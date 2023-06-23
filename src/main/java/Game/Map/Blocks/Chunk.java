@@ -1,0 +1,400 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Game.Map.Blocks;
+
+import com.jme3.material.Material;
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
+import com.jme3.math.Vector4f;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+import com.jme3.scene.VertexBuffer;
+import com.jme3.texture.Texture;
+import com.jme3.util.BufferUtils;
+import java.nio.Buffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ *
+ * @author 48793
+ */
+public class Chunk {
+
+    private List<Vector3f> positions = new ArrayList<>();
+    private List<Vector2f> uvs = new ArrayList<>();
+    private List<Integer> indices = new ArrayList<>();
+    private List<Vector4f> colors = new ArrayList<>();
+    private Geometry geometry;
+    private final BlockWorld bw;
+    
+    private Vector2f chunkPos;
+    private int blocksCount = 0;
+    private int vertexCount = 0;
+
+    public Chunk(BlockWorld bw,int x,int z) {
+        this.bw = bw;
+        chunkPos = new Vector2f(x,z);
+    }
+
+    public final Geometry generateGeometry(Mesh m) {
+
+        geometry = new Geometry("Chunk", m);
+        bw.getWorldNode().attachChild(geometry);
+        
+        geometry.move(chunkPos.getX()*bw.getBLOCK_SIZE(),0,chunkPos.getY()*bw.getBLOCK_SIZE());
+        
+                Material matVC = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
+
+        Texture t = bw.getAsm().loadTexture(BlockType.STONE.textureName);
+        t.setMagFilter(Texture.MagFilter.Nearest);
+        matVC.setTexture("ColorMap", t);
+        matVC.setBoolean("VertexColor", true);
+        geometry.setMaterial(matVC);
+
+        Material mat = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setTexture("ColorMap", bw.getTextureAtlas().getAtlasTexture("DiffuseMap"));
+        mat.getTextureParam("ColorMap").getTextureValue().setMagFilter(Texture.MagFilter.Nearest);
+        mat.setBoolean("VertexColor", true);
+
+//        mat.getAdditionalRenderState().setWireframe(true);
+//        mat.getAdditionalRenderState().setLineWidth(5);
+        geometry.setMaterial(mat);
+        
+        return geometry;
+    }
+
+    public Mesh generateMesh() {
+
+        Mesh mesh = new Mesh();
+
+//    
+        mesh.setBuffer(VertexBuffer.Type.Position, 3, vector3fToBuffer(positions));
+        mesh.setBuffer(VertexBuffer.Type.Index, 1, intToBuffer(indices));
+
+        mesh.setBuffer(VertexBuffer.Type.TexCoord, 2, vector2fToBuffer(uvs));
+        mesh.setBuffer(VertexBuffer.Type.Color, 4, vector4fToBuffer(colors));
+        mesh.updateBound();
+
+        
+        return mesh;
+    }
+    
+    
+    
+//      public Mesh updateMesh(int newPositions,int newIndices, int newTexCoords,int newColors) {
+//
+//        Mesh mesh = geometry.getMesh();
+//
+//        mesh.setBuffer(VertexBuffer.Type.Position, 3, vector3fToBuffer(positions));
+//        mesh.setBuffer(VertexBuffer.Type.Index, 1, intToBuffer(indices));
+//
+//        mesh.setBuffer(VertexBuffer.Type.TexCoord, 2, vector2fToBuffer(uvs));
+//        mesh.setBuffer(VertexBuffer.Type.Color, 4, vector4fToBuffer(colors));
+//        mesh.updateBound();
+//
+//        
+//        return mesh;
+//    }
+    
+    
+    
+
+    public Block attachBlock(Block b,Texture t) {
+                   b.setVertexOffsetInParentChunk(positions.size());
+
+//        System.out.println("starting indices index "+indices.size());
+//        System.out.println("block indices size "+b.getIndices().size());
+//        
+//        System.out.println("block vertex offset "+b.getVertexOffsetInParentChunk());
+//        System.out.println("\n\n\n");
+        addBlockData(b,t);
+
+        Mesh m = generateMesh();
+//        updateMesh(b.getPositions().size(),b.getIndices().size(),b.getUvs().size(),b.getColors().size());
+        
+//        if(geometry != null)
+        geometry.setMesh(m);
+//        else
+//            generateGeometry(m);
+
+        
+        
+        
+//          m.getFloatBuffer(VertexBuffer.Type.TexCoord).position(0);
+//        for(int i = 0 ; i< m.getFloatBuffer(VertexBuffer.Type.TexCoord).limit();i++)
+//        System.out.print(m.getFloatBuffer(VertexBuffer.Type.TexCoord).get()+", ");
+        
+
+        
+
+        
+
+        
+
+        
+        return b;
+    }
+    
+    
+    
+    
+    
+    
+    
+       public Block addBlockData(Block b,Texture t) {
+           b.setVertexOffsetInParentChunk(positions.size());
+        positions.addAll(b.getPositions());
+        indices.addAll(b.getIndices());
+        uvs.addAll(b.getUvs());
+        colors.addAll(b.getColors());
+
+        
+        blocksCount+=1;
+        vertexCount+= b.getVertexCount();
+        
+
+        
+        return b;
+    }
+    
+       
+       
+       
+       
+       
+       public Block detachBlock(Block b) {
+    if (b == null)
+        return b;
+
+    int vertexOffset = b.getVertexOffsetInParentChunk();
+
+    for (int i = b.getVertexOffsetInParentChunk() + b.getVertexCount() - 1; i >= vertexOffset; i--) {
+        positions.remove(i);
+        uvs.remove(i);
+    }
+
+    blocksCount--;
+    vertexCount -= b.getVertexCount();
+
+    for (int i = 0; i < indices.size(); i++) {
+        int index = indices.get(i);
+        if (index >= vertexOffset) {
+            indices.set(i, index - b.getVertexCount());
+        }
+    }
+
+    int CHUNK_SIZE = 16;
+    int chunkPosX = (int) chunkPos.getX();
+    int chunkPosY = (int) chunkPos.getY();
+
+    for (int x = chunkPosX; x < chunkPosX + CHUNK_SIZE; x++) {
+        for (int y = 0; y < bw.getMap()[0].length; y++) {
+            for (int z = chunkPosY; z < chunkPosY + CHUNK_SIZE; z++) {
+                Block bl = bw.getMap()[x][y][z];
+                if (bl != null && bl.getVertexOffsetInParentChunk() > vertexOffset) {
+                    bl.setVertexOffsetInParentChunk(bl.getVertexOffsetInParentChunk() - b.getVertexCount());
+                }
+            }
+        }
+    }
+
+    Mesh mesh = generateMesh();
+    geometry.setMesh(mesh);
+
+    return b;
+}
+
+       
+    
+    
+    
+//    public Block detachBlock(Block b){
+//        if(b==null)
+//            return b;
+//
+//  for(int i= b.getVertexOffsetInParentChunk()+b.getVertexCount()-1; i>= b.getVertexOffsetInParentChunk();i--){
+//            positions.remove(i);
+//            uvs.remove(i);
+//        }
+//        
+//// usun z 0.1 
+//// potem z 1.0 i bedzie bug
+//
+//        blocksCount--;
+//        vertexCount -= b.getVertexCount();
+//        
+//
+//        for(int i =0 ;i<indices.size();i++)
+//            if(indices.get(i) >= Collections.min(b.getIndices() )  ){ 
+//                            indices.set(i, indices.get(i)-b.getVertexCount());            
+//            }
+//        
+//            // te znikajace na krawedziach bloki plipuja triangle
+//            
+//        int CHUNK_SIZE = 16;
+//        for(int x =(int) chunkPos.getX() ; x<(int) chunkPos.getX()+CHUNK_SIZE; x++){
+//        
+//        
+//         for(int y =0 ; y< bw.getMap().length; y++){
+//        
+//         for(int z =(int) chunkPos.getY() ; z<(int) chunkPos.getY()+ CHUNK_SIZE; z++){
+//        
+//        
+//        Block bl = bw.getMap()[x][y][z];
+//                       if(bl != null){
+//                       
+//                       if(bl.getVertexOffsetInParentChunk() > b.getVertexOffsetInParentChunk()){
+//                           
+//
+//                                              bl.setVertexOffsetInParentChunk(bl.getVertexOffsetInParentChunk()-b.getVertexCount() );
+//
+//                       }
+//                       }
+//        
+//        }
+//        
+//        
+//        }
+//        
+//        
+//        }
+//       
+//                Mesh m = generateMesh();
+//                geometry.setMesh(m);
+//
+//        
+//    return b;
+//    }
+    
+    
+    
+    
+    
+    
+    
+
+    public void clear() {
+        positions.clear();
+        indices.clear();
+        uvs.clear();
+
+    }
+
+    private static FloatBuffer vector3fToBuffer(List<Vector3f> list) {
+        FloatBuffer buf = BufferUtils.createFloatBuffer(list.size() * 3);
+        for (Vector3f vec : list) {
+            buf.put(vec.getX()).put(vec.getY()).put(vec.getZ());
+        }
+        flipBuffer(buf);
+        return buf;
+    }
+
+    private static FloatBuffer vector2fToBuffer(List<Vector2f> list) {
+        FloatBuffer buf = BufferUtils.createFloatBuffer(list.size() * 2);
+        for (Vector2f vec : list) {
+            buf.put(vec.getX()).put(vec.getY());
+        }
+        flipBuffer(buf);
+        return buf;
+    }
+
+    private static IntBuffer intToBuffer(List<Integer> list) {
+        IntBuffer buf = BufferUtils.createIntBuffer(list.size());
+        for (int i : list) {
+            buf.put(i);
+        }
+        flipBuffer(buf);
+        return buf;
+    }
+
+    private static FloatBuffer vector4fToBuffer(List<Vector4f> list) {
+        FloatBuffer buf = BufferUtils.createFloatBuffer(list.size() * 4);
+        for (Vector4f vec : list) {
+            buf.put(vec.getX()).put(vec.getY()).put(vec.getZ()).put(vec.getW());
+        }
+        flipBuffer(buf);
+        return buf;
+    }
+
+    private static void flipBuffer(Buffer buffer) {
+        // Since JDK 9, ByteBuffer class overrides some methods and their return type in the Buffer class. To
+        // ensure compatibility with JDK 8, calling the 'flipBuffer' method forces using the
+        // JDK 8 Buffer's methods signature, and avoids explicit casts.
+//        buffer.flip();
+    }
+
+    public List<Vector3f> getPositions() {
+        return positions;
+    }
+
+    public void setPositions(List<Vector3f> positions) {
+        this.positions = positions;
+    }
+
+    public List<Vector2f> getUvs() {
+        return uvs;
+    }
+
+    public void setUvs(List<Vector2f> uvs) {
+        this.uvs = uvs;
+    }
+
+    public List<Integer> getIndices() {
+        return indices;
+    }
+
+    public void setIndices(List<Integer> indices) {
+        this.indices = indices;
+    }
+
+    public List<Vector4f> getColors() {
+        return colors;
+    }
+
+    public void setColors(List<Vector4f> colors) {
+        this.colors = colors;
+    }
+
+    public Geometry getGeometry() {
+        return geometry;
+    }
+
+    public void setGeometry(Geometry geometry) {
+        this.geometry = geometry;
+    }
+
+    public Vector2f getChunkPos() {
+        return chunkPos;
+    }
+
+    public void setChunkPos(Vector2f chunkPos) {
+        this.chunkPos = chunkPos;
+    }
+
+    public int getBlocksCount() {
+        return blocksCount;
+    }
+
+    public void setBlocksCount(int blocksCount) {
+        this.blocksCount = blocksCount;
+    }
+
+    public int getVertexCount() {
+        return vertexCount;
+    }
+
+    public void setVertexCount(int vertexCount) {
+        this.vertexCount = vertexCount;
+    }
+
+    
+    
+    
+}
