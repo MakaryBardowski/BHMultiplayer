@@ -4,6 +4,7 @@
  */
 package Game.Mobs;
 
+import Game.Items.Item;
 import Game.Items.ItemInterface;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
@@ -20,10 +21,11 @@ public abstract class Mob {
     
     
     //mob stats
+    protected String name;
     protected float speed = DEFAULT_SPEED;
     protected float health = 50;
     protected float maxHealth = 50;
-    protected ItemInterface[] equipment = new ItemInterface[18]; // 6 rows 3 cols
+    protected Item[] equipment = new Item[18]; // 6 rows 3 cols
 
     
     //mob ai variables
@@ -34,9 +36,10 @@ public abstract class Mob {
     protected Vector3f serverLocation; // updated by the server
     protected float interpolationValue;
 
-    public Mob(int id, Node node) {
+    public Mob(int id, Node node, String name) {
         this.id = id;
         this.node = node;
+        this.name = name;
         this.serverLocation = node.getWorldTranslation();
     }
 
@@ -101,10 +104,18 @@ public abstract class Mob {
         this.currentTarget = currentTarget;
     }
 
-    public ItemInterface[] getEquipment() {
+    public Item[] getEquipment() {
         return equipment;
     }
     
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
     
     public void equipItem(ItemInterface i){
     i.equip(this);

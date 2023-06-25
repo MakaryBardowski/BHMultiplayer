@@ -5,7 +5,8 @@
  */
 package com.Networking.Client;
 
-
+import Game.Mobs.Mob;
+import Game.Mobs.Player;
 import com.Networking.Client.ClientMain;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -55,7 +56,7 @@ public class PlayerHUD extends BaseAppState {
 
     private float percentMobHealthbarLength = 0.33f;
     private float percentMobHealthbarHeight = 0.01f;
-
+    private float playerHealthbarWidth = 0.15f;
     public PlayerHUD(ClientMain gs) {
         this.gs = gs;
     }
@@ -128,13 +129,13 @@ public class PlayerHUD extends BaseAppState {
                                 valignCenter();
                                 height("85%");
 //                                width("25%");
-width(gs.getPlayer().getHotbar().length*nifty.getRenderEngine().getNativeHeight() * 0.08+gs.getPlayer().getHotbar().length*2 +"px");
+                                width(gs.getPlayer().getHotbar().length * nifty.getRenderEngine().getNativeHeight() * 0.08 + gs.getPlayer().getHotbar().length * 2 + "px");
 //                                backgroundColor("#A30000");
                                 visibleToMouse(false);
                                 textVAlign(ElementBuilder.VAlign.Top);
                                 textHAlign(ElementBuilder.Align.Left);
                                 this.font("Interface/Fonts/pixelCC0_noOutline.fnt");
-                                
+
                                 wrap(true);
 
 //                                 onActiveEffect(new EffectBuilder("textSize") {
@@ -143,7 +144,6 @@ width(gs.getPlayer().getHotbar().length*nifty.getRenderEngine().getNativeHeight(
 //
 //                                    }
 //                                });
-
                             }
                         });
                     }
@@ -473,11 +473,13 @@ width(gs.getPlayer().getHotbar().length*nifty.getRenderEngine().getNativeHeight(
 
     @Override
     public void update(float tpf) {
-        nifty.getCurrentScreen().findElementById("hp_bar").setWidth((int) (gs.getPlayer().getHealth() * 8 * (getApplication().getGuiViewPort().getCamera().getWidth() * 0.00215f)));
-//        checkTargetedMob(gs.getPlayer(), gs, gs.getCamc(), gs.getEntityManager(), gs.getWorldNode(), gs.getDebugNode());
-
+        nifty.getCurrentScreen().findElementById("hp_bar").setWidth(     (int) ((gs.getPlayer().getHealth() / gs.getPlayer().getMaxHealth()) * (playerHealthbarWidth * nifty.getRenderEngine().getNativeWidth()))     );
+        checkTargetedMob(gs, gs.getPickableNode());
+        
+        System.out.println(                    nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).getText() );
+ 
+        
         if (gs.getPlayer().getCurrentTarget() != null) {
-
             float length = ((gs.getPlayer().getCurrentTarget().getHealth() / gs.getPlayer().getCurrentTarget().getMaxHealth()) * (percentMobHealthbarLength * nifty.getRenderEngine().getNativeWidth()));
             nifty.getCurrentScreen().findElementById("hp_bar_target").setWidth((int) (length));
 //            nifty.getCurrentScreen().findControl("hp_bar_target", LabelControl.class).setText(Float.toString(gs.getPlayer().getCurrentTarget().getHealth()));
@@ -494,46 +496,31 @@ width(gs.getPlayer().getHotbar().length*nifty.getRenderEngine().getNativeHeight(
 
     }
 
-//    private void checkTargetedMob(Player p, GameState gs, CameraAndMouseControl c, EntityManager em, Node nodeToCheckCollisionOn, Node debugNode) {
-//        CollisionResults results = new CollisionResults();
-//        Ray ray = new Ray(c.getCamera().getLocation(), c.getCamera().getDirection());
-//        nodeToCheckCollisionOn.collideWith(ray, results);
-//        if (results.size() > 0) {
-//            CollisionResult closest = results.getClosestCollision();
-//            String hit = closest.getGeometry().getParent().getParent().getParent().getName();
-//            Mob enemyHit = em.getEnemiesAlive().get(hit);
-//            if (enemyHit == null && closest.getGeometry().getParent().getParent().getParent().getParent() != null) {
-//                hit = closest.getGeometry().getParent().getParent().getParent().getParent().getName();
-//                enemyHit = em.getEnemiesAlive().get(hit);
-//            }
-//
-//            if (enemyHit != null) {
-//                boolean switched = p.getCurrentTarget() != enemyHit;
-//                if (switched) {
-//                    System.out.println(switched);
-//                }
-//                p.setCurrentTarget(enemyHit);
-//
-//                if (switched) {
-//                    nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).setText(enemyHit.getMobName());
-////                    nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).setText("Mob \\#80ff00#"+enemyHit.getMobName()); COLORED TEXT
-//
-//                    nifty.getCurrentScreen().findElementById("hp_bar_target_yellow").setWidth((int) ((p.getCurrentTarget().getHealth() / p.getCurrentTarget().getMaxHealth()) * (percentMobHealthbarLength * nifty.getRenderEngine().getNativeWidth())));
-//                    nifty.getCurrentScreen().findElementById("hp_bar_target_gray").setVisible(true);
-//                    nifty.getCurrentScreen().findElementById("hp_bar_target_label").setVisible(true);
-//
-//                }
-////                Sphere sphere1 = new Sphere(30, 30, 0.02f);
-////                Spatial mark1 = new Geometry("BOOM!", sphere1);
-////                Material mark_mat1 = new Material(gs.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-////                mark_mat1.setColor("Color", ColorRGBA.Red);
-////                mark1.setMaterial(mark_mat1);
-////                                debugNode.attachChild(mark1);
-////                mark1.move(closest.getContactPoint());
-//            }
-//        }
-//
-//    }
+    private void checkTargetedMob(ClientMain gs, Node nodeToCheckCollisionOn) {
+        CollisionResults results = new CollisionResults();
+        Ray ray = new Ray(gs.getCamera().getLocation(), gs.getCamera().getDirection());
+        nodeToCheckCollisionOn.collideWith(ray, results);
+        if (results.size() > 0) {
+            CollisionResult closest = results.getClosestCollision();
+            String hit = closest.getGeometry().getName();
+            
+            Mob enemyHit = gs.getMobs().get(Integer.valueOf(hit));
+
+            if (enemyHit != null) {
+                boolean switched = gs.getPlayer().getCurrentTarget() != enemyHit;
+                gs.getPlayer().setCurrentTarget(enemyHit);
+                if (switched) {
+                    nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).setText(enemyHit.getName());
+                    nifty.getCurrentScreen().findElementById("hp_bar_target_yellow").setWidth(     (int) ((gs.getPlayer().getCurrentTarget().getHealth() / gs.getPlayer().getCurrentTarget().getMaxHealth()) * (percentMobHealthbarLength * nifty.getRenderEngine().getNativeWidth()))    );
+                    nifty.getCurrentScreen().findElementById("hp_bar_target_gray").setVisible(true);
+                    nifty.getCurrentScreen().findElementById("hp_bar_target_label").setVisible(true);
+
+                }
+
+            } 
+        }
+
+    }
 
     public Nifty getNifty() {
         return nifty;

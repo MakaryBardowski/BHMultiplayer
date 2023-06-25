@@ -11,7 +11,7 @@ import com.jme3.scene.Node;
  * @author 48793
  */
 public class HumanMob extends Mob{
-    public HumanMob(int id,Node node){
-    super(id,node);
+    public HumanMob(int id,Node node,String name){
+    super(id,node,name);
     }
 }
