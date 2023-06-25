@@ -42,6 +42,7 @@ import java.awt.Toolkit;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,10 +56,10 @@ import java.util.logging.Logger;
 public class ClientMain extends SimpleApplication implements ClientStateListener {
 
     private final Node worldNode = new Node("WORLD NODE");
-    private final Node mapNode = new Node ("MAP NODE");
+    private final Node mapNode = new Node("MAP NODE");
     private final Node debugNode = new Node("DEBUG NODE");
     private final Node pickableNode = new Node("PICKABLE NODE");
-    
+
     // obiekt Client - bezposrednio z biblioteki do multi z Jmonkey
     private Client client;
     // kolejka komunikatow od serwera (zeby klient mogl je przerobic jak nie nadaza na bierzaco)
@@ -73,29 +74,38 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     private ActionListener actionListener;
     private Map map;
 
-    
-
     public static void main(String[] args) {
         // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
         NetworkingInitialization.initializeSerializables();
-        
+
         ClientMain app = new ClientMain();
-        
+
+        AppSettings settings1 = new AppSettings(true);
+        settings1.setCenterWindow(false);
+        if (new Random().nextInt(2) == 0) {
+            settings1.setWindowXPosition(0);
+        } else {
+            settings1.setWindowXPosition(1000);
+        }
+        app.setPauseOnLostFocus(false);
+        app.setSettings(settings1);
+
         /* ustawwiamy, ze wszystko co robimy ma byc renderowane (pokaze sie okno)
         w przeciwienstwie do tego, serwer nie wyswietla obrazu wiec ma Type.Headless
-        */
-        app.start(JmeContext.Type.Display); 
+         */
+        app.start(JmeContext.Type.Display);
+
         app.applicationSettings = app.settings;
     }
 
     @Override
     public void simpleInitApp() {
-    
+
         /* ustawiamy strukture naszego swiata
         debugNode - tutaj beda dolaczone  particle itp
         pickableNode - modele i obiekty z ktorymi mozemy wejsc w interakcje przez klikniecie (moby, przyciski etc)
         mapNode - Wszystko zwiazane z mapa (klocki, jakies krzesla itp)
-        */
+         */
         worldNode.attachChild(debugNode);
         worldNode.attachChild(pickableNode);
         worldNode.attachChild(mapNode);
@@ -103,8 +113,7 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 
         //dodajemy state który obsluguje kamere (wygodne rozwiazanie bo mozna go pozniej odpiac np. w menu)
         stateManager.attach(new PlayerCameraControlAppState(this));
-        
-        
+
         // probujemy podlaczyc sie do serwera (poki co na localhoscie - czyli ip = 127.0.0.1)
         try {
             client = Network.connectToServer("localhost", NetworkingInitialization.PORT);
@@ -117,19 +126,19 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 
         //kolejka rozkazów od serwera (w przypadku slabego kompa pomaga)
         messageQueue = new ConcurrentLinkedQueue();
-        
+
         //dodajemy listener nas³uchuj¹cy pakietów od serwera (CTRL + Lewy przycisk zeby wejsc w klase)
-        client.addMessageListener(new ClientMessageListener(this)); 
-        
+        client.addMessageListener(new ClientMessageListener(this));
+
         // kolor tla na niebieski
         viewPort.setBackgroundColor(ColorRGBA.Cyan);
-        
+
         // predkosc ruszania sie kamery (nie zmienia nic bo kamera jest przymocowana do gracza)
         flyCam.setMoveSpeed(70);
-        
+
         // generujemy mape
         MapGenerator mg = new MapGenerator();
-        map =  mg.generateMap(MapType.BOSS, 5, 16, 48, assetManager, mapNode);
+        map = mg.generateMap(MapType.BOSS, 5, 16, 48, assetManager, mapNode);
     }
 
     @Override
@@ -139,17 +148,15 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         tpf - time per frame (czas na wyrenderowanie klatki) potrzebny jest
         zeby np. predkosc ruchu nie zalezala od fpsow 
         
-        */
+         */
 
         if (player != null) {
             player.move(tpf, this);
         }
 
-        
         /* wrzuce to do metody, ale interpolujemy (plynnie zmieniamy) 
         przemieszczenie mobow i graczy 
-        */
-        
+         */
         mobs.values().forEach(x -> {
             if (x != player) {
                 interpolateMobPosition(x, tpf);
@@ -230,9 +237,5 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     public Map getMap() {
         return map;
     }
-    
-    
-    
-    
 
 }

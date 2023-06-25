@@ -5,9 +5,10 @@
 package com.Networking;
 
 import Messages.MessageListeners.ServerMessageListener;
+import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdateMessage;
 import Messages.MobUpdatePosRotMessage;
-import Messages.PlayerJoinSendMobsMessage;
+import Messages.PlayerJoined;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
@@ -23,7 +24,8 @@ public class NetworkingInitialization {
     public static void initializeSerializables(){
     Serializer.registerClass(MobUpdateMessage.class);
     Serializer.registerClass(MobUpdatePosRotMessage.class);
-    Serializer.registerClass(PlayerJoinSendMobsMessage.class);
+    Serializer.registerClass(MobHealthUpdateMessage.class);
+    Serializer.registerClass(PlayerJoined.class);
     Serializer.registerClass(ServerMessageListener.class);
     }
     
