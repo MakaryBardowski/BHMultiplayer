@@ -5,6 +5,7 @@
 package Game.Mobs;
 
 import Game.Items.ItemInterface;
+import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdatePosRotMessage;
 import com.Networking.Client.ClientMain;
 import com.jme3.asset.AssetManager;
@@ -26,6 +27,11 @@ public class Player extends HumanMob {
     
     private ItemInterface[] hotbar;
     private String equipment;
+    
+    
+    
+    private float time = 10;
+    
 
     public Player(int id, Node node,String name) {
         super(id, node,name);
@@ -105,6 +111,16 @@ public class Player extends HumanMob {
     }
 
     public void move(float tpf, ClientMain gs) {
+        time-= tpf;
+        if(time <= 0){
+        time = 10;
+        health -= 1;
+        MobHealthUpdateMessage hmsg = new MobHealthUpdateMessage(id,health);
+        gs.getClient().send(hmsg);
+        }
+        
+        
+        
         /*tpf is time per frame,
 which makes movement rate independent of fps,  checks for WSAD input and moves if detected
          */

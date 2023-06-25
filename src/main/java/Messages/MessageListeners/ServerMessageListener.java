@@ -4,6 +4,7 @@
  */
 package Messages.MessageListeners;
 
+import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdateMessage;
 import Messages.MobUpdatePosRotMessage;
 import com.jme3.network.AbstractMessage;
@@ -37,6 +38,8 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
                 validateMovement();
                 Vector3f newPos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
                 serverApp.getMobs().get( nmsg.getId() ).getNode().setLocalTranslation(newPos);
+                } else if(msg instanceof MobHealthUpdateMessage hmsg){
+                serverApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
                 }
     }
 

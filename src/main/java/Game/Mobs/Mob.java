@@ -23,8 +23,8 @@ public abstract class Mob {
     //mob stats
     protected String name;
     protected float speed = DEFAULT_SPEED;
-    protected float health = 50;
-    protected float maxHealth = 50;
+    protected float health = 10;
+    protected float maxHealth = 10;
     protected Item[] equipment = new Item[18]; // 6 rows 3 cols
 
     

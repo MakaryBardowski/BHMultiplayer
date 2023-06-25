@@ -20,8 +20,9 @@ public class MobHealthUpdateMessage extends AbstractMessage {
     public MobHealthUpdateMessage() {
     }
 
-    public MobHealthUpdateMessage(int id,int health) {
+    public MobHealthUpdateMessage(int id,float health) {
         this.id = id;
+        this.health = health;
     }
 
     public int getId() {

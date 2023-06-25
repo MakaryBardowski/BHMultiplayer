@@ -6,6 +6,7 @@ package Messages.MessageListeners;
 
 import Game.CameraAndInput.InputEditor;
 import Game.Mobs.Player;
+import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdateMessage;
 import Messages.MobUpdatePosRotMessage;
 import Messages.PlayerJoined;
@@ -41,7 +42,22 @@ public class ClientMessageListener implements MessageListener<Client> {
     @Override
     public void messageReceived(Client s, Message m) {
 
-        if (m instanceof PlayerJoined nmsg) {
+        if (m instanceof MobUpdatePosRotMessage nmsg) {
+
+            if (clientApp.getMobs().get(nmsg.getId()) != null) {
+                Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
+                clientApp.getMobs().get(nmsg.getId()).setServerLocation(pos);
+//                clientApp.enqueue(() -> {clientApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(pos);               
+//                });
+            }
+        } else if(m instanceof MobHealthUpdateMessage hmsg){
+            System.out.println("HMSG "+hmsg.getHealth());
+            if(clientApp.getMobs().get(hmsg.getId()) != null){
+            clientApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
+                        System.out.println("received message that player HP is"+hmsg.getHealth());
+            
+            }
+        } else if (m instanceof PlayerJoined nmsg) {
             Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
 
             if (clientApp.getMobs().get(nmsg.getId()) == null) {
@@ -65,14 +81,6 @@ public class ClientMessageListener implements MessageListener<Client> {
                 );
             }
 
-        } else if (m instanceof MobUpdatePosRotMessage nmsg) {
-
-            if (clientApp.getMobs().get(nmsg.getId()) != null) {
-                Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
-                clientApp.getMobs().get(nmsg.getId()).setServerLocation(pos);
-//                clientApp.enqueue(() -> {clientApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(pos);               
-//                });
-            }
         }
 
     }
