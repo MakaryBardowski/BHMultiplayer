@@ -27,8 +27,8 @@ public class Player extends HumanMob {
     private ItemInterface[] hotbar;
     private String equipment;
 
-    public Player(int id, Node node) {
-        super(id, node);
+    public Player(int id, Node node,String name) {
+        super(id, node,name);
         hotbar = new ItemInterface[10];
     }
 
@@ -76,10 +76,12 @@ public class Player extends HumanMob {
     
     // metoda tworzaca nowego gracza, poki co gracz to po prostu kolorowe pudelko
     public static Player spawnPlayer(int id, AssetManager assetManager, Node worldNode) {
-        Node playerNode = new Node("player " + id + " node");
+        Node playerNode = new Node(""+id);
         playerNode.move(0, 6, 0);
 
-        Player p = new Player(id, playerNode);
+        
+        String name = "Gracz_"+id;
+        Player p = new Player(id, playerNode,name);
 
         Box box = new Box(Vector3f.ZERO, 1, 1, 1);
         Geometry geometry = new Geometry("Box", box);
@@ -91,6 +93,14 @@ public class Player extends HumanMob {
         geometry.setMaterial(material);
         playerNode.attachChild(geometry);
         worldNode.attachChild(playerNode);
+        
+        
+        
+        
+        
+        // bardzo wazne - KA¯DE DZIECKO NODA MUSI MIEC NAZWE ID!!!!!!!!!!
+        playerNode.getChildren().stream().forEach(x-> x.setName(""+id));
+        
         return p;
     }
 

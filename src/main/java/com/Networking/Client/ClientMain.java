@@ -83,15 +83,16 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         NetworkingInitialization.initializeSerializables();
 
         ClientMain app = new ClientMain();
-
         AppSettings settings1 = new AppSettings(true);
-        settings1.setCenterWindow(false);
-        if (new Random().nextInt(2) == 0) {
-            settings1.setWindowXPosition(0);
-        } else {
-            settings1.setWindowXPosition(1000);
-        }
-        app.setPauseOnLostFocus(false);
+settings1.setResolution(1920,1080);
+        settings1.setFullscreen(true);
+//        settings1.setCenterWindow(false);
+//        if (new Random().nextInt(2) == 0) {
+//            settings1.setWindowXPosition(0);
+//        } else {
+//            settings1.setWindowXPosition(1000);
+//        }
+//        app.setPauseOnLostFocus(false);
         app.setSettings(settings1);
 
         /* ustawwiamy, ze wszystko co robimy ma byc renderowane (pokaze sie okno)
@@ -193,7 +194,7 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     }
 
     public Player registerPlayer(Integer id) { // rejestrujemy gracza
-        Player p = Player.spawnPlayer(id, assetManager, rootNode);
+        Player p = Player.spawnPlayer(id, assetManager, pickableNode);
         this.mobs.put(id, p);
         return p;
     }
@@ -241,17 +242,17 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     public Map getMap() {
         return map;
     }
-    
-    public FlyByCamera getFlyCam(){
-    return flyCam;
+
+    public FlyByCamera getFlyCam() {
+        return flyCam;
     }
-    
-    public Nifty getNifty(){
-    return nifty;
+
+    public Nifty getNifty() {
+        return nifty;
     }
-    
-    public void setNifty(Nifty nifty){
-    this.nifty = nifty;
+
+    public void setNifty(Nifty nifty) {
+        this.nifty = nifty;
     }
 
 }

@@ -10,4 +10,17 @@ package Game.Items;
  */
 public abstract class Item implements ItemInterface {
     
+    String iconPath;
+
+    public String getIconPath() {
+        return iconPath;
+    }
+
+    public void setIconPath(String iconPath) {
+        this.iconPath = iconPath;
+    }
+    
+    
+    
+    
 }

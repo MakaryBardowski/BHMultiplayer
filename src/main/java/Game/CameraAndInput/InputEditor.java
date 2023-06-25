@@ -5,6 +5,7 @@
  */
 package Game.CameraAndInput;
 
+import Game.Items.Item;
 import Game.Mobs.Player;
 import com.Networking.Client.ClientMain;
 import com.jme3.animation.LoopMode;
@@ -96,18 +97,21 @@ public class InputEditor {
 //                    player.setShooting(true);
 //                }
 
-//                if (name.equals("I") && !gs.getPlayer().isDead() && !keyPressed) {
-//                    gs.getFlyCam().setDragToRotate(!gs.getFlyCam().isDragToRotate());
-//                    for (int eqSlot = 0; eqSlot < gs.getPlayer().getEquipment().length; eqSlot++) {
-//                        if (gs.getPlayer().getEquipment()[eqSlot] != null) {
-//
-//                            guiElement = gs.getNifty().getRenderEngine().createImage(gs.getNifty().getCurrentScreen(), gs.getPlayer().getEquipment()[eqSlot].getIconPath(), false);
-//                            gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).getRenderer(ImageRenderer.class).setImage(guiElement);
-//                        }
-//
-//                        gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).setVisible(!gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).isVisible());
-//                    }
-//                }
+
+
+
+                if (name.equals("I") && !gs.getPlayer().isDead() && !keyPressed) {
+                    gs.getFlyCam().setDragToRotate(!gs.getFlyCam().isDragToRotate());
+                    for (int eqSlot = 0; eqSlot < gs.getPlayer().getEquipment().length; eqSlot++) {
+                        if (gs.getPlayer().getEquipment()[eqSlot] != null) {
+
+                            guiElement = gs.getNifty().getRenderEngine().createImage(gs.getNifty().getCurrentScreen(), gs.getPlayer().getEquipment()[eqSlot].getIconPath(), false);
+                            gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).getRenderer(ImageRenderer.class).setImage(guiElement);
+                        }
+
+                        gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).setVisible(!gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).isVisible());
+                    }
+                }
 
 //                if (name.equals("E") && !gs.getPlayer().isDead() && !keyPressed) {
 //                    gs.getPlayer().checkIfPlayerPicked(gs.getPickableNode(), gs);
