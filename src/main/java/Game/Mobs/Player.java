@@ -4,6 +4,7 @@
  */
 package Game.Mobs;
 
+import Game.Items.ItemInterface;
 import Messages.MobUpdatePosRotMessage;
 import com.Networking.Client.ClientMain;
 import com.jme3.asset.AssetManager;
@@ -22,10 +23,20 @@ import com.jme3.scene.shape.Box;
 public class Player extends HumanMob {
     // ustawiane przy klikaniu WSAD (forward = idz do przodu , left = idz w lewo  itd)
     private boolean forward, backward, right, left;
+    
+    private ItemInterface[] hotbar;
+    private String equipment;
 
     public Player(int id, Node node) {
         super(id, node);
+        hotbar = new ItemInterface[10];
     }
+
+    public ItemInterface[] getHotbar() {
+        return hotbar;
+    }
+    
+    
 
     public boolean isForward() {
         return forward;
@@ -59,6 +70,9 @@ public class Player extends HumanMob {
         this.left = left;
     }
 
+
+
+    
     
     // metoda tworzaca nowego gracza, poki co gracz to po prostu kolorowe pudelko
     public static Player spawnPlayer(int id, AssetManager assetManager, Node worldNode) {
@@ -149,5 +163,8 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
         }
 
     }
+    
+    
+    
 
 }

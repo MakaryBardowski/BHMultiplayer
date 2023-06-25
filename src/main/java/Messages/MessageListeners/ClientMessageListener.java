@@ -14,6 +14,7 @@ import com.jme3.network.Client;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.Networking.Client.ClientMain;
+import com.Networking.Client.PlayerHUD;
 import com.jme3.math.Vector3f;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -58,6 +59,7 @@ public class ClientMessageListener implements MessageListener<Client> {
                             if (clientApp.getPlayer() == null) {
                                 clientApp.setPlayer(p);
                                 new InputEditor().setupInput(clientApp);
+                                clientApp.getStateManager().attach(new PlayerHUD(clientApp));
                             }
                         }
                 );

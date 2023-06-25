@@ -32,11 +32,13 @@ import com.jme3.system.JmeContext;
 import com.jme3.texture.Texture;
 import com.Networking.NetworkingInitialization;
 import com.Networking.Server.ServerMain;
+import com.jme3.input.FlyByCamera;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.network.ClientStateListener;
 import com.jme3.scene.Node;
+import de.lessvoid.nifty.Nifty;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.IOException;
@@ -73,6 +75,8 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     // action listener - obsluguje input klawiatury/myszki
     private ActionListener actionListener;
     private Map map;
+    // nifty obsluguje GUI
+    private Nifty nifty;
 
     public static void main(String[] args) {
         // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
@@ -236,6 +240,18 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 
     public Map getMap() {
         return map;
+    }
+    
+    public FlyByCamera getFlyCam(){
+    return flyCam;
+    }
+    
+    public Nifty getNifty(){
+    return nifty;
+    }
+    
+    public void setNifty(Nifty nifty){
+    this.nifty = nifty;
     }
 
 }
