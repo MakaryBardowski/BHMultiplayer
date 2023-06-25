@@ -476,7 +476,7 @@ public class PlayerHUD extends BaseAppState {
         nifty.getCurrentScreen().findElementById("hp_bar").setWidth(     (int) ((gs.getPlayer().getHealth() / gs.getPlayer().getMaxHealth()) * (playerHealthbarWidth * nifty.getRenderEngine().getNativeWidth()))     );
         checkTargetedMob(gs, gs.getPickableNode());
         
-        System.out.println(                    nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).getText() );
+//        System.out.println(                    nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).getText() );
  
         
         if (gs.getPlayer().getCurrentTarget() != null) {

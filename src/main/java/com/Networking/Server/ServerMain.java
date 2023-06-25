@@ -4,6 +4,7 @@ import Game.Mobs.Mob;
 import Game.Mobs.Player;
 import Messages.MessageListeners.ClientMessageListener;
 import Messages.MessageListeners.ServerMessageListener;
+import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdatePosRotMessage;
 import Messages.PlayerJoined;
 
@@ -69,7 +70,9 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
             tickTimer = 0;
             mobs.entrySet().stream().forEach(
                     x -> {
+                        //to be seriously optimized
                         server.broadcast(new MobUpdatePosRotMessage(x.getValue().getId(), x.getValue().getNode().getWorldTranslation().getX(), x.getValue().getNode().getWorldTranslation().getY(), x.getValue().getNode().getWorldTranslation().getZ(), x.getValue().getNode().getLocalRotation()));
+                        server.broadcast(new MobHealthUpdateMessage(x.getValue().getId(),x.getValue().getHealth())        );
                     }
             );
 
@@ -90,6 +93,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     public void connectionAdded(Server server, HostedConnection hc) {
        
         Mob newPlayer = registerPlayer(hc.getId());
+        System.out.println("registering ---------------- health = "+newPlayer.getHealth());
         PlayerJoined messageToNewPlayer = new PlayerJoined(newPlayer.getId(), newPlayer.getNode().getWorldTranslation().getX(), newPlayer.getNode().getWorldTranslation().getY(), newPlayer.getNode().getWorldTranslation().getZ());
         server.broadcast(messageToNewPlayer);
         mobs.values().stream().toList().forEach(x -> {
