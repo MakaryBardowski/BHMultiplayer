@@ -5,7 +5,7 @@ import Game.Mobs.Player;
 import Messages.MessageListeners.ClientMessageListener;
 import Messages.MessageListeners.ServerMessageListener;
 import Messages.MobUpdatePosRotMessage;
-import Messages.PlayerJoinSendMobsMessage;
+import Messages.PlayerJoined;
 
 import com.jme3.app.SimpleApplication;
 
@@ -90,12 +90,11 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     public void connectionAdded(Server server, HostedConnection hc) {
        
         Mob newPlayer = registerPlayer(hc.getId());
-        PlayerJoinSendMobsMessage messageToNewPlayer = new PlayerJoinSendMobsMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation().getX(), newPlayer.getNode().getWorldTranslation().getY(), newPlayer.getNode().getWorldTranslation().getZ());
+        PlayerJoined messageToNewPlayer = new PlayerJoined(newPlayer.getId(), newPlayer.getNode().getWorldTranslation().getX(), newPlayer.getNode().getWorldTranslation().getY(), newPlayer.getNode().getWorldTranslation().getZ());
         server.broadcast(messageToNewPlayer);
-        mobs.values().stream().toList().forEach(
-                x -> {
+        mobs.values().stream().toList().forEach(x -> {
                     if (x != newPlayer) {
-                        PlayerJoinSendMobsMessage msg = new PlayerJoinSendMobsMessage(x.getId(), x.getNode().getWorldTranslation().getX(), x.getNode().getWorldTranslation().getY(), x.getNode().getWorldTranslation().getZ());
+                        PlayerJoined msg = new PlayerJoined(x.getId(), x.getNode().getWorldTranslation().getX(), x.getNode().getWorldTranslation().getY(), x.getNode().getWorldTranslation().getZ());
                         server.broadcast(msg);
                     }
                 }

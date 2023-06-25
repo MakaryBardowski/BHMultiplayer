@@ -133,9 +133,10 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
 //            Vector3f locationAfterMovementInCell = new Vector3f((float) Math.floor(positionNode.getWorldTranslation().add(UMC.mult(1f)).getX() / gs.getWorldGrid().getCellSize()), 0, (float) Math.floor(positionNode.getWorldTranslation().add(UMC.mult(1f)).getZ() / gs.getWorldGrid().getCellSize()));
             node.move(movementVector.getX(), 0, movementVector.getZ());
 
+//            if(node.getWorldTranslation().distance(serverLocation) > 0.5f){
             MobUpdatePosRotMessage upd = new MobUpdatePosRotMessage(id, node.getWorldTranslation().getX(), node.getWorldTranslation().getY(), node.getWorldTranslation().getZ(), null);
             gs.getClient().send(upd);
-            
+//            }
             
 //            if (locationAfterMovementInCell.getZ() < gs.getTileDataMap()[0][0].length && locationAfterMovementInCell.getZ() > -1 && gs.getTileDataMap()[(int) Math.floor(positionNode.getWorldTranslation().getY() / gs.getWorldGrid().getCellSize())][(int) Math.floor(positionNode.getWorldTranslation().getX() / gs.getWorldGrid().getCellSize())][(int) locationAfterMovementInCell.getZ()].getTileType() == TileType.EMPTY) {
 //                getPositionNode().move(0, 0, movementVector.getZ());

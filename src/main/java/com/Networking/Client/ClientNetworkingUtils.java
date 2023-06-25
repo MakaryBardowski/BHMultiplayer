@@ -13,7 +13,6 @@ import com.jme3.math.Vector3f;
  */
 public class ClientNetworkingUtils {
 
-    private static final float INTERPOLATION_THRESHOLD = 0.01f;
 
     /* metoda interpoluj¹ca pozycjê moba (zeby nie teleportowal sie tam gdzie serwer powie ze jest,
     tylko zeby faktycznie przemieszczal sie tam ze swoja predkoscia

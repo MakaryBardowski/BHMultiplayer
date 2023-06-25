@@ -13,17 +13,17 @@ import com.jme3.network.serializing.Serializable;
  * @author 48793
  */
 @Serializable
-public class PlayerJoinSendMobsMessage extends AbstractMessage {
+public class PlayerJoined extends AbstractMessage {
 
     private int id;
     private float x;
     private float y;
     private float z;
 
-    public PlayerJoinSendMobsMessage() {
+    public PlayerJoined() {
     }
 
-    public PlayerJoinSendMobsMessage(int id, float x, float y, float z) {
+    public PlayerJoined(int id, float x, float y, float z) {
         this.id = id;
         this.x = x;
         this.y = y;
