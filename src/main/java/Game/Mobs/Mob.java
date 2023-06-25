@@ -4,6 +4,7 @@
  */
 package Game.Mobs;
 
+import Game.Items.ItemInterface;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
@@ -16,11 +17,17 @@ public abstract class Mob {
     private static float DEFAULT_SPEED = 20f;
     protected int id;
     protected Node node;
+    
+    
     //mob stats
     protected float speed = DEFAULT_SPEED;
     protected float health = 50;
     protected float maxHealth = 50;
+    protected ItemInterface[] equipment = new ItemInterface[18]; // 6 rows 3 cols
+
     
+    //mob ai variables
+    protected Mob currentTarget;
     
     //sync
     protected MobType mobType;
@@ -85,5 +92,23 @@ public abstract class Mob {
     public boolean isDead(){
     return health <= 0;
     }
+
+    public Mob getCurrentTarget() {
+        return currentTarget;
+    }
+
+    public void setCurrentTarget(Mob currentTarget) {
+        this.currentTarget = currentTarget;
+    }
+
+    public ItemInterface[] getEquipment() {
+        return equipment;
+    }
+    
+    
+    public void equipItem(ItemInterface i){
+    i.equip(this);
+    }
+    
 
 }
