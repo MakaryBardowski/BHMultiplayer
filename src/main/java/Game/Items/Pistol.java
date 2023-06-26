@@ -7,21 +7,19 @@ package Game.Items;
 import Game.Mobs.Mob;
 
 /**
+ *
  * @author tomasz potoczko
  */
-public abstract class Weapon extends Item{
-    float damage;
-    float range;
-    DamageType damageType;
-    float attackSpeed;
+public class Pistol extends RangedWeapon{
 
-    
-    public void dealDamage(Mob m){
-        //m.setHealth(m.getHealth() - this.getDamage())
+    @Override
+    public void equip(Mob m) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void unequip(Mob m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
-    public float getDamage(){
-        return this.damage;
-    }
 }

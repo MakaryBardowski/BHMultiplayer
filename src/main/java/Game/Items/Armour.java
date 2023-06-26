@@ -11,18 +11,10 @@ import java.util.HashMap;
  * 
  * @author tomasz potoczko
  */
-public class Armour extends Item{
-    HashMap <DamageType, Float> damageReductions;
-    ArmourType armourTyoe;
-
-    @Override
-    public void equip(Mob m) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void unequip(Mob m) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+public abstract class Armour extends Item{
+    float damageReduction;
     
+    public void setDamageReduction(float damageReduction){
+        this.damageReduction = damageReduction;
+    }
 }
