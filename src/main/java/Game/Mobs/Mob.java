@@ -118,7 +118,7 @@ public abstract class Mob {
     }
     
     public void equipItem(ItemInterface i){
-    i.equip(this);
+        i.equip(this);
     }
     
 
