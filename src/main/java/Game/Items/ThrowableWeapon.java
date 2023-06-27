@@ -27,6 +27,11 @@ public class ThrowableWeapon extends Weapon{
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
+    @Override
+    public void attack() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+    
 //    public static class Builder{
 //        private MeleeWeapon weapon;
 //
@@ -67,6 +72,7 @@ public class ThrowableWeapon extends Weapon{
 //            return w;
 //        }
 //    }
+
     
 } 
 

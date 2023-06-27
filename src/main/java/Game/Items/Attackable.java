@@ -8,7 +8,7 @@ package Game.Items;
  *
  * @author tomasz potoczko
  */
-public interface Shootable {
-    void shoot();
+public interface Attackable {
+    void attack();
     
 }

@@ -9,7 +9,7 @@ import Game.Mobs.Mob;
 /**
  * @author tomasz potoczko
  */
-public abstract class Weapon extends Item{
+public abstract class Weapon extends Item implements Attackable{
     float damage;
     float range;
     DamageType damageType;
