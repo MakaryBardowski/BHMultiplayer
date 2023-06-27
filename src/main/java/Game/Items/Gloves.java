@@ -10,7 +10,7 @@ import Game.Mobs.Mob;
  *
  * @author tomasz potoczko
  */
-public class HeadArmour extends Armour{
+public class Gloves extends Armour{
 
     @Override
     public void equip(Mob m) {
