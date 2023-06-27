@@ -12,10 +12,5 @@ import Game.Mobs.Mob;
  */
 public abstract class RangedWeapon extends Weapon{
     
-    @Override
-    public float getDamage(){
-        //todo: math function for damage drop-off
-        return this.damage;
-    }
     
 }

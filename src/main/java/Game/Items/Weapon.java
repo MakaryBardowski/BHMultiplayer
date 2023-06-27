@@ -15,13 +15,35 @@ public abstract class Weapon extends Item implements Attackable{
     DamageType damageType;
     float attackSpeed;
 
-    
-    public void dealDamage(Mob m){
-        //m.setHealth(m.getHealth() - this.getDamage())
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void setDamage(float damage) {
+        this.damage = damage;
+    }
+
+    public void setRange(float range) {
+        this.range = range;
+    }
+
+    public void setDamageType(DamageType damageType) {
+        this.damageType = damageType;
+    }
+
+    public void setAttackSpeed(float attackSpeed) {
+        this.attackSpeed = attackSpeed;
+    }
+
+    public float getRange() {
+        return range;
+    }
+
+    public DamageType getDamageType() {
+        return damageType;
+    }
+
+    public float getAttackSpeed() {
+        return attackSpeed;
     }
     
     public float getDamage(){
-        return this.damage;
+        return damage;
     }
 }
