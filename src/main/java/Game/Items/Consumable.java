@@ -4,15 +4,10 @@
  */
 package Game.Items;
 
-import Game.Mobs.Mob;
-
 /**
  *
- * @author 48793
+ * @author tomasz potoczko
  */
-public interface ItemInterface {
+public abstract class Consumable extends Item{
     
-    public void equip(Mob m);
-    public void unequip(Mob m);
- 
 }

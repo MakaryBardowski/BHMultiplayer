@@ -5,14 +5,16 @@
 package Game.Items;
 
 import Game.Mobs.Mob;
+import java.util.HashMap;
 
 /**
- *
- * @author 48793
+ * 
+ * @author tomasz potoczko
  */
-public interface ItemInterface {
+public abstract class Armour extends Item{
+    float damageReduction;
     
-    public void equip(Mob m);
-    public void unequip(Mob m);
- 
+    public void setDamageReduction(float damageReduction){
+        this.damageReduction = damageReduction;
+    }
 }
