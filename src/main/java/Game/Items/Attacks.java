@@ -8,7 +8,7 @@ package Game.Items;
  *
  * @author tomasz potoczko
  */
-public interface Attackable {
+public interface Attacks {
     void attack();
     
 }
