@@ -11,4 +11,7 @@ package Game.Items;
 public interface HoldableInterface {
     void equipRight();
     void equipLeft();
+    
+    void useRight();
+    void useLeft();
 }
