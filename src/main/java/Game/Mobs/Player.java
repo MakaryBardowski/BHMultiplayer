@@ -15,6 +15,8 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
 /**
@@ -22,27 +24,23 @@ import com.jme3.scene.shape.Box;
  * @author 48793
  */
 public class Player extends HumanMob {
+
     // ustawiane przy klikaniu WSAD (forward = idz do przodu , left = idz w lewo  itd)
     private boolean forward, backward, right, left;
-    
+
     private ItemInterface[] hotbar;
     private String equipment;
-    
-    
-    
-    private float time = 10;
-    
 
-    public Player(int id, Node node,String name) {
-        super(id, node,name);
+    private float time = 10;
+
+    public Player(int id, Node node, String name) {
+        super(id, node, name);
         hotbar = new ItemInterface[10];
     }
 
     public ItemInterface[] getHotbar() {
         return hotbar;
     }
-    
-    
 
     public boolean isForward() {
         return forward;
@@ -76,51 +74,56 @@ public class Player extends HumanMob {
         this.left = left;
     }
 
-
-
-    
-    
     // metoda tworzaca nowego gracza, poki co gracz to po prostu kolorowe pudelko
     public static Player spawnPlayer(int id, AssetManager assetManager, Node worldNode) {
-        Node playerNode = new Node(""+id);
-        playerNode.move(0, 6, 0);
+        Node playerNode = (Node) assetManager.loadModel("Models/testHuman/testHuman.j3o");
+        
+        for (Spatial c : playerNode.getChildren()) {
+            if (c != null && c instanceof Geometry) {
+                Geometry g = (Geometry) c;
+                Material originalMaterial = g.getMaterial();
+                Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+
+                newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+                g.setMaterial(newMaterial);
+
+            }
+
+        }
+        System.out.println("playerNode "+ playerNode);
+                Debugging.DebugUtils.addArrow(playerNode,assetManager);
 
         
-        String name = "Gracz_"+id;
-        Player p = new Player(id, playerNode,name);
+        
+        
+        
+        
+        
+        
+        
+        playerNode.setName("" + id);
+        playerNode.move(0, 5, 0);
 
-        Box box = new Box(Vector3f.ZERO, 1, 1, 1);
-        Geometry geometry = new Geometry("Box", box);
+        String name = "Gracz_" + id;
+        Player p = new Player(id, playerNode, name);
 
-        Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        ColorRGBA color = new ColorRGBA(id / 2f, id / 2f, id / 2f, 1f);
-        material.setColor("Color", color);
-        material.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
-        geometry.setMaterial(material);
-        playerNode.attachChild(geometry);
+
         worldNode.attachChild(playerNode);
-        
-        
-        
-        
-        
+
         // bardzo wazne - KA¯DE DZIECKO NODA MUSI MIEC NAZWE ID!!!!!!!!!!
-        playerNode.getChildren().stream().forEach(x-> x.setName(""+id));
-        
+        playerNode.getChildren().stream().forEach(x -> x.setName("" + id));
         return p;
     }
 
     public void move(float tpf, ClientMain gs) {
-        time-= tpf;
-        if(time <= 0){
-        time = 10;
-        health -= 1;
-        MobHealthUpdateMessage hmsg = new MobHealthUpdateMessage(id,health);
-        gs.getClient().send(hmsg);
+        time -= tpf;
+        if (time <= 0) {
+            time = 10;
+            health -= 1;
+            MobHealthUpdateMessage hmsg = new MobHealthUpdateMessage(id, health);
+            gs.getClient().send(hmsg);
         }
-        
-        
-        
+
         /*tpf is time per frame,
 which makes movement rate independent of fps,  checks for WSAD input and moves if detected
          */
@@ -151,9 +154,8 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
                 Vector3f moveVec = gs.getCamera().getLeft().negateLocal().mult(speed / 2 * tpf);;
                 movementVector.addLocal(moveVec);
             }
-            
-            // UMC odpowiada za to zebys nie mogl stanac bardzo blisko sciany, daje minimalna odleglosc miedzy toba a sciana
 
+            // UMC odpowiada za to zebys nie mogl stanac bardzo blisko sciany, daje minimalna odleglosc miedzy toba a sciana
 //            removeFromGrid(gs.getWorldGrid());
             Vector3f UMC = movementVector.clone();
             if (UMC.getX() < 0) {
@@ -177,20 +179,16 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
             MobUpdatePosRotMessage upd = new MobUpdatePosRotMessage(id, node.getWorldTranslation().getX(), node.getWorldTranslation().getY(), node.getWorldTranslation().getZ(), null);
             gs.getClient().send(upd);
 //            }
-            
+
 //            if (locationAfterMovementInCell.getZ() < gs.getTileDataMap()[0][0].length && locationAfterMovementInCell.getZ() > -1 && gs.getTileDataMap()[(int) Math.floor(positionNode.getWorldTranslation().getY() / gs.getWorldGrid().getCellSize())][(int) Math.floor(positionNode.getWorldTranslation().getX() / gs.getWorldGrid().getCellSize())][(int) locationAfterMovementInCell.getZ()].getTileType() == TileType.EMPTY) {
 //                getPositionNode().move(0, 0, movementVector.getZ());
 //            }
 //            if (locationAfterMovementInCell.getX() < gs.getTileDataMap()[0].length && locationAfterMovementInCell.getX() > -1 && gs.getTileDataMap()[(int) Math.floor(positionNode.getWorldTranslation().getY() / gs.getWorldGrid().getCellSize())][(int) locationAfterMovementInCell.getX()][(int) Math.floor(positionNode.getWorldTranslation().getZ() / gs.getWorldGrid().getCellSize())].getTileType() == TileType.EMPTY) {
 //                getPositionNode().move(movementVector.getX(), 0, 0);
 //            }
-
 //            insert(gs.getWorldGrid());
         }
 
     }
-    
-    
-    
 
 }

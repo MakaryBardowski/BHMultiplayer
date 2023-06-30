@@ -8,7 +8,9 @@ import Messages.MessageListeners.ServerMessageListener;
 import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdateMessage;
 import Messages.MobUpdatePosRotMessage;
-import Messages.PlayerJoined;
+import Messages.MobsInGameMessage;
+import Messages.PlayerJoinedMessage;
+import Messages.SetPlayerMessage;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
@@ -25,7 +27,9 @@ public class NetworkingInitialization {
     Serializer.registerClass(MobUpdateMessage.class);
     Serializer.registerClass(MobUpdatePosRotMessage.class);
     Serializer.registerClass(MobHealthUpdateMessage.class);
-    Serializer.registerClass(PlayerJoined.class);
+    Serializer.registerClass(PlayerJoinedMessage.class);
+    Serializer.registerClass(SetPlayerMessage.class);
+    Serializer.registerClass(MobsInGameMessage.class);
     Serializer.registerClass(ServerMessageListener.class);
     }
     

@@ -34,10 +34,12 @@ import com.Networking.NetworkingInitialization;
 import com.Networking.Server.ServerMain;
 import com.jme3.input.FlyByCamera;
 import com.jme3.input.controls.ActionListener;
+import com.jme3.light.AmbientLight;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.network.ClientStateListener;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial.CullHint;
 import de.lessvoid.nifty.Nifty;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -64,7 +66,7 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 
     // obiekt Client - bezposrednio z biblioteki do multi z Jmonkey
     private Client client;
-    // kolejka komunikatow od serwera (zeby klient mogl je przerobic jak nie nadaza na bierzaco)
+    // kolejka komunikatow od serwera (zeby klient mogl je przerobic jak nie nadaza na biezaco)
     private ConcurrentLinkedQueue<AbstractMessage> messageQueue;
     // wszystkie moby, przechowywane wg. swojego ID
     private HashMap<Integer, Mob> mobs = new HashMap<>();
@@ -74,6 +76,7 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     private AppSettings applicationSettings;
     // action listener - obsluguje input klawiatury/myszki
     private ActionListener actionListener;
+    // mapa uzyskana z map generator
     private Map map;
     // nifty obsluguje GUI
     private Nifty nifty;
@@ -84,7 +87,7 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 
         ClientMain app = new ClientMain();
         AppSettings settings1 = new AppSettings(true);
-settings1.setResolution(1920,1080);
+        settings1.setResolution(1920, 1080);
         settings1.setFullscreen(true);
 //        settings1.setCenterWindow(false);
 //        if (new Random().nextInt(2) == 0) {
@@ -144,6 +147,14 @@ settings1.setResolution(1920,1080);
         // generujemy mape
         MapGenerator mg = new MapGenerator();
         map = mg.generateMap(MapType.BOSS, 5, 16, 48, assetManager, mapNode);
+
+        //to be moved to mapGenerator class
+        AmbientLight al = new AmbientLight();
+        al.setColor(ColorRGBA.White.mult(0.7f));
+        worldNode.addLight(al);
+        
+        
+
     }
 
     @Override
@@ -194,6 +205,7 @@ settings1.setResolution(1920,1080);
     }
 
     public Player registerPlayer(Integer id) { // rejestrujemy gracza
+
         Player p = Player.spawnPlayer(id, assetManager, pickableNode);
         this.mobs.put(id, p);
         return p;

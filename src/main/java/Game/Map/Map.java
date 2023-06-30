@@ -18,7 +18,6 @@ public class Map {
     
     public Map(int blockSize,int chunkSize, int mapSize, byte[][][] logicMap, AssetManager a,Node mapNode){
      blockWorld = new BlockWorld(blockSize,chunkSize,mapSize,logicMap,a,mapNode);
-   blockWorld.placeBlock(3, 3, 3, BlockType.DIRT).getPositions();
     }
     
     

@@ -20,15 +20,15 @@ import jme3tools.optimize.TextureAtlas;
 public class BlockWorld {
 
     private final int BLOCK_SIZE;
-    private int CHUNK_SIZE;
-    private int MAP_SIZE;
+    private final int CHUNK_SIZE;
+    private final int MAP_SIZE;
     private Block[][][] map;  // contains block data - generated based on logic map
-    private byte[][][] logicMap; // contains info if a block is present (!=0) needed for culling
+    private final byte[][][] logicMap; // contains info if a block is present (!=0) needed for culling
 
     private TextureAtlas textureAtlas;
-    private AssetManager asm;
+    private final AssetManager asm;
 
-    private HashMap<String, Chunk> chunks;
+    private final HashMap<String, Chunk> chunks;
     private Node worldNode;
 
     public BlockWorld(int VOXEL_SIZE, int CHUNK_SIZE, int MAP_SIZE, byte[][][] logicMap, AssetManager asm, Node rootNode) {
@@ -47,7 +47,6 @@ public class BlockWorld {
         textureAtlas.addTexture(asm.loadTexture(BlockType.DIRT.textureName), "DiffuseMap");
 
         initializeBlocks();
-
         rootNode.attachChild(worldNode);
 
     }
@@ -75,24 +74,19 @@ public class BlockWorld {
         }
 
         logicMap[x][y][z] = 1;
-
         Chunk c = chunks.get("" + (x / CHUNK_SIZE) * CHUNK_SIZE + (z / CHUNK_SIZE) * CHUNK_SIZE);
-
 //       Block   b = VoxelAdding.addBox((x * BLOCK_SIZE)-c.getChunkPos().getX()*BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE)-c.getChunkPos().getY()*BLOCK_SIZE, BLOCK_SIZE,  c.getBlocksCount(),  asm,  bt);
         Block b = VoxelAdding.AddOptimizedBox(c, map, logicMap, x, y, z, BLOCK_SIZE, c.getBlocksCount(), asm, bt, (x * BLOCK_SIZE) - c.getChunkPos().getX() * BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE) - c.getChunkPos().getY() * BLOCK_SIZE);
         map[x][y][z] = b;
         c.attachBlock(b, asm.loadTexture(bt.textureName));
-
         return b;
     }
 
     public Block removeBlock(int x, int y, int z) {
         logicMap[x][y][z] = 0;
         Block b = map[x][y][z];
-
         Chunk c = chunks.get("" + (x / CHUNK_SIZE) * CHUNK_SIZE + (z / CHUNK_SIZE) * CHUNK_SIZE);
         c.detachBlock(b);
-
         return b;
     }
 

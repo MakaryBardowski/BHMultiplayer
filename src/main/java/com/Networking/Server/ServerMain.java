@@ -6,7 +6,9 @@ import Messages.MessageListeners.ClientMessageListener;
 import Messages.MessageListeners.ServerMessageListener;
 import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdatePosRotMessage;
-import Messages.PlayerJoined;
+import Messages.MobsInGameMessage;
+import Messages.PlayerJoinedMessage;
+import Messages.SetPlayerMessage;
 
 import com.jme3.app.SimpleApplication;
 
@@ -20,6 +22,8 @@ import com.jme3.scene.Geometry;
 import com.jme3.system.JmeContext;
 import com.Networking.NetworkingInitialization;
 import com.jme3.network.AbstractMessage;
+import com.jme3.network.Filters;
+import com.jme3.scene.Spatial.CullHint;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -72,7 +76,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
                     x -> {
                         //to be seriously optimized
                         server.broadcast(new MobUpdatePosRotMessage(x.getValue().getId(), x.getValue().getNode().getWorldTranslation().getX(), x.getValue().getNode().getWorldTranslation().getY(), x.getValue().getNode().getWorldTranslation().getZ(), x.getValue().getNode().getLocalRotation()));
-                        server.broadcast(new MobHealthUpdateMessage(x.getValue().getId(),x.getValue().getHealth())        );
+                        server.broadcast(new MobHealthUpdateMessage(x.getValue().getId(), x.getValue().getHealth()));
                     }
             );
 
@@ -80,7 +84,6 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
 
     }
 
-    
     /* wykonywanie przy polaczeniu sie gracza do serwera
     tworzy nowego Player# , wysyla graczowi ktory sie dolaczyl ze bedzie sterowal Player#
     oraz informuje go o mobach (w tym innych graczach) ktore sa juz w grze.
@@ -88,21 +91,28 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     Innych graczy (polaczonych wczesniej) informuje o nowym graczu.
     
     informuje - przesyla pozycje, rotacje (pozniej informacje takie jak itemy, hp, etc.)
-    */
+     */
     @Override
     public void connectionAdded(Server server, HostedConnection hc) {
-       
+                // inform the new player about all mobs (including players) currently in the game
+        mobs.entrySet().forEach(x -> {
+            Mob mob = x.getValue();
+            MobsInGameMessage m = new MobsInGameMessage(mob.getId(), mob.getNode().getWorldTranslation().getX(), mob.getNode().getWorldTranslation().getY(), mob.getNode().getWorldTranslation().getZ());
+            server.broadcast(Filters.in(hc), m);
+        });
+        
+        
         Mob newPlayer = registerPlayer(hc.getId());
-        System.out.println("registering ---------------- health = "+newPlayer.getHealth());
-        PlayerJoined messageToNewPlayer = new PlayerJoined(newPlayer.getId(), newPlayer.getNode().getWorldTranslation().getX(), newPlayer.getNode().getWorldTranslation().getY(), newPlayer.getNode().getWorldTranslation().getZ());
-        server.broadcast(messageToNewPlayer);
-        mobs.values().stream().toList().forEach(x -> {
-                    if (x != newPlayer) {
-                        PlayerJoined msg = new PlayerJoined(x.getId(), x.getNode().getWorldTranslation().getX(), x.getNode().getWorldTranslation().getY(), x.getNode().getWorldTranslation().getZ());
-                        server.broadcast(msg);
-                    }
-                }
-        );
+        // set newly created player as the player new client will control
+        SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation().getX(), newPlayer.getNode().getWorldTranslation().getY(), newPlayer.getNode().getWorldTranslation().getZ());
+        server.broadcast(Filters.in(hc), messageToNewPlayer);
+
+
+
+        // inform all other clients about new player and his position
+        PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation().getX(), newPlayer.getNode().getWorldTranslation().getY(), newPlayer.getNode().getWorldTranslation().getZ());
+        server.broadcast(Filters.notEqualTo(hc), msg);
+
     }
 
     @Override
@@ -135,6 +145,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
 
     // tworzy nowego gracza
     public Player registerPlayer(Integer id) {
+        // the server doesnt need to render the player, hence cull hint = always
         Player player = Player.spawnPlayer(id, assetManager, rootNode);
         this.mobs.put(id, player);
         return player;

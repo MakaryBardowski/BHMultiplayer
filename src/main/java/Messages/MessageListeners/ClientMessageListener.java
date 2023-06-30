@@ -5,11 +5,14 @@
 package Messages.MessageListeners;
 
 import Game.CameraAndInput.InputEditor;
+import Game.Mobs.Mob;
 import Game.Mobs.Player;
 import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdateMessage;
 import Messages.MobUpdatePosRotMessage;
-import Messages.PlayerJoined;
+import Messages.MobsInGameMessage;
+import Messages.PlayerJoinedMessage;
+import Messages.SetPlayerMessage;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.Client;
 import com.jme3.network.Message;
@@ -50,17 +53,39 @@ public class ClientMessageListener implements MessageListener<Client> {
 //                clientApp.enqueue(() -> {clientApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(pos);               
 //                });
             }
-        } else if(m instanceof MobHealthUpdateMessage hmsg){
-            System.out.println("HMSG "+hmsg.getHealth());
-            if(clientApp.getMobs().get(hmsg.getId()) != null){
-            clientApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
-                        System.out.println("received message that player HP is"+hmsg.getHealth());
-            
+        } else if (m instanceof MobHealthUpdateMessage hmsg) {
+            System.out.println("HMSG " + hmsg.getHealth());
+            if (clientApp.getMobs().get(hmsg.getId()) != null) {
+                clientApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
+                System.out.println("received message that player HP is" + hmsg.getHealth());
+
             }
-        } else if (m instanceof PlayerJoined nmsg) {
-            Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
+        } else if (m instanceof MobsInGameMessage nmsg){
+        
+            if (clientApp.getMobs().get(nmsg.getId()) == null) {
+                Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
+
+                /* jesli klient który odbierze
+                wiadomoœæ nie ma moba o takim ID, to go dodaje
+                 */
+                clientApp.enqueue(
+                        () -> {
+                            /*
+                            jesli klient, ktory odebral wiadomosc nie ma jeszcze przypisanego gracza
+                            to wtedy
+                             */
+                            Mob p = clientApp.registerPlayer(nmsg.getId());
+                            p.getNode().setLocalTranslation(pos);
+
+                        }
+                );
+            }
+        
+        }else if (m instanceof PlayerJoinedMessage nmsg) {
 
             if (clientApp.getMobs().get(nmsg.getId()) == null) {
+                Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
+
                 /* jesli klient który odbierze
                 wiadomoœæ nie ma moba o takim ID, to go dodaje
                  */
@@ -72,15 +97,21 @@ public class ClientMessageListener implements MessageListener<Client> {
                              */
                             Player p = clientApp.registerPlayer(nmsg.getId());
                             p.getNode().setLocalTranslation(pos);
-                            if (clientApp.getPlayer() == null) {
-                                clientApp.setPlayer(p);
-                                new InputEditor().setupInput(clientApp);
-                                clientApp.getStateManager().attach(new PlayerHUD(clientApp));
-                            }
+
                         }
                 );
             }
 
+        } else if (m instanceof SetPlayerMessage nmsg) {
+
+            clientApp.enqueue(() -> {
+                Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
+                Player p = clientApp.registerPlayer(nmsg.getId());
+                p.getNode().setLocalTranslation(pos);
+                clientApp.setPlayer(p);
+                new InputEditor().setupInput(clientApp);
+                clientApp.getStateManager().attach(new PlayerHUD(clientApp));
+            });
         }
 
     }
