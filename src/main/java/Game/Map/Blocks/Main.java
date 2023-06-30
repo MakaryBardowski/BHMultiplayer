@@ -27,13 +27,15 @@ import java.util.Arrays;
 /**
  * This is the Main Class of your Game. You should only do initialization here.
  * Move your Logic into AppStates or Controls
+ *
  * @author normenhansen
  */
 public class Main extends SimpleApplication {
-BitmapText nodeCountText;
+
+    BitmapText nodeCountText;
     BlockWorld bw;
-    int cbx,cby,cbz;
-    
+    int cbx, cby, cbz;
+
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
@@ -45,15 +47,8 @@ BitmapText nodeCountText;
         flyCam.setMoveSpeed(70);
         addLabel();
         initKeys();
-        
+
 //         bw = new BlockWorld(5,16,48 ,assetManager,rootNode);
-        
-        
-        
-
-
-
-
 //bw.placeBlock(0, 0, 0,BlockType.DIRT);
 //bw.placeBlock(1, 0, 0,BlockType.STONE);
 ////bw.placeBlock(2, 0, 0,BlockType.STONE);
@@ -67,8 +62,6 @@ BitmapText nodeCountText;
 //bw.placeBlock(0, 2, 1,BlockType.STONE);
 //bw.placeBlock(1, 2, 1,BlockType.DIRT);
 //bw.placeBlock(9, 3, 4,BlockType.STONE);
-
-
     }
 
     @Override
@@ -81,10 +74,8 @@ BitmapText nodeCountText;
     public void simpleRender(RenderManager rm) {
         //TODO: add render code
     }
-    
-    
-    
-    private void addLabel(){
+
+    private void addLabel() {
         nodeCountText = new BitmapText(guiFont, false);
         nodeCountText.setSize(guiFont.getCharSet().getRenderedSize() * 2);
         nodeCountText.setText("Swiatlo: ");
@@ -92,20 +83,18 @@ BitmapText nodeCountText;
                 settings.getWidth() / 10 - nodeCountText.getLineWidth() / 2,
                 settings.getHeight() - settings.getHeight() / 15 + nodeCountText.getLineHeight() / 2, 0);
         guiNode.attachChild(nodeCountText);
-    
-        
-        
-          Picture crosshair = new Picture("crosshair");
+
+        Picture crosshair = new Picture("crosshair");
         crosshair.setImage(assetManager, "Textures/crosshair.png", true);
         crosshair.setWidth(settings.getHeight() * 0.04f);
         crosshair.setHeight(settings.getHeight() * 0.04f); //0.04f
         crosshair.setPosition((settings.getWidth() / 2) - settings.getHeight() * 0.04f / 2, settings.getHeight() / 2 - settings.getHeight() * 0.04f / 2);
         guiNode.attachChild(crosshair);
     }
-    
-    private void castRay(){
-    
-         CollisionResults results = new CollisionResults();
+
+    private void castRay() {
+
+        CollisionResults results = new CollisionResults();
         Ray ray = new Ray(cam.getLocation(), cam.getDirection());
         rootNode.collideWith(ray, results);
 
@@ -117,34 +106,29 @@ BitmapText nodeCountText;
             int z = (int) Math.floor(cpt.getZ() / 5);
 //                    System.out.println("closest: x" + bx + " y " + by + " z " + bz);
             if (x >= 0 && y >= 0 && z >= 0 && x < bw.getMap().length && y < bw.getMap()[0].length && z < bw.getMap()[0][0].length) {
-          
-                
-                      int chunkX = 16 * (int) (Math.floor(x / 16));
-                    int chunkZ = 16 * (int) (Math.floor(z / 16));
-                
-                
-               if(bw.getMap()[x][y][z] != null)
-//                   nodeCountText.setText("block vertex offset: "+Arrays.toString(bw.getMap()[x][y][z].getFaceOffsetIndexes()));
 
-nodeCountText.setText("block vertex offset: "+bw.getMap()[x][y][z].getVertexOffsetInParentChunk()+"\n"+
-        bw.getMap()[x][y][z].getVertexCount()
-//        +"\n"+bw.getMap()[x][y][z].getIndices()
-        
-        );
+                int chunkX = 16 * (int) (Math.floor(x / 16));
+                int chunkZ = 16 * (int) (Math.floor(z / 16));
 
-               
+                if (bw.getMap()[x][y][z] != null) //                   nodeCountText.setText("block vertex offset: "+Arrays.toString(bw.getMap()[x][y][z].getFaceOffsetIndexes()));
+                {
+                    nodeCountText.setText("block vertex offset: " + bw.getMap()[x][y][z].getVertexOffsetInParentChunk() + "\n"
+                            + bw.getMap()[x][y][z].getVertexCount()
+                    //        +"\n"+bw.getMap()[x][y][z].getIndices()
+
+                    );
+                }
+
             }
 
         }
     }
-    
-    
-    
-    public void updateLighting(){
-            int bx = (int) Math.floor(cam.getLocation().getX() / bw.getBLOCK_SIZE());
+
+    public void updateLighting() {
+        int bx = (int) Math.floor(cam.getLocation().getX() / bw.getBLOCK_SIZE());
         int by = (int) Math.floor(cam.getLocation().getY() / bw.getBLOCK_SIZE());
         int bz = (int) Math.floor(cam.getLocation().getZ() / bw.getBLOCK_SIZE());
-                    castRay();
+        castRay();
 
         if (bx != cbx || by != cby || bz != cbz) {
 
@@ -173,23 +157,16 @@ nodeCountText.setText("block vertex offset: "+bw.getMap()[x][y][z].getVertexOffs
             }
 //            System.out.println(System.currentTimeMillis() - t + "ms");
         }
-    
+
     }
-    
-    
-    
-    
-    
-    
-    
-    
-       final private ActionListener actionListener = new ActionListener() {
+
+    final private ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String name, boolean keyPressed, float tpf) {
-          
+
             if (name.equals("Shoot") && !keyPressed) {
-                
-                 CollisionResults results = new CollisionResults();
+
+                CollisionResults results = new CollisionResults();
                 Ray ray = new Ray(cam.getLocation(), cam.getDirection());
                 rootNode.collideWith(ray, results);
 
@@ -199,7 +176,7 @@ nodeCountText.setText("block vertex offset: "+bw.getMap()[x][y][z].getVertexOffs
                     int ux = (int) Math.floor(cpt.getX() / bw.getBLOCK_SIZE());
                     int uy = (int) Math.floor((cpt.clone().getY() + 0.2f) / bw.getBLOCK_SIZE());
                     int uz = (int) Math.floor(cpt.getZ() / bw.getBLOCK_SIZE());
-                    
+
                     bw.placeBlock(ux, uy, uz, BlockType.STONE);
 
                 }
@@ -217,29 +194,20 @@ nodeCountText.setText("block vertex offset: "+bw.getMap()[x][y][z].getVertexOffs
                     int ux = (int) Math.floor(cpt.getX() / bw.getBLOCK_SIZE());
                     int uy = (int) Math.floor((cpt.clone().getY() - 0.2f) / bw.getBLOCK_SIZE());
                     int uz = (int) Math.floor(cpt.getZ() / bw.getBLOCK_SIZE());
-                    
+
                     long t1 = System.currentTimeMillis();
-                    
-                    if(ux >= 0 && uy >= 0 && uz >=0){
-                    bw.removeBlock(ux,uy,uz);
-                    System.out.println(System.currentTimeMillis()-t1+"ms passed during block removal");
-                }
+
+                    if (ux >= 0 && uy >= 0 && uz >= 0) {
+                        bw.removeBlock(ux, uy, uz);
+                        System.out.println(System.currentTimeMillis() - t1 + "ms passed during block removal");
+                    }
                 }
             }
 
- 
         }
     };
-    
-    
-    
-    
-    
-    
-    
-    
-    
-       private void initKeys() {
+
+    private void initKeys() {
         inputManager.addMapping("R",
                 new KeyTrigger(KeyInput.KEY_R)); // trigger 1: spacebar
 
@@ -259,9 +227,5 @@ nodeCountText.setText("block vertex offset: "+bw.getMap()[x][y][z].getVertexOffs
         inputManager.addListener(actionListener, "Remove");
 
     }
-    
-    
-    
-    
-    
+
 }

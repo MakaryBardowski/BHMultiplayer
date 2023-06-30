@@ -16,35 +16,31 @@ import java.util.List;
  * @author 48793
  */
 public class Block {
-        private  List<Vector3f> positions = new ArrayList<>(); 
-    private  List<Vector2f> uvs = new ArrayList<>();
-    private  List<Integer> indices = new ArrayList<>();
+
+    private List<Vector3f> positions = new ArrayList<>();
+    private List<Vector2f> uvs = new ArrayList<>();
+    private List<Integer> indices = new ArrayList<>();
     private List<Vector4f> colors = new ArrayList<>();
-    
+
     private int index;
     private int vertexOffsetInParentChunk; // first vertex in parentChunk
-    
+
     private float lightLevel;
-    
-    
-    private final float[] faceOffsetIndexes ; 
-    
-    public Block(){
-    faceOffsetIndexes = new float[6];
-    
-    for(int i =0; i <faceOffsetIndexes.length;i++){
-        faceOffsetIndexes[i] = -1;
-    }
-    
+
+    private final float[] faceOffsetIndexes;
+
+    public Block() {
+        faceOffsetIndexes = new float[6];
+
+        for (int i = 0; i < faceOffsetIndexes.length; i++) {
+            faceOffsetIndexes[i] = -1;
+        }
+
     }
 
     public float[] getFaceOffsetIndexes() {
         return faceOffsetIndexes;
     }
-    
-    
-    
-    
 
     public List<Vector3f> getPositions() {
         return positions;
@@ -101,12 +97,9 @@ public class Block {
     public void setVertexOffsetInParentChunk(int vertexOffsetInParentChunk) {
         this.vertexOffsetInParentChunk = vertexOffsetInParentChunk;
     }
-    
-    
-    public int getVertexCount(){
-    return positions.size();
+
+    public int getVertexCount() {
+        return positions.size();
     }
-    
-    
 
 }
