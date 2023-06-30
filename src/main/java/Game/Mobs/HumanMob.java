@@ -4,7 +4,10 @@
  */
 package Game.Mobs;
 
+import Game.Map.Collision.CollidableInterface;
+import Game.Map.Collision.WorldGrid;
 import com.jme3.scene.Node;
+import java.util.HashSet;
 
 /**
  *
@@ -13,5 +16,35 @@ import com.jme3.scene.Node;
 public class HumanMob extends Mob{
     public HumanMob(int id,Node node,String name){
     super(id,node,name);
+    }
+
+    @Override
+    public void insert(WorldGrid wg) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void removeFromGrid(WorldGrid wg) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public HashSet<CollidableInterface> getFromCellsImIn(WorldGrid wg) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public HashSet<CollidableInterface> getEntitiesFromTilesInRange(WorldGrid wg, float distance) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void checkCollision() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void onCollision() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

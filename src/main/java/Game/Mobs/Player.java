@@ -31,8 +31,6 @@ public class Player extends HumanMob {
     private ItemInterface[] hotbar;
     private String equipment;
 
-    private float time = 10;
-
     public Player(int id, Node node, String name) {
         super(id, node, name);
         hotbar = new ItemInterface[10];
@@ -77,7 +75,7 @@ public class Player extends HumanMob {
     // metoda tworzaca nowego gracza, poki co gracz to po prostu kolorowe pudelko
     public static Player spawnPlayer(int id, AssetManager assetManager, Node worldNode) {
         Node playerNode = (Node) assetManager.loadModel("Models/testHuman/testHuman.j3o");
-        
+
         for (Spatial c : playerNode.getChildren()) {
             if (c != null && c instanceof Geometry) {
                 Geometry g = (Geometry) c;
@@ -90,23 +88,13 @@ public class Player extends HumanMob {
             }
 
         }
-        System.out.println("playerNode "+ playerNode);
-                Debugging.DebugUtils.addArrow(playerNode,assetManager);
+        Debugging.DebugUtils.addArrow(playerNode, assetManager);
 
-        
-        
-        
-        
-        
-        
-        
-        
         playerNode.setName("" + id);
         playerNode.move(0, 5, 0);
 
         String name = "Gracz_" + id;
         Player p = new Player(id, playerNode, name);
-
 
         worldNode.attachChild(playerNode);
 
@@ -116,13 +104,7 @@ public class Player extends HumanMob {
     }
 
     public void move(float tpf, ClientMain gs) {
-        time -= tpf;
-        if (time <= 0) {
-            time = 10;
-            health -= 1;
-            MobHealthUpdateMessage hmsg = new MobHealthUpdateMessage(id, health);
-            gs.getClient().send(hmsg);
-        }
+
 
         /*tpf is time per frame,
 which makes movement rate independent of fps,  checks for WSAD input and moves if detected
