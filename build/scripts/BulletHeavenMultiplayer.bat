@@ -71,7 +71,7 @@ set CLASSPATH=%APP_HOME%\lib\BulletHeavenMultiplayer-1.0.jar;%APP_HOME%\lib\Shad
 
 
 @rem Execute BulletHeavenMultiplayer
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %BULLET_HEAVEN_MULTIPLAYER_OPTS%  -classpath "%CLASSPATH%" com.mygame.Main %*
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %BULLET_HEAVEN_MULTIPLAYER_OPTS%  -classpath "%CLASSPATH%" com.mygame.ServerMain %*
 
 :end
 @rem End local scope for the variables with windows NT shell
