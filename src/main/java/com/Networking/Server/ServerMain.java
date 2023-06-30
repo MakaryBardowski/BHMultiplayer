@@ -2,7 +2,6 @@ package com.Networking.Server;
 
 import Game.Mobs.Mob;
 import Game.Mobs.Player;
-import Messages.MessageListeners.ClientMessageListener;
 import Messages.MessageListeners.ServerMessageListener;
 import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdatePosRotMessage;
@@ -18,15 +17,11 @@ import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
-import com.jme3.scene.Geometry;
 import com.jme3.system.JmeContext;
 import com.Networking.NetworkingInitialization;
-import com.jme3.network.AbstractMessage;
 import com.jme3.network.Filters;
-import com.jme3.scene.Spatial.CullHint;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,12 +33,11 @@ import java.util.logging.Logger;
  */
 public class ServerMain extends SimpleApplication implements ConnectionListener, MessageListener<HostedConnection> {
 
-    private static String serverIP = "localhost";
+    private static final String SERVER_IP = "localhost";
     private Server server;
-    private HashMap<Integer, Mob> mobs = new HashMap<>();
+    private final HashMap<Integer, Mob> mobs = new HashMap<>();
     private float tickTimer;
-    private float timePerTick = 0.033f;
-//    private float timePerTick = 3f;
+    private final float timePerTick = 0.033f;
 
     public static void main(String[] args) {
         NetworkingInitialization.initializeSerializables();
@@ -94,20 +88,17 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
      */
     @Override
     public void connectionAdded(Server server, HostedConnection hc) {
-                // inform the new player about all mobs (including players) currently in the game
+        // inform the new player about all mobs (including players) currently in the game
         mobs.entrySet().forEach(x -> {
             Mob mob = x.getValue();
             MobsInGameMessage m = new MobsInGameMessage(mob.getId(), mob.getNode().getWorldTranslation().getX(), mob.getNode().getWorldTranslation().getY(), mob.getNode().getWorldTranslation().getZ());
             server.broadcast(Filters.in(hc), m);
         });
-        
-        
+
         Mob newPlayer = registerPlayer(hc.getId());
         // set newly created player as the player new client will control
         SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation().getX(), newPlayer.getNode().getWorldTranslation().getY(), newPlayer.getNode().getWorldTranslation().getZ());
         server.broadcast(Filters.in(hc), messageToNewPlayer);
-
-
 
         // inform all other clients about new player and his position
         PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation().getX(), newPlayer.getNode().getWorldTranslation().getY(), newPlayer.getNode().getWorldTranslation().getZ());

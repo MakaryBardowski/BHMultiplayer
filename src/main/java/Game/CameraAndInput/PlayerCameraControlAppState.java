@@ -25,6 +25,7 @@ import com.jme3.renderer.ViewPort;
  * @author 48793
  */
 public class PlayerCameraControlAppState extends AbstractAppState {
+
     private final float CAMERA_Y_OFFSET = 2.12f; //2.12f
     private Camera handsCam;
     private ClientMain clientApp;
@@ -94,16 +95,8 @@ public class PlayerCameraControlAppState extends AbstractAppState {
             if (results.size() > 0) {
                 CollisionResult closest = results.getClosestCollision();
                 lookDirection = new Vector3f(closest.getContactPoint().x, clientApp.getPlayer().getNode().getWorldTranslation().getY(), closest.getContactPoint().z);
-                             System.out.println("rotation "+clientApp.getPlayer().getNode().getLocalRotation());
-
                 clientApp.getPlayer().getNode().lookAt(lookDirection, Vector3f.UNIT_Y);
-                
-//                clientApp.getPlayer().getNode().setLocalRotation(clientApp.getPlayer().getNode().getWorldRotation().lookAt(lookDirection, Vector3f.UNIT_Y));
-                
-                System.out.println("player pos "+clientApp.getPlayer().getNode().getWorldTranslation());
-                System.out.println("rotation "+clientApp.getPlayer().getNode().getLocalRotation());
-                System.out.println("looking direction "+lookDirection );
-                System.out.println("After looking "+clientApp.getPlayer().getNode().getWorldTranslation());
+
             }
         }
     }

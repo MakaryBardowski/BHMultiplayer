@@ -6,6 +6,7 @@ package Game.Mobs;
 
 import Game.Items.Item;
 import Game.Items.ItemInterface;
+import Game.Map.Collision.CollidableInterface;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
@@ -13,7 +14,7 @@ import com.jme3.scene.Node;
  *
  * @author 48793
  */
-public abstract class Mob {
+public abstract class Mob implements CollidableInterface{
 
     private static float DEFAULT_SPEED = 20f;
     protected int id;
