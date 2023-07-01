@@ -14,7 +14,7 @@ import com.jme3.scene.Node;
  *
  * @author 48793
  */
-public abstract class Mob implements CollidableInterface{
+public abstract class Mob implements CollidableInterface,MobInterface{
 
     private static float DEFAULT_SPEED = 20f;
     protected int id;

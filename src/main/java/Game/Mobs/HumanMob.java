@@ -6,6 +6,7 @@ package Game.Mobs;
 
 import Game.Map.Collision.CollidableInterface;
 import Game.Map.Collision.WorldGrid;
+import com.Networking.Client.ClientMain;
 import com.jme3.scene.Node;
 import java.util.HashSet;
 
@@ -17,6 +18,34 @@ public class HumanMob extends Mob{
     public HumanMob(int id,Node node,String name){
     super(id,node,name);
     }
+    
+    
+    
+    @Override
+    public void move(float tpf, ClientMain cm) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void die() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void attack() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void receiveDamage() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void dealDamage() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+    
 
     @Override
     public void insert(WorldGrid wg) {
@@ -47,4 +76,5 @@ public class HumanMob extends Mob{
     public void onCollision() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+
 }
