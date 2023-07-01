@@ -6,7 +6,8 @@ package Messages.MessageListeners;
 
 import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdateMessage;
-import Messages.MobUpdatePosRotMessage;
+import Messages.MobPosUpdateMessage;
+import Messages.MobRotUpdateMessage;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.Client;
 import com.jme3.network.Message;
@@ -26,28 +27,32 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class ServerMessageListener implements MessageListener<HostedConnection> {
 
     private ServerMain serverApp;
-    
-    public ServerMessageListener(){};
-    public ServerMessageListener(ServerMain s){
-    this.serverApp = s;
+
+    public ServerMessageListener() {
+    }
+
+    ;
+    public ServerMessageListener(ServerMain s) {
+        this.serverApp = s;
     }
 
     @Override
     public void messageReceived(HostedConnection s, Message msg) {
-                if(msg instanceof MobUpdatePosRotMessage nmsg){
-                validateMovement();
-                Vector3f newPos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
-                serverApp.getMobs().get( nmsg.getId() ).getNode().setLocalTranslation(newPos);
-                } else if(msg instanceof MobHealthUpdateMessage hmsg){
-                serverApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
-                }
+        if (msg instanceof MobRotUpdateMessage nmsg) {
+            serverApp.getMobs().get(nmsg.getId()).getNode().setLocalRotation(nmsg.getRot());
+
+        } else if (msg instanceof MobPosUpdateMessage nmsg) {
+            validateMovement();
+            Vector3f newPos = nmsg.getPos();
+            serverApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(newPos);
+
+        } else if (msg instanceof MobHealthUpdateMessage hmsg) {
+            serverApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
+        }
     }
 
-
-  private void validateMovement(){
-  // validate
-  }
-
-
+    private void validateMovement() {
+        // validate
+    }
 
 }

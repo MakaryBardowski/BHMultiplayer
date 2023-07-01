@@ -8,7 +8,8 @@ import Game.Items.ItemInterface;
 import static Game.Map.Collision.MovementCollisionUtils.canMoveToLocationGround;
 
 import Messages.MobHealthUpdateMessage;
-import Messages.MobUpdatePosRotMessage;
+import Messages.MobPosUpdateMessage;
+import Messages.MobRotUpdateMessage;
 import com.Networking.Client.ClientMain;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -107,7 +108,8 @@ public class Player extends HumanMob {
 
     @Override
     public void move(float tpf, ClientMain cm) {
-
+            MobRotUpdateMessage rotu = new MobRotUpdateMessage(id, node.getLocalRotation());
+            cm.getClient().send(rotu);
 
         /*tpf is time per frame,
 which makes movement rate independent of fps,  checks for WSAD input and moves if detected
@@ -157,7 +159,7 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
             if (UMC.getZ() > 0) {
                 UMC.setZ(UMC.getZ() + 0.5f);
             }
-            
+
             boolean[] canMoveOnAxes = canMoveToLocationGround(node, UMC, cm.getMap().getBlockWorld().getLogicMap(), cm.getBLOCK_SIZE());
             boolean canMoveOnAxisX = canMoveOnAxes[0];
             boolean canMoveOnAxisZ = canMoveOnAxes[2];
@@ -170,8 +172,10 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
             }
 
 //            if(node.getWorldTranslation().distance(serverLocation) > 0.5f){
-            MobUpdatePosRotMessage upd = new MobUpdatePosRotMessage(id, node.getWorldTranslation().getX(), node.getWorldTranslation().getY(), node.getWorldTranslation().getZ(), null);
-            cm.getClient().send(upd);
+            MobPosUpdateMessage posu = new MobPosUpdateMessage(id, node.getWorldTranslation());
+            cm.getClient().send(posu);
+
+
 //            }
 
 //            insert(cm.getWorldGrid());

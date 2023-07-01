@@ -9,7 +9,8 @@ import Game.Mobs.Mob;
 import Game.Mobs.Player;
 import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdateMessage;
-import Messages.MobUpdatePosRotMessage;
+import Messages.MobPosUpdateMessage;
+import Messages.MobRotUpdateMessage;
 import Messages.MobsInGameMessage;
 import Messages.PlayerJoinedMessage;
 import Messages.SetPlayerMessage;
@@ -20,6 +21,7 @@ import com.jme3.network.MessageListener;
 import com.Networking.Client.ClientMain;
 import com.Networking.Client.PlayerHUD;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Spatial;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -44,22 +46,25 @@ public class ClientMessageListener implements MessageListener<Client> {
      */
     @Override
     public void messageReceived(Client s, Message m) {
+        if (m instanceof MobRotUpdateMessage nmsg) {
+            clientApp.enqueue(() -> {
+                clientApp.getMobs().get(nmsg.getId()).getNode().setLocalRotation(nmsg.getRot());
+            });
 
-        if (m instanceof MobUpdatePosRotMessage nmsg) {
+        } else if (m instanceof MobPosUpdateMessage nmsg) {
 
             if (clientApp.getMobs().get(nmsg.getId()) != null) {
-                Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
+                Vector3f pos = nmsg.getPos();
                 clientApp.getMobs().get(nmsg.getId()).setServerLocation(pos);
-//                clientApp.enqueue(() -> {clientApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(pos);               
-//                });
+
             }
         } else if (m instanceof MobHealthUpdateMessage hmsg) {
             if (clientApp.getMobs().get(hmsg.getId()) != null) {
                 clientApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
 
             }
-        } else if (m instanceof MobsInGameMessage nmsg){
-        
+        } else if (m instanceof MobsInGameMessage nmsg) {
+
             if (clientApp.getMobs().get(nmsg.getId()) == null) {
                 Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
 
@@ -78,8 +83,8 @@ public class ClientMessageListener implements MessageListener<Client> {
                         }
                 );
             }
-        
-        }else if (m instanceof PlayerJoinedMessage nmsg) {
+
+        } else if (m instanceof PlayerJoinedMessage nmsg) {
 
             if (clientApp.getMobs().get(nmsg.getId()) == null) {
                 Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
@@ -109,6 +114,7 @@ public class ClientMessageListener implements MessageListener<Client> {
                 clientApp.setPlayer(p);
                 new InputEditor().setupInput(clientApp);
                 clientApp.getStateManager().attach(new PlayerHUD(clientApp));
+                p.getNode().setCullHint(Spatial.CullHint.Always);
             });
         }
 

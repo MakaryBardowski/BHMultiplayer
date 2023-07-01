@@ -17,7 +17,6 @@ public class MovementCollisionUtils {
 
     public static boolean[] canMoveToLocationGround(Node node, Vector3f movementVector, byte[][][] logicMap, int blockSize) {
         Vector3f newPosInLogicMap = calculateNewPosInLogicMap(node,movementVector,blockSize);
-        System.out.println("new Vector "+newPosInLogicMap);
         boolean[] canMoveOnAxes = new boolean[3];
         canMoveOnAxes[0] = canMoveToLocationGroundX(node, newPosInLogicMap, logicMap, blockSize);
 //        canMoveOnAxes[1] = canMoveToLocationGroundY(node, newPosInLogicMap, logicMap, blockSize);
