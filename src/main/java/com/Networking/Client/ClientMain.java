@@ -25,6 +25,7 @@ import com.jme3.scene.Node;
 import de.lessvoid.nifty.Nifty;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,15 +70,15 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 
         ClientMain app = new ClientMain();
         AppSettings settings1 = new AppSettings(true);
-        settings1.setResolution(1920, 1080);
-        settings1.setFullscreen(true);
-//        settings1.setCenterWindow(false);
-//        if (new Random().nextInt(2) == 0) {
-//            settings1.setWindowXPosition(0);
-//        } else {
-//            settings1.setWindowXPosition(1000);
-//        }
-//        app.setPauseOnLostFocus(false);
+//        settings1.setResolution(1920, 1080);
+//        settings1.setFullscreen(true);
+        settings1.setCenterWindow(false);
+        if (new Random().nextInt(2) == 0) {
+            settings1.setWindowXPosition(0);
+        } else {
+            settings1.setWindowXPosition(1000);
+        }
+        app.setPauseOnLostFocus(false);
         app.setSettings(settings1);
 
         /* ustawwiamy, ze wszystko co robimy ma byc renderowane (pokaze sie okno)

@@ -7,7 +7,8 @@ package com.Networking;
 import Messages.MessageListeners.ServerMessageListener;
 import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdateMessage;
-import Messages.MobUpdatePosRotMessage;
+import Messages.MobPosUpdateMessage;
+import Messages.MobRotUpdateMessage;
 import Messages.MobsInGameMessage;
 import Messages.PlayerJoinedMessage;
 import Messages.SetPlayerMessage;
@@ -25,7 +26,8 @@ public class NetworkingInitialization {
     
     public static void initializeSerializables(){
     Serializer.registerClass(MobUpdateMessage.class);
-    Serializer.registerClass(MobUpdatePosRotMessage.class);
+    Serializer.registerClass(MobPosUpdateMessage.class);
+    Serializer.registerClass(MobRotUpdateMessage.class);
     Serializer.registerClass(MobHealthUpdateMessage.class);
     Serializer.registerClass(PlayerJoinedMessage.class);
     Serializer.registerClass(SetPlayerMessage.class);

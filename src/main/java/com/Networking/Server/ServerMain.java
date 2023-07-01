@@ -4,7 +4,8 @@ import Game.Mobs.Mob;
 import Game.Mobs.Player;
 import Messages.MessageListeners.ServerMessageListener;
 import Messages.MobHealthUpdateMessage;
-import Messages.MobUpdatePosRotMessage;
+import Messages.MobPosUpdateMessage;
+import Messages.MobRotUpdateMessage;
 import Messages.MobsInGameMessage;
 import Messages.PlayerJoinedMessage;
 import Messages.SetPlayerMessage;
@@ -66,12 +67,13 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
         tickTimer += tpf;
         if (tickTimer >= timePerTick) {
             tickTimer = 0;
-            mobs.entrySet().stream().forEach(
-                    x -> {
-                        //to be seriously optimized
-                        server.broadcast(new MobUpdatePosRotMessage(x.getValue().getId(), x.getValue().getNode().getWorldTranslation().getX(), x.getValue().getNode().getWorldTranslation().getY(), x.getValue().getNode().getWorldTranslation().getZ(), x.getValue().getNode().getLocalRotation()));
-                        server.broadcast(new MobHealthUpdateMessage(x.getValue().getId(), x.getValue().getHealth()));
-                    }
+            mobs.entrySet().stream().forEach(x -> {
+                //to be seriously optimized
+                server.broadcast(new MobPosUpdateMessage(x.getValue().getId(), x.getValue().getNode().getWorldTranslation()));
+                server.broadcast(new MobRotUpdateMessage(x.getValue().getId(), x.getValue().getNode().getLocalRotation()));
+
+                server.broadcast(new MobHealthUpdateMessage(x.getValue().getId(), x.getValue().getHealth()));
+            }
             );
 
         }
