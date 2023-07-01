@@ -37,6 +37,10 @@ import java.util.logging.Logger;
  */
 public class ClientMain extends SimpleApplication implements ClientStateListener {
 
+    private final int BLOCK_SIZE = 5;
+    private final int CHUNK_SIZE = 16;
+    private final int MAP_SIZE = 48;
+    
     private final Node worldNode = new Node("WORLD NODE");
     private final Node mapNode = new Node("MAP NODE");
     private final Node debugNode = new Node("DEBUG NODE");
@@ -124,7 +128,7 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 
         // generujemy mape
         MapGenerator mg = new MapGenerator();
-        map = mg.generateMap(MapType.BOSS, 5, 16, 48, assetManager, mapNode);
+        map = mg.generateMap(MapType.BOSS, BLOCK_SIZE, CHUNK_SIZE, MAP_SIZE, assetManager, mapNode);
 
         //to be moved to mapGenerator class
         AmbientLight al = new AmbientLight();
@@ -245,4 +249,17 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         this.nifty = nifty;
     }
 
+    public int getBLOCK_SIZE() {
+        return BLOCK_SIZE;
+    }
+
+    public int getCHUNK_SIZE() {
+        return CHUNK_SIZE;
+    }
+
+    public int getMAP_SIZE() {
+        return MAP_SIZE;
+    }
+
+    
 }

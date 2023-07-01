@@ -5,6 +5,8 @@
 package Game.Mobs;
 
 import Game.Items.ItemInterface;
+import static Game.Map.Collision.MovementCollisionUtils.canMoveToLocationGround;
+
 import Messages.MobHealthUpdateMessage;
 import Messages.MobUpdatePosRotMessage;
 import com.Networking.Client.ClientMain;
@@ -103,7 +105,8 @@ public class Player extends HumanMob {
         return p;
     }
 
-    public void move(float tpf, ClientMain gs) {
+    @Override
+    public void move(float tpf, ClientMain cm) {
 
 
         /*tpf is time per frame,
@@ -128,17 +131,18 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
             }
             if (left) {
 
-                Vector3f moveVec = gs.getCamera().getLeft().mult(speed / 2 * tpf);
+                Vector3f moveVec = cm.getCamera().getLeft().mult(speed / 2 * tpf);
                 movementVector.addLocal(moveVec);
             }
             if (right) {
 
-                Vector3f moveVec = gs.getCamera().getLeft().negateLocal().mult(speed / 2 * tpf);;
+                Vector3f moveVec = cm.getCamera().getLeft().negateLocal().mult(speed / 2 * tpf);;
                 movementVector.addLocal(moveVec);
             }
 
+            movementVector.setY(0);
             // UMC odpowiada za to zebys nie mogl stanac bardzo blisko sciany, daje minimalna odleglosc miedzy toba a sciana
-//            removeFromGrid(gs.getWorldGrid());
+//            removeFromGrid(cm.getWorldGrid());
             Vector3f UMC = movementVector.clone();
             if (UMC.getX() < 0) {
                 UMC.setX(UMC.getX() - 0.5f);
@@ -153,24 +157,34 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
             if (UMC.getZ() > 0) {
                 UMC.setZ(UMC.getZ() + 0.5f);
             }
+            
+            boolean[] canMoveOnAxes = canMoveToLocationGround(node, UMC, cm.getMap().getBlockWorld().getLogicMap(), cm.getBLOCK_SIZE());
+            boolean canMoveOnAxisX = canMoveOnAxes[0];
+            boolean canMoveOnAxisZ = canMoveOnAxes[2];
 
-//            Vector3f locationAfterMovementInCell = new Vector3f((float) Math.floor(positionNode.getWorldTranslation().add(UMC.mult(1f)).getX() / gs.getWorldGrid().getCellSize()), 0, (float) Math.floor(positionNode.getWorldTranslation().add(UMC.mult(1f)).getZ() / gs.getWorldGrid().getCellSize()));
-            node.move(movementVector.getX(), 0, movementVector.getZ());
+            if (canMoveOnAxisZ) {
+                node.move(0, 0, movementVector.getZ());
+            }
+            if (canMoveOnAxisX) {
+                node.move(movementVector.getX(), 0, 0);
+            }
 
 //            if(node.getWorldTranslation().distance(serverLocation) > 0.5f){
             MobUpdatePosRotMessage upd = new MobUpdatePosRotMessage(id, node.getWorldTranslation().getX(), node.getWorldTranslation().getY(), node.getWorldTranslation().getZ(), null);
-            gs.getClient().send(upd);
+            cm.getClient().send(upd);
 //            }
 
-//            if (locationAfterMovementInCell.getZ() < gs.getTileDataMap()[0][0].length && locationAfterMovementInCell.getZ() > -1 && gs.getTileDataMap()[(int) Math.floor(positionNode.getWorldTranslation().getY() / gs.getWorldGrid().getCellSize())][(int) Math.floor(positionNode.getWorldTranslation().getX() / gs.getWorldGrid().getCellSize())][(int) locationAfterMovementInCell.getZ()].getTileType() == TileType.EMPTY) {
-//                getPositionNode().move(0, 0, movementVector.getZ());
-//            }
-//            if (locationAfterMovementInCell.getX() < gs.getTileDataMap()[0].length && locationAfterMovementInCell.getX() > -1 && gs.getTileDataMap()[(int) Math.floor(positionNode.getWorldTranslation().getY() / gs.getWorldGrid().getCellSize())][(int) locationAfterMovementInCell.getX()][(int) Math.floor(positionNode.getWorldTranslation().getZ() / gs.getWorldGrid().getCellSize())].getTileType() == TileType.EMPTY) {
-//                getPositionNode().move(movementVector.getX(), 0, 0);
-//            }
-//            insert(gs.getWorldGrid());
+//            insert(cm.getWorldGrid());
         }
 
+    }
+
+    @Override
+    public void die() {
+        forward = false;
+        backward = false;
+        left = false;
+        right = false;
     }
 
 }

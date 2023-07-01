@@ -54,10 +54,8 @@ public class ClientMessageListener implements MessageListener<Client> {
 //                });
             }
         } else if (m instanceof MobHealthUpdateMessage hmsg) {
-            System.out.println("HMSG " + hmsg.getHealth());
             if (clientApp.getMobs().get(hmsg.getId()) != null) {
                 clientApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
-                System.out.println("received message that player HP is" + hmsg.getHealth());
 
             }
         } else if (m instanceof MobsInGameMessage nmsg){

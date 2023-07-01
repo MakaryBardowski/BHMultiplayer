@@ -20,5 +20,8 @@ public class Map {
      blockWorld = new BlockWorld(blockSize,chunkSize,mapSize,logicMap,a,mapNode);
     }
     
+    public BlockWorld getBlockWorld(){
+    return blockWorld;
+    }
     
 }
