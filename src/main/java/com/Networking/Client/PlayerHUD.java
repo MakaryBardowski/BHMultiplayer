@@ -43,20 +43,21 @@ import java.util.Random;
  */
 public class PlayerHUD extends BaseAppState {
 
+    private static final int HP_BAR_TOP_MARGIN = -92;
+    private final double EQ_MARGIN = 0;
+    private final int ROWS = 6;
+
     private Nifty nifty;
     private ClientMain gs;
     private int cnt = 0;
     private int hotBarCnt = 0;
-    private final double eqMargin = 0;
-    private final int ROW_NUM = 6;
     private double eqSlotSizePx;
     private int equipmentSlotAdded = 0;
-
-    private static final int HP_BAR_TOP_MARGIN = -92;
 
     private float percentMobHealthbarLength = 0.33f;
     private float percentMobHealthbarHeight = 0.01f;
     private float playerHealthbarWidth = 0.15f;
+
     public PlayerHUD(ClientMain gs) {
         this.gs = gs;
     }
@@ -316,7 +317,7 @@ public class PlayerHUD extends BaseAppState {
                                     width(nifty.getRenderEngine().getNativeHeight() * 0.08 + "px");
                                     visibleToMouse(true);
                                     // kod od ustawianai okienek
-                                    marginLeft("" + (eqMargin + 2) + "px");
+                                    marginLeft("" + (EQ_MARGIN + 2) + "px");
                                     marginTop("80%");
 
                                     // kod od ustawiania okienek
@@ -341,7 +342,7 @@ public class PlayerHUD extends BaseAppState {
                 // DRAW EQUIPMENT SLOTS
                 eqSlotSizePx = nifty.getRenderEngine().getNativeHeight() * 0.08;
 
-                for (int j = 0; j < ROW_NUM; j++) {
+                for (int j = 0; j < ROWS; j++) {
 
                     layer(new LayerBuilder("playerEquipmentLayer") {
                         {
@@ -353,7 +354,7 @@ public class PlayerHUD extends BaseAppState {
                             cnt++;
                             final double marginTop = cnt * eqSlotSizePx;
                             System.out.println("marginTop: " + marginTop);
-                            for (int slotNumber = 0; slotNumber < gs.getPlayer().getEquipment().length / ROW_NUM; slotNumber++) {
+                            for (int slotNumber = 0; slotNumber < gs.getPlayer().getEquipment().length / ROWS; slotNumber++) {
                                 final int i = slotNumber;
 //                                cnt = slotNumber;
                                 image(new ImageBuilder("slot" + equipmentSlotAdded) {
@@ -393,7 +394,7 @@ public class PlayerHUD extends BaseAppState {
                                             }
                                         });
                                         // kod od ustawianai okienek
-                                        marginLeft("" + (eqMargin + 2) + "px");
+                                        marginLeft("" + (EQ_MARGIN + 2) + "px");
                                         marginTop("" + marginTop + "px");
 
                                         // kod od ustawiania okienek
@@ -473,12 +474,10 @@ public class PlayerHUD extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        nifty.getCurrentScreen().findElementById("hp_bar").setWidth(     (int) ((gs.getPlayer().getHealth() / gs.getPlayer().getMaxHealth()) * (playerHealthbarWidth * nifty.getRenderEngine().getNativeWidth()))     );
-        checkTargetedMob(gs, gs.getPickableNode());
-        
+        nifty.getCurrentScreen().findElementById("hp_bar").setWidth((int) ((gs.getPlayer().getHealth() / gs.getPlayer().getMaxHealth()) * (playerHealthbarWidth * nifty.getRenderEngine().getNativeWidth())));
+        checkTargetedMob(gs, gs.getMobsNode());
+
 //        System.out.println(                    nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).getText() );
- 
-        
         if (gs.getPlayer().getCurrentTarget() != null) {
             float length = ((gs.getPlayer().getCurrentTarget().getHealth() / gs.getPlayer().getCurrentTarget().getMaxHealth()) * (percentMobHealthbarLength * nifty.getRenderEngine().getNativeWidth()));
             nifty.getCurrentScreen().findElementById("hp_bar_target").setWidth((int) (length));
@@ -503,7 +502,7 @@ public class PlayerHUD extends BaseAppState {
         if (results.size() > 0) {
             CollisionResult closest = results.getClosestCollision();
             String hit = closest.getGeometry().getName();
-            
+
             Mob enemyHit = gs.getMobs().get(Integer.valueOf(hit));
 
             if (enemyHit != null) {
@@ -511,13 +510,13 @@ public class PlayerHUD extends BaseAppState {
                 gs.getPlayer().setCurrentTarget(enemyHit);
                 if (switched) {
                     nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).setText(enemyHit.getName());
-                    nifty.getCurrentScreen().findElementById("hp_bar_target_yellow").setWidth(     (int) ((gs.getPlayer().getCurrentTarget().getHealth() / gs.getPlayer().getCurrentTarget().getMaxHealth()) * (percentMobHealthbarLength * nifty.getRenderEngine().getNativeWidth()))    );
+                    nifty.getCurrentScreen().findElementById("hp_bar_target_yellow").setWidth((int) ((gs.getPlayer().getCurrentTarget().getHealth() / gs.getPlayer().getCurrentTarget().getMaxHealth()) * (percentMobHealthbarLength * nifty.getRenderEngine().getNativeWidth())));
                     nifty.getCurrentScreen().findElementById("hp_bar_target_gray").setVisible(true);
                     nifty.getCurrentScreen().findElementById("hp_bar_target_label").setVisible(true);
 
                 }
 
-            } 
+            }
         }
 
     }

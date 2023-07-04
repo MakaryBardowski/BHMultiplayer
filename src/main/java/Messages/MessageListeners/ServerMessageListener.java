@@ -43,8 +43,7 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
 
         } else if (msg instanceof MobPosUpdateMessage nmsg) {
             validateMovement();
-            Vector3f newPos = nmsg.getPos();
-            serverApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(newPos);
+            serverApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(nmsg.getPos());
 
         } else if (msg instanceof MobHealthUpdateMessage hmsg) {
             serverApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());

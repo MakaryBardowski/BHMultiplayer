@@ -7,7 +7,8 @@ import Game.Map.MapType;
 import Game.Mobs.Mob;
 import Game.Mobs.Player;
 import Messages.MessageListeners.ClientMessageListener;
-import static com.Networking.Client.ClientNetworkingUtils.interpolateMobPosition;
+import static com.Networking.Client.ClientSynchronizationUtils.interpolateMobPosition;
+import static com.Networking.Client.ClientSynchronizationUtils.interpolateMobRotation;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.network.AbstractMessage;
@@ -45,6 +46,7 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     private final Node worldNode = new Node("WORLD NODE");
     private final Node mapNode = new Node("MAP NODE");
     private final Node debugNode = new Node("DEBUG NODE");
+    private final Node mobsNode = new Node("ENTITY NODE");
     private final Node pickableNode = new Node("PICKABLE NODE");
 
     // obiekt Client - bezposrednio z biblioteki do multi z Jmonkey
@@ -99,6 +101,7 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
          */
         worldNode.attachChild(debugNode);
         worldNode.attachChild(pickableNode);
+        pickableNode.attachChild(mobsNode);
         worldNode.attachChild(mapNode);
         rootNode.attachChild(worldNode);
 
@@ -159,6 +162,7 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         mobs.values().forEach(x -> {
             if (x != player) {
                 interpolateMobPosition(x, tpf);
+                interpolateMobRotation(x,tpf);
             }
         }
         );
@@ -189,7 +193,7 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 
     public Player registerPlayer(Integer id) { // rejestrujemy gracza
 
-        Player p = Player.spawnPlayer(id, assetManager, pickableNode);
+        Player p = Player.spawnPlayer(id, assetManager, mobsNode);
         this.mobs.put(id, p);
         return p;
     }
@@ -261,6 +265,12 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     public int getMAP_SIZE() {
         return MAP_SIZE;
     }
+
+    public Node getMobsNode() {
+        return mobsNode;
+    }
+    
+    
 
     
 }

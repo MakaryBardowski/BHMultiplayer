@@ -38,7 +38,8 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     private Server server;
     private final HashMap<Integer, Mob> mobs = new HashMap<>();
     private float tickTimer;
-    private final float timePerTick = 0.033f;
+    private final float TIME_PER_TICK = 0.033f;
+//    private final float TIME_PER_TICK = 0.15f;
 
     public static void main(String[] args) {
         NetworkingInitialization.initializeSerializables();
@@ -65,7 +66,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     public void simpleUpdate(float tpf) {
         //glowna petla serwera, 30 tickow (wiadomosci od serwera) na sekunde, co 0.033s kazda
         tickTimer += tpf;
-        if (tickTimer >= timePerTick) {
+        if (tickTimer >= TIME_PER_TICK) {
             tickTimer = 0;
             mobs.entrySet().stream().forEach(x -> {
                 //to be seriously optimized
@@ -95,6 +96,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
             Mob mob = x.getValue();
             MobsInGameMessage m = new MobsInGameMessage(mob.getId(), mob.getNode().getWorldTranslation().getX(), mob.getNode().getWorldTranslation().getY(), mob.getNode().getWorldTranslation().getZ());
             server.broadcast(Filters.in(hc), m);
+            
         });
 
         Mob newPlayer = registerPlayer(hc.getId());
