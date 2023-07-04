@@ -47,15 +47,14 @@ public class ClientMessageListener implements MessageListener<Client> {
     @Override
     public void messageReceived(Client s, Message m) {
         if (m instanceof MobRotUpdateMessage nmsg) {
-            clientApp.enqueue(() -> {
-                clientApp.getMobs().get(nmsg.getId()).getNode().setLocalRotation(nmsg.getRot());
-            });
+            if (clientApp.getMobs().get(nmsg.getId()) != null) {
 
+                clientApp.getMobs().get(nmsg.getId()).setServerRotation(nmsg.getRot());
+            }
         } else if (m instanceof MobPosUpdateMessage nmsg) {
 
             if (clientApp.getMobs().get(nmsg.getId()) != null) {
-                Vector3f pos = nmsg.getPos();
-                clientApp.getMobs().get(nmsg.getId()).setServerLocation(pos);
+                clientApp.getMobs().get(nmsg.getId()).setServerLocation(nmsg.getPos());
 
             }
         } else if (m instanceof MobHealthUpdateMessage hmsg) {
@@ -110,6 +109,7 @@ public class ClientMessageListener implements MessageListener<Client> {
             clientApp.enqueue(() -> {
                 Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
                 Player p = clientApp.registerPlayer(nmsg.getId());
+                clientApp.getPickableNode().attachChild(p.getNode());
                 p.getNode().setLocalTranslation(pos);
                 clientApp.setPlayer(p);
                 new InputEditor().setupInput(clientApp);
