@@ -44,7 +44,7 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         viewPort.setBackgroundColor(ColorRGBA.Cyan);
-        flyCam.setMoveSpeed(70);
+        flyCam.setMoveSpeed(0);
         addLabel();
         initKeys();
 

@@ -70,7 +70,7 @@ public class ClientMessageListener implements MessageListener<Client> {
                 /* jesli klient który odbierze
                 wiadomoœæ nie ma moba o takim ID, to go dodaje
                  */
-                clientApp.enqueue(
+                clientApp.getApp().enqueue(
                         () -> {
                             /*
                             jesli klient, ktory odebral wiadomosc nie ma jeszcze przypisanego gracza
@@ -91,7 +91,7 @@ public class ClientMessageListener implements MessageListener<Client> {
                 /* jesli klient który odbierze
                 wiadomoœæ nie ma moba o takim ID, to go dodaje
                  */
-                clientApp.enqueue(
+                clientApp.getApp().enqueue(
                         () -> {
                             /*
                             jesli klient, ktory odebral wiadomosc nie ma jeszcze przypisanego gracza
@@ -106,7 +106,7 @@ public class ClientMessageListener implements MessageListener<Client> {
 
         } else if (m instanceof SetPlayerMessage nmsg) {
 
-            clientApp.enqueue(() -> {
+            clientApp.getApp().enqueue(() -> {
                 Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
                 Player p = clientApp.registerPlayer(nmsg.getId());
                 clientApp.getPickableNode().attachChild(p.getNode());
@@ -114,7 +114,7 @@ public class ClientMessageListener implements MessageListener<Client> {
                 clientApp.setPlayer(p);
                 new InputEditor().setupInput(clientApp);
                 clientApp.getStateManager().attach(new PlayerHUD(clientApp));
-                p.getNode().setCullHint(Spatial.CullHint.Always);
+//                p.getNode().setCullHint(Spatial.CullHint.Always);
             });
         }
 

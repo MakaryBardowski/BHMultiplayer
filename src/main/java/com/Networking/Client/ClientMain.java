@@ -18,10 +18,16 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeContext;
 import com.Networking.NetworkingInitialization;
+import com.jme3.app.Application;
+import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.state.AppStateManager;
+import com.jme3.asset.AssetManager;
 import com.jme3.input.FlyByCamera;
+import com.jme3.input.InputManager;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.light.AmbientLight;
 import com.jme3.network.ClientStateListener;
+import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import de.lessvoid.nifty.Nifty;
 import java.io.IOException;
@@ -37,12 +43,13 @@ import java.util.logging.Logger;
  *
  * @author normenhansen
  */
-public class ClientMain extends SimpleApplication implements ClientStateListener {
+public class ClientMain extends AbstractAppState implements ClientStateListener {
 
     private final int BLOCK_SIZE = 5;
     private final int CHUNK_SIZE = 16;
     private final int MAP_SIZE = 48;
-    
+
+    private final Node rootNode = new Node ("ROOT NODE");
     private final Node worldNode = new Node("WORLD NODE");
     private final Node mapNode = new Node("MAP NODE");
     private final Node debugNode = new Node("DEBUG NODE");
@@ -65,35 +72,22 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     private Map map;
     // nifty obsluguje GUI
     private Nifty nifty;
-
-    public static void main(String[] args) {
-        // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
-        NetworkingInitialization.initializeSerializables();
-
-        ClientMain app = new ClientMain();
-        AppSettings settings1 = new AppSettings(true);
-//        settings1.setResolution(1920, 1080);
-//        settings1.setFullscreen(true);
-        settings1.setCenterWindow(false);
-        if (new Random().nextInt(2) == 0) {
-            settings1.setWindowXPosition(0);
-        } else {
-            settings1.setWindowXPosition(1000);
-        }
-        app.setPauseOnLostFocus(false);
-        app.setSettings(settings1);
-
-        /* ustawwiamy, ze wszystko co robimy ma byc renderowane (pokaze sie okno)
-        w przeciwienstwie do tego, serwer nie wyswietla obrazu wiec ma Type.Headless
-         */
-        app.start(JmeContext.Type.Display);
-
-        app.applicationSettings = app.settings;
+    
+    private SimpleApplication app;
+    private final AssetManager assetManager;
+    
+    public ClientMain (Main app){
+    this.app = app;
+    this.assetManager = app.getAssetManager();
+    this.applicationSettings = app.getAppSettings();
+    app.getRootNode().attachChild(rootNode);
     }
 
     @Override
-    public void simpleInitApp() {
-
+    public void initialize(AppStateManager stateManager, Application app) {        // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
+        NetworkingInitialization.initializeSerializables();
+        
+        
         /* ustawiamy strukture naszego swiata
         debugNode - tutaj beda dolaczone  particle itp
         pickableNode - modele i obiekty z ktorymi mozemy wejsc w interakcje przez klikniecie (moby, przyciski etc)
@@ -125,10 +119,8 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         client.addMessageListener(new ClientMessageListener(this));
 
         // kolor tla na niebieski
-        viewPort.setBackgroundColor(ColorRGBA.Cyan);
+        app.getViewPort().setBackgroundColor(ColorRGBA.Cyan);
 
-        // predkosc ruszania sie kamery (nie zmienia nic bo kamera jest przymocowana do gracza)
-        flyCam.setMoveSpeed(70);
 
         // generujemy mape
         MapGenerator mg = new MapGenerator();
@@ -138,13 +130,14 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         AmbientLight al = new AmbientLight();
         al.setColor(ColorRGBA.White.mult(0.7f));
         worldNode.addLight(al);
-        
-        
+
 
     }
 
+
+
     @Override
-    public void simpleUpdate(float tpf) {
+    public void update(float tpf) {
         /*glowna petla gry, wykonujaca sie 1x na ka¿d¹ klatkê,
         wszystko co sie dzieje w petli (ruszanie sie) wykonywane jest tutaj
         tpf - time per frame (czas na wyrenderowanie klatki) potrzebny jest
@@ -162,17 +155,14 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         mobs.values().forEach(x -> {
             if (x != player) {
                 interpolateMobPosition(x, tpf);
-                interpolateMobRotation(x,tpf);
+                interpolateMobRotation(x, tpf);
             }
         }
         );
 
     }
 
-    @Override
-    public void simpleRender(RenderManager rm) {
-        //TODO: add render code
-    }
+
 
     public Client getClient() {
         return client;
@@ -241,9 +231,13 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     public Map getMap() {
         return map;
     }
+    
+    public Camera getCamera(){
+    return app.getCamera();
+    }
 
     public FlyByCamera getFlyCam() {
-        return flyCam;
+        return app.getFlyByCamera();
     }
 
     public Nifty getNifty() {
@@ -270,7 +264,20 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         return mobsNode;
     }
     
+    public Node getRootNode(){
+    return rootNode;
+    }
     
+    public InputManager getInputManager(){
+    return app.getInputManager();
+    }
+    
+    public AppStateManager getStateManager(){
+        return app.getStateManager();
+    }
+    
+    public SimpleApplication getApp() {
+    return app;
+    }
 
-    
 }

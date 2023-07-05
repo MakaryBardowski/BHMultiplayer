@@ -8,10 +8,9 @@ package Game.Items;
  *
  * @author tomasz potoczko
  */
-public enum DamageType {
-    Physical,
-    Thermal,
-    Radiation,
-    Other
+public enum DamageType { // according to oracles offical docs, enums should be named using uppercase
+    PHYSICAL,
+    THERMAL,
+    CHEMICAL
     
 }

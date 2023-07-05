@@ -79,21 +79,19 @@ public class InputEditor {
 
                 }
 
-                // eq test
-//                if (!player.isDead() && name.equals("1") && !keyPressed) {
-//                    player.equipItem((ItemInterface)player.getEquipment()[0], true, gs);
-//
-//                }
+                if (!player.isDead() && name.equals("1") && !keyPressed) {
+                    player.equipItem(player.getEquipment()[Integer.parseInt(name)]);
 
-//                if (!player.isDead() && name.equals("2") && !keyPressed) {
-//                    player.equipItem((ItemInterface)player.getEquipment()[1], true, gs);
-//                }
+                }
+
+
 
                 // attack test
-//                if (!player.isDead() && name.equals("Attack") && !keyPressed) {
+                if (!player.isDead() && name.equals("Attack") && !keyPressed) {
 //                    player.setShooting(false);
-//
-//                } else if (!player.isDead() && name.equals("Attack")) {
+                    player.attack();
+                } 
+//                else if (!player.isDead() && name.equals("Attack")) {
 //                    player.setShooting(true);
 //                }
 
