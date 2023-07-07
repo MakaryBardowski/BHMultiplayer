@@ -18,7 +18,7 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.network.Client;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
-import com.Networking.Client.ClientMain;
+import com.Networking.Client.ClientGamAppState;
 import com.Networking.Client.PlayerHUD;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -30,14 +30,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 /*
 Klasa nas³uchuj¹ca wszystkich komunikatów wys³anych przez serwer do klienta
-w klasie ClientMain (Main aplikacji klienta) jest 
+w klasie ClientGamAppState (Main aplikacji klienta) jest 
 
  */
 public class ClientMessageListener implements MessageListener<Client> {
 
-    private ClientMain clientApp;
+    private ClientGamAppState clientApp;
 
-    public ClientMessageListener(ClientMain c) {
+    public ClientMessageListener(ClientGamAppState c) {
         this.clientApp = c;
     }
 
@@ -70,7 +70,7 @@ public class ClientMessageListener implements MessageListener<Client> {
                 /* jesli klient który odbierze
                 wiadomoœæ nie ma moba o takim ID, to go dodaje
                  */
-                clientApp.enqueue(
+                clientApp.getApp().enqueue(
                         () -> {
                             /*
                             jesli klient, ktory odebral wiadomosc nie ma jeszcze przypisanego gracza
@@ -91,7 +91,7 @@ public class ClientMessageListener implements MessageListener<Client> {
                 /* jesli klient który odbierze
                 wiadomoœæ nie ma moba o takim ID, to go dodaje
                  */
-                clientApp.enqueue(
+                clientApp.getApp().enqueue(
                         () -> {
                             /*
                             jesli klient, ktory odebral wiadomosc nie ma jeszcze przypisanego gracza
@@ -106,7 +106,7 @@ public class ClientMessageListener implements MessageListener<Client> {
 
         } else if (m instanceof SetPlayerMessage nmsg) {
 
-            clientApp.enqueue(() -> {
+            clientApp.getApp().enqueue(() -> {
                 Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
                 Player p = clientApp.registerPlayer(nmsg.getId());
                 clientApp.getPickableNode().attachChild(p.getNode());

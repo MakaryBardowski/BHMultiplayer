@@ -4,9 +4,10 @@
  */
 package Game.Mobs;
 
+import Game.Items.Holdable;
 import Game.Map.Collision.CollidableInterface;
 import Game.Map.Collision.WorldGrid;
-import com.Networking.Client.ClientMain;
+import com.Networking.Client.ClientGamAppState;
 import com.jme3.scene.Node;
 import java.util.HashSet;
 
@@ -15,6 +16,10 @@ import java.util.HashSet;
  * @author 48793
  */
 public class HumanMob extends Mob{
+    protected Holdable equippedRightHand;
+    protected Holdable equippedLeftHand;
+    
+    
     public HumanMob(int id,Node node,String name){
     super(id,node,name);
     }
@@ -22,7 +27,7 @@ public class HumanMob extends Mob{
     
     
     @Override
-    public void move(float tpf, ClientMain cm) {
+    public void move(float tpf, ClientGamAppState cm) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -76,5 +81,23 @@ public class HumanMob extends Mob{
     public void onCollision() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+
+    public Holdable getEquippedRightHand() {
+        return equippedRightHand;
+    }
+
+    public void setEquippedRightHand(Holdable equippedRightHand) {
+        this.equippedRightHand = equippedRightHand;
+    }
+
+    public Holdable getEquippedLeftHand() {
+        return equippedLeftHand;
+    }
+
+    public void setEquippedLeftHand(Holdable equippedLeftHand) {
+        this.equippedLeftHand = equippedLeftHand;
+    }
+    
+    
 
 }

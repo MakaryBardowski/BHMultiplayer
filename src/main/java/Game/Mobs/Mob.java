@@ -16,6 +16,7 @@ import com.jme3.scene.Node;
  * @author 48793
  */
 public abstract class Mob implements CollidableInterface, MobInterface {
+    protected static final int EQUIPMENT_SIZE = 18;
 
     private static float DEFAULT_SPEED = 10f; //20
     protected int id;
@@ -26,7 +27,7 @@ public abstract class Mob implements CollidableInterface, MobInterface {
     protected float speed = DEFAULT_SPEED;
     protected float health = 10;
     protected float maxHealth = 10;
-    protected Item[] equipment = new Item[18]; // 6 rows 3 cols
+    protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
 
     //mob ai variables
     protected Mob currentTarget;

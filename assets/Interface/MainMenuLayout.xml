@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nifty>
+    <screen id="MainMenu" controller="de.lessvoid.nifty.screen.DefaultScreenController" childLayout = "vertical">
+        
+        <layer id="background" childLayout = "center">
+            <panel id="panel_bottom_left" height="50%" width="50%" valign="center" childLayout="Vertical" backgroundColor="#000">
+                <control name="button" label="Start" id="StartButton" align="center" valign="Vertical">
+                </control>
+            </panel>    
+        </layer>
+
+
+    </screen>
+</nifty>

@@ -9,6 +9,8 @@ package Game.Items;
  * @author tomasz potoczko
  */
 public interface HoldableInterface {
-    void equipRight();
+
     void equipLeft();
+    void equipRight();
+    
 }

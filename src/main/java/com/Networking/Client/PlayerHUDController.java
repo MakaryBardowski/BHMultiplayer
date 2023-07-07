@@ -13,9 +13,9 @@ import de.lessvoid.nifty.screen.ScreenController;
  * @author 48793
  */
 public class PlayerHUDController implements ScreenController{
-    private static ClientMain gs;
+    private static ClientGamAppState gs;
 
-    public PlayerHUDController(ClientMain gs) {
+    public PlayerHUDController(ClientGamAppState gs) {
         this.gs =gs;
     }
     

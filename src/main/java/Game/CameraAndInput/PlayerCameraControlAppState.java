@@ -4,7 +4,7 @@
  */
 package Game.CameraAndInput;
 
-import com.Networking.Client.ClientMain;
+import com.Networking.Client.ClientGamAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
@@ -28,13 +28,13 @@ public class PlayerCameraControlAppState extends AbstractAppState {
 
     private final float CAMERA_Y_OFFSET = 2.12f; //2.12f
     private Camera handsCam;
-    private ClientMain clientApp;
+    private ClientGamAppState clientApp;
     private float renderDistance = 700f; //70
     private Vector3f lookDirection;
     float[] cameraRotAsAngles = new float[3];
     Quaternion temporaryCameraRotQuaternion = new Quaternion();
 
-    public PlayerCameraControlAppState(ClientMain clientApp) {
+    public PlayerCameraControlAppState(ClientGamAppState clientApp) {
         this.clientApp = clientApp;
     }
 
@@ -47,16 +47,6 @@ public class PlayerCameraControlAppState extends AbstractAppState {
 
     public void initCamera() {
         clientApp.getCamera().setFrustumPerspective(45, (float) clientApp.getSettings().getWidth() / clientApp.getSettings().getHeight(), 0.01f, renderDistance);
-
-//        handsCam = clientApp.getCamera().clone();
-//        handsCam.setViewPort(0, 1, 0, 1);
-//        handsCam.setLocation(new Vector3f(0, -49.5f, -2));
-//        handsCam.lookAt(clientApp.getPlayer().getHandsNode().getWorldTranslation(), Vector3f.ZERO);
-//        ViewPort handsViewPort = clientApp.getRenderManager().createMainView("View of camera #n", handsCam);
-//        handsViewPort.attachScene(clientApp.getPlayer().getHandsNode());
-//        handsViewPort.setBackgroundColor(ColorRGBA.Black);
-//        handsViewPort.setClearFlags(false, true, true);
-//        lookDirection = new Vector3f(clientApp.getPlayer().getNode().getLocalRotation().getRotationColumn(2).x + 2, 2, clientApp.getPlayer().getNode().getLocalRotation().getRotationColumn(2).z + 2);
     }
 
     @Override
@@ -88,6 +78,7 @@ public class PlayerCameraControlAppState extends AbstractAppState {
 
             clientApp.getCamera().setLocation(new Vector3f(clientApp.getPlayer().getNode().getWorldTranslation().x, CAMERA_Y_OFFSET + clientApp.getPlayer().getNode().getWorldTranslation().getY(), clientApp.getPlayer().getNode().getWorldTranslation().z));
 
+            
             CollisionResults results = new CollisionResults();
             Ray ray = new Ray(clientApp.getCamera().getLocation(), clientApp.getCamera().getDirection());
             clientApp.getMapNode().collideWith(ray, results);
