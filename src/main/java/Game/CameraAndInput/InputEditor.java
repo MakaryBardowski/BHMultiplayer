@@ -7,7 +7,7 @@ package Game.CameraAndInput;
 
 import Game.Items.Item;
 import Game.Mobs.Player;
-import com.Networking.Client.ClientMain;
+import com.Networking.Client.ClientGamAppState;
 import com.jme3.animation.LoopMode;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
@@ -30,12 +30,12 @@ public class InputEditor {
     
     private NiftyImage guiElement;
 
-    public void setupInput(ClientMain gs) {
+    public void setupInput(ClientGamAppState gs) {
         InputManager m = gs.getInputManager();
         initKeys(m, initActionManager(gs));
     }
 
-    private ActionListener initActionManager(final ClientMain gs) {
+    private ActionListener initActionManager(final ClientGamAppState gs) {
         final Player player = gs.getPlayer();
 
         ActionListener actionListener = new ActionListener() {

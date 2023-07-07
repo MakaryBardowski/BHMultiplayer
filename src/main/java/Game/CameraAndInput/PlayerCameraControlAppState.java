@@ -4,7 +4,7 @@
  */
 package Game.CameraAndInput;
 
-import com.Networking.Client.ClientMain;
+import com.Networking.Client.ClientGamAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
@@ -28,13 +28,13 @@ public class PlayerCameraControlAppState extends AbstractAppState {
 
     private final float CAMERA_Y_OFFSET = 2.12f; //2.12f
     private Camera handsCam;
-    private ClientMain clientApp;
+    private ClientGamAppState clientApp;
     private float renderDistance = 700f; //70
     private Vector3f lookDirection;
     float[] cameraRotAsAngles = new float[3];
     Quaternion temporaryCameraRotQuaternion = new Quaternion();
 
-    public PlayerCameraControlAppState(ClientMain clientApp) {
+    public PlayerCameraControlAppState(ClientGamAppState clientApp) {
         this.clientApp = clientApp;
     }
 
@@ -76,7 +76,7 @@ public class PlayerCameraControlAppState extends AbstractAppState {
     private void rotatePlayerTowardsLookDirection() {
         if (clientApp.getPlayer() != null && clientApp.getPlayer().getHealth() > 0) {//                                                          2.12f so you are level with humanoids
 
-//            clientApp.getCamera().setLocation(new Vector3f(clientApp.getPlayer().getNode().getWorldTranslation().x, CAMERA_Y_OFFSET + clientApp.getPlayer().getNode().getWorldTranslation().getY(), clientApp.getPlayer().getNode().getWorldTranslation().z));
+            clientApp.getCamera().setLocation(new Vector3f(clientApp.getPlayer().getNode().getWorldTranslation().x, CAMERA_Y_OFFSET + clientApp.getPlayer().getNode().getWorldTranslation().getY(), clientApp.getPlayer().getNode().getWorldTranslation().z));
 
             
             CollisionResults results = new CollisionResults();

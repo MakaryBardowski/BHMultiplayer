@@ -12,7 +12,7 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.network.Client;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
-import com.Networking.Client.ClientMain;
+import com.Networking.Client.ClientGamAppState;
 import com.Networking.Server.ServerMain;
 import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;

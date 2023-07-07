@@ -10,7 +10,7 @@ import static Game.Map.Collision.MovementCollisionUtils.canMoveToLocationGround;
 import Messages.MobHealthUpdateMessage;
 import Messages.MobPosUpdateMessage;
 import Messages.MobRotUpdateMessage;
-import com.Networking.Client.ClientMain;
+import com.Networking.Client.ClientGamAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
@@ -129,7 +129,7 @@ public class Player extends HumanMob {
     }
 
     @Override
-    public void move(float tpf, ClientMain cm) {
+    public void move(float tpf, ClientGamAppState cm) {
         MobRotUpdateMessage rotu = new MobRotUpdateMessage(id, node.getLocalRotation());
         cm.getClient().send(rotu);
 
@@ -201,8 +201,6 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
 
 //            insert(cm.getWorldGrid());
         }
-        cm.getCamera().setLocation(new Vector3f(node.getWorldTranslation().x, 2.12f + node.getWorldTranslation().getY(), node.getWorldTranslation().z));
-
     }
 
     @Override

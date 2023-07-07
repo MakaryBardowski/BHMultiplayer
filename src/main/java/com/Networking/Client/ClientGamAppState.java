@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  *
  * @author normenhansen
  */
-public class ClientMain extends AbstractAppState implements ClientStateListener {
+public class ClientGamAppState extends AbstractAppState implements ClientStateListener {
 
     private final int BLOCK_SIZE = 5;
     private final int CHUNK_SIZE = 16;
@@ -56,27 +56,19 @@ public class ClientMain extends AbstractAppState implements ClientStateListener 
     private final Node mobsNode = new Node("ENTITY NODE");
     private final Node pickableNode = new Node("PICKABLE NODE");
 
-    // obiekt Client - bezposrednio z biblioteki do multi z Jmonkey
     private Client client;
-    // kolejka komunikatow od serwera (zeby klient mogl je przerobic jak nie nadaza na biezaco)
     private ConcurrentLinkedQueue<AbstractMessage> messageQueue;
-    // wszystkie moby, przechowywane wg. swojego ID
     private HashMap<Integer, Mob> mobs = new HashMap<>();
-    // gracz ktorym steruje ten konkretny klient
     private Player player;
-    // ustawienia, potrzebne do okreselnia fov kamery (wyciagam z nich rozdzielczosc)
     private AppSettings applicationSettings;
-    // action listener - obsluguje input klawiatury/myszki
     private ActionListener actionListener;
-    // mapa uzyskana z map generator
     private Map map;
-    // nifty obsluguje GUI
     private Nifty nifty;
     
     private SimpleApplication app;
     private final AssetManager assetManager;
     
-    public ClientMain (Main app){
+    public ClientGamAppState (Main app){
     this.app = app;
     this.assetManager = app.getAssetManager();
     this.applicationSettings = app.getAppSettings();
@@ -86,47 +78,30 @@ public class ClientMain extends AbstractAppState implements ClientStateListener 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {        // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
         NetworkingInitialization.initializeSerializables();
-        
-        
-        /* ustawiamy strukture naszego swiata
-        debugNode - tutaj beda dolaczone  particle itp
-        pickableNode - modele i obiekty z ktorymi mozemy wejsc w interakcje przez klikniecie (moby, przyciski etc)
-        mapNode - Wszystko zwiazane z mapa (klocki, jakies krzesla itp)
-         */
         worldNode.attachChild(debugNode);
         worldNode.attachChild(pickableNode);
         pickableNode.attachChild(mobsNode);
         worldNode.attachChild(mapNode);
         rootNode.attachChild(worldNode);
 
-        //dodajemy state który obsluguje kamere (wygodne rozwiazanie bo mozna go pozniej odpiac np. w menu)
         stateManager.attach(new PlayerCameraControlAppState(this));
 
-        // probujemy podlaczyc sie do serwera (poki co na localhoscie - czyli ip = 127.0.0.1)
         try {
             client = Network.connectToServer("localhost", NetworkingInitialization.PORT);
             client.addClientStateListener(this);
             client.start();
 
         } catch (IOException ex) {
-            Logger.getLogger(ClientMain.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ClientGamAppState.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        //kolejka rozkazów od serwera (w przypadku slabego kompa pomaga)
         messageQueue = new ConcurrentLinkedQueue();
-
-        //dodajemy listener nas³uchuj¹cy pakietów od serwera (CTRL + Lewy przycisk zeby wejsc w klase)
         client.addMessageListener(new ClientMessageListener(this));
-
-        // kolor tla na niebieski
         app.getViewPort().setBackgroundColor(ColorRGBA.Cyan);
 
-
-        // generujemy mape
         MapGenerator mg = new MapGenerator();
         map = mg.generateMap(MapType.BOSS, BLOCK_SIZE, CHUNK_SIZE, MAP_SIZE, assetManager, mapNode);
 
-        //to be moved to mapGenerator class
         AmbientLight al = new AmbientLight();
         al.setColor(ColorRGBA.White.mult(0.7f));
         worldNode.addLight(al);
@@ -138,20 +113,12 @@ public class ClientMain extends AbstractAppState implements ClientStateListener 
 
     @Override
     public void update(float tpf) {
-        /*glowna petla gry, wykonujaca sie 1x na ka¿d¹ klatkê,
-        wszystko co sie dzieje w petli (ruszanie sie) wykonywane jest tutaj
-        tpf - time per frame (czas na wyrenderowanie klatki) potrzebny jest
-        zeby np. predkosc ruchu nie zalezala od fpsow 
-        
-         */
 
         if (player != null) {
             player.move(tpf, this);
         }
 
-        /* wrzuce to do metody, ale interpolujemy (plynnie zmieniamy) 
-        przemieszczenie mobow i graczy 
-         */
+        
         mobs.values().forEach(x -> {
             if (x != player) {
                 interpolateMobPosition(x, tpf);

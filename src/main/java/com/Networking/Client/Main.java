@@ -1,5 +1,6 @@
 package com.Networking.Client;
 
+import com.Networking.Client.GUI.MainMenuAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.FlyByCamera;
 import com.jme3.material.Material;
@@ -15,18 +16,21 @@ import java.util.Random;
 /**
  * This is the Main Class of your Game. You should only do initialization here.
  * Move your Logic into AppStates or Controls
+ *
  * @author normenhansen
  */
-public class Main extends SimpleApplication  {
+public class Main extends SimpleApplication {
 
     public static void main(String[] args) {
-   Main app = new Main();
+        Main app = new Main();
         app.start();
+        
     }
-    
 
     @Override
     public void simpleInitApp() {
+//        stateManager.attach(new MainMenuAppState());
+        
         AppSettings settings1 = new AppSettings(true);
         settings1.setResolution(1920, 1080);
         settings1.setFullscreen(true);
@@ -39,8 +43,8 @@ public class Main extends SimpleApplication  {
         this.setPauseOnLostFocus(false);
         this.setSettings(settings1);
         this.start(JmeContext.Type.Display);
-        
-        stateManager.attach(new ClientMain(this));
+
+        stateManager.attach(new ClientGamAppState(this));
     }
 
     @Override
@@ -52,12 +56,12 @@ public class Main extends SimpleApplication  {
     public void simpleRender(RenderManager rm) {
         //TODO: add render code
     }
-    
-    public FlyByCamera getFlyCam(){
-    return flyCam;
+
+    public FlyByCamera getFlyCam() {
+        return flyCam;
     }
-    
-    public AppSettings getAppSettings(){
-    return settings;
+
+    public AppSettings getAppSettings() {
+        return settings;
     }
 }
