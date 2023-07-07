@@ -4,7 +4,7 @@
  */
 package Game.Map.Collision;
 
-import com.Networking.Client.ClientGamAppState;
+import com.Networking.Client.ClientGameAppState;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import java.util.Arrays;
@@ -43,7 +43,7 @@ public class MovementCollisionUtils {
                 (float) Math.floor(node.getWorldTranslation().add(UMC).getZ() / blockSize));
   }
 
-    public static boolean canMoveToLocationFlying(Vector3f newPosition, ClientGamAppState cm) {
+    public static boolean canMoveToLocationFlying(Vector3f newPosition, ClientGameAppState cm) {
 
         return false;
     }

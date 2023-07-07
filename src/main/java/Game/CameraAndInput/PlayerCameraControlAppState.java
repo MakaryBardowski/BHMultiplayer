@@ -4,7 +4,7 @@
  */
 package Game.CameraAndInput;
 
-import com.Networking.Client.ClientGamAppState;
+import com.Networking.Client.ClientGameAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
@@ -28,13 +28,13 @@ public class PlayerCameraControlAppState extends AbstractAppState {
 
     private final float CAMERA_Y_OFFSET = 2.12f; //2.12f
     private Camera handsCam;
-    private ClientGamAppState clientApp;
+    private ClientGameAppState clientApp;
     private float renderDistance = 700f; //70
     private Vector3f lookDirection;
     float[] cameraRotAsAngles = new float[3];
     Quaternion temporaryCameraRotQuaternion = new Quaternion();
 
-    public PlayerCameraControlAppState(ClientGamAppState clientApp) {
+    public PlayerCameraControlAppState(ClientGameAppState clientApp) {
         this.clientApp = clientApp;
     }
 

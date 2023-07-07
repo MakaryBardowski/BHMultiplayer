@@ -44,7 +44,7 @@ public class Main extends SimpleApplication {
         this.setSettings(settings1);
         this.start(JmeContext.Type.Display);
 
-        stateManager.attach(new ClientGamAppState(this));
+        stateManager.attach(new ClientGameAppState(this));
     }
 
     @Override

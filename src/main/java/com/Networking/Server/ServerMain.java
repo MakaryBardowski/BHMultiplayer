@@ -141,7 +141,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     // tworzy nowego gracza
     public Player registerPlayer(Integer id) {
         // the server doesnt need to render the player, hence cull hint = always
-        Player player = Player.spawnPlayer(id, assetManager, rootNode);
+        Player player = Player.spawnPlayer(id, assetManager, rootNode,cam);
         this.mobs.put(id, player);
         return player;
     }

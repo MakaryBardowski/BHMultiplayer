@@ -6,22 +6,15 @@ package Game.Mobs;
 
 import Game.Items.ItemInterface;
 import static Game.Map.Collision.MovementCollisionUtils.canMoveToLocationGround;
+import Game.Mobs.MobFactory.PlayerFactory;
 
-import Messages.MobHealthUpdateMessage;
 import Messages.MobPosUpdateMessage;
 import Messages.MobRotUpdateMessage;
-import com.Networking.Client.ClientGamAppState;
+import com.Networking.Client.ClientGameAppState;
 import com.jme3.asset.AssetManager;
-import com.jme3.material.Material;
-import com.jme3.material.RenderState;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
+import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.Spatial.CullHint;
-import com.jme3.scene.shape.Box;
 
 /**
  *
@@ -30,14 +23,9 @@ import com.jme3.scene.shape.Box;
 public class Player extends HumanMob {
 
     private static final int HOTBAR_SIZE = 10;
-
     private boolean forward, backward, right, left;
+    private final ItemInterface[] hotbar;
 
-    private ItemInterface[] hotbar;
-    private String equipment;
-
-    private Node firstPersonHandsNode;
-    private Node firstPersonHandsCameraNode;
 
     public Player(int id, Node node, String name) {
         super(id, node, name);
@@ -80,56 +68,16 @@ public class Player extends HumanMob {
         this.left = left;
     }
 
-    // metoda tworzaca nowego gracza, poki co gracz to po prostu kolorowe pudelko
-    public static Player spawnPlayer(int id, AssetManager assetManager, Node worldNode) {
-        Node playerNode = (Node) assetManager.loadModel("Models/testHuman/testHuman.j3o");
 
-        Node gunNodeFP = (Node) assetManager.loadModel("Models/testRifleFP/testRifleFP.j3o");
-        playerNode.attachChild(gunNodeFP);
-        gunNodeFP.move(0, 2, 0);
 
-        for (Spatial c : gunNodeFP.getChildren()) {
-            c.setName("" + id);
-            if (c != null && c instanceof Geometry) {
-                Geometry g = (Geometry) c;
-                Material originalMaterial = g.getMaterial();
-                Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-                newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
-                g.setMaterial(newMaterial);
 
-            }
-        }
-
-        for (Spatial c : playerNode.getChildren()) {
-            if (c != null && c instanceof Geometry) {
-                Geometry g = (Geometry) c;
-                Material originalMaterial = g.getMaterial();
-                Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-
-                newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
-                g.setMaterial(newMaterial);
-
-            }
-        }
-
-        Debugging.DebugUtils.addArrow(playerNode, assetManager);
-
-        playerNode.setName("" + id);
-        playerNode.move(0, 5, 0);
-
-        // bardzo wazne - KA¯DE DZIECKO NODA MUSI MIEC NAZWE ID!!!!!!!!!!
-        playerNode.getChildren().stream().forEach(x -> x.setName("" + id));
-
-        String name = "Gracz_" + id;
-        Player p = new Player(id, playerNode, name);
-
-        worldNode.attachChild(playerNode);
-
-        return p;
+    public static Player spawnPlayer(int newPlayerId, AssetManager assetManager, Node mobNode, Camera cam) {
+        PlayerFactory factory = new PlayerFactory(newPlayerId, assetManager, mobNode, cam);
+        return factory.create();
     }
 
     @Override
-    public void move(float tpf, ClientGamAppState cm) {
+    public void move(float tpf, ClientGameAppState cm) {
         MobRotUpdateMessage rotu = new MobRotUpdateMessage(id, node.getLocalRotation());
         cm.getClient().send(rotu);
 
@@ -161,7 +109,7 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
             }
             if (right) {
 
-                Vector3f moveVec = cm.getCamera().getLeft().negateLocal().mult(speed * tpf);;
+                Vector3f moveVec = cm.getCamera().getLeft().negateLocal().mult(speed * tpf);
                 movementVector.addLocal(moveVec);
             }
 
