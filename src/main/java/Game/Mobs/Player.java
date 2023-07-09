@@ -14,6 +14,7 @@ import com.Networking.Client.ClientGameAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
+import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 
 /**
@@ -25,6 +26,17 @@ public class Player extends HumanMob {
     private static final int HOTBAR_SIZE = 10;
     private boolean forward, backward, right, left;
     private final ItemInterface[] hotbar;
+    private Node gunNode = new Node();
+
+    public void addToGunNode(Node ... nodes) {
+        for (Node node : nodes) {
+            this.gunNode.attachChild(node);
+        }   
+    }
+
+    public Node getGunNode() {
+        return gunNode;
+    }
 
 
     public Player(int id, Node node, String name) {
@@ -71,8 +83,8 @@ public class Player extends HumanMob {
 
 
 
-    public static Player spawnPlayer(int newPlayerId, AssetManager assetManager, Node mobNode, Camera cam) {
-        PlayerFactory factory = new PlayerFactory(newPlayerId, assetManager, mobNode, cam);
+    public static Player spawnPlayer(int newPlayerId, AssetManager assetManager, Node mobNode, Camera cam, RenderManager renderManager) {
+        PlayerFactory factory = new PlayerFactory(newPlayerId, assetManager, mobNode, cam, renderManager);
         return factory.create();
     }
 
