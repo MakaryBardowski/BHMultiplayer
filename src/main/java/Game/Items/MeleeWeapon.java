@@ -36,8 +36,6 @@ public class MeleeWeapon extends Weapon{
     public void equipLeft() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-<<<<<<< HEAD
-=======
 
     @Override
     public void useRight() {
@@ -48,7 +46,6 @@ public class MeleeWeapon extends Weapon{
     public void useLeft() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
->>>>>>> c2ad0c1136f6473af79cc5ba8753a2fa1b95973c
     
     public static class Builder{
         private MeleeWeapon weapon;
