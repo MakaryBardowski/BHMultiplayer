@@ -18,7 +18,7 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.network.Client;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
-import com.Networking.Client.ClientGamAppState;
+import com.Networking.Client.ClientGameAppState;
 import com.Networking.Client.PlayerHUD;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -30,14 +30,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 /*
 Klasa nas³uchuj¹ca wszystkich komunikatów wys³anych przez serwer do klienta
-w klasie ClientGamAppState (Main aplikacji klienta) jest 
+w klasie ClientGameAppState (Main aplikacji klienta) jest 
 
  */
 public class ClientMessageListener implements MessageListener<Client> {
 
-    private ClientGamAppState clientApp;
+    private ClientGameAppState clientApp;
 
-    public ClientMessageListener(ClientGamAppState c) {
+    public ClientMessageListener(ClientGameAppState c) {
         this.clientApp = c;
     }
 

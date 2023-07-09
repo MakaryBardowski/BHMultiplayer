@@ -4,14 +4,14 @@
  */
 package Game.Mobs;
 
-import com.Networking.Client.ClientGamAppState;
+import com.Networking.Client.ClientGameAppState;
 
 /**
  *
  * @author 48793
  */
 public interface MobInterface {
-    public void move(float tpf, ClientGamAppState cm);
+    public void move(float tpf, ClientGameAppState cm);
     public void die();
     public void attack();
     public void receiveDamage();

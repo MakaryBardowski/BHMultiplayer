@@ -7,7 +7,7 @@ package com.Networking.Client;
 
 import Game.Mobs.Mob;
 import Game.Mobs.Player;
-import com.Networking.Client.ClientGamAppState;
+import com.Networking.Client.ClientGameAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -48,7 +48,7 @@ public class PlayerHUD extends BaseAppState {
     private final int ROWS = 6;
 
     private Nifty nifty;
-    private ClientGamAppState gs;
+    private ClientGameAppState gs;
     private int cnt = 0;
     private int hotBarCnt = 0;
     private double eqSlotSizePx;
@@ -58,7 +58,7 @@ public class PlayerHUD extends BaseAppState {
     private float percentMobHealthbarHeight = 0.01f;
     private float playerHealthbarWidth = 0.15f;
 
-    public PlayerHUD(ClientGamAppState gs) {
+    public PlayerHUD(ClientGameAppState gs) {
         this.gs = gs;
     }
 
@@ -495,7 +495,7 @@ public class PlayerHUD extends BaseAppState {
 
     }
 
-    private void checkTargetedMob(ClientGamAppState gs, Node nodeToCheckCollisionOn) {
+    private void checkTargetedMob(ClientGameAppState gs, Node nodeToCheckCollisionOn) {
         CollisionResults results = new CollisionResults();
         Ray ray = new Ray(gs.getCamera().getLocation(), gs.getCamera().getDirection());
         nodeToCheckCollisionOn.collideWith(ray, results);
@@ -529,11 +529,11 @@ public class PlayerHUD extends BaseAppState {
         this.nifty = nifty;
     }
 
-    public ClientGamAppState getClient() {
+    public ClientGameAppState getClient() {
         return gs;
     }
 
-    public void setClient(ClientGamAppState gs) {
+    public void setClient(ClientGameAppState gs) {
         this.gs = gs;
     }
 

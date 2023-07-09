@@ -43,36 +43,36 @@ import java.util.logging.Logger;
  *
  * @author normenhansen
  */
-public class ClientGamAppState extends AbstractAppState implements ClientStateListener {
+public class ClientGameAppState extends AbstractAppState implements ClientStateListener {
 
     private final int BLOCK_SIZE = 5;
     private final int CHUNK_SIZE = 16;
     private final int MAP_SIZE = 48;
 
-    private final Node rootNode = new Node ("ROOT NODE");
+    private final Node rootNode = new Node("ROOT NODE");
     private final Node worldNode = new Node("WORLD NODE");
     private final Node mapNode = new Node("MAP NODE");
     private final Node debugNode = new Node("DEBUG NODE");
     private final Node mobsNode = new Node("ENTITY NODE");
     private final Node pickableNode = new Node("PICKABLE NODE");
 
+    private final SimpleApplication app;
+    private final AssetManager assetManager;
+    private final ConcurrentLinkedQueue<AbstractMessage> messageQueue = new ConcurrentLinkedQueue<>();
+    private final HashMap<Integer, Mob> mobs = new HashMap<>();
+    private final AppSettings applicationSettings;
+
     private Client client;
-    private ConcurrentLinkedQueue<AbstractMessage> messageQueue;
-    private HashMap<Integer, Mob> mobs = new HashMap<>();
     private Player player;
-    private AppSettings applicationSettings;
     private ActionListener actionListener;
     private Map map;
     private Nifty nifty;
-    
-    private SimpleApplication app;
-    private final AssetManager assetManager;
-    
-    public ClientGamAppState (Main app){
-    this.app = app;
-    this.assetManager = app.getAssetManager();
-    this.applicationSettings = app.getAppSettings();
-    app.getRootNode().attachChild(rootNode);
+
+    public ClientGameAppState(Main app) {
+        this.app = app;
+        this.assetManager = app.getAssetManager();
+        this.applicationSettings = app.getAppSettings();
+        app.getRootNode().attachChild(rootNode);
     }
 
     @Override
@@ -92,10 +92,9 @@ public class ClientGamAppState extends AbstractAppState implements ClientStateLi
             client.start();
 
         } catch (IOException ex) {
-            Logger.getLogger(ClientGamAppState.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ClientGameAppState.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        messageQueue = new ConcurrentLinkedQueue();
         client.addMessageListener(new ClientMessageListener(this));
         app.getViewPort().setBackgroundColor(ColorRGBA.Cyan);
 
@@ -106,10 +105,7 @@ public class ClientGamAppState extends AbstractAppState implements ClientStateLi
         al.setColor(ColorRGBA.White.mult(0.7f));
         worldNode.addLight(al);
 
-
     }
-
-
 
     @Override
     public void update(float tpf) {
@@ -118,7 +114,6 @@ public class ClientGamAppState extends AbstractAppState implements ClientStateLi
             player.move(tpf, this);
         }
 
-        
         mobs.values().forEach(x -> {
             if (x != player) {
                 interpolateMobPosition(x, tpf);
@@ -128,8 +123,6 @@ public class ClientGamAppState extends AbstractAppState implements ClientStateLi
         );
 
     }
-
-
 
     public Client getClient() {
         return client;
@@ -148,9 +141,8 @@ public class ClientGamAppState extends AbstractAppState implements ClientStateLi
 
     }
 
-    public Player registerPlayer(Integer id) { // rejestrujemy gracza
-
-        Player p = Player.spawnPlayer(id, assetManager, mobsNode);
+    public Player registerPlayer(Integer id) { 
+        Player p = Player.spawnPlayer(id, assetManager,mapNode,getCamera());
         this.mobs.put(id, p);
         return p;
     }
@@ -198,9 +190,9 @@ public class ClientGamAppState extends AbstractAppState implements ClientStateLi
     public Map getMap() {
         return map;
     }
-    
-    public Camera getCamera(){
-    return app.getCamera();
+
+    public Camera getCamera() {
+        return app.getCamera();
     }
 
     public FlyByCamera getFlyCam() {
@@ -230,21 +222,25 @@ public class ClientGamAppState extends AbstractAppState implements ClientStateLi
     public Node getMobsNode() {
         return mobsNode;
     }
-    
-    public Node getRootNode(){
-    return rootNode;
+
+    public Node getRootNode() {
+        return rootNode;
     }
     
-    public InputManager getInputManager(){
-    return app.getInputManager();
+    public AssetManager getAssetManager(){
+    return app.getAssetManager();
     }
-    
-    public AppStateManager getStateManager(){
+
+    public InputManager getInputManager() {
+        return app.getInputManager();
+    }
+
+    public AppStateManager getStateManager() {
         return app.getStateManager();
     }
-    
+
     public SimpleApplication getApp() {
-    return app;
+        return app;
     }
 
 }

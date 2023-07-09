@@ -7,7 +7,7 @@ package Game.Mobs;
 import Game.Items.Holdable;
 import Game.Map.Collision.CollidableInterface;
 import Game.Map.Collision.WorldGrid;
-import com.Networking.Client.ClientGamAppState;
+import com.Networking.Client.ClientGameAppState;
 import com.jme3.scene.Node;
 import java.util.HashSet;
 
@@ -27,7 +27,7 @@ public class HumanMob extends Mob{
     
     
     @Override
-    public void move(float tpf, ClientGamAppState cm) {
+    public void move(float tpf, ClientGameAppState cm) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
