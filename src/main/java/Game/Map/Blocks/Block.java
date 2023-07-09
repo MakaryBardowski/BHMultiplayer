@@ -19,6 +19,7 @@ public class Block {
 
     private List<Vector3f> positions = new ArrayList<>();
     private List<Vector2f> uvs = new ArrayList<>();
+    private List<Vector3f> normals = new ArrayList<>();
     private List<Integer> indices = new ArrayList<>();
     private List<Vector4f> colors = new ArrayList<>();
 
@@ -69,6 +70,16 @@ public class Block {
     public void setColors(List<Vector4f> colors) {
         this.colors = colors;
     }
+    
+    public void setNormals(List<Vector3f> normals){
+    this.normals = normals;
+    }
+
+    public List<Vector3f> getNormals() {
+        return normals;
+    }
+    
+    
 
     public List<Vector4f> getColors() {
         return colors;

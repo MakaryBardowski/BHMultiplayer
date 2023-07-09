@@ -37,200 +37,6 @@ import java.util.Random;
  */
 public class VoxelAdding {
 
-    public static Block addBox(float x, float y, float z, float voxelSize, int index, AssetManager asm, BlockType bt) {
-        Mesh m = new Mesh();
-
-//        float FACE_OFFSET = -0.2f;
-        float FACE_OFFSET = 0;
-
-        // Vertex positions in space
-        Vector3f[] vertices = new Vector3f[24];
-        vertices[0] = new Vector3f(x, y, FACE_OFFSET + z); // front bottom left
-        vertices[1] = new Vector3f(voxelSize + x, y, FACE_OFFSET + z); // front bottom right
-        vertices[2] = new Vector3f(x, voxelSize + y, FACE_OFFSET + z); // front top left
-        vertices[3] = new Vector3f(voxelSize + x, voxelSize + y, FACE_OFFSET + z); // front top right
-
-        vertices[4] = new Vector3f(voxelSize - FACE_OFFSET + x, y, voxelSize + z); // back bottom right 
-        vertices[5] = new Vector3f(voxelSize - FACE_OFFSET + x, voxelSize + y, voxelSize + z); // back top right 
-        vertices[6] = new Vector3f(voxelSize - FACE_OFFSET + x, voxelSize + y, z); // front top right
-        vertices[7] = new Vector3f(voxelSize - FACE_OFFSET + x, y, z); // front bottom right
-
-        vertices[8] = new Vector3f(voxelSize + x, voxelSize + y, voxelSize - FACE_OFFSET + z); // back top right 
-        vertices[9] = new Vector3f(x, y, voxelSize - FACE_OFFSET + z); // back bottom left 
-        vertices[10] = new Vector3f(voxelSize + x, y, voxelSize - FACE_OFFSET + z); // back bottom right 
-        vertices[11] = new Vector3f(x, voxelSize + y, voxelSize - FACE_OFFSET + z); // back top left 
-
-        vertices[12] = new Vector3f(FACE_OFFSET + x, y, z); // front bottom left
-        vertices[13] = new Vector3f(FACE_OFFSET + x, voxelSize + y, z); // front top left
-        vertices[14] = new Vector3f(FACE_OFFSET + x, y, voxelSize + z); // back bottom left 
-        vertices[15] = new Vector3f(FACE_OFFSET + x, voxelSize + y, voxelSize + z); // back top left
-
-        vertices[16] = new Vector3f(x, voxelSize - FACE_OFFSET + y, z);
-        vertices[17] = new Vector3f(voxelSize + x, voxelSize - FACE_OFFSET + y, z);
-        vertices[18] = new Vector3f(voxelSize + x, voxelSize - FACE_OFFSET + y, voxelSize + z);
-        vertices[19] = new Vector3f(x, voxelSize - FACE_OFFSET + y, voxelSize + z);
-
-        vertices[20] = new Vector3f(x, y - FACE_OFFSET, z);
-        vertices[21] = new Vector3f(voxelSize + x, y - FACE_OFFSET, z);
-        vertices[22] = new Vector3f(voxelSize + x, y - FACE_OFFSET, z + voxelSize);
-        vertices[23] = new Vector3f(x, y - FACE_OFFSET, z + voxelSize);
-
-        //                                                   
-        int[] indexes = {1, 0, 2, 2, 3, 1, 4, 7, 6, 6, 5, 4, 8, 9, 10, 8, 11, 9,
-            14, 13, 12, 14, 15, 13,
-            18, 17, 16, 16, 19, 18,
-            23, 20, 21, 21, 22, 23
-
-        };
-
-        for (int i = 0; i < indexes.length; i++) {
-
-            indexes[i] += index * 24;
-
-        }
-
-        // Texture coordinates 
-// front face GIT
-        Vector2f[] texCoord = new Vector2f[24];
-        texCoord[0] = bt.minTexCoord;
-        texCoord[1] = new Vector2f(bt.maxTexCoord.getX(), bt.minTexCoord.getY());
-        texCoord[2] = new Vector2f(bt.minTexCoord.getX(), bt.maxTexCoord.getY());
-        texCoord[3] = bt.maxTexCoord;
-
-        // right face GIT
-        texCoord[7] = new Vector2f(bt.maxTexCoord.getX(), bt.minTexCoord.getY());
-        texCoord[4] = bt.minTexCoord;
-        texCoord[6] = bt.maxTexCoord;
-        texCoord[5] = new Vector2f(bt.minTexCoord.getX(), bt.maxTexCoord.getY());
-
-////        left face GIT
-        texCoord[13] = new Vector2f(bt.minTexCoord.getX(), bt.maxTexCoord.getY());
-        texCoord[12] = bt.minTexCoord;
-        texCoord[15] = bt.maxTexCoord;
-        texCoord[14] = new Vector2f(bt.maxTexCoord.getX(), bt.minTexCoord.getY());
-//        back face GIT
-        texCoord[9] = new Vector2f(bt.maxTexCoord.getX(), bt.minTexCoord.getY());
-        texCoord[10] = bt.minTexCoord;
-        texCoord[11] = bt.maxTexCoord;
-        texCoord[8] = new Vector2f(bt.minTexCoord.getX(), bt.maxTexCoord.getY());
-
-////        top face GIT
-        texCoord[17] = bt.minTexCoord; // a = 18
-        texCoord[18] = new Vector2f(bt.minTexCoord.getX(), bt.maxTexCoord.getY()); // 19 = b
-        texCoord[16] = new Vector2f(bt.maxTexCoord.getX(), bt.minTexCoord.getY()); // 23  = c
-        texCoord[19] = bt.maxTexCoord; // 6 = d
-
-// floor face GIT
-        texCoord[20] = bt.minTexCoord; // a = 18
-        texCoord[23] = new Vector2f(bt.minTexCoord.getX(), bt.maxTexCoord.getY()); // 19 = b
-        texCoord[21] = new Vector2f(bt.maxTexCoord.getX(), bt.minTexCoord.getY()); // 23  = c
-        texCoord[22] = bt.maxTexCoord; // 6 = d
-/*
-         texCoord[0] = new Vector2f(0, 0);
-        texCoord[1] = new Vector2f(1, 0);
-        texCoord[2] = new Vector2f(0, 1);
-        texCoord[3] = new Vector2f(1, 1);
-
-        // right face GIT
-        texCoord[7] = new Vector2f(1, 0);
-        texCoord[4] = new Vector2f(0, 0);
-        texCoord[6] = new Vector2f(1, 1);
-        texCoord[5] = new Vector2f(0, 1);
-    
-////        left face GIT
-
-        texCoord[13] = new Vector2f(0, 1);
-        texCoord[12] = new Vector2f(0, 0);
-        texCoord[15] = new Vector2f(1, 1);
-        texCoord[14] = new Vector2f(1, 0);
-//        back face GIT
-        texCoord[9] = new Vector2f(1, 0);
-        texCoord[10] = new Vector2f(0, 0);
-        texCoord[11] = new Vector2f(1, 1);
-        texCoord[8] = new Vector2f(0, 1);
-
-        
-        
-////        top face GIT
-        texCoord[17] = new Vector2f(0, 0); // a = 18
-        texCoord[18] = new Vector2f(0, 1); // 19 = b
-        texCoord[16] = new Vector2f(1, 0); // 23  = c
-        texCoord[19] = new Vector2f(1, 1); // 6 = d
-
-// floor face GIT
-        texCoord[20] = new Vector2f(0, 0); // a = 18
-        texCoord[23] = new Vector2f(0, 1); // 19 = b
-        texCoord[21] = new Vector2f(1, 0); // 23  = c
-        texCoord[22] = new Vector2f(1, 1); // 6 = d
-
-         */
-
-        m.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
-        m.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoord));
-
-        m.setBuffer(Type.Index, 1, BufferUtils.createIntBuffer(indexes));
-
-        m.getFloatBuffer(VertexBuffer.Type.TexCoord).position(0);
-//        System.out.println("Voxel mid generation");
-//                for(int i = 0 ; i< m.getFloatBuffer(VertexBuffer.Type.TexCoord).limit();i++)
-//        System.out.print(m.getFloatBuffer(VertexBuffer.Type.TexCoord).get()+", ");
-
-        m.updateBound();
-
-        Geometry coloredMesh = new Geometry("v" + index++, m);
-        Material matVC = new Material(asm, "Common/MatDefs/Misc/Unshaded.j3md");
-
-        Texture t = asm.loadTexture(bt.textureName);
-        t.setMagFilter(Texture.MagFilter.Nearest);
-        matVC.setTexture("ColorMap", t);
-//matVC.setColor("Color", ColorRGBA.White);
-        matVC.setBoolean("VertexColor", true);
-
-        float[] colorArray = new float[24 * 4];
-        int colorIndex = 0;
-
-        List<Vector4f> colors = new ArrayList<>();
-
-        //Set custom RGBA value for each Vertex. Values range from 0.0f to 1.0f
-        for (int i = 0; i < 24; i++) {
-            colors.add(new Vector4f(1, 1, 1, 1));
-            // Red value (is increased by .2 on each next vertex here)
-            colorArray[colorIndex++] = 1f;
-            // Green value (is reduced by .2 on each next vertex)
-            colorArray[colorIndex++] = 1f;
-            // Blue value (remains the same in our case)
-            colorArray[colorIndex++] = 1f;
-            // Alpha value (no transparency set here)
-            colorArray[colorIndex++] = 1;
-        }
-
-        m.setBuffer(Type.Color, 4, colorArray);
-        coloredMesh.setMaterial(matVC);
-
-//        rn.attachChild(coloredMesh);
-        Block b = new Block();
-        b.setPositions(Arrays.asList(vertices));
-
-        List<Integer> inds = new ArrayList<>();
-
-        for (int i = 0; i < indexes.length; i++) {
-            inds.add(indexes[i]);
-        }
-
-        b.setIndices(inds);
-        b.setUvs(Arrays.asList(texCoord));
-        b.setColors(colors);
-
-//        System.out.println("\n\nvoxel adding final");
-//                m.getFloatBuffer(VertexBuffer.Type.TexCoord).position(0);
-//
-//        for(int i = 0 ; i< m.getFloatBuffer(VertexBuffer.Type.TexCoord).limit();i++){
-//        System.out.print(m.getFloatBuffer(VertexBuffer.Type.TexCoord).get()+", ");
-//        }
-//        System.out.println("\n\n");
-        return b;
-    }
-
     public static Block AddOptimizedBox(Chunk chunk, Block[][][] map, byte[][][] logicMap, int vmX, int vmY, int vmZ, float voxelSize, int index, AssetManager asm, BlockType bt, float x, float y, float z) {
 
         Block b = new Block();
@@ -276,14 +82,8 @@ public class VoxelAdding {
             left = false;
             right = false;
 
-        } else {
-            top = true;
-            floor = true;
-            back = true;
-            front = true;
-            left = true;
-            right = true;
-        }
+        } 
+
 
         int neighborCnt = (left ? 1 : 0) + (right ? 1 : 0) + (back ? 1 : 0) + (front ? 1 : 0) + (top ? 1 : 0) + (floor ? 1 : 0);
         int vertexCount = neighborCnt * 4;
@@ -292,7 +92,8 @@ public class VoxelAdding {
         float FACE_OFFSET = 0;
 
         // Vertex positions in space
-        Vector3f[] vertices = new Vector3f[vertexCount]; // vertexCount
+        ArrayList<Vector3f> vertices = new ArrayList<>(); // vertexCount
+        ArrayList<Vector3f> normals = new ArrayList<>();
 
         ArrayList<Short> overridenIndexes = new ArrayList<>();
 
@@ -300,16 +101,13 @@ public class VoxelAdding {
 
         int usedBooleanCount = 0;
 
-        if (front) {
+        int TEST_VAL = 4;
 
-//            vertices[c++] = new Vector3f(0, 0, FACE_OFFSET); // front bottom left
-//            vertices[c++] = new Vector3f(voxelSize, 0, FACE_OFFSET); // front bottom right
-//            vertices[c++] = new Vector3f(0, voxelSize, FACE_OFFSET); // front top left
-//            vertices[c++] = new Vector3f(voxelSize, voxelSize, FACE_OFFSET); // front top right
-            vertices[c++] = new Vector3f(x, y, FACE_OFFSET + z); // front bottom left
-            vertices[c++] = new Vector3f(voxelSize + x, y, FACE_OFFSET + z); // front bottom right
-            vertices[c++] = new Vector3f(x, voxelSize + y, FACE_OFFSET + z); // front top left
-            vertices[c++] = new Vector3f(voxelSize + x, voxelSize + y, FACE_OFFSET + z); // front top right
+        if (front) {
+            vertices.add(new Vector3f(x, y, FACE_OFFSET + z)); // front bottom left
+            vertices.add(new Vector3f(voxelSize + x, y, FACE_OFFSET + z)); // front bottom right
+            vertices.add(new Vector3f(x, voxelSize + y, FACE_OFFSET + z)); // front top left
+            vertices.add(new Vector3f(voxelSize + x, voxelSize + y, FACE_OFFSET + z)); // front top right
 
             overridenIndexes.add(((short) (1 + usedBooleanCount)));
             overridenIndexes.add(((short) (0 + usedBooleanCount)));
@@ -326,48 +124,17 @@ public class VoxelAdding {
             texCoord[1] = new Vector2f(bt.maxTexCoord.getX(), bt.minTexCoord.getY());
             texCoord[2] = new Vector2f(bt.minTexCoord.getX(), bt.maxTexCoord.getY());
             texCoord[3] = bt.maxTexCoord;
-
-        }
-
-        if (right) {
-//            vertices[c++] = new Vector3f(voxelSize - FACE_OFFSET, 0, voxelSize); // back bottom right 
-//            vertices[c++] = new Vector3f(voxelSize - FACE_OFFSET, voxelSize, voxelSize); // back top right 
-//            vertices[c++] = new Vector3f(voxelSize - FACE_OFFSET, voxelSize, 0); // front top right
-//            vertices[c++] = new Vector3f(voxelSize - FACE_OFFSET, 0, 0); // front bottom right
-
-            vertices[c++] = new Vector3f(voxelSize - FACE_OFFSET + x, y, voxelSize + z); // back bottom right 
-            vertices[c++] = new Vector3f(voxelSize - FACE_OFFSET + x, voxelSize + y, voxelSize + z); // back top right 
-            vertices[c++] = new Vector3f(voxelSize - FACE_OFFSET + x, voxelSize + y, z); // front top right
-            vertices[c++] = new Vector3f(voxelSize - FACE_OFFSET + x, y, z); // front bottom right
-
-            overridenIndexes.add(((short) (0 + (4 * usedBooleanCount)))); // 4
-            overridenIndexes.add(((short) (3 + (4 * usedBooleanCount)))); // 7 
-            overridenIndexes.add(((short) (2 + (4 * usedBooleanCount)))); // 6
-            overridenIndexes.add(((short) (2 + (4 * usedBooleanCount)))); // 6
-            overridenIndexes.add(((short) (1 + (4 * usedBooleanCount)))); // 5
-            overridenIndexes.add(((short) (0 + (4 * usedBooleanCount)))); // 4
-
-            map[vmX][vmY][vmZ].getFaceOffsetIndexes()[3] = ((short) (0 + (4 * usedBooleanCount)));
-
-            texCoord[0 + (usedBooleanCount * 4)] = bt.minTexCoord;
-            texCoord[1 + (usedBooleanCount * 4)] = new Vector2f(bt.minTexCoord.getX(), bt.maxTexCoord.getY());
-            texCoord[2 + (usedBooleanCount * 4)] = bt.maxTexCoord;
-            texCoord[3 + (usedBooleanCount * 4)] = new Vector2f(bt.maxTexCoord.getX(), bt.minTexCoord.getY());
-
-            usedBooleanCount++;
+            for (int i = 0; i < TEST_VAL; i++) {
+                normals.add(new Vector3f(0, 0, -1));
+            }
 
         }
 
         if (back) {
-
-//            vertices[c++] = new Vector3f(voxelSize, voxelSize, voxelSize - FACE_OFFSET); // back top right 
-//            vertices[c++] = new Vector3f(0, 0, voxelSize - FACE_OFFSET); // back bottom left 
-//            vertices[c++] = new Vector3f(voxelSize, 0, voxelSize - FACE_OFFSET); // back bottom right 
-//            vertices[c++] = new Vector3f(0, voxelSize, voxelSize - FACE_OFFSET); // back top left 
-            vertices[c++] = new Vector3f(voxelSize + x, voxelSize + y, voxelSize - FACE_OFFSET + z); // back top right 
-            vertices[c++] = new Vector3f(x, y, voxelSize - FACE_OFFSET + z); // back bottom left 
-            vertices[c++] = new Vector3f(voxelSize + x, y, voxelSize - FACE_OFFSET + z); // back bottom right 
-            vertices[c++] = new Vector3f(x, voxelSize + y, voxelSize - FACE_OFFSET + z); // back top left 
+            vertices.add(new Vector3f(voxelSize + x, voxelSize + y, voxelSize - FACE_OFFSET + z)); // back top right 
+            vertices.add(new Vector3f(x, y, voxelSize - FACE_OFFSET + z)); // back bottom left 
+            vertices.add(new Vector3f(voxelSize + x, y, voxelSize - FACE_OFFSET + z)); // back bottom right 
+            vertices.add(new Vector3f(x, voxelSize + y, voxelSize - FACE_OFFSET + z)); // back top left 
 
 //        // 8, 9, 10, 8, 11, 9,
             overridenIndexes.add(((short) (0 + (4 * usedBooleanCount))));
@@ -383,20 +150,46 @@ public class VoxelAdding {
             texCoord[1 + (usedBooleanCount * 4)] = new Vector2f(bt.maxTexCoord.getX(), bt.minTexCoord.getY());
             texCoord[2 + (usedBooleanCount * 4)] = bt.minTexCoord;
             texCoord[3 + (usedBooleanCount * 4)] = bt.maxTexCoord;
+            for (int i = 0; i < TEST_VAL; i++) {
+                normals.add(new Vector3f(0, 0, 1));
+            }
+
             usedBooleanCount++;
 
         }
+        if (right) {
+            vertices.add(new Vector3f(voxelSize - FACE_OFFSET + x, y, voxelSize + z)); // back bottom right 
+            vertices.add(new Vector3f(voxelSize - FACE_OFFSET + x, voxelSize + y, voxelSize + z)); // back top right 
+            vertices.add(new Vector3f(voxelSize - FACE_OFFSET + x, voxelSize + y, z)); // front top right
+            vertices.add(new Vector3f(voxelSize - FACE_OFFSET + x, y, z)); // front bottom right
 
+            overridenIndexes.add(((short) (0 + (4 * usedBooleanCount)))); // 4
+            overridenIndexes.add(((short) (3 + (4 * usedBooleanCount)))); // 7 
+            overridenIndexes.add(((short) (2 + (4 * usedBooleanCount)))); // 6
+            overridenIndexes.add(((short) (2 + (4 * usedBooleanCount)))); // 6
+            overridenIndexes.add(((short) (1 + (4 * usedBooleanCount)))); // 5
+            overridenIndexes.add(((short) (0 + (4 * usedBooleanCount)))); // 4
+
+            map[vmX][vmY][vmZ].getFaceOffsetIndexes()[3] = ((short) (0 + (4 * usedBooleanCount)));
+
+            texCoord[0 + (usedBooleanCount * 4)] = bt.minTexCoord;
+            texCoord[1 + (usedBooleanCount * 4)] = new Vector2f(bt.minTexCoord.getX(), bt.maxTexCoord.getY());
+            texCoord[2 + (usedBooleanCount * 4)] = bt.maxTexCoord;
+            texCoord[3 + (usedBooleanCount * 4)] = new Vector2f(bt.maxTexCoord.getX(), bt.minTexCoord.getY());
+            for (int i = 0; i < TEST_VAL; i++) {
+                normals.add(new Vector3f(1, 0, 0));
+            }
+
+            usedBooleanCount++;
+
+        }
+//
         if (left) {
-//            vertices[c++] = new Vector3f(FACE_OFFSET, 0, 0); // front bottom left
-//            vertices[c++] = new Vector3f(FACE_OFFSET, voxelSize, 0); // front top left
-//            vertices[c++] = new Vector3f(FACE_OFFSET, 0, voxelSize); // back bottom left 
-//            vertices[c++] = new Vector3f(FACE_OFFSET, voxelSize, voxelSize); // back top left
 
-            vertices[c++] = new Vector3f(FACE_OFFSET + x, y, z); // front bottom left
-            vertices[c++] = new Vector3f(FACE_OFFSET + x, voxelSize + y, z); // front top left
-            vertices[c++] = new Vector3f(FACE_OFFSET + x, y, voxelSize + z); // back bottom left 
-            vertices[c++] = new Vector3f(FACE_OFFSET + x, voxelSize + y, voxelSize + z); // back top left
+            vertices.add(new Vector3f(FACE_OFFSET + x, y, z)); // front bottom left
+            vertices.add(new Vector3f(FACE_OFFSET + x, voxelSize + y, z)); // front top left
+            vertices.add(new Vector3f(FACE_OFFSET + x, y, voxelSize + z)); // back bottom left 
+            vertices.add(new Vector3f(FACE_OFFSET + x, voxelSize + y, voxelSize + z)); // back top left
 
             //              14, 13, 12, 14, 15, 13,   
             overridenIndexes.add(((short) (2 + (4 * usedBooleanCount))));
@@ -412,21 +205,20 @@ public class VoxelAdding {
             texCoord[1 + (usedBooleanCount * 4)] = new Vector2f(bt.minTexCoord.getX(), bt.maxTexCoord.getY());
             texCoord[2 + (usedBooleanCount * 4)] = new Vector2f(bt.maxTexCoord.getX(), bt.minTexCoord.getY());
             texCoord[3 + (usedBooleanCount * 4)] = bt.maxTexCoord;
+            for (int i = 0; i < TEST_VAL; i++) {
+                normals.add(new Vector3f(-1, 0, 0));
+            }
 
             usedBooleanCount++;
 
         }
 
         if (top) {
-//            vertices[c++] = new Vector3f(0, voxelSize - FACE_OFFSET, 0);
-//            vertices[c++] = new Vector3f(voxelSize, voxelSize - FACE_OFFSET, 0);
-//            vertices[c++] = new Vector3f(voxelSize, voxelSize - FACE_OFFSET, voxelSize);
-//            vertices[c++] = new Vector3f(0, voxelSize - FACE_OFFSET, voxelSize);
 
-            vertices[c++] = new Vector3f(x, voxelSize - FACE_OFFSET + y, z);
-            vertices[c++] = new Vector3f(voxelSize + x, voxelSize - FACE_OFFSET + y, z);
-            vertices[c++] = new Vector3f(voxelSize + x, voxelSize - FACE_OFFSET + y, voxelSize + z);
-            vertices[c++] = new Vector3f(x, voxelSize - FACE_OFFSET + y, voxelSize + z);
+            vertices.add(new Vector3f(x, voxelSize - FACE_OFFSET + y, z));
+            vertices.add(new Vector3f(voxelSize + x, voxelSize - FACE_OFFSET + y, z));
+            vertices.add(new Vector3f(voxelSize + x, voxelSize - FACE_OFFSET + y, voxelSize + z));
+            vertices.add(new Vector3f(x, voxelSize - FACE_OFFSET + y, voxelSize + z));
 
             //                         18, 17 ,16,16,19,18,
             overridenIndexes.add(((short) (2 + (4 * usedBooleanCount))));
@@ -443,19 +235,18 @@ public class VoxelAdding {
             texCoord[2 + (usedBooleanCount * 4)] = new Vector2f(bt.minTexCoord.getX(), bt.maxTexCoord.getY()); // 19 = b
             texCoord[3 + (usedBooleanCount * 4)] = bt.maxTexCoord; // 6 = d
 
+            for (int i = 0; i < TEST_VAL; i++) {
+                normals.add(new Vector3f(0, 1, 0));
+            }
+
             usedBooleanCount++;
         }
 
         if (floor) {
-
-//            vertices[c++] = new Vector3f(0, 0 - FACE_OFFSET, 0);
-//            vertices[c++] = new Vector3f(voxelSize, 0 - FACE_OFFSET, 0);
-//            vertices[c++] = new Vector3f(voxelSize, 0 - FACE_OFFSET, voxelSize);
-//            vertices[c++] = new Vector3f(0, 0 - FACE_OFFSET, voxelSize);
-            vertices[c++] = new Vector3f(x, y - FACE_OFFSET, z);
-            vertices[c++] = new Vector3f(voxelSize + x, y - FACE_OFFSET, z);
-            vertices[c++] = new Vector3f(voxelSize + x, y - FACE_OFFSET, z + voxelSize);
-            vertices[c++] = new Vector3f(x, y - FACE_OFFSET, z + voxelSize);
+            vertices.add(new Vector3f(x, y - FACE_OFFSET, z));
+            vertices.add(new Vector3f(voxelSize + x, y - FACE_OFFSET, z));
+            vertices.add(new Vector3f(voxelSize + x, y - FACE_OFFSET, z + voxelSize));
+            vertices.add(new Vector3f(x, y - FACE_OFFSET, z + voxelSize));
 
             //        23, 20 ,21 ,21,22,23
             overridenIndexes.add(((short) (3 + (4 * usedBooleanCount))));
@@ -471,7 +262,9 @@ public class VoxelAdding {
             texCoord[1 + (4 * usedBooleanCount)] = new Vector2f(bt.maxTexCoord.getX(), bt.minTexCoord.getY()); // 23  = c
             texCoord[2 + (4 * usedBooleanCount)] = bt.maxTexCoord; // 6 = d
             texCoord[3 + (4 * usedBooleanCount)] = new Vector2f(bt.minTexCoord.getX(), bt.maxTexCoord.getY()); // 19 = b
-
+            for (int i = 0; i < TEST_VAL; i++) {
+                normals.add(new Vector3f(0, -1, 0));
+            }
             usedBooleanCount++;
         }
 
@@ -487,19 +280,20 @@ public class VoxelAdding {
 
 // floor face GIT
         List<Vector4f> colors = new ArrayList<>();
-
+//        System.out.println(Arrays.toString(texCoord));
         //Set custom RGBA value for each Vertex. Values range from 0.0f to 1.0f
-        for (int i = 0; i < vertices.length; i++) {
-            colors.add(new Vector4f(1, 1, 1, 1));
+        for (int i = 0; i < vertices.size(); i++) {
+            colors.add(new Vector4f(0.1f, 0.1f, 0.1f, 1));
 
         }
 
-        b.setPositions(Arrays.asList(vertices));
+        b.setPositions(vertices);
         b.setIndices(Arrays.asList(indexes));
 //        System.out.println("INDICES "+b.getIndices().size());
-
+        b.setNormals(normals);
         b.setUvs(Arrays.asList(texCoord));
         b.setColors(colors);
+
 
 //        System.out.println("box indices "+ b.getIndices() + "  size "+b.getIndices().size());
 //        System.out.println("\n\nvoxel adding final");

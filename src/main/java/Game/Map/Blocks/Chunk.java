@@ -30,27 +30,30 @@ public class Chunk {
     private List<Vector3f> positions = new ArrayList<>();
     private List<Vector2f> uvs = new ArrayList<>();
     private List<Integer> indices = new ArrayList<>();
+    private List<Vector3f> normals = new ArrayList<>();
     private List<Vector4f> colors = new ArrayList<>();
     private Geometry geometry;
     private final BlockWorld bw;
-    
+
     private Vector2f chunkPos;
     private int blocksCount = 0;
     private int vertexCount = 0;
 
-    public Chunk(BlockWorld bw,int x,int z) {
+    private ArrayList<Block> blocks = new ArrayList<>();
+
+    public Chunk(BlockWorld bw, int x, int z) {
         this.bw = bw;
-        chunkPos = new Vector2f(x,z);
+        chunkPos = new Vector2f(x, z);
     }
 
     public final Geometry generateGeometry(Mesh m) {
 
         geometry = new Geometry("Chunk", m);
         bw.getWorldNode().attachChild(geometry);
-        
-        geometry.move(chunkPos.getX()*bw.getBLOCK_SIZE(),0,chunkPos.getY()*bw.getBLOCK_SIZE());
-        
-                Material matVC = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
+
+        geometry.move(chunkPos.getX() * bw.getBLOCK_SIZE(), 0, chunkPos.getY() * bw.getBLOCK_SIZE());
+
+        Material matVC = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
 
         Texture t = bw.getAsm().loadTexture(BlockType.STONE.textureName);
         t.setMagFilter(Texture.MagFilter.Nearest);
@@ -62,11 +65,11 @@ public class Chunk {
         mat.setTexture("ColorMap", bw.getTextureAtlas().getAtlasTexture("DiffuseMap"));
         mat.getTextureParam("ColorMap").getTextureValue().setMagFilter(Texture.MagFilter.Nearest);
         mat.setBoolean("VertexColor", true);
+        mat.getAdditionalRenderState().setWireframe(true);
+        mat.getAdditionalRenderState().setLineWidth(7);
 
-//        mat.getAdditionalRenderState().setWireframe(true);
-//        mat.getAdditionalRenderState().setLineWidth(5);
         geometry.setMaterial(mat);
-        
+
         return geometry;
     }
 
@@ -77,17 +80,15 @@ public class Chunk {
 //    
         mesh.setBuffer(VertexBuffer.Type.Position, 3, vector3fToBuffer(positions));
         mesh.setBuffer(VertexBuffer.Type.Index, 1, intToBuffer(indices));
+        mesh.setBuffer(VertexBuffer.Type.Normal, 3, vector3fToBuffer(normals));
 
         mesh.setBuffer(VertexBuffer.Type.TexCoord, 2, vector2fToBuffer(uvs));
         mesh.setBuffer(VertexBuffer.Type.Color, 4, vector4fToBuffer(colors));
         mesh.updateBound();
 
-        
         return mesh;
     }
-    
-    
-    
+
 //      public Mesh updateMesh(int newPositions,int newIndices, int newTexCoords,int newColors) {
 //
 //        Mesh mesh = geometry.getMesh();
@@ -102,119 +103,47 @@ public class Chunk {
 //        
 //        return mesh;
 //    }
-    
-    
-    
+    public Block attachBlock(Block b, Texture t) {
+        b.setVertexOffsetInParentChunk(positions.size());
 
-    public Block attachBlock(Block b,Texture t) {
-                   b.setVertexOffsetInParentChunk(positions.size());
+        System.out.println("starting indices index " + indices.size());
+        System.out.println("block indices size " + b.getIndices().size());
 
-//        System.out.println("starting indices index "+indices.size());
-//        System.out.println("block indices size "+b.getIndices().size());
-//        
-//        System.out.println("block vertex offset "+b.getVertexOffsetInParentChunk());
-//        System.out.println("\n\n\n");
-        addBlockData(b,t);
+        System.out.println("block vertex offset " + b.getVertexOffsetInParentChunk());
+        System.out.println("\n\n\n");
+        addBlockData(b, t);
 
         Mesh m = generateMesh();
 //        updateMesh(b.getPositions().size(),b.getIndices().size(),b.getUvs().size(),b.getColors().size());
-        
+
 //        if(geometry != null)
         geometry.setMesh(m);
 //        else
 //            generateGeometry(m);
 
-        
-        
-        
 //          m.getFloatBuffer(VertexBuffer.Type.TexCoord).position(0);
 //        for(int i = 0 ; i< m.getFloatBuffer(VertexBuffer.Type.TexCoord).limit();i++)
 //        System.out.print(m.getFloatBuffer(VertexBuffer.Type.TexCoord).get()+", ");
-        
-
-        
-
-        
-
-        
-
-        
         return b;
     }
-    
-    
-    
-    
-    
-    
-    
-       public Block addBlockData(Block b,Texture t) {
-           b.setVertexOffsetInParentChunk(positions.size());
+
+    public Block addBlockData(Block b, Texture t) {
+        blocks.add(b);
+        /*veretxOffsetInParentChunk is the number of the first vertex in the chunk which belongs to this block
+           so the block vertices in a chunk start at vertexOffsetInParentChunk and end at vertexOffsetInparentChunk+vertexCount
+         */
+        b.setVertexOffsetInParentChunk(positions.size());
         positions.addAll(b.getPositions());
         indices.addAll(b.getIndices());
+        normals.addAll(b.getNormals());
+
         uvs.addAll(b.getUvs());
         colors.addAll(b.getColors());
-
-        
-        blocksCount+=1;
-        vertexCount+= b.getVertexCount();
-        
-
-        
+        blocksCount += 1;
+        vertexCount += b.getVertexCount();
         return b;
     }
-    
-       
-       
-       
-       
-       
-       public Block detachBlock(Block b) {
-    if (b == null)
-        return b;
 
-    int vertexOffset = b.getVertexOffsetInParentChunk();
-
-    for (int i = b.getVertexOffsetInParentChunk() + b.getVertexCount() - 1; i >= vertexOffset; i--) {
-        positions.remove(i);
-        uvs.remove(i);
-    }
-
-    blocksCount--;
-    vertexCount -= b.getVertexCount();
-
-    for (int i = 0; i < indices.size(); i++) {
-        int index = indices.get(i);
-        if (index >= vertexOffset) {
-            indices.set(i, index - b.getVertexCount());
-        }
-    }
-
-    int CHUNK_SIZE = 16;
-    int chunkPosX = (int) chunkPos.getX();
-    int chunkPosY = (int) chunkPos.getY();
-
-    for (int x = chunkPosX; x < chunkPosX + CHUNK_SIZE; x++) {
-        for (int y = 0; y < bw.getMap()[0].length; y++) {
-            for (int z = chunkPosY; z < chunkPosY + CHUNK_SIZE; z++) {
-                Block bl = bw.getMap()[x][y][z];
-                if (bl != null && bl.getVertexOffsetInParentChunk() > vertexOffset) {
-                    bl.setVertexOffsetInParentChunk(bl.getVertexOffsetInParentChunk() - b.getVertexCount());
-                }
-            }
-        }
-    }
-
-    Mesh mesh = generateMesh();
-    geometry.setMesh(mesh);
-
-    return b;
-}
-
-       
-    
-    
-    
 //    public Block detachBlock(Block b){
 //        if(b==null)
 //            return b;
@@ -272,13 +201,63 @@ public class Chunk {
 //        
 //    return b;
 //    }
-    
-    
-    
-    
-    
-    
-    
+    public Block detachBlock(Block b) {
+        if (b == null) {
+            return b;
+        }
+
+        int vertexOffset = b.getVertexOffsetInParentChunk();
+        int vertexCount = b.getVertexCount();
+        int triangleCount = vertexCount / 3;
+
+        // Remove the vertices and adjust the indices
+        for (int i = vertexOffset + vertexCount - 1; i >= vertexOffset; i--) {
+            positions.remove(i);
+            uvs.remove(i);
+        }
+
+        // Adjust the indices for the removed block
+        for (int i = 0; i < indices.size(); i++) {
+            int index = indices.get(i);
+
+            if (index >= vertexOffset) {
+                index -= vertexCount;
+            }
+
+            indices.set(i, index);
+        }
+
+        // Adjust the vertex offsets and indices for subsequent blocks
+        for (Block block : blocks) {
+            if (block.getVertexOffsetInParentChunk() > vertexOffset) {
+                int blockVertexOffset = block.getVertexOffsetInParentChunk();
+                int blockVertexCount = block.getVertexCount();
+
+                // Adjust the vertex offset
+                block.setVertexOffsetInParentChunk(blockVertexOffset - vertexCount);
+
+                // Adjust the indices for the block
+                for (int i = 0; i < block.getIndices().size(); i++) {
+                    int index = block.getIndices().get(i);
+
+                    if (index >= blockVertexOffset) {
+                        index -= blockVertexCount;
+                    }
+
+                    block.getIndices().set(i, index);
+                }
+            }
+        }
+
+        // Update counts
+        blocksCount--;
+        vertexCount -= b.getVertexCount();
+
+        Mesh m = generateMesh();
+        geometry.setMesh(m);
+
+        return b;
+    }
 
     public void clear() {
         positions.clear();
@@ -394,7 +373,12 @@ public class Chunk {
         this.vertexCount = vertexCount;
     }
 
-    
-    
-    
+    public List<Vector3f> getNormals() {
+        return normals;
+    }
+
+    public void setNormals(List<Vector3f> normals) {
+        this.normals = normals;
+    }
+
 }
