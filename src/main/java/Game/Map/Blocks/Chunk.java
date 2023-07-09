@@ -65,8 +65,8 @@ public class Chunk {
         mat.setTexture("ColorMap", bw.getTextureAtlas().getAtlasTexture("DiffuseMap"));
         mat.getTextureParam("ColorMap").getTextureValue().setMagFilter(Texture.MagFilter.Nearest);
         mat.setBoolean("VertexColor", true);
-        mat.getAdditionalRenderState().setWireframe(true);
-        mat.getAdditionalRenderState().setLineWidth(7);
+//        mat.getAdditionalRenderState().setWireframe(true);
+//        mat.getAdditionalRenderState().setLineWidth(7);
 
         geometry.setMaterial(mat);
 
