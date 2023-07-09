@@ -59,7 +59,7 @@ public class PlayerFactory extends MobFactory {
     private void firstPersonCameraSetup(Player p, Node playerNode){
         Node gunCameraNode = new CameraNode("Gun Camera Node", firstPersonCamera);
         Node model = (Node) assetManager.loadModel("Models/testRifleFP/testRifleFP.j3o");
-        model.move(-.45f, -.52f, 1.8f);
+        model.move(-.48f, -.52f, 1.8f);
         model.setLocalRotation((new Quaternion()).fromAngleAxis(FastMath.PI / 32, new Vector3f(-.15f, .5f, 0)));
         
         /// i don't know why the setupModelLight() method doesn't work <<-- big congo
