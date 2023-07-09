@@ -48,6 +48,7 @@ public class InputEditor {
                 } else if (!player.isDead() && name.equals("W")) {
                     player.setForward(true);
                     setMovingAnimationPlayer(player, 2.5f);
+                    
 
                 }
 

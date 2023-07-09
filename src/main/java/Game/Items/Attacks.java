@@ -8,12 +8,7 @@ package Game.Items;
  *
  * @author tomasz potoczko
  */
-public interface HoldableInterface {
-
-    void equipLeft();
-    void equipRight();
+public interface Attacks {
+    void attack();
     
-    
-    void useRight();
-    void useLeft();
 }

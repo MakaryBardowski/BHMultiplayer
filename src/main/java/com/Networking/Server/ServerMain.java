@@ -21,6 +21,7 @@ import com.jme3.network.Server;
 import com.jme3.system.JmeContext;
 import com.Networking.NetworkingInitialization;
 import com.jme3.network.Filters;
+import com.jme3.renderer.RenderManager;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -141,7 +142,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     // tworzy nowego gracza
     public Player registerPlayer(Integer id) {
         // the server doesnt need to render the player, hence cull hint = always
-        Player player = Player.spawnPlayer(id, assetManager, rootNode,cam);
+        Player player = Player.spawnPlayer(id, assetManager, rootNode,cam, renderManager);
         this.mobs.put(id, player);
         return player;
     }

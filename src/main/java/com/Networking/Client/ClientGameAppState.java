@@ -142,7 +142,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     }
 
     public Player registerPlayer(Integer id) { 
-        Player p = Player.spawnPlayer(id, assetManager,mapNode,getCamera());
+        Player p = Player.spawnPlayer(id, assetManager,mapNode,getCamera(), app.getRenderManager());
         this.mobs.put(id, p);
         return p;
     }
