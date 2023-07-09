@@ -4,7 +4,7 @@
  */
 package Messages.MessageListeners;
 
-import Game.CameraAndInput.InputEditor;
+import Game.CameraAndInput.InputController;
 import Game.Mobs.Mob;
 import Game.Mobs.Player;
 import Messages.MobHealthUpdateMessage;
@@ -112,7 +112,7 @@ public class ClientMessageListener implements MessageListener<Client> {
                 clientApp.getPickableNode().attachChild(p.getNode());
                 p.getNode().setLocalTranslation(pos);
                 clientApp.setPlayer(p);
-                new InputEditor().setupInput(clientApp);
+                new InputController().setupInput(clientApp);
                 clientApp.getStateManager().attach(new PlayerHUD(clientApp));
                 p.getNode().setCullHint(Spatial.CullHint.Always);
             });

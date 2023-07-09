@@ -5,29 +5,39 @@
  */
 package Game.CameraAndInput;
 
+import Game.Effects.DecalProjector;
 import Game.Items.Item;
 import Game.Mobs.Player;
 import com.Networking.Client.ClientGameAppState;
 import com.jme3.animation.LoopMode;
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.material.Material;
+import com.jme3.material.RenderState;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.Camera;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Node;
+import com.jme3.texture.Texture;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
+import java.util.Random;
 
 /**
  *
  * @author 48793
- * 
+ *
  * klasa odpowiadaj¹ca za obs³ugê inputu gracza (klawiatura, przyciski myszy)
  */
-public class InputEditor {
-    
+public class InputController {
+
     private NiftyImage guiElement;
 
     public void setupInput(ClientGameAppState gs) {
@@ -48,7 +58,6 @@ public class InputEditor {
                 } else if (!player.isDead() && name.equals("W")) {
                     player.setForward(true);
                     setMovingAnimationPlayer(player, 2.5f);
-                    
 
                 }
 
@@ -85,19 +94,16 @@ public class InputEditor {
 
                 }
 
-
-
                 // attack test
                 if (!player.isDead() && name.equals("Attack") && !keyPressed) {
 //                    player.setShooting(false);
-                    player.attack();
-                } 
+//                    player.attack();
+
+                    projectBlood(gs);
+                }
 //                else if (!player.isDead() && name.equals("Attack")) {
 //                    player.setShooting(true);
 //                }
-
-
-
 
                 if (name.equals("I") && !gs.getPlayer().isDead() && !keyPressed) {
                     gs.getFlyCam().setDragToRotate(!gs.getFlyCam().isDragToRotate());
@@ -115,16 +121,13 @@ public class InputEditor {
 //                if (name.equals("E") && !gs.getPlayer().isDead() && !keyPressed) {
 //                    gs.getPlayer().checkIfPlayerPicked(gs.getPickableNode(), gs);
 //                }
-
 //                if (name.equals("R") && !gs.getPlayer().isDead() && !keyPressed) {
 //                    gs.getPlayer().getEquippedRightHand().reload(gs.getPlayer(), gs);
 //                }
-                
-                if (name.equals("K") && !keyPressed) {     
+                if (name.equals("K") && !keyPressed) {
 //                    gs.chatPutMessage("Cheat!");
                 }
 
-                
             }
         };
 
@@ -185,4 +188,61 @@ public class InputEditor {
 //        }
     }
 
+    private void projectBlood(ClientGameAppState gs) {
+        long time = System.currentTimeMillis();
+        for (int i = 0; i < 1; i++) {
+
+            Camera cam = gs.getCamera();
+            var contactFaceNormal = new Vector3f(); // Get the normal vector of the contact face
+            CollisionResults results = new CollisionResults();
+            Ray ray = new Ray(gs.getCamera().getLocation(), gs.getCamera().getDirection());
+            gs.getMapNode().collideWith(ray, results);
+            var contactPoint = new Vector3f();
+            if (results.size() > 0) {
+                CollisionResult closest = results.getClosestCollision();
+                contactFaceNormal = closest.getContactNormal();
+                contactPoint = closest.getContactPoint();
+            }
+// Calculate the position aligned with the contact face normal
+//var pos = cam.getLocation().add(contactFaceNormal.mult(dist / 2));
+            var pos = contactPoint.add(contactFaceNormal.mult(0.1f));
+// Calculate the rotation aligned with the contact face normal
+//var rot = new Quaternion().lookAt(contactFaceNormal.negate(), Vector3f.UNIT_Y);
+            var rot = cam.getRotation().clone();
+            var dist = contactPoint.distance(pos) + 35f;
+//pos.addLocal(rot.getRotationColumn(2).mult(dist/2));
+            var projectionBox = new Vector3f(3f, 3f, dist);
+
+            var projector = new DecalProjector(gs.getMapNode(), pos, rot, projectionBox);
+            projector.setSeparation(0.002f);
+            var geometry = projector.project();
+
+            Texture texture = gs.getAssetManager().loadTexture("Textures/Gameplay/Decals/testBlood" + new Random().nextInt(2) + ".png");
+            Material material = new Material(gs.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+            material.setTexture("ColorMap", texture);
+            material.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+            material.getAdditionalRenderState().setDepthWrite(false);
+            material.getAdditionalRenderState().setPolyOffset(-4, -1f);
+            // Apply the material to the geometry
+            geometry.setMaterial(material);
+            geometry.setQueueBucket(Bucket.Transparent);
+
+            geometry.setMaterial(material);
+
+            gs.getRootNode().attachChild(geometry);
+        }
+
+        System.out.println(System.currentTimeMillis() - time + "ms");
+//                    var box = new Geometry("box", new Box(projectionBox.x / 2f, projectionBox.y / 2f, projectionBox.z / 2f));
+//                    var boxmat = new Material(gs.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+//                    boxmat.getAdditionalRenderState().setWireframe(true);
+//                    boxmat.setColor("Color", ColorRGBA.White);
+//                    box.setMaterial(boxmat);
+//                    box.setLocalTranslation(pos);
+//                    box.setLocalRotation(rot);
+//                    gs.getRootNode().attachChild(box);
+
+    }
 }
+
+
