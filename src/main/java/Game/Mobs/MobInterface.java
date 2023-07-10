@@ -4,6 +4,8 @@
  */
 package Game.Mobs;
 
+import Game.Items.Equippable;
+import Game.Items.Item;
 import com.Networking.Client.ClientGameAppState;
 
 /**
@@ -16,4 +18,5 @@ public interface MobInterface {
     public void attack();
     public void receiveDamage();
     public void dealDamage();
+    public void equip(Item e);
 }

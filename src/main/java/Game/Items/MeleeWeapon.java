@@ -5,6 +5,7 @@
 package Game.Items;
 
 import Game.Mobs.Mob;
+import Game.Mobs.Player;
 
 /**
  *
@@ -13,12 +14,12 @@ import Game.Mobs.Mob;
 public class MeleeWeapon extends Weapon{
 
     @Override
-    public void equip(Mob m) {
+    public void playerEquip(Player m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public void unequip(Mob m) {
+    public void playerUnequip(Player m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -28,24 +29,17 @@ public class MeleeWeapon extends Weapon{
     }
 
     @Override
-    public void equipRight() {
+    public void playerHoldRight(Player p) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+
     @Override
-    public void equipLeft() {
+    public void playerUseRight(Player p) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    @Override
-    public void useRight() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 
-    @Override
-    public void useLeft() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
     
     public static class Builder{
         private MeleeWeapon weapon;

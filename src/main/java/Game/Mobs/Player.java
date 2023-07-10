@@ -4,7 +4,8 @@
  */
 package Game.Mobs;
 
-import Game.Items.ItemInterface;
+import Game.Items.Equippable;
+import Game.Items.Item;
 import static Game.Map.Collision.MovementCollisionUtils.canMoveToLocationGround;
 import Game.Mobs.MobFactory.PlayerFactory;
 
@@ -25,26 +26,26 @@ public class Player extends HumanMob {
 
     private static final int HOTBAR_SIZE = 10;
     private boolean forward, backward, right, left;
-    private final ItemInterface[] hotbar;
-    private Node gunNode = new Node();
+    private final Item[] hotbar;
+    private final Node gunNode = new Node();
 
-    public void addToGunNode(Node ... nodes) {
-        for (Node node : nodes) {
-            this.gunNode.attachChild(node);
-        }   
+
+    @Override
+    public void equip(Item item) {
+        if(item instanceof Equippable equippableItem)
+            equippableItem.playerEquip(this);
     }
 
     public Node getGunNode() {
         return gunNode;
     }
 
-
     public Player(int id, Node node, String name) {
         super(id, node, name);
-        hotbar = new ItemInterface[HOTBAR_SIZE];
+        hotbar = new Item[HOTBAR_SIZE];
     }
 
-    public ItemInterface[] getHotbar() {
+    public Item[] getHotbar() {
         return hotbar;
     }
 
@@ -79,9 +80,6 @@ public class Player extends HumanMob {
     public void setLeft(boolean left) {
         this.left = left;
     }
-
-
-
 
     public static Player spawnPlayer(int newPlayerId, AssetManager assetManager, Node mobNode, Camera cam, RenderManager renderManager) {
         PlayerFactory factory = new PlayerFactory(newPlayerId, assetManager, mobNode, cam, renderManager);
@@ -129,18 +127,19 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
             // UMC odpowiada za to zebys nie mogl stanac bardzo blisko sciany, daje minimalna odleglosc miedzy toba a sciana
 //            removeFromGrid(cm.getWorldGrid());
             Vector3f UMC = movementVector.clone();
+            float wallCollisionRange = 0.75f;
             if (UMC.getX() < 0) {
-                UMC.setX(UMC.getX() - 0.5f);
+                UMC.setX(UMC.getX() - wallCollisionRange);
             }
             if (UMC.getX() > 0) {
-                UMC.setX(UMC.getX() + 0.5f);
+                UMC.setX(UMC.getX() + wallCollisionRange);
             }
 
             if (UMC.getZ() < 0) {
-                UMC.setZ(UMC.getZ() - 0.5f);
+                UMC.setZ(UMC.getZ() - wallCollisionRange);
             }
             if (UMC.getZ() > 0) {
-                UMC.setZ(UMC.getZ() + 0.5f);
+                UMC.setZ(UMC.getZ() + wallCollisionRange);
             }
 
             boolean[] canMoveOnAxes = canMoveToLocationGround(node, UMC, cm.getMap().getBlockWorld().getLogicMap(), cm.getBLOCK_SIZE());

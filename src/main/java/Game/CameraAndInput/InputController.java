@@ -9,7 +9,6 @@ import Game.Effects.DecalProjector;
 import Game.Items.Item;
 import Game.Mobs.Player;
 import com.Networking.Client.ClientGameAppState;
-import com.jme3.animation.LoopMode;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.InputManager;
@@ -90,7 +89,7 @@ public class InputController {
                 }
 
                 if (!player.isDead() && name.equals("1") && !keyPressed) {
-                    player.equipItem(player.getEquipment()[Integer.parseInt(name)]);
+                    player.equip(player.getEquipment()[Integer.parseInt(name)-1]);
 
                 }
 
@@ -108,11 +107,11 @@ public class InputController {
                 if (name.equals("I") && !gs.getPlayer().isDead() && !keyPressed) {
                     gs.getFlyCam().setDragToRotate(!gs.getFlyCam().isDragToRotate());
                     for (int eqSlot = 0; eqSlot < gs.getPlayer().getEquipment().length; eqSlot++) {
-                        if (gs.getPlayer().getEquipment()[eqSlot] != null) {
-
-                            guiElement = gs.getNifty().getRenderEngine().createImage(gs.getNifty().getCurrentScreen(), gs.getPlayer().getEquipment()[eqSlot].getIconPath(), false);
-                            gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).getRenderer(ImageRenderer.class).setImage(guiElement);
-                        }
+//                        if (gs.getPlayer().getEquipment()[eqSlot] != null) {
+//
+//                            guiElement = gs.getNifty().getRenderEngine().createImage(gs.getNifty().getCurrentScreen(), gs.getPlayer().getEquipment()[eqSlot].getIconPath(), false);
+//                            gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).getRenderer(ImageRenderer.class).setImage(guiElement);
+//                        }
 
                         gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).setVisible(!gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).isVisible());
                     }

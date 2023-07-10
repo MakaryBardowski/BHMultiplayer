@@ -4,11 +4,15 @@
  */
 package Game.Items;
 
+import Game.Mobs.Player;
+
 /**
  *
- * @author tomasz potoczko
+ * @author 48793
  */
-public interface Attackable {
-    void attack();
-    
+public interface Equippable {
+
+    public void playerEquip(Player m);
+
+    public void playerUnequip(Player m);
 }

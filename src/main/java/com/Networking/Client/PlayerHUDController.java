@@ -4,6 +4,8 @@
  */
 package com.Networking.Client;
 
+import Game.Items.Equippable;
+import Game.Items.Item;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
@@ -42,7 +44,9 @@ public class PlayerHUDController implements ScreenController{
     
     public static void playerEquipItem(String strIndex){
         int i = Integer.parseInt(strIndex);
-        gs.getPlayer().equipItem(gs.getPlayer().getEquipment()[i]); 
+        Item item = gs.getPlayer().getEquipment()[i];
+        gs.getPlayer().equip(item); 
+
     }
     
     

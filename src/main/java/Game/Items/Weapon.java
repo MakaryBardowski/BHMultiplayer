@@ -9,12 +9,12 @@ import Game.Mobs.Mob;
 /**
  * @author tomasz potoczko
  */
-public abstract class Weapon extends Holdable implements Attacks{
-    float damage;
-    float range;
-    DamageType damageType;
-    float attackSpeed;
-
+public abstract class Weapon extends Item implements Attacks,Holdable,Equippable{
+    protected float damage;
+    protected float range;
+    protected DamageType damageType;
+    protected float attackSpeed;
+    
     public void setDamage(float damage) {
         this.damage = damage;
     }
@@ -46,4 +46,6 @@ public abstract class Weapon extends Holdable implements Attacks{
     public float getDamage(){
         return damage;
     }
+    
+    
 }

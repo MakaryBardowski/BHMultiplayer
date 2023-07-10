@@ -27,11 +27,8 @@ public class DecalProjector {
   private Matrix4f projectorMatrixInverse;
   private float separation;
   
-  private Vector3f shootAngle;
-  private static final float CUTOFF_ANGLE = FastMath.DEG_TO_RAD*80;
 
   public DecalProjector(Spatial spatial, Vector3f position, Quaternion rotation, Vector3f size) {
-      shootAngle = rotation.getRotationColumn(2);
     var geometries = new ArrayList<Geometry>();
     spatial.depthFirstTraversal(s -> {
       if (s instanceof Geometry) {
@@ -148,13 +145,10 @@ public class DecalProjector {
     geometry.getWorldMatrix().mult(position, position);
     projectorMatrixInverse.mult(position, position);
 
-          float angle = calculateAngle(normal.mult(-1),shootAngle);
-//      System.out.println("angle "+angle);
-//      System.out.println("cutoff "+angleCutoff);
-if (angle <= CUTOFF_ANGLE) {
+          
+
     geometry.getWorldMatrix().rotateVect(normal);
     vertices.add(new DecalVertex(position, normal));
-}
   }
 
   private ArrayList<DecalVertex> clipGeometry(List<DecalVertex> inVertices, Vector3f plane) {

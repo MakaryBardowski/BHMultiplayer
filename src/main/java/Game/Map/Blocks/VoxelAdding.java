@@ -38,15 +38,9 @@ import java.util.Random;
 public class VoxelAdding {
 
     public static Block AddOptimizedBox(Chunk chunk, Block[][][] map, byte[][][] logicMap, int vmX, int vmY, int vmZ, float voxelSize, int index, AssetManager asm, BlockType bt, float x, float y, float z) {
-
         Block b = new Block();
-
-//        System.out.println("------------------------chunk "+chunk.getChunkPos());
-//        System.out.println("cull x "+x);
-//        System.out.println("cull y "+y);
-//        System.out.println("cull z "+z);
         map[vmX][vmY][vmZ] = b;
-
+        
         boolean top = false;
         boolean floor = false;
         boolean left = false;
@@ -74,15 +68,6 @@ public class VoxelAdding {
             floor = true;
         }
 
-        if (vmY == 0) {
-            top = true;
-            floor = false;
-            back = false;
-            front = false;
-            left = false;
-            right = false;
-
-        } 
 
 
         int neighborCnt = (left ? 1 : 0) + (right ? 1 : 0) + (back ? 1 : 0) + (front ? 1 : 0) + (top ? 1 : 0) + (floor ? 1 : 0);
@@ -248,7 +233,6 @@ public class VoxelAdding {
             vertices.add(new Vector3f(voxelSize + x, y - FACE_OFFSET, z + voxelSize));
             vertices.add(new Vector3f(x, y - FACE_OFFSET, z + voxelSize));
 
-            //        23, 20 ,21 ,21,22,23
             overridenIndexes.add(((short) (3 + (4 * usedBooleanCount))));
             overridenIndexes.add(((short) (0 + (4 * usedBooleanCount))));
             overridenIndexes.add(((short) (1 + (4 * usedBooleanCount))));
@@ -273,14 +257,11 @@ public class VoxelAdding {
         Integer[] indexes = new Integer[inds.length];
 
         for (int i = 0; i < indexes.length; i++) {
-//            System.out.println("chunk vs "+chunk.getVertexCount());
             indexes[i] = (int) inds[i] + chunk.getVertexCount();  // + index*24 pobawic sie indeksacja i bedzie dzialac
 
         }
 
-// floor face GIT
         List<Vector4f> colors = new ArrayList<>();
-//        System.out.println(Arrays.toString(texCoord));
         //Set custom RGBA value for each Vertex. Values range from 0.0f to 1.0f
         for (int i = 0; i < vertices.size(); i++) {
             colors.add(new Vector4f(0.1f, 0.1f, 0.1f, 1));
@@ -289,22 +270,9 @@ public class VoxelAdding {
 
         b.setPositions(vertices);
         b.setIndices(Arrays.asList(indexes));
-//        System.out.println("INDICES "+b.getIndices().size());
         b.setNormals(normals);
         b.setUvs(Arrays.asList(texCoord));
         b.setColors(colors);
-
-
-//        System.out.println("box indices "+ b.getIndices() + "  size "+b.getIndices().size());
-//        System.out.println("\n\nvoxel adding final");
-//                m.getFloatBuffer(VertexBuffer.Type.TexCoord).position(0);
-//
-//        for(int i = 0 ; i< m.getFloatBuffer(VertexBuffer.Type.TexCoord).limit();i++){
-//        System.out.print(m.getFloatBuffer(VertexBuffer.Type.TexCoord).get()+", ");
-//        }
-//        System.out.println("\n\n");
-//System.out.println(new HashSet<Vector3f>(Arrays.asList(vertices)));
-//        System.out.println(b.getPositions());
         return b;
 
     }

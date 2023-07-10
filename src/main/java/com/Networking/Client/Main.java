@@ -1,6 +1,7 @@
 package com.Networking.Client;
 
 import com.Networking.Client.GUI.MainMenuAppState;
+import com.jme3.app.DetailedProfilerState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.FlyByCamera;
 import com.jme3.material.Material;
@@ -20,31 +21,30 @@ import java.util.Random;
  * @author normenhansen
  */
 public class Main extends SimpleApplication {
+    private static Main instance;
+    
+    private static final short STARTING_RESOLUTION_WIDTH = 1422;
+    private static final short STARTING_RESOLUTION_HEIGHT = 800;
 
+    
     public static void main(String[] args) {
         Main app = new Main();
+        setupSettings(app);
         app.start();
-        
+
     }
 
     @Override
     public void simpleInitApp() {
+        instance = this;
 //        stateManager.attach(new MainMenuAppState());
-        
-        AppSettings settings1 = new AppSettings(true);
-        settings1.setResolution(1920, 1080);
-        settings1.setFullscreen(true);
-        settings1.setCenterWindow(false);
-        if (new Random().nextInt(2) == 0) {
-            settings1.setWindowXPosition(0);
-        } else {
-            settings1.setWindowXPosition(1000);
-        }
-        this.setPauseOnLostFocus(false);
-        this.setSettings(settings1);
-        this.start(JmeContext.Type.Display);
 
+        this.start(JmeContext.Type.Display);
         stateManager.attach(new ClientGameAppState(this));
+        
+        
+        DetailedProfilerState dps = new DetailedProfilerState();
+        stateManager.attach(dps);
     }
 
     @Override
@@ -64,4 +64,32 @@ public class Main extends SimpleApplication {
     public AppSettings getAppSettings() {
         return settings;
     }
+
+    private static void setupSettings(SimpleApplication app) {
+        AppSettings settings1 = new AppSettings(true);
+        settings1.setResolution(STARTING_RESOLUTION_WIDTH, STARTING_RESOLUTION_HEIGHT);
+//        settings1.setFullscreen(true);
+        settings1.setFrameRate(2000);
+        
+//        app.setDisplayFps(false);
+//        app.setDisplayStatView(false);
+//        settings1.setCenterWindow(false);
+
+//        if (new Random().nextInt(2) == 0) {
+//            settings1.setWindowXPosition(0);
+//        } else {
+//            settings1.setWindowXPosition(1000);
+//        }
+//        
+        settings1.setTitle("BH");
+        app.setSettings(settings1);
+        System.out.println(settings1);
+        app.setPauseOnLostFocus(false);
+        app.setSettings(settings1);
+    }
+
+    public static Main getInstance() {
+        return instance;
+    }
+    
 }
