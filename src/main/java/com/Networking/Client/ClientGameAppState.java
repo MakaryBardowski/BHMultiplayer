@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  */
 public class ClientGameAppState extends AbstractAppState implements ClientStateListener {
 
-    private final int BLOCK_SIZE = 5;
+    private final int BLOCK_SIZE = 4;
     private final int CHUNK_SIZE = 16;
     private final int MAP_SIZE = 48;
 

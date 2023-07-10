@@ -4,6 +4,7 @@
  */
 package Game.Mobs.MobFactory;
 
+import Game.Items.Rifle;
 import Game.Mobs.Player;
 import com.Networking.Client.ClientGameAppState;
 import com.jme3.anim.SkinningControl;
@@ -19,6 +20,7 @@ import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import java.util.Arrays;
 
 /**
  *
@@ -47,48 +49,35 @@ public class PlayerFactory extends MobFactory {
         String name = "Gracz_" + mobId;
         Player p = new Player(mobId, playerNode, name);
 
-        Vector3f playerSpawnpoint = new Vector3f(0, 5, 0);
+        Vector3f playerSpawnpoint = new Vector3f(0, 4, 0);
         attachToMobsNode(playerNode, playerSpawnpoint);
         Debugging.DebugUtils.addArrow(playerNode, assetManager);
         
-        firstPersonCameraSetup(p, playerNode);
-
+        setupFirstPersonCamera(p, playerNode);
+        
+        addStartEquipment(p);
         return p;
     }
     
-    private void firstPersonCameraSetup(Player p, Node playerNode){
+    private void setupFirstPersonCamera(Player p, Node playerNode){
         Node gunCameraNode = new CameraNode("Gun Camera Node", firstPersonCamera);
-        Node model = (Node) assetManager.loadModel("Models/testRifleFP/testRifleFP.j3o");
-        model.move(-.48f, -.52f, 1.8f);
-        model.setLocalRotation((new Quaternion()).fromAngleAxis(FastMath.PI / 32, new Vector3f(-.15f, .5f, 0)));
-        
-        /// i don't know why the setupModelLight() method doesn't work <<-- big congo
-            Geometry ge = (Geometry) ((Node) model.getChild(0)).getChild(0);
-            Material originalMaterial = ge.getMaterial();
-            Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-            newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
-            ge.setMaterial(newMaterial);
-        ///
-        
-        SkinningControl skinningControl = model.getChild(0).getControl(SkinningControl.class);
-        Node muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
-        
-        p.addToGunNode(model, muzzleNode);
-        
         ViewPort view2 = renderManager.createMainView("View of firstPersonCamera", firstPersonCamera);
         view2.setClearFlags(false, true, true);
         view2.attachScene(p.getGunNode());
         firstPersonCamera.setFrustumPerspective(45f, (float) firstPersonCamera.getWidth() / firstPersonCamera.getHeight(), 0.01f, 1000f);
-        
         playerNode.attachChild(gunCameraNode);
         gunCameraNode.attachChild(p.getGunNode());
-        
-        model.move((gunCameraNode.getLocalTranslation().clone().subtract(model.getLocalTranslation().clone())).mult(.9f));
         gunCameraNode.setCullHint(Spatial.CullHint.Never);
     }
     
     private Node loadPlayerModel() {
         return (Node) assetManager.loadModel("Models/testHuman/testHuman.j3o");
+    }
+    
+    
+    private void addStartEquipment(Player p){
+    p.getEquipment()[0] = new Rifle();
+    p.getHotbar()[0] = p.getEquipment()[0];
     }
 
 }

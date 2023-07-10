@@ -4,38 +4,20 @@
  */
 package Game.Items;
 
+import Game.Items.ItemTemplates.ItemTemplate;
+
 /**
  *
  * @author 48793
  */
-public abstract class Item implements ItemInterface {
-    
-    String iconPath;
-    String name;
-    String description;
+public abstract class Item{
+    protected String name;
+    protected String description;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getIconPath() {
-        return iconPath;
-    }
-
-    public void setIconPath(String iconPath) {
-        this.iconPath = iconPath;
-    }
-    
+    // odkomentuj
+//    private ItemTemplate template;
+//    
+//    public Item (ItemTemplate template){
+//    this.template = template;
+//    }
 }

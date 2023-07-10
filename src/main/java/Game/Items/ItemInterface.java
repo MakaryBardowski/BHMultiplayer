@@ -5,14 +5,9 @@
 package Game.Items;
 
 import Game.Mobs.Mob;
+import Game.Mobs.Player;
 
 /**
  *
  * @author 48793
  */
-public interface ItemInterface {
-    
-    public void equip(Mob m);
-    public void unequip(Mob m);
- 
-}

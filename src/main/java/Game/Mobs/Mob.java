@@ -5,7 +5,6 @@
 package Game.Mobs;
 
 import Game.Items.Item;
-import Game.Items.ItemInterface;
 import Game.Map.Collision.CollidableInterface;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -138,8 +137,5 @@ public abstract class Mob implements CollidableInterface, MobInterface {
         this.rotInterpolationValue = rotInterpolationValue;
     }
 
-    public void equipItem(ItemInterface i) {
-        i.equip(this);
-    }
 
 }

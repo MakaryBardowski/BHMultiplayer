@@ -1,13 +1,16 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
 package Game.Items;
+
+import Game.Mobs.Player;
 
 /**
  *
  * @author tomasz potoczko
  */
-public abstract class Holdable extends Item implements HoldableInterface{
-    
+public interface Holdable {
+    void playerHoldRight(Player p);
+    void playerUseRight(Player p);
 }

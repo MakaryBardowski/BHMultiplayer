@@ -11,6 +11,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.math.Vector4f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
@@ -69,7 +70,6 @@ public class Chunk {
 //        mat.getAdditionalRenderState().setLineWidth(7);
 
         geometry.setMaterial(mat);
-
         return geometry;
     }
 
@@ -106,11 +106,11 @@ public class Chunk {
     public Block attachBlock(Block b, Texture t) {
         b.setVertexOffsetInParentChunk(positions.size());
 
-        System.out.println("starting indices index " + indices.size());
-        System.out.println("block indices size " + b.getIndices().size());
-
-        System.out.println("block vertex offset " + b.getVertexOffsetInParentChunk());
-        System.out.println("\n\n\n");
+//        System.out.println("starting indices index " + indices.size());
+//        System.out.println("block indices size " + b.getIndices().size());
+//
+//        System.out.println("block vertex offset " + b.getVertexOffsetInParentChunk());
+//        System.out.println("\n\n\n");
         addBlockData(b, t);
 
         Mesh m = generateMesh();
@@ -144,63 +144,6 @@ public class Chunk {
         return b;
     }
 
-//    public Block detachBlock(Block b){
-//        if(b==null)
-//            return b;
-//
-//  for(int i= b.getVertexOffsetInParentChunk()+b.getVertexCount()-1; i>= b.getVertexOffsetInParentChunk();i--){
-//            positions.remove(i);
-//            uvs.remove(i);
-//        }
-//        
-//// usun z 0.1 
-//// potem z 1.0 i bedzie bug
-//
-//        blocksCount--;
-//        vertexCount -= b.getVertexCount();
-//        
-//
-//        for(int i =0 ;i<indices.size();i++)
-//            if(indices.get(i) >= Collections.min(b.getIndices() )  ){ 
-//                            indices.set(i, indices.get(i)-b.getVertexCount());            
-//            }
-//        
-//            // te znikajace na krawedziach bloki plipuja triangle
-//            
-//        int CHUNK_SIZE = 16;
-//        for(int x =(int) chunkPos.getX() ; x<(int) chunkPos.getX()+CHUNK_SIZE; x++){
-//        
-//        
-//         for(int y =0 ; y< bw.getMap().length; y++){
-//        
-//         for(int z =(int) chunkPos.getY() ; z<(int) chunkPos.getY()+ CHUNK_SIZE; z++){
-//        
-//        
-//        Block bl = bw.getMap()[x][y][z];
-//                       if(bl != null){
-//                       
-//                       if(bl.getVertexOffsetInParentChunk() > b.getVertexOffsetInParentChunk()){
-//                           
-//
-//                                              bl.setVertexOffsetInParentChunk(bl.getVertexOffsetInParentChunk()-b.getVertexCount() );
-//
-//                       }
-//                       }
-//        
-//        }
-//        
-//        
-//        }
-//        
-//        
-//        }
-//       
-//                Mesh m = generateMesh();
-//                geometry.setMesh(m);
-//
-//        
-//    return b;
-//    }
     public Block detachBlock(Block b) {
         if (b == null) {
             return b;
@@ -380,5 +323,8 @@ public class Chunk {
     public void setNormals(List<Vector3f> normals) {
         this.normals = normals;
     }
+    
+    
+    
 
 }
