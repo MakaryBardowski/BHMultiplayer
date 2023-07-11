@@ -96,7 +96,7 @@ public class InputController {
                 // attack test
                 if (!player.isDead() && name.equals("Attack") && !keyPressed) {
 //                    player.setShooting(false);
-//                    player.attack();
+                    player.getEquippedRightHand().playerUseRight(player);
 
                     projectBlood(gs);
                 }

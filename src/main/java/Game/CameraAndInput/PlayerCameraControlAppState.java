@@ -19,6 +19,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
+import com.jme3.scene.Node;
 
 /**
  *
@@ -26,7 +27,7 @@ import com.jme3.renderer.ViewPort;
  */
 public class PlayerCameraControlAppState extends AbstractAppState {
 
-    private final float CAMERA_Y_OFFSET = 2.12f; //2.12f
+    public static final float CAMERA_Y_OFFSET = 2.12f; //2.12f
     private Camera handsCam;
     private ClientGameAppState clientApp;
     private float renderDistance = 700f; //70
@@ -78,7 +79,16 @@ public class PlayerCameraControlAppState extends AbstractAppState {
 
             clientApp.getCamera().setLocation(new Vector3f(clientApp.getPlayer().getNode().getWorldTranslation().x, CAMERA_Y_OFFSET + clientApp.getPlayer().getNode().getWorldTranslation().getY(), clientApp.getPlayer().getNode().getWorldTranslation().z));
 
-            
+            if (lookDirection != null) {
+                clientApp.getPlayer().getGunNode().getParent().lookAt(lookDirection, Vector3f.UNIT_Y);
+            }
+
+            // first person alignment for bullets to work
+            float[] playerAngles = new float[3];
+            clientApp.getPlayer().getGunNode().getLocalRotation().toAngles(playerAngles);
+            playerAngles[0] = cameraRotAsAngles[0];
+            clientApp.getPlayer().getGunNode().getParent().setLocalRotation(new Quaternion().fromAngles(playerAngles));
+
             CollisionResults results = new CollisionResults();
             Ray ray = new Ray(clientApp.getCamera().getLocation(), clientApp.getCamera().getDirection());
             clientApp.getMapNode().collideWith(ray, results);

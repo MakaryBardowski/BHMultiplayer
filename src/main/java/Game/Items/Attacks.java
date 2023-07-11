@@ -4,11 +4,14 @@
  */
 package Game.Items;
 
+import Game.Mobs.Mob;
+import Game.Mobs.Player;
+
 /**
  *
  * @author tomasz potoczko
  */
 public interface Attacks {
-    void attack();
-    
+    void attack(Mob m);
+    void playerAttack(Player p);
 }

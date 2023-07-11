@@ -4,16 +4,26 @@
  */
 package Game.Items;
 
+import Game.Items.ItemTemplates.ItemTemplate;
 import Game.Mobs.Mob;
+import Game.Mobs.Player;
 
 /**
  * @author tomasz potoczko
  */
 public abstract class Weapon extends Item implements Attacks,Holdable,Equippable{
+    private static final DamageType DEFAULT_DAMAGE_TYPE = DamageType.PHYSICAL;
     protected float damage;
     protected float range;
     protected DamageType damageType;
     protected float attackSpeed;
+    
+    protected Weapon(ItemTemplate template){
+    super(template);
+    damageType = DEFAULT_DAMAGE_TYPE;
+    }
+    
+//
     
     public void setDamage(float damage) {
         this.damage = damage;

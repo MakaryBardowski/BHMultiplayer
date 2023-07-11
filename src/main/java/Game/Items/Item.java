@@ -15,9 +15,24 @@ public abstract class Item{
     protected String description;
 
     // odkomentuj
-//    private ItemTemplate template;
-//    
-//    public Item (ItemTemplate template){
-//    this.template = template;
-//    }
+    protected ItemTemplate template;
+    
+    protected Item (ItemTemplate template){
+    this.template = template;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public ItemTemplate getTemplate() {
+        return template;
+    }
+    
+    
+    
 }

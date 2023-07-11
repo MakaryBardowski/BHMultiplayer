@@ -9,7 +9,7 @@ package Game.Items;
  * @author 48793
  */
 public class ItemTemplates {
-    public final ItemTemplate RIFLE_MANNLICHER_95 = new ItemTemplate("Models/testRifleFP/testRifleFP.j3o",null,null);
+    public static final ItemTemplate RIFLE_MANNLICHER_95 = new ItemTemplate("Models/testRifleFP/testRifleFP.j3o",null,null);
 
     protected static class ItemTemplate {
         private final String fpPath; // path to the model seen in first person
