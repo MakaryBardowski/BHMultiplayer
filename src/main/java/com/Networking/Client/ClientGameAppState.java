@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  * @author normenhansen
  */
 public class ClientGameAppState extends AbstractAppState implements ClientStateListener {
-
+    private static ClientGameAppState instance;
     private final int BLOCK_SIZE = 4;
     private final int CHUNK_SIZE = 16;
     private final int MAP_SIZE = 48;
@@ -69,6 +69,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     private Nifty nifty;
 
     public ClientGameAppState(Main app) {
+        instance = this;
         this.app = app;
         this.assetManager = app.getAssetManager();
         this.applicationSettings = app.getAppSettings();
@@ -239,8 +240,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         return app.getStateManager();
     }
 
-    public SimpleApplication getApp() {
-        return app;
+    public static ClientGameAppState getInstance(){
+    return instance;
     }
 
 }

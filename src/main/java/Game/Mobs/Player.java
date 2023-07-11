@@ -26,6 +26,7 @@ public class Player extends HumanMob {
 
     private static final int HOTBAR_SIZE = 10;
     private boolean forward, backward, right, left;
+    private Camera mainCamera;
     private final Item[] hotbar;
     private final Node gunNode = new Node();
 
@@ -40,8 +41,9 @@ public class Player extends HumanMob {
         return gunNode;
     }
 
-    public Player(int id, Node node, String name) {
+    public Player(int id, Node node, String name,Camera mainCamera) {
         super(id, node, name);
+        this.mainCamera = mainCamera;
         hotbar = new Item[HOTBAR_SIZE];
     }
 
@@ -81,6 +83,16 @@ public class Player extends HumanMob {
         this.left = left;
     }
 
+    public Camera getMainCamera() {
+        return mainCamera;
+    }
+
+    public void setMainCamera(Camera mainCamera) {
+        this.mainCamera = mainCamera;
+    }
+
+    
+    
     public static Player spawnPlayer(int newPlayerId, AssetManager assetManager, Node mobNode, Camera cam, RenderManager renderManager) {
         PlayerFactory factory = new PlayerFactory(newPlayerId, assetManager, mobNode, cam, renderManager);
         return factory.create();

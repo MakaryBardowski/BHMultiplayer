@@ -4,6 +4,7 @@
  */
 package Game.Items;
 
+import Game.Items.ItemTemplates.ItemTemplate;
 import Game.Mobs.Mob;
 import Game.Mobs.Player;
 
@@ -13,6 +14,10 @@ import Game.Mobs.Player;
  */
 public class MeleeWeapon extends Weapon{
 
+    protected MeleeWeapon(ItemTemplate template){
+    super(template);
+    }
+    
     @Override
     public void playerEquip(Player m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
@@ -24,7 +29,7 @@ public class MeleeWeapon extends Weapon{
     }
 
     @Override
-    public void attack() {
+    public void attack(Mob m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -39,18 +44,26 @@ public class MeleeWeapon extends Weapon{
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+    @Override
+    public void playerAttack(Player p) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
 
     
     public static class Builder{
         private MeleeWeapon weapon;
-
+        private final ItemTemplate DEFAULT_TEMPLATE = ItemTemplates.RIFLE_MANNLICHER_95;
+        
         public Builder(){
             this.reset();
         }
 
         public void reset(){
-            this.weapon = new MeleeWeapon();
+            this.weapon = new MeleeWeapon(DEFAULT_TEMPLATE);
         }
+        
+        
 
         public void setName(String name){
             weapon.name = name;
