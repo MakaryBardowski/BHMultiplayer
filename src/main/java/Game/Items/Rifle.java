@@ -72,9 +72,14 @@ public class Rifle extends RangedWeapon {
 
         AssetManager assetManager = Main.getInstance().getAssetManager();
         Node model = (Node) assetManager.loadModel(template.getFpPath());
-        model.move(-.48f, -.52f, 1.8f);
-        model.setLocalRotation((new Quaternion()).fromAngleAxis(FastMath.PI / 32, new Vector3f(-.15f, .5f, 0)));
 
+         model.move(-.63f, -.65f, 2.3f);
+        model.setLocalRotation((new Quaternion()).fromAngleAxis(FastMath.PI / 32, new Vector3f(-.15f, .5f, 0)));
+        
+        
+//        model.move(-.48f, -.52f, 1.8f);
+//        model.setLocalRotation((new Quaternion()).fromAngleAxis(FastMath.PI / 32, new Vector3f(-.15f, .5f, 0)));
+ 
         /// i don't know why the setupModelLight() method doesn't work <<-- big congo
         Geometry ge = (Geometry) ((Node) model.getChild(0)).getChild(0);
         Material originalMaterial = ge.getMaterial();
@@ -86,7 +91,16 @@ public class Rifle extends RangedWeapon {
         SkinningControl skinningControl = model.getChild(0).getControl(SkinningControl.class);
         muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
+        
+//                Box box1 = new Box(0.5f, 0.5f, 0.5f);
+//        Geometry blue = new Geometry("Box", box1);
+//        blue.setMaterial(newMaterial);
+//        Node bullet = new Node();
+//        bullet.attachChild(blue);
+//        muzzleNode.attachChild(bullet);
+//  
         p.getGunNode().attachChild(model);
+        p.getFirstPersonCameraNode().attachChild(p.getGunNode());
         model.move(new Vector3f(0.43199998f, 0.46799996f, -1.6199999f));
     }
 
@@ -138,8 +152,8 @@ public class Rifle extends RangedWeapon {
         emitter.addInfluencer(ti);
         emitter.addInfluencer(gi);
 
-//        ClientGameAppState.getInstance().getDebugNode().attachChild(emitter);
-////        emitter.setLocalTranslation(cp.clone());
+        ClientGameAppState.getInstance().getDebugNode().attachChild(emitter);
+        emitter.setLocalTranslation(muzzleNode.getWorldTranslation());
 //emitter.setLocalTranslation(new Vector3f ( 0 , 1, 0));
 //        System.out.println("emitter "+emitter.getWorldTranslation());
         Box box1 = new Box(0.02f, 0.02f, 0.02f);
@@ -150,11 +164,13 @@ public class Rifle extends RangedWeapon {
         ClientGameAppState.getInstance().getDebugNode().attachChild(bullet);
         
         bullet.move(muzzleNode.getWorldTranslation());
-        System.out.println("bullet "+bullet.getWorldTranslation());
-        System.out.println("player "+p.getNode().getWorldTranslation());
-        System.out.println("dist "+p.getNode().getWorldTranslation().distance(bullet.getWorldTranslation()));
-        
-        bullet.addControl(new BulletTracerControl(bullet, cp, 1f));
+        System.out.println("muzzle pos--- "+muzzleNode.getWorldTranslation());
+        System.out.println("player pos "+p.getNode().getWorldTranslation());
+        System.out.println("muzzle rot--- "+muzzleNode.getWorldRotation());
+        System.out.println("cam node rot --- "+p.getFirstPersonCameraNode().getWorldRotation());
+        System.out.println("rot node rot "+p.getRotationNode().getWorldRotation());
+
+        bullet.addControl(new BulletTracerControl(bullet, cp, 3f));
     }
 
 }

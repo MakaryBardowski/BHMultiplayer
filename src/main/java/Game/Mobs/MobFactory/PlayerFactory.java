@@ -30,6 +30,7 @@ import java.util.Arrays;
  */
 public class PlayerFactory extends MobFactory {
 
+    private static final float PLAYER_HEIGHT = 2.12f;
     private final int mobId;
     private final Camera mainCamera;
     private Camera firstPersonCamera;
@@ -50,39 +51,46 @@ public class PlayerFactory extends MobFactory {
         setupModelShootability(playerNode, mobId);
 
         String name = "Gracz_" + mobId;
-        Player p = new Player(mobId, playerNode, name,mainCamera);
+        Player p = new Player(mobId, playerNode, name, mainCamera);
 
         Vector3f playerSpawnpoint = new Vector3f(0, 4, 0);
         attachToMobsNode(playerNode, playerSpawnpoint);
         Debugging.DebugUtils.addArrow(playerNode, assetManager);
-        
+
         setupFirstPersonCamera(p, playerNode);
-        
+
         addStartEquipment(p);
         return p;
     }
-    
-    private void setupFirstPersonCamera(Player p, Node playerNode){
+
+    private void setupFirstPersonCamera(Player p, Node playerNode) {
+        CameraNode playerCameraNode = new CameraNode("Main Camera Node", mainCamera);
+        p.getRotationNode().attachChild(playerCameraNode);
+        p.getNode().attachChild(p.getRotationNode());
+        p.getRotationNode().setLocalTranslation(0, PLAYER_HEIGHT, 0);
+
         CameraNode gunCameraNode = new CameraNode("Gun Camera Node", firstPersonCamera);
-                gunCameraNode.move(0,2.12f,0);
+        gunCameraNode.move(0, PLAYER_HEIGHT, 0);
         ViewPort view2 = renderManager.createMainView("View of firstPersonCamera", firstPersonCamera);
         view2.setClearFlags(false, true, true);
         view2.attachScene(p.getGunNode());
-gunCameraNode.setControlDir(ControlDirection.SpatialToCamera);
         firstPersonCamera.setFrustumPerspective(45f, (float) firstPersonCamera.getWidth() / firstPersonCamera.getHeight(), 0.01f, 1000f);
         playerNode.attachChild(gunCameraNode);
         gunCameraNode.attachChild(p.getGunNode());
         gunCameraNode.setCullHint(Spatial.CullHint.Never);
+
+
+        p.setMainCameraNode(playerCameraNode);
+        p.setFirstPersonCameraNode(gunCameraNode);
     }
-    
+
     private Node loadPlayerModel() {
         return (Node) assetManager.loadModel("Models/testHuman/testHuman.j3o");
     }
-    
-    
-    private void addStartEquipment(Player p){
-    p.getEquipment()[0] = new Rifle(ItemTemplates.RIFLE_MANNLICHER_95);
-    p.getHotbar()[0] = p.getEquipment()[0];
+
+    private void addStartEquipment(Player p) {
+        p.getEquipment()[0] = new Rifle(ItemTemplates.RIFLE_MANNLICHER_95);
+        p.getHotbar()[0] = p.getEquipment()[0];
     }
 
 }

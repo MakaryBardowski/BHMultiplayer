@@ -16,6 +16,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
+import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
 
 /**
@@ -26,9 +27,15 @@ public class Player extends HumanMob {
 
     private static final int HOTBAR_SIZE = 10;
     private boolean forward, backward, right, left;
+    
+    // camera
+    private CameraNode mainCameraNode;
+    private CameraNode firstPersonCameraNode;
+    private Node rotationNode = new Node();
+    
     private Camera mainCamera;
     private final Item[] hotbar;
-    private final Node gunNode = new Node();
+    private final Node gunNode = new Node("gun node");
 
 
     @Override
@@ -91,6 +98,31 @@ public class Player extends HumanMob {
         this.mainCamera = mainCamera;
     }
 
+    public CameraNode getMainCameraNode() {
+        return mainCameraNode;
+    }
+
+    public void setMainCameraNode(CameraNode mainCameraNode) {
+        this.mainCameraNode = mainCameraNode;
+    }
+
+    public CameraNode getFirstPersonCameraNode() {
+        return firstPersonCameraNode;
+    }
+
+    public void setFirstPersonCameraNode(CameraNode firstPersonCameraNode) {
+        this.firstPersonCameraNode = firstPersonCameraNode;
+    }
+
+    public Node getRotationNode() {
+        return rotationNode;
+    }
+
+    public void setRotationNode(Node rotationNode) {
+        this.rotationNode = rotationNode;
+    }
+
+    
     
     
     public static Player spawnPlayer(int newPlayerId, AssetManager assetManager, Node mobNode, Camera cam, RenderManager renderManager) {
