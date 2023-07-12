@@ -25,6 +25,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
 import com.jme3.light.AmbientLight;
 import com.jme3.network.ClientStateListener;
 import com.jme3.renderer.Camera;
@@ -65,6 +66,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     private Client client;
     private Player player;
     private ActionListener actionListener;
+    private AnalogListener analogListener;
     private Map map;
     private Nifty nifty;
 
@@ -242,6 +244,14 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     public static ClientGameAppState getInstance(){
     return instance;
+    }
+
+    public AnalogListener getAnalogListener() {
+        return analogListener;
+    }
+
+    public void setAnalogListener(AnalogListener analogListener) {
+        this.analogListener = analogListener;
     }
 
 }

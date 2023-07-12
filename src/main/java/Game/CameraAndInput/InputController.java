@@ -15,10 +15,13 @@ import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
@@ -38,13 +41,14 @@ import java.util.Random;
 public class InputController {
 
     private NiftyImage guiElement;
+    private InputManager m;
 
     public void setupInput(ClientGameAppState gs) {
-        InputManager m = gs.getInputManager();
-        initKeys(m, initActionManager(gs));
+        m = gs.getInputManager();
+        initKeys(m, initActionListener(gs), initAnalogListener(gs));
     }
 
-    private ActionListener initActionManager(final ClientGameAppState gs) {
+    private ActionListener initActionListener(final ClientGameAppState gs) {
         final Player player = gs.getPlayer();
 
         ActionListener actionListener = new ActionListener() {
@@ -89,7 +93,7 @@ public class InputController {
                 }
 
                 if (!player.isDead() && name.equals("1") && !keyPressed) {
-                    player.equip(player.getEquipment()[Integer.parseInt(name)-1]);
+                    player.equip(player.getEquipment()[Integer.parseInt(name) - 1]);
 
                 }
 
@@ -135,7 +139,38 @@ public class InputController {
         return actionListener;
     }
 
-    private void initKeys(InputManager inputManager, ActionListener actionListener) {
+    private AnalogListener initAnalogListener(final ClientGameAppState gs) {
+        final Player player = gs.getPlayer();
+
+        AnalogListener analogListener = new AnalogListener() {
+            @Override
+            public void onAnalog(String name, float value, float tpf) {
+                if (name.equals("MouseMovedX")) {
+                    float centredX = m.getCursorPosition().x - 0.5f * gs.getSettings().getWidth();
+                    Quaternion quat = new Quaternion();
+                    quat.fromAngles(0, -0.005f * centredX, 0);
+
+                    gs.getPlayer().getNode().setLocalRotation(quat);
+
+                }
+                if (name.equals("MouseMovedY")) {
+                    float centredY = m.getCursorPosition().y - 0.5f * gs.getSettings().getWidth();
+                    Quaternion quat = new Quaternion();
+                    quat.fromAngles(-0.005f * centredY, 0, 0);
+
+                    gs.getPlayer().getRotationNode().setLocalRotation(quat);
+                    gs.getPlayer().getFirstPersonCameraNode().setLocalRotation(quat);
+                }
+            }
+
+        };
+
+        gs.setAnalogListener(analogListener);
+
+        return analogListener;
+    }
+
+    private void initKeys(InputManager inputManager, ActionListener actionListener, AnalogListener analogListener) {
 
         inputManager.addMapping("W", new KeyTrigger(KeyInput.KEY_W)); // forward
         inputManager.addMapping("S", new KeyTrigger(KeyInput.KEY_S)); // backward
@@ -152,7 +187,17 @@ public class InputController {
         inputManager.addMapping("K", new KeyTrigger(KeyInput.KEY_K));
         inputManager.addMapping("1", new KeyTrigger(KeyInput.KEY_1)); // hotbar 1
         inputManager.addMapping("2", new KeyTrigger(KeyInput.KEY_2)); // hotbar 2
+        inputManager.addMapping("MouseMovedX",
+                new MouseAxisTrigger(MouseInput.AXIS_X, false),
+                new MouseAxisTrigger(MouseInput.AXIS_X, true)
+        );
+        inputManager.addMapping("MouseMovedY",
+                new MouseAxisTrigger(MouseInput.AXIS_Y, false),
+                new MouseAxisTrigger(MouseInput.AXIS_Y, true)
+        );
 
+        inputManager.addListener(analogListener, "MouseMovedX");
+        inputManager.addListener(analogListener, "MouseMovedY");
         inputManager.addListener(actionListener, "W");
         inputManager.addListener(actionListener, "S");
         inputManager.addListener(actionListener, "A");
@@ -243,5 +288,3 @@ public class InputController {
 
     }
 }
-
-

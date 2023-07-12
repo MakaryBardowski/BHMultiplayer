@@ -77,28 +77,28 @@ public class PlayerCameraControlAppState extends AbstractAppState {
     private void rotatePlayerTowardsLookDirection() {
         if (clientApp.getPlayer() != null && clientApp.getPlayer().getHealth() > 0) {//                                                          2.12f so you are level with humanoids
 
-            clientApp.getCamera().setLocation(new Vector3f(clientApp.getPlayer().getNode().getWorldTranslation().x, CAMERA_Y_OFFSET + clientApp.getPlayer().getNode().getWorldTranslation().getY(), clientApp.getPlayer().getNode().getWorldTranslation().z));
+//            clientApp.getCamera().setLocation(new Vector3f(clientApp.getPlayer().getNode().getWorldTranslation().x, CAMERA_Y_OFFSET + clientApp.getPlayer().getNode().getWorldTranslation().getY(), clientApp.getPlayer().getNode().getWorldTranslation().z));
 
-            if (lookDirection != null) {
-                clientApp.getPlayer().getGunNode().getParent().lookAt(lookDirection, Vector3f.UNIT_Y);
-            }
+//            if (lookDirection != null) {
+//                clientApp.getPlayer().getGunNode().getParent().lookAt(lookDirection, Vector3f.UNIT_Y);
+//            }
+//
+//            // first person alignment for bullets to work
+//            float[] playerAngles = new float[3];
+//            clientApp.getPlayer().getGunNode().getLocalRotation().toAngles(playerAngles);
+//            playerAngles[0] = cameraRotAsAngles[0];
+//            clientApp.getPlayer().getGunNode().getParent().setLocalRotation(new Quaternion().fromAngles(playerAngles));
 
-            // first person alignment for bullets to work
-            float[] playerAngles = new float[3];
-            clientApp.getPlayer().getGunNode().getLocalRotation().toAngles(playerAngles);
-            playerAngles[0] = cameraRotAsAngles[0];
-            clientApp.getPlayer().getGunNode().getParent().setLocalRotation(new Quaternion().fromAngles(playerAngles));
-
-            CollisionResults results = new CollisionResults();
-            Ray ray = new Ray(clientApp.getCamera().getLocation(), clientApp.getCamera().getDirection());
-            clientApp.getMapNode().collideWith(ray, results);
-
-            if (results.size() > 0) {
-                CollisionResult closest = results.getClosestCollision();
-                lookDirection = new Vector3f(closest.getContactPoint().x, clientApp.getPlayer().getNode().getWorldTranslation().getY(), closest.getContactPoint().z);
-                clientApp.getPlayer().getNode().lookAt(lookDirection, Vector3f.UNIT_Y);
-
-            }
+//            CollisionResults results = new CollisionResults();
+//            Ray ray = new Ray(clientApp.getCamera().getLocation(), clientApp.getCamera().getDirection());
+//            clientApp.getMapNode().collideWith(ray, results);
+//
+//            if (results.size() > 0) {
+//                CollisionResult closest = results.getClosestCollision();
+//                lookDirection = new Vector3f(closest.getContactPoint().x, clientApp.getPlayer().getNode().getWorldTranslation().getY(), closest.getContactPoint().z);
+//                clientApp.getPlayer().getNode().lookAt(lookDirection, Vector3f.UNIT_Y);
+//
+//            }
         }
     }
 
