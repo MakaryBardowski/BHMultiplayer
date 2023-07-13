@@ -4,15 +4,20 @@
  */
 package Game.Items;
 
+import Debugging.DebugUtils;
+import Game.Effects.GradientParticleEmitter;
+import Game.Effects.GradientParticleMesh;
 import Game.Items.ItemTemplates.ItemTemplate;
 import Game.Mobs.Mob;
 import Game.Mobs.Player;
 import Projectiles.Controls.BulletTracerControl;
 import com.Networking.Client.ClientGameAppState;
 import com.Networking.Client.Main;
+import com.epagagames.particles.BillboardMode;
 import com.epagagames.particles.Emitter;
 import com.epagagames.particles.emittershapes.EmitterCircle;
 import com.epagagames.particles.emittershapes.EmitterCone;
+import com.epagagames.particles.emittershapes.EmitterLine;
 import com.epagagames.particles.influencers.ColorInfluencer;
 import com.epagagames.particles.influencers.GravityInfluencer;
 import com.epagagames.particles.influencers.PreferredDirectionInfluencer;
@@ -24,6 +29,9 @@ import com.jme3.animation.SkeletonControl;
 import com.jme3.asset.AssetManager;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
+import com.jme3.effect.ParticleEmitter;
+import com.jme3.effect.ParticleMesh;
+import com.jme3.effect.influencers.ParticleInfluencer;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
@@ -46,9 +54,12 @@ import jme3utilities.mesh.PointMesh;
 public class Rifle extends RangedWeapon {
 
     private Node muzzleNode;
+    private static final float BULLET_SPEED = 1200f;
+    private CameraRecoilControl camRecoil;
+    private RecoilControl gunRecoil;
 
-    public Rifle(ItemTemplate template) {
-        super(template);
+    public Rifle(float damage, ItemTemplate template) {
+        super(damage, template);
     }
 
     @Override
@@ -73,13 +84,11 @@ public class Rifle extends RangedWeapon {
         AssetManager assetManager = Main.getInstance().getAssetManager();
         Node model = (Node) assetManager.loadModel(template.getFpPath());
 
-         model.move(-.63f, -.65f, 2.3f);
+        model.move(-.63f, -.65f, 2.3f);
         model.setLocalRotation((new Quaternion()).fromAngleAxis(FastMath.PI / 32, new Vector3f(-.15f, .5f, 0)));
-        
-        
+
 //        model.move(-.48f, -.52f, 1.8f);
 //        model.setLocalRotation((new Quaternion()).fromAngleAxis(FastMath.PI / 32, new Vector3f(-.15f, .5f, 0)));
- 
         /// i don't know why the setupModelLight() method doesn't work <<-- big congo
         Geometry ge = (Geometry) ((Node) model.getChild(0)).getChild(0);
         Material originalMaterial = ge.getMaterial();
@@ -91,14 +100,12 @@ public class Rifle extends RangedWeapon {
         SkinningControl skinningControl = model.getChild(0).getControl(SkinningControl.class);
         muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
-        
-//                Box box1 = new Box(0.5f, 0.5f, 0.5f);
-//        Geometry blue = new Geometry("Box", box1);
-//        blue.setMaterial(newMaterial);
-//        Node bullet = new Node();
-//        bullet.attachChild(blue);
-//        muzzleNode.attachChild(bullet);
-//  
+        gunRecoil = new RecoilControl(0.6f);
+        camRecoil = new CameraRecoilControl(2);
+        p.getGunNode().addControl(gunRecoil);
+        p.getMainCameraNode().addControl(camRecoil);
+
+        p.getGunNode().detachAllChildren();
         p.getGunNode().attachChild(model);
         p.getFirstPersonCameraNode().attachChild(p.getGunNode());
         model.move(new Vector3f(0.43199998f, 0.46799996f, -1.6199999f));
@@ -111,66 +118,81 @@ public class Rifle extends RangedWeapon {
 
     @Override
     public void playerAttack(Player p) {
+        if (!hitscan(p, ClientGameAppState.getInstance().getMobsNode(), false)) {
+hitscan(p, ClientGameAppState.getInstance().getMapNode(), true);
+        }
+
+    }
+
+    private boolean hitscan(Player p, Node collsionNode, boolean wallCheck) {
         CollisionResults results = new CollisionResults();
         Vector3f shotDirection = p.getMainCamera().getDirection();
         Vector3f shotOrigin = p.getMainCamera().getLocation();
         Ray ray = new Ray(shotOrigin, shotDirection);
-        ClientGameAppState.getInstance().getMapNode().collideWith(ray, results);
+        collsionNode.collideWith(ray, results);
 
         Vector3f cp = null;
         if (results.size() > 0) {
             CollisionResult closest = results.getClosestCollision();
             cp = closest.getContactPoint();
-
+            if (!wallCheck) {
+                Integer hitId = Integer.valueOf(closest.getGeometry().getName());
+                Mob mobHit = ClientGameAppState.getInstance().getMobs().get(hitId);
+                p.dealDamage(damage, mobHit);
+            }
+            createBullet(cp);
+            recoilFire();
+            return true;
         }
+        return false;
+    }
 
-        Material m = new Material(Main.getInstance().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-        m.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
+    private void recoilFire() {
+        camRecoil.recoilFire();
+        gunRecoil.recoilFire();
 
-        Texture tex = Main.getInstance().getAssetManager().loadTexture("Textures/Gameplay/Decals/testBlood0.png");
-        m.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
-        m.setTexture("ColorMap", tex);
-        TrailInfluencer ti = new TrailInfluencer();
+    }
+
+    private void createBullet(Vector3f destination) {
+        Node bullet = new Node("boolet");
+        ClientGameAppState.getInstance().getDebugNode().attachChild(bullet);
+        bullet.move(muzzleNode.getWorldTranslation());
+        GradientParticleEmitter trail = createTrail();
+        bullet.attachChild(trail);
+        bullet.addControl(new BulletTracerControl(bullet, destination, BULLET_SPEED, trail));
+
+    }
+
+    private GradientParticleEmitter createTrail() {
+        Material trailMat = createTrailMaterial();
+        GradientParticleEmitter fire = new GradientParticleEmitter("Debris", GradientParticleMesh.Type.Triangle, 400);
+        fire.setMaterial(trailMat);
+        fire.setLowLife(0.7f);
+        fire.setHighLife(0.7f);
+        fire.setStartSize(0.02f);
+        fire.setEndSize(0.00f);
+        fire.setRotateSpeed(0);
+        fire.setParticlesPerSec(30);
+        fire.setSelectRandomImage(true);
+        fire.setVelocityVariation(1);
+        fire.getParticleInfluencer().setInitialVelocity(new Vector3f(0, -0.4f, 0));
+        fire.setGravity(0, -0.6f, 0);
+        fire.setStartColor(new ColorRGBA(252f / 255f, 115f / 255f, 3f / 255f, 1));
+        fire.setMidColor(new ColorRGBA(125f / 255f, 7f / 255f, 51f / 255f, 1));
+        float gray = 16f / 255f;
+        fire.setEndColor(new ColorRGBA(gray, gray, gray, 1));
+        fire.getParticleInfluencer().setVelocityVariation(0.4f);
+        fire.setParticlesPerSec(0);
+        return fire;
+    }
+
+    private Material createTrailMaterial() {
         Material mat = new Material(Main.getInstance().getAssetManager(), "Common/MatDefs/Misc/Particle.j3md");
         mat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
+        mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Off);
         Texture tex1 = Main.getInstance().getAssetManager().loadTexture("Effects/Particles/part_beam.png");
         mat.setTexture("Texture", tex1);
-        ti.setTrailmat(mat);
-
-        GravityInfluencer gi = new GravityInfluencer();
-        gi.setGravity(0, -9, 0);
-
-        Emitter emitter = new Emitter("test", m, 100);
-        emitter.setStartSpeed(new ValueType(9.5f));
-        emitter.setLifeFixedDuration(2.0f);
-        emitter.setEmissionsPerSecond(20);
-        emitter.setParticlesPerEmission(1);
-        emitter.setShape(new EmitterCircle());
-
-//        emitter.setShape(new EmitterCone());
-//        ((EmitterCone) emitter.getShape()).setRadius(0.005f);
-        emitter.addInfluencer(ti);
-        emitter.addInfluencer(gi);
-
-        ClientGameAppState.getInstance().getDebugNode().attachChild(emitter);
-        emitter.setLocalTranslation(muzzleNode.getWorldTranslation());
-//emitter.setLocalTranslation(new Vector3f ( 0 , 1, 0));
-//        System.out.println("emitter "+emitter.getWorldTranslation());
-        Box box1 = new Box(0.02f, 0.02f, 0.02f);
-        Geometry blue = new Geometry("Box", box1);
-        blue.setMaterial(m);
-        Node bullet = new Node();
-        bullet.attachChild(blue);
-        ClientGameAppState.getInstance().getDebugNode().attachChild(bullet);
-        
-        bullet.move(muzzleNode.getWorldTranslation());
-        System.out.println("muzzle pos--- "+muzzleNode.getWorldTranslation());
-        System.out.println("player pos "+p.getNode().getWorldTranslation());
-        System.out.println("muzzle rot--- "+muzzleNode.getWorldRotation());
-        System.out.println("cam node rot --- "+p.getFirstPersonCameraNode().getWorldRotation());
-        System.out.println("rot node rot "+p.getRotationNode().getWorldRotation());
-
-        bullet.addControl(new BulletTracerControl(bullet, cp, 3f));
+        return mat;
     }
 
 }

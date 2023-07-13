@@ -14,7 +14,7 @@ import Game.Mobs.Mob;
 public abstract class RangedWeapon extends Weapon {
 
     
-    protected RangedWeapon(ItemTemplate template) {
-        super(template);
+    protected RangedWeapon(float damage,ItemTemplate template) {
+        super(damage,template);
     }
 }

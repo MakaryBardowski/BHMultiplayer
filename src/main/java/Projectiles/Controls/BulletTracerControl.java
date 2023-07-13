@@ -5,6 +5,7 @@
  */
 package Projectiles.Controls;
 
+import Game.Effects.GradientParticleEmitter;
 import com.Networking.Client.ClientGameAppState;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
@@ -27,11 +28,17 @@ import java.util.Random;
  */
 public class BulletTracerControl extends AbstractControl implements Savable, Cloneable {
 
+    private static final int MOVEMENT_STEPS = 100;
+
+    private float distanceToTravel;
+    private boolean reachedDestination;
     private final Node bulletNode;
     private final Vector3f destination;
     private final float speed;
+    private final GradientParticleEmitter p;
 
-    public BulletTracerControl(Node node, Vector3f destination, float speed) {
+    public BulletTracerControl(Node node, Vector3f destination, float speed, GradientParticleEmitter p) {
+        this.p = p;
         this.bulletNode = node;
         this.destination = destination;
         this.speed = speed;
@@ -66,16 +73,27 @@ public class BulletTracerControl extends AbstractControl implements Savable, Clo
      */
     @Override
     protected void controlUpdate(float tpf) {
-        if (bulletNode.getWorldTranslation().distance(destination) > tpf * speed) {
-            bulletNode.move( bulletNode.getLocalRotation().getRotationColumn(2).mult(tpf * speed) );
-        } else {
+        distanceToTravel = bulletNode.getWorldTranslation().distance(destination);
+        if (distanceToTravel > tpf * speed) {
+            for (int i = 0; i < MOVEMENT_STEPS; i += 2) {
+                p.emitParticles(1);
+                bulletNode.move(bulletNode.getLocalRotation().getRotationColumn(2).mult(tpf * speed / MOVEMENT_STEPS));
+            }
+        }  else if(!reachedDestination){
+            reachedDestination = true;
+            for (int i = 0; i < distanceToTravel / (tpf * speed / MOVEMENT_STEPS); i++) {
+                p.emitParticles(1);
+                bulletNode.move(bulletNode.getLocalRotation().getRotationColumn(2).mult(tpf * speed / MOVEMENT_STEPS));
+            }
+        } else if (p.getNumVisibleParticles() == 0) {
+            bulletNode.removeFromParent();
             bulletNode.removeControl(this);
         }
     }
 
     @Override
     public Control cloneForSpatial(Spatial spatial) {
-        final BulletTracerControl control = new BulletTracerControl(bulletNode, destination.clone(), speed);
+        final BulletTracerControl control = new BulletTracerControl(bulletNode, destination.clone(), speed, p);
         /* Optional: use setters to copy userdata into the cloned control */
         // control.setIndex(i); // example
         control.setSpatial(spatial);

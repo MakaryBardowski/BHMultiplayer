@@ -14,8 +14,8 @@ import Game.Mobs.Player;
  */
 public class MeleeWeapon extends Weapon{
 
-    protected MeleeWeapon(ItemTemplate template){
-    super(template);
+    protected MeleeWeapon(float damage,ItemTemplate template){
+    super(damage,template);
     }
     
     @Override
@@ -60,7 +60,7 @@ public class MeleeWeapon extends Weapon{
         }
 
         public void reset(){
-            this.weapon = new MeleeWeapon(DEFAULT_TEMPLATE);
+            this.weapon = new MeleeWeapon(0,DEFAULT_TEMPLATE);
         }
         
         

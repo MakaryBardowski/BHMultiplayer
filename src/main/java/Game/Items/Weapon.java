@@ -18,8 +18,9 @@ public abstract class Weapon extends Item implements Attacks,Holdable,Equippable
     protected DamageType damageType;
     protected float attackSpeed;
     
-    protected Weapon(ItemTemplate template){
+    protected Weapon(float damage,ItemTemplate template){
     super(template);
+    this.damage = damage;
     damageType = DEFAULT_DAMAGE_TYPE;
     }
     

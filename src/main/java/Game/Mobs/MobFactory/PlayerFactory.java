@@ -29,19 +29,19 @@ import java.util.Arrays;
  * @author 48793
  */
 public class PlayerFactory extends MobFactory {
-
     private static final float PLAYER_HEIGHT = 2.12f;
     private final int mobId;
     private final Camera mainCamera;
     private Camera firstPersonCamera;
     private RenderManager renderManager;
-
-    public PlayerFactory(int id, AssetManager assetManager, Node mobNode, Camera mainCamera, RenderManager renderManager) {
+    private boolean setAsPlayer;
+    public PlayerFactory(int id, AssetManager assetManager, Node mobNode, Camera mainCamera, RenderManager renderManager,boolean setAsPlayer) {
         super(assetManager, mobNode);
         this.mainCamera = mainCamera;
         this.firstPersonCamera = mainCamera.clone();
         this.mobId = id;
         this.renderManager = renderManager;
+        this.setAsPlayer = setAsPlayer;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class PlayerFactory extends MobFactory {
         Node playerNode = loadPlayerModel();
         setupModelLight(playerNode);
         setupModelShootability(playerNode, mobId);
-
+        System.out.println("attaching player "+mobId+" to node "+mobsNode);
         String name = "Gracz_" + mobId;
         Player p = new Player(mobId, playerNode, name, mainCamera);
 
@@ -57,28 +57,30 @@ public class PlayerFactory extends MobFactory {
         attachToMobsNode(playerNode, playerSpawnpoint);
         Debugging.DebugUtils.addArrow(playerNode, assetManager);
 
-        setupFirstPersonCamera(p, playerNode);
-
+        if(setAsPlayer){
+        setupFirstPersonCamera(p);
         addStartEquipment(p);
+        }
+        System.out.println("player is attached to "+p.getNode().getParent());
         return p;
     }
 
-    private void setupFirstPersonCamera(Player p, Node playerNode) {
-        CameraNode playerCameraNode = new CameraNode("Main Camera Node", mainCamera);
+    public void setupFirstPersonCamera(Player p) {
+        CameraNode playerCameraNode = new CameraNode("Main Camera Node"+p.getId(), mainCamera);
+        p.getRotationNode().setName("player "+p.getId()+" rotation node");
         p.getRotationNode().attachChild(playerCameraNode);
         p.getNode().attachChild(p.getRotationNode());
         p.getRotationNode().setLocalTranslation(0, PLAYER_HEIGHT, 0);
 
-        CameraNode gunCameraNode = new CameraNode("Gun Camera Node", firstPersonCamera);
+        CameraNode gunCameraNode = new CameraNode("Gun Camera Node"+p.getId(), firstPersonCamera);
         gunCameraNode.move(0, PLAYER_HEIGHT, 0);
         ViewPort view2 = renderManager.createMainView("View of firstPersonCamera", firstPersonCamera);
         view2.setClearFlags(false, true, true);
         view2.attachScene(p.getGunNode());
         firstPersonCamera.setFrustumPerspective(45f, (float) firstPersonCamera.getWidth() / firstPersonCamera.getHeight(), 0.01f, 1000f);
-        playerNode.attachChild(gunCameraNode);
+        p.getNode().attachChild(gunCameraNode);
         gunCameraNode.attachChild(p.getGunNode());
         gunCameraNode.setCullHint(Spatial.CullHint.Never);
-
 
         p.setMainCameraNode(playerCameraNode);
         p.setFirstPersonCameraNode(gunCameraNode);
@@ -89,7 +91,7 @@ public class PlayerFactory extends MobFactory {
     }
 
     private void addStartEquipment(Player p) {
-        p.getEquipment()[0] = new Rifle(ItemTemplates.RIFLE_MANNLICHER_95);
+        p.getEquipment()[0] = new Rifle(4,ItemTemplates.RIFLE_MANNLICHER_95);
         p.getHotbar()[0] = p.getEquipment()[0];
     }
 
