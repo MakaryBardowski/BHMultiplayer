@@ -23,8 +23,8 @@ import java.util.Random;
 public class Main extends SimpleApplication {
     private static Main instance;
     
-    private static final short STARTING_RESOLUTION_WIDTH = 1422;
-    private static final short STARTING_RESOLUTION_HEIGHT = 800;
+    private static final short STARTING_RESOLUTION_WIDTH = 1920;
+    private static final short STARTING_RESOLUTION_HEIGHT = 1080;
 
     
     public static void main(String[] args) {
@@ -36,6 +36,7 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        speed = 1f;
         instance = this;
 //        stateManager.attach(new MainMenuAppState());
 
@@ -68,13 +69,15 @@ public class Main extends SimpleApplication {
     private static void setupSettings(SimpleApplication app) {
         AppSettings settings1 = new AppSettings(true);
         settings1.setResolution(STARTING_RESOLUTION_WIDTH, STARTING_RESOLUTION_HEIGHT);
-//        settings1.setFullscreen(true);
+        settings1.setFullscreen(true);
         settings1.setFrameRate(2000);
         
+        
+//                settings1.setResolution(800, 800);
 //        app.setDisplayFps(false);
 //        app.setDisplayStatView(false);
 //        settings1.setCenterWindow(false);
-
+//
 //        if (new Random().nextInt(2) == 0) {
 //            settings1.setWindowXPosition(0);
 //        } else {

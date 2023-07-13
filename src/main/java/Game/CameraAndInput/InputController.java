@@ -50,7 +50,7 @@ public class InputController {
 
     private ActionListener initActionListener(final ClientGameAppState gs) {
         final Player player = gs.getPlayer();
-
+        System.out.println("player "+player);
         ActionListener actionListener = new ActionListener() {
             @Override
             public void onAction(String name, boolean keyPressed, float tpf) {
@@ -102,7 +102,7 @@ public class InputController {
 //                    player.setShooting(false);
                     player.getEquippedRightHand().playerUseRight(player);
 
-                    projectBlood(gs);
+//                    projectBlood(gs);
                 }
 //                else if (!player.isDead() && name.equals("Attack")) {
 //                    player.setShooting(true);
@@ -158,6 +158,7 @@ public class InputController {
                     Quaternion quat = new Quaternion();
                     quat.fromAngles(-0.005f * centredY, 0, 0);
 
+                   
                     gs.getPlayer().getRotationNode().setLocalRotation(quat);
                     gs.getPlayer().getFirstPersonCameraNode().setLocalRotation(quat);
                 }

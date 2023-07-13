@@ -125,8 +125,8 @@ public class Player extends HumanMob {
     
     
     
-    public static Player spawnPlayer(int newPlayerId, AssetManager assetManager, Node mobNode, Camera cam, RenderManager renderManager) {
-        PlayerFactory factory = new PlayerFactory(newPlayerId, assetManager, mobNode, cam, renderManager);
+    public static Player spawnPlayer(int newPlayerId, AssetManager assetManager, Node mobNode, Camera cam,RenderManager renderManager,boolean setAsPlayer) {
+        PlayerFactory factory = new PlayerFactory(newPlayerId, assetManager, mobNode, cam,renderManager,setAsPlayer);
         return factory.create();
     }
 
@@ -212,6 +212,11 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
         backward = false;
         left = false;
         right = false;
+    }
+
+    @Override
+    public String toString() {
+        return "Player{ mainCameraNode=" + mainCameraNode + ", firstPersonCameraNode=" + firstPersonCameraNode + ", rotationNode=" + rotationNode + ", mainCamera=" + mainCamera + ", gunNode=" + gunNode + '}';
     }
 
 }

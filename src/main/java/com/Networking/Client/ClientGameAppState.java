@@ -45,6 +45,7 @@ import java.util.logging.Logger;
  * @author normenhansen
  */
 public class ClientGameAppState extends AbstractAppState implements ClientStateListener {
+
     private static ClientGameAppState instance;
     private final int BLOCK_SIZE = 4;
     private final int CHUNK_SIZE = 16;
@@ -144,8 +145,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     }
 
-    public Player registerPlayer(Integer id) { 
-        Player p = Player.spawnPlayer(id, assetManager,mapNode,getCamera(), app.getRenderManager());
+    public Player registerPlayer(Integer id, boolean setAsPlayer) {
+        Player p = Player.spawnPlayer(id, assetManager, mobsNode, getCamera(), app.getRenderManager(), setAsPlayer);
         this.mobs.put(id, p);
         return p;
     }
@@ -229,9 +230,9 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     public Node getRootNode() {
         return rootNode;
     }
-    
-    public AssetManager getAssetManager(){
-    return app.getAssetManager();
+
+    public AssetManager getAssetManager() {
+        return app.getAssetManager();
     }
 
     public InputManager getInputManager() {
@@ -242,8 +243,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         return app.getStateManager();
     }
 
-    public static ClientGameAppState getInstance(){
-    return instance;
+    public static ClientGameAppState getInstance() {
+        return instance;
     }
 
     public AnalogListener getAnalogListener() {

@@ -9,6 +9,7 @@ import Game.Items.Holdable;
 import Game.Items.Item;
 import Game.Map.Collision.CollidableInterface;
 import Game.Map.Collision.WorldGrid;
+import Messages.MobHealthUpdateMessage;
 import com.Networking.Client.ClientGameAppState;
 import com.jme3.scene.Node;
 import java.util.HashSet;
@@ -44,13 +45,15 @@ public class HumanMob extends Mob{
     }
 
     @Override
-    public void receiveDamage() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void receiveDamage(float damage) {
+        health = health-damage;
+        MobHealthUpdateMessage hpUpd = new MobHealthUpdateMessage(id,health);
+        ClientGameAppState.getInstance().getClient().send(hpUpd);
     }
 
     @Override
-    public void dealDamage() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void dealDamage(float damage, Mob mob) {
+        mob.receiveDamage(damage);
     }
     
 

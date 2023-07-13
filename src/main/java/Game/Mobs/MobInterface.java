@@ -16,7 +16,7 @@ public interface MobInterface {
     public void move(float tpf, ClientGameAppState cm);
     public void die();
     public void attack();
-    public void receiveDamage();
-    public void dealDamage();
+    public void receiveDamage(float damage);
+    public void dealDamage(float damage, Mob mob);
     public void equip(Item e);
 }

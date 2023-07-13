@@ -23,6 +23,7 @@ import com.Networking.Client.Main;
 import com.Networking.Client.PlayerHUD;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -77,7 +78,7 @@ public class ClientMessageListener implements MessageListener<Client> {
                             jesli klient, ktory odebral wiadomosc nie ma jeszcze przypisanego gracza
                             to wtedy
                              */
-                            Mob p = clientApp.registerPlayer(nmsg.getId());
+                            Mob p = clientApp.registerPlayer(nmsg.getId(),false);
                             p.getNode().setLocalTranslation(pos);
 
                         }
@@ -98,7 +99,8 @@ public class ClientMessageListener implements MessageListener<Client> {
                             jesli klient, ktory odebral wiadomosc nie ma jeszcze przypisanego gracza
                             to wtedy
                              */
-                            Player p = clientApp.registerPlayer(nmsg.getId());
+                            Player p = clientApp.registerPlayer(nmsg.getId(),false);
+                            clientApp.getMobsNode().attachChild(p.getNode());
                             p.getNode().setLocalTranslation(pos);
 
                         }
@@ -109,8 +111,9 @@ public class ClientMessageListener implements MessageListener<Client> {
 
             Main.getInstance().enqueue(() -> {
                 Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
-                Player p = clientApp.registerPlayer(nmsg.getId());
+                Player p = clientApp.registerPlayer(nmsg.getId(),true);
                 clientApp.getPickableNode().attachChild(p.getNode());
+//                clientApp.getMapNode().attachChild(p.getNode());
                 p.getNode().setLocalTranslation(pos);
                 clientApp.setPlayer(p);
                 new InputController().setupInput(clientApp);
