@@ -43,7 +43,7 @@ public class InputController {
     private NiftyImage guiElement;
     private InputManager m;
 
-    public void setupInput(ClientGameAppState gs) {
+    public void createInputListeners(ClientGameAppState gs) {
         m = gs.getInputManager();
         initKeys(m, initActionListener(gs), initAnalogListener(gs));
     }

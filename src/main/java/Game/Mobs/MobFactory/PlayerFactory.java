@@ -6,8 +6,10 @@ package Game.Mobs.MobFactory;
 
 import Game.Items.ItemTemplates;
 import Game.Items.Rifle;
+import Game.Mobs.Mob;
 import Game.Mobs.Player;
 import com.Networking.Client.ClientGameAppState;
+import com.Networking.Client.Main;
 import com.jme3.anim.SkinningControl;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -29,50 +31,69 @@ import java.util.Arrays;
  * @author 48793
  */
 public class PlayerFactory extends MobFactory {
+
     private static final float PLAYER_HEIGHT = 2.12f;
     private final int mobId;
     private final Camera mainCamera;
-    private Camera firstPersonCamera;
-    private RenderManager renderManager;
+    private final Camera firstPersonCamera;
+    private final RenderManager renderManager;
     private boolean setAsPlayer;
-    public PlayerFactory(int id, AssetManager assetManager, Node mobNode, Camera mainCamera, RenderManager renderManager,boolean setAsPlayer) {
+
+    public PlayerFactory(int id, AssetManager assetManager, Node mobNode, RenderManager renderManager) {
         super(assetManager, mobNode);
+        this.mainCamera = null;
+        this.firstPersonCamera = null;
+        this.mobId = id;
+        this.renderManager = renderManager;
+    }
+
+    public PlayerFactory(int id, Node mobNode, Camera mainCamera, boolean setAsPlayer) {
+        super( mobNode);
         this.mainCamera = mainCamera;
         this.firstPersonCamera = mainCamera.clone();
         this.mobId = id;
-        this.renderManager = renderManager;
+        this.renderManager = Main.getInstance().getRenderManager();
         this.setAsPlayer = setAsPlayer;
     }
 
     @Override
-    public Player create() {
+    public Player createClientSide() {
         Node playerNode = loadPlayerModel();
         setupModelLight(playerNode);
         setupModelShootability(playerNode, mobId);
-        System.out.println("attaching player "+mobId+" to node "+mobsNode);
         String name = "Gracz_" + mobId;
         Player p = new Player(mobId, playerNode, name, mainCamera);
-
         Vector3f playerSpawnpoint = new Vector3f(0, 4, 0);
         attachToMobsNode(playerNode, playerSpawnpoint);
         Debugging.DebugUtils.addArrow(playerNode, assetManager);
-
-        if(setAsPlayer){
-        setupFirstPersonCamera(p);
-        addStartEquipment(p);
+        if (setAsPlayer) {
+            setupFirstPersonCamera(p);
+            addStartEquipment(p);
         }
-        System.out.println("player is attached to "+p.getNode().getParent());
         return p;
     }
 
-    public void setupFirstPersonCamera(Player p) {
-        CameraNode playerCameraNode = new CameraNode("Main Camera Node"+p.getId(), mainCamera);
-        p.getRotationNode().setName("player "+p.getId()+" rotation node");
+    @Override
+    public Player createServerSide() {
+        Node playerNode = loadPlayerModel();
+        setupModelLight(playerNode);
+        setupModelShootability(playerNode, mobId);
+        String name = "Gracz_" + mobId;
+        Player p = new Player(mobId, playerNode, name, mainCamera);
+        Vector3f playerSpawnpoint = new Vector3f(0, 4, 0);
+        attachToMobsNode(playerNode, playerSpawnpoint);
+        addStartEquipment(p);
+        return p;
+    }
+
+    private void setupFirstPersonCamera(Player p) {
+        CameraNode playerCameraNode = new CameraNode("Main Camera Node" + p.getId(), mainCamera);
+        p.getRotationNode().setName("player " + p.getId() + " rotation node");
         p.getRotationNode().attachChild(playerCameraNode);
         p.getNode().attachChild(p.getRotationNode());
         p.getRotationNode().setLocalTranslation(0, PLAYER_HEIGHT, 0);
 
-        CameraNode gunCameraNode = new CameraNode("Gun Camera Node"+p.getId(), firstPersonCamera);
+        CameraNode gunCameraNode = new CameraNode("Gun Camera Node" + p.getId(), firstPersonCamera);
         gunCameraNode.move(0, PLAYER_HEIGHT, 0);
         ViewPort view2 = renderManager.createMainView("View of firstPersonCamera", firstPersonCamera);
         view2.setClearFlags(false, true, true);
@@ -91,8 +112,13 @@ public class PlayerFactory extends MobFactory {
     }
 
     private void addStartEquipment(Player p) {
-        p.getEquipment()[0] = new Rifle(4,ItemTemplates.RIFLE_MANNLICHER_95);
+        p.getEquipment()[0] = new Rifle(4, ItemTemplates.RIFLE_MANNLICHER_95);
         p.getHotbar()[0] = p.getEquipment()[0];
     }
+    
+    
+
+
+
 
 }

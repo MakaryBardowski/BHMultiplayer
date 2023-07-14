@@ -5,6 +5,7 @@
 package Game.Mobs.MobFactory;
 
 import Game.Mobs.Mob;
+import com.Networking.Client.Main;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
@@ -21,12 +22,19 @@ public abstract class MobFactory {
     protected AssetManager assetManager;
     protected Node mobsNode;
 
-    protected MobFactory(AssetManager assetManager,Node mobsNode) {
+    protected MobFactory(AssetManager assetManager, Node mobsNode) {
         this.assetManager = assetManager;
         this.mobsNode = mobsNode;
     }
 
-    public abstract Mob create();
+    protected MobFactory(Node mobsNode) {
+        this.assetManager = Main.getInstance().getAssetManager();
+        this.mobsNode = mobsNode;
+    }
+
+    public abstract Mob createClientSide();
+
+    public abstract Mob createServerSide();
 
     protected void setupModelLight(Node node) {
         for (Spatial c : node.getChildren()) {

@@ -8,13 +8,11 @@ import Game.CameraAndInput.InputController;
 import Game.Mobs.Mob;
 import Game.Mobs.Player;
 import Messages.MobHealthUpdateMessage;
-import Messages.MobUpdateMessage;
 import Messages.MobPosUpdateMessage;
 import Messages.MobRotUpdateMessage;
 import Messages.MobsInGameMessage;
 import Messages.PlayerJoinedMessage;
 import Messages.SetPlayerMessage;
-import com.jme3.network.AbstractMessage;
 import com.jme3.network.Client;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
@@ -22,106 +20,141 @@ import com.Networking.Client.ClientGameAppState;
 import com.Networking.Client.Main;
 import com.Networking.Client.PlayerHUD;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Callable;
 
 /**
  *
  * @author 48793
  */
-/*
-Klasa nas³uchuj¹ca wszystkich komunikatów wys³anych przez serwer do klienta
-w klasie ClientGameAppState (Main aplikacji klienta) jest 
-
- */
 public class ClientMessageListener implements MessageListener<Client> {
 
-    private ClientGameAppState clientApp;
+    private final ClientGameAppState clientApp;
 
     public ClientMessageListener(ClientGameAppState c) {
         this.clientApp = c;
     }
 
-    /* metoda wykonuje sie przy otrzymaniu wiadomosci od serwera. Troche spaghetti code,
-    ale prosty do przepisania a nie planujemy chyba miec 10000 typow wiadomosci 
-     */
     @Override
     public void messageReceived(Client s, Message m) {
         if (m instanceof MobRotUpdateMessage nmsg) {
-            if (clientApp.getMobs().get(nmsg.getId()) != null) {
-
-                clientApp.getMobs().get(nmsg.getId()).setServerRotation(nmsg.getRot());
-            }
+            updateMobRotation(nmsg);
         } else if (m instanceof MobPosUpdateMessage nmsg) {
-
-            if (clientApp.getMobs().get(nmsg.getId()) != null) {
-                clientApp.getMobs().get(nmsg.getId()).setServerLocation(nmsg.getPos());
-
-            }
+            updateMobPosition(nmsg);
         } else if (m instanceof MobHealthUpdateMessage hmsg) {
-            if (clientApp.getMobs().get(hmsg.getId()) != null) {
-                clientApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
-
-            }
+            updateMobHealth(hmsg);
         } else if (m instanceof MobsInGameMessage nmsg) {
-
-            if (clientApp.getMobs().get(nmsg.getId()) == null) {
-                Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
-
-                /* jesli klient który odbierze
-                wiadomoœæ nie ma moba o takim ID, to go dodaje
-                 */
-                Main.getInstance().enqueue(
-                        () -> {
-                            /*
-                            jesli klient, ktory odebral wiadomosc nie ma jeszcze przypisanego gracza
-                            to wtedy
-                             */
-                            Mob p = clientApp.registerPlayer(nmsg.getId(),false);
-                            p.getNode().setLocalTranslation(pos);
-
-                        }
-                );
-            }
-
+            addMob(nmsg);
         } else if (m instanceof PlayerJoinedMessage nmsg) {
-
-            if (clientApp.getMobs().get(nmsg.getId()) == null) {
-                Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
-
-                /* jesli klient który odbierze
-                wiadomoœæ nie ma moba o takim ID, to go dodaje
-                 */
-                Main.getInstance().enqueue(
-                        () -> {
-                            /*
-                            jesli klient, ktory odebral wiadomosc nie ma jeszcze przypisanego gracza
-                            to wtedy
-                             */
-                            Player p = clientApp.registerPlayer(nmsg.getId(),false);
-                            clientApp.getMobsNode().attachChild(p.getNode());
-                            p.getNode().setLocalTranslation(pos);
-
-                        }
-                );
-            }
-
+            addNewPlayer(nmsg);
         } else if (m instanceof SetPlayerMessage nmsg) {
-
-            Main.getInstance().enqueue(() -> {
-                Vector3f pos = new Vector3f(nmsg.getX(), nmsg.getY(), nmsg.getZ());
-                Player p = clientApp.registerPlayer(nmsg.getId(),true);
-                clientApp.getPickableNode().attachChild(p.getNode());
-//                clientApp.getMapNode().attachChild(p.getNode());
-                p.getNode().setLocalTranslation(pos);
-                clientApp.setPlayer(p);
-                new InputController().setupInput(clientApp);
-                clientApp.getStateManager().attach(new PlayerHUD(clientApp));
-                p.getNode().setCullHint(Spatial.CullHint.Always);
-            });
+            addMyPlayer(nmsg);
         }
 
+    }
+
+    private void createMyPlayer(SetPlayerMessage nmsg) {
+        Player p = registerMyPlayer(nmsg);
+        clientApp.setPlayer(p);
+        placeMyPlayer(nmsg, p);
+        addInputListeners();
+        addPlayerHUD();
+    }
+
+    private void createOtherPlayer(PlayerJoinedMessage nmsg) {
+        Player p = registerOtherPlayer(nmsg);
+        placeOtherPlayer(nmsg, p);
+    }
+
+    private Player registerMyPlayer(SetPlayerMessage nmsg) {
+        return clientApp.registerPlayer(nmsg.getId(), true);
+    }
+
+    private void placeMyPlayer(SetPlayerMessage nmsg, Player p) {
+        Node playerNode = p.getNode();
+        clientApp.getPickableNode().attachChild(playerNode);
+        playerNode.setCullHint(Spatial.CullHint.Always);
+        p.getNode().setLocalTranslation(nmsg.getPos());
+
+    }
+
+    private Player registerOtherPlayer(PlayerJoinedMessage nmsg) {
+        return clientApp.registerPlayer(nmsg.getId(), false);
+    }
+
+    private void placeOtherPlayer(PlayerJoinedMessage nmsg, Player p) {
+        placeMob(nmsg.getPos(), p);
+    }
+
+    private void placeMob(Vector3f pos, Mob p) {
+        clientApp.getMobsNode().attachChild(p.getNode());
+        p.getNode().setLocalTranslation(pos);
+    }
+
+    private void updateMobHealth(MobHealthUpdateMessage hmsg) {
+        if (mobExistsLocally(hmsg.getId())) {
+            clientApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
+        }
+    }
+
+    private void updateMobPosition(MobPosUpdateMessage nmsg) {
+        if (mobExistsLocally(nmsg.getId())) {
+            clientApp.getMobs().get(nmsg.getId()).setServerLocation(nmsg.getPos());
+        }
+    }
+
+    private void updateMobRotation(MobRotUpdateMessage nmsg) {
+        if (mobExistsLocally(nmsg.getId())) {
+            clientApp.getMobs().get(nmsg.getId()).setServerRotation(nmsg.getRot());
+        }
+    }
+
+    private void addNewPlayer(PlayerJoinedMessage nmsg) {
+        if (mobDoesNotExistLocally(nmsg.getId())) {
+            enqueueExecution(
+                    () -> {
+                        createOtherPlayer(nmsg);
+                    }
+            );
+        }
+    }
+
+    private void addMyPlayer(SetPlayerMessage nmsg) {
+        enqueueExecution(() -> {
+            createMyPlayer(nmsg);
+        });
+    }
+
+    private void addMob(MobsInGameMessage nmsg) {
+        if (mobDoesNotExistLocally(nmsg.getId())) {
+            enqueueExecution(() -> {
+                Mob p = clientApp.registerPlayer(nmsg.getId(), false);
+                placeMob(nmsg.getPos(), p);
+            }
+            );
+        }
+    }
+
+    private boolean mobExistsLocally(int id) {
+        return clientApp.getMobs().get(id) != null;
+    }
+
+    private boolean mobDoesNotExistLocally(int id) {
+        return clientApp.getMobs().get(id) == null;
+    }
+
+    private void addInputListeners() {
+        new InputController().createInputListeners(clientApp);
+    }
+
+    private void addPlayerHUD() {
+        clientApp.getStateManager().attach(new PlayerHUD(clientApp));
+
+    }
+
+    private void enqueueExecution(Runnable runnable) {
+        Main.getInstance().enqueue(runnable);
     }
 
 }
