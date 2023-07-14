@@ -5,6 +5,7 @@ import Game.Map.Map;
 import Game.Map.MapGenerator;
 import Game.Map.MapType;
 import Game.Mobs.Mob;
+import Game.Mobs.MobFactory.PlayerFactory;
 import Game.Mobs.Player;
 import Messages.MessageListeners.ClientMessageListener;
 import static com.Networking.Client.ClientSynchronizationUtils.interpolateMobPosition;
@@ -146,7 +147,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     }
 
     public Player registerPlayer(Integer id, boolean setAsPlayer) {
-        Player p = Player.spawnPlayer(id, assetManager, mobsNode, getCamera(), app.getRenderManager(), setAsPlayer);
+        Player p = new PlayerFactory(id, mobsNode, getCamera(), setAsPlayer).createClientSide();
         this.mobs.put(id, p);
         return p;
     }

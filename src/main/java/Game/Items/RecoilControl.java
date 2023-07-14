@@ -16,10 +16,10 @@ import com.jme3.scene.control.AbstractControl;
  * @author tomas
  */
 public class RecoilControl extends AbstractControl{
-    
-    float recoilX = -.6f;
-    float recoilY = .3f;
-    float recoilZ = .1f;
+    protected static final float RECOIL_SPEED = 0.016f;
+    protected float recoilX = -.6f;
+    protected float recoilY = .3f;
+    protected float recoilZ = .1f;
     int snap=20;
     float kickback;
     Quaternion currentRotationRecoil = new Quaternion(0,0,0,1);
@@ -28,15 +28,18 @@ public class RecoilControl extends AbstractControl{
     Vector3f targetVectorRecoil = new Vector3f(0, 0, 0);
 
 
-    public RecoilControl(float kickback){
+    public RecoilControl(float kickback,float recoilX,float recoilY,float recoilZ){
         this.kickback = kickback;
+        this.recoilX = recoilX;
+        this.recoilY = recoilY;
+        this.recoilZ = recoilZ;
     }
     // better recoil for any type of weapon
-    public void recoilUpdate(float tpf) {
-        targetRotationRecoil.nlerp(new Quaternion(0, 0, 0, 1), tpf*snap);
-        currentRotationRecoil.slerp(targetRotationRecoil, tpf * snap);
-        targetVectorRecoil.interpolateLocal(new Vector3f(0, 0, 0), tpf * snap);
-        currentVectorRecoil.interpolateLocal(targetVectorRecoil, tpf * snap);
+    public void recoilUpdate() {
+        targetRotationRecoil.nlerp(new Quaternion(0, 0, 0, 1), RECOIL_SPEED*snap);
+        currentRotationRecoil.slerp(targetRotationRecoil, RECOIL_SPEED * snap);
+        targetVectorRecoil.interpolateLocal(new Vector3f(0, 0, 0), RECOIL_SPEED * snap);
+        currentVectorRecoil.interpolateLocal(targetVectorRecoil, RECOIL_SPEED * snap);
         
         spatial.setLocalRotation(currentRotationRecoil);
         spatial.setLocalTranslation(currentVectorRecoil);
@@ -44,8 +47,8 @@ public class RecoilControl extends AbstractControl{
     
     public void recoilFire(){
         targetRotationRecoil = targetRotationRecoil.add((new Quaternion()).fromAngleAxis(FastMath.PI / (6-kickback), new Vector3f(recoilX, getRandomNumber(-recoilY, recoilY), getRandomNumber(-recoilZ, recoilZ))));
-        targetVectorRecoil = targetVectorRecoil.subtract(0, 0, .2f);
-    }
+        targetVectorRecoil = targetVectorRecoil.subtract(targetRotationRecoil.getRotationColumn(2).subtract(0,0,0.2f));
+            }
     
     public float getRandomNumber(float min, float max) {
         return (float) ((Math.random() * (max - min)) + min);
@@ -109,7 +112,7 @@ public class RecoilControl extends AbstractControl{
 
     @Override
     protected void controlUpdate(float tpf) {
-        recoilUpdate(tpf);
+        recoilUpdate();
     }
 
     @Override

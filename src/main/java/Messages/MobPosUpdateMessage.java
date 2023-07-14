@@ -15,9 +15,9 @@ import com.jme3.network.serializing.Serializable;
 @Serializable
 public class MobPosUpdateMessage extends MobUpdateMessage {
 
-    private float x;
-    private float y;
-    private float z;
+    protected float x;
+    protected float y;
+    protected float z;
     
     public MobPosUpdateMessage() {
     }

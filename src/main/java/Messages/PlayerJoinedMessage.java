@@ -5,6 +5,7 @@
 package Messages;
 
 import Game.Mobs.MobType;
+import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 
@@ -16,34 +17,26 @@ import com.jme3.network.serializing.Serializable;
 public class PlayerJoinedMessage extends AbstractMessage {
 
     private int id;
-    private float x;
-    private float y;
-    private float z;
+private float x;
+private float y;
+private float z;
 
     public PlayerJoinedMessage() {
     }
 
-    public PlayerJoinedMessage(int id, float x, float y, float z) {
+    public PlayerJoinedMessage(int id, Vector3f pos) {
         this.id = id;
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this.x = pos.getX();
+        this.y = pos.getY();
+        this.z = pos.getZ();
     }
 
-    public int getId() {
-        return id;
+    public int getId(){
+    return id;
     }
 
-    public float getX() {
-        return x;
-    }
-
-    public float getY() {
-        return y;
-    }
-
-    public float getZ() {
-        return z;
+    public Vector3f getPos(){
+    return new Vector3f(x,y,z);
     }
 
 }

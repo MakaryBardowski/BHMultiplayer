@@ -15,19 +15,20 @@ import com.jme3.math.Vector3f;
  */
 public class CameraRecoilControl extends RecoilControl{
 
-    public CameraRecoilControl(float kickback) {
-        super(kickback);  
+    public CameraRecoilControl(float kickback,float recoilX,float recoilY,float recoilZ) {
+        super(kickback,recoilX,recoilY,recoilZ);  
     }
 
     
     @Override
     protected void controlUpdate(float tpf) {
-        this.recoilUpdate(tpf);
+        this.recoilUpdate();
     }
     
-    public void recoilUpdate(float tpf) {
-        targetRotationRecoil.nlerp(new Quaternion(0, 0, 0, 1), tpf*snap*.4f);
-        currentRotationRecoil.slerp(targetRotationRecoil, tpf * snap);
+    @Override
+    public void recoilUpdate() {
+        targetRotationRecoil.nlerp(new Quaternion(0, 0, 0, 1), RECOIL_SPEED*snap*.4f);
+        currentRotationRecoil.slerp(targetRotationRecoil, RECOIL_SPEED * snap);
         
         spatial.setLocalRotation(currentRotationRecoil);
 

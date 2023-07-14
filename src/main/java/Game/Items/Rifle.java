@@ -100,8 +100,8 @@ public class Rifle extends RangedWeapon {
         SkinningControl skinningControl = model.getChild(0).getControl(SkinningControl.class);
         muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
-        gunRecoil = new RecoilControl(0.6f);
-        camRecoil = new CameraRecoilControl(2);
+        gunRecoil = new RecoilControl(0.2f,-.0f,.0f,.00f);
+        camRecoil = new CameraRecoilControl(2f,-.3f,.3f,.1f);
         p.getGunNode().addControl(gunRecoil);
         p.getMainCameraNode().addControl(camRecoil);
 
