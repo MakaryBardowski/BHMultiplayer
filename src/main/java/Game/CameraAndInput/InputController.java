@@ -49,7 +49,7 @@ public class InputController {
         initKeys(m, initActionListener(gs), initAnalogListener(gs));
         
         headBob = new HeadBobControl(gs.getPlayer());
-        gs.getPlayer().getMainCameraNode().addControl(headBob);
+        gs.getPlayer().getRotationNode().addControl(headBob);
     }
 
     private ActionListener initActionListener(final ClientGameAppState gs) {
@@ -164,7 +164,6 @@ public class InputController {
 
                    
                     gs.getPlayer().getRotationNode().setLocalRotation(quat);
-                    gs.getPlayer().getFirstPersonCameraNode().setLocalRotation(quat);
                 }
             }
 

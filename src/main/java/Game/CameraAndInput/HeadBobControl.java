@@ -18,7 +18,7 @@ public class HeadBobControl extends AbstractControl{
     private boolean headBobActive = false;
     private float headBobTimer=0;
     private final float frequency = 15;
-    private final float amplitude = .03f;
+    private final float amplitude = .02f;
     private final float wavelength = 2*FastMath.PI;
     private final Player player;
 
