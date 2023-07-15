@@ -42,10 +42,14 @@ public class InputController {
 
     private NiftyImage guiElement;
     private InputManager m;
+    private HeadBobControl headBob;
 
     public void createInputListeners(ClientGameAppState gs) {
         m = gs.getInputManager();
         initKeys(m, initActionListener(gs), initAnalogListener(gs));
+        
+        headBob = new HeadBobControl(gs.getPlayer());
+        gs.getPlayer().getMainCameraNode().addControl(headBob);
     }
 
     private ActionListener initActionListener(final ClientGameAppState gs) {
