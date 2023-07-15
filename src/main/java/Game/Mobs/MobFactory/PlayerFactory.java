@@ -94,12 +94,12 @@ public class PlayerFactory extends MobFactory {
         p.getRotationNode().setLocalTranslation(0, PLAYER_HEIGHT, 0);
 
         CameraNode gunCameraNode = new CameraNode("Gun Camera Node" + p.getId(), firstPersonCamera);
-        gunCameraNode.move(0, PLAYER_HEIGHT, 0);
+        gunCameraNode.move(0, 0, 0);
         ViewPort view2 = renderManager.createMainView("View of firstPersonCamera", firstPersonCamera);
         view2.setClearFlags(false, true, true);
         view2.attachScene(p.getGunNode());
         firstPersonCamera.setFrustumPerspective(45f, (float) firstPersonCamera.getWidth() / firstPersonCamera.getHeight(), 0.01f, 1000f);
-        p.getNode().attachChild(gunCameraNode);
+        p.getRotationNode().attachChild(gunCameraNode);
         gunCameraNode.attachChild(p.getGunNode());
         gunCameraNode.setCullHint(Spatial.CullHint.Never);
 
