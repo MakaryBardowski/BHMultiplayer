@@ -12,13 +12,18 @@ import com.Networking.Client.ClientGameAppState;
 import com.Networking.Client.Main;
 import com.jme3.anim.SkinningControl;
 import com.jme3.asset.AssetManager;
+import com.jme3.effect.ParticleEmitter;
+import com.jme3.effect.ParticleMesh;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
+import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -66,10 +71,15 @@ public class PlayerFactory extends MobFactory {
         Vector3f playerSpawnpoint = new Vector3f(0, 4, 0);
         attachToMobsNode(playerNode, playerSpawnpoint);
         Debugging.DebugUtils.addArrow(playerNode, assetManager);
-        if (setAsPlayer) {
+        if (!setAsPlayer) {
             setupFirstPersonCamera(p);
             addStartEquipment(p);
         }
+
+        setupBloodEmitter(p);
+
+        
+        
         return p;
     }
 
@@ -83,7 +93,38 @@ public class PlayerFactory extends MobFactory {
         Vector3f playerSpawnpoint = new Vector3f(0, 4, 0);
         attachToMobsNode(playerNode, playerSpawnpoint);
         addStartEquipment(p);
+
         return p;
+    }
+    
+    private void setupBloodEmitter(Player p ){
+                                    ParticleEmitter  blood =
+            new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 500);
+    Material mat_red = new Material(Main.getInstance().getAssetManager(),
+            "Common/MatDefs/Misc/Particle.j3md");
+    mat_red.setTexture("Texture", Main.getInstance().getAssetManager().loadTexture(
+            "Textures/Gameplay/Decals/testBlood0.png"));
+    mat_red.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+    blood.setQueueBucket(RenderQueue.Bucket.Transparent);
+    blood.setMaterial(mat_red);
+    blood.setImagesX(1);
+    blood.setImagesY(1); // 2x2 texture animation
+    blood.setSelectRandomImage(true);
+    blood.setRandomAngle(true);
+    blood.setEndColor(  new ColorRGBA(1f, 0f, 0f, 1f));   // red
+    blood.setStartColor(new ColorRGBA(1f, 1f, 0f, 0.5f)); // yellow
+    blood.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 1, 0));
+    blood.setStartSize(1.2f);
+    blood.setEndSize(0.6f);
+    blood.setGravity(0, 9, 0);
+    blood.setLowLife(2f);
+    blood.setHighLife(3f);
+    blood.getParticleInfluencer().setVelocityVariation(3f);
+    p.getNode().attachChild(blood);
+    blood.move(0, 2, 0);
+    blood.setParticlesPerSec(0);
+    p.setBloodEmitter(blood);
+        
     }
 
     private void setupFirstPersonCamera(Player p) {
@@ -112,7 +153,7 @@ public class PlayerFactory extends MobFactory {
     }
 
     private void addStartEquipment(Player p) {
-        p.getEquipment()[0] = new Rifle(4, ItemTemplates.RIFLE_MANNLICHER_95);
+        p.getEquipment()[0] = new Rifle(0.33f, ItemTemplates.RIFLE_MANNLICHER_95);
         p.getHotbar()[0] = p.getEquipment()[0];
     }
     
