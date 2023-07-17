@@ -161,8 +161,6 @@ public class InputController {
                     float centredY = m.getCursorPosition().y - 0.5f * gs.getSettings().getWidth();
                     Quaternion quat = new Quaternion();
                     quat.fromAngles(-0.005f * centredY, 0, 0);
-
-                   
                     gs.getPlayer().getRotationNode().setLocalRotation(quat);
                 }
             }
@@ -237,7 +235,11 @@ public class InputController {
     }
 
     private void projectBlood(ClientGameAppState gs) {
-        long time = System.currentTimeMillis();
+//        long time = System.currentTimeMillis();
+long startTime = System.nanoTime();
+
+
+
         for (int i = 0; i < 1; i++) {
 
             Camera cam = gs.getCamera();
@@ -246,6 +248,7 @@ public class InputController {
             Ray ray = new Ray(gs.getCamera().getLocation(), gs.getCamera().getDirection());
             gs.getMapNode().collideWith(ray, results);
             var contactPoint = new Vector3f();
+            
             if (results.size() > 0) {
                 CollisionResult closest = results.getClosestCollision();
                 contactFaceNormal = closest.getContactNormal();
@@ -279,8 +282,11 @@ public class InputController {
 
             gs.getRootNode().attachChild(geometry);
         }
+long endTime = System.nanoTime();
+long executionTime = endTime - startTime;
 
-        System.out.println(System.currentTimeMillis() - time + "ms");
+System.out.println("Execution time: " + executionTime + " nanoseconds");
+//        System.out.println(System.currentTimeMillis() - time + "ms");
 //                    var box = new Geometry("box", new Box(projectionBox.x / 2f, projectionBox.y / 2f, projectionBox.z / 2f));
 //                    var boxmat = new Material(gs.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 //                    boxmat.getAdditionalRenderState().setWireframe(true);

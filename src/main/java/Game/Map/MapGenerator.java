@@ -46,15 +46,21 @@ public class MapGenerator {
             }
            }
         }
-        logicMap[15][1][13] = 1;
-                logicMap[15][1][15] = 1;
-        logicMap[16][1][15] = 1;
-        logicMap[16][1][13] = 1;
-        logicMap[17][1][14] = 1;
-        logicMap[14][0][13] =0;
+//        logicMap[15][1][13] = 1;
+//                logicMap[15][1][15] = 1;
+//        logicMap[16][1][15] = 1;
+//        logicMap[16][1][13] = 1;
+//        logicMap[17][1][14] = 1;
+//       for (int x = 6; x < 8; x++) {
+//           for(int y = 2; y<4;y++){
+//            for (int z = 6; z < 7; z++) {
+//                
+//                logicMap[x][y][z] = 1;
+//            }
+//           }
+//        }
 
 //        logicMap[15][0][13] = 0;
-
         Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
         return map;
     }

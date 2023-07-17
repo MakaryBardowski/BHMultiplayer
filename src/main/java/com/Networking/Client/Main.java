@@ -77,7 +77,7 @@ public class Main extends SimpleApplication {
 //        app.setDisplayFps(false);
 //        app.setDisplayStatView(false);
 //        settings1.setCenterWindow(false);
-//
+//asd
 //        if (new Random().nextInt(2) == 0) {
 //            settings1.setWindowXPosition(0);
 //        } else {
@@ -95,4 +95,4 @@ public class Main extends SimpleApplication {
         return instance;
     }
     
-}
+    }

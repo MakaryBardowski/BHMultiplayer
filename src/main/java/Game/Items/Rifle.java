@@ -4,7 +4,6 @@
  */
 package Game.Items;
 
-import Debugging.DebugUtils;
 import Game.Effects.GradientParticleEmitter;
 import Game.Effects.GradientParticleMesh;
 import Game.Items.ItemTemplates.ItemTemplate;
@@ -13,25 +12,10 @@ import Game.Mobs.Player;
 import Projectiles.Controls.BulletTracerControl;
 import com.Networking.Client.ClientGameAppState;
 import com.Networking.Client.Main;
-import com.epagagames.particles.BillboardMode;
-import com.epagagames.particles.Emitter;
-import com.epagagames.particles.emittershapes.EmitterCircle;
-import com.epagagames.particles.emittershapes.EmitterCone;
-import com.epagagames.particles.emittershapes.EmitterLine;
-import com.epagagames.particles.influencers.ColorInfluencer;
-import com.epagagames.particles.influencers.GravityInfluencer;
-import com.epagagames.particles.influencers.PreferredDirectionInfluencer;
-import com.epagagames.particles.influencers.SizeInfluencer;
-import com.epagagames.particles.influencers.TrailInfluencer;
-import com.epagagames.particles.valuetypes.ValueType;
 import com.jme3.anim.SkinningControl;
-import com.jme3.animation.SkeletonControl;
 import com.jme3.asset.AssetManager;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
-import com.jme3.effect.ParticleEmitter;
-import com.jme3.effect.ParticleMesh;
-import com.jme3.effect.influencers.ParticleInfluencer;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
@@ -41,11 +25,7 @@ import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Box;
 import com.jme3.texture.Texture;
-import java.util.Random;
-import jme3utilities.mesh.PointMesh;
 
 /**
  *
