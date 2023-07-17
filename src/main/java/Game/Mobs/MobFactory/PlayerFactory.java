@@ -71,7 +71,7 @@ public class PlayerFactory extends MobFactory {
         Vector3f playerSpawnpoint = new Vector3f(0, 4, 0);
         attachToMobsNode(playerNode, playerSpawnpoint);
         Debugging.DebugUtils.addArrow(playerNode, assetManager);
-        if (!setAsPlayer) {
+        if (setAsPlayer) {
             setupFirstPersonCamera(p);
             addStartEquipment(p);
         }
