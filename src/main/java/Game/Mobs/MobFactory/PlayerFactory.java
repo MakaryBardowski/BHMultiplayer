@@ -153,7 +153,7 @@ public class PlayerFactory extends MobFactory {
     }
 
     private void addStartEquipment(Player p) {
-        p.getEquipment()[0] = new Rifle(0.33f, ItemTemplates.RIFLE_MANNLICHER_95);
+        p.getEquipment()[0] = new Rifle(30f, ItemTemplates.RIFLE_MANNLICHER_95);
         p.getHotbar()[0] = p.getEquipment()[0];
     }
     

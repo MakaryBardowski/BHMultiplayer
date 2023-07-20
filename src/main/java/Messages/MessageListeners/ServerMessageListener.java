@@ -47,7 +47,6 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
 
         } else if (msg instanceof MobHealthUpdateMessage hmsg) {
             serverApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
-            System.out.println("player "+hmsg.getId()+" new hp is "+hmsg.getHealth());
         }
     }
 

@@ -60,7 +60,8 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
         } catch (IOException ex) {
             Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        for(int i = 5; i< 8;i++)
+registerPlayer(i).getNode().move(10,0,10+(i-5)*4);
     }
 
     @Override

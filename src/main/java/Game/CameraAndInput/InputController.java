@@ -21,12 +21,15 @@ import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.shape.Box;
 import com.jme3.texture.Texture;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
@@ -47,14 +50,14 @@ public class InputController {
     public void createInputListeners(ClientGameAppState gs) {
         m = gs.getInputManager();
         initKeys(m, initActionListener(gs), initAnalogListener(gs));
-        
+
         headBob = new HeadBobControl(gs.getPlayer());
         gs.getPlayer().getRotationNode().addControl(headBob);
     }
 
     private ActionListener initActionListener(final ClientGameAppState gs) {
         final Player player = gs.getPlayer();
-        System.out.println("player "+player);
+        System.out.println("player " + player);
         ActionListener actionListener = new ActionListener() {
             @Override
             public void onAction(String name, boolean keyPressed, float tpf) {
@@ -107,6 +110,11 @@ public class InputController {
                     player.getEquippedRightHand().playerUseRight(player);
 
 //                    projectBlood(gs);
+                }
+                if (!player.isDead() && name.equals("AttackR") && !keyPressed) {
+                    Camera cam = gs.getCamera();
+
+                    projectBlood(gs, cam.getLocation(), cam.getDirection());
                 }
 //                else if (!player.isDead() && name.equals("Attack")) {
 //                    player.setShooting(true);
@@ -180,6 +188,8 @@ public class InputController {
         inputManager.addMapping("D", new KeyTrigger(KeyInput.KEY_D)); // strafe right
 
         inputManager.addMapping("Attack", new MouseButtonTrigger(MouseInput.BUTTON_LEFT)); // shoot
+        inputManager.addMapping("AttackR", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT)); // shoot
+
         inputManager.addMapping("Grenade", new KeyTrigger(KeyInput.KEY_G));
         inputManager.addMapping("B", new KeyTrigger(KeyInput.KEY_B));
         inputManager.addMapping("E", new KeyTrigger(KeyInput.KEY_E)); // activate item
@@ -207,6 +217,8 @@ public class InputController {
         inputManager.addListener(actionListener, "R");
 
         inputManager.addListener(actionListener, "Attack");
+        inputManager.addListener(actionListener, "AttackR");
+
         inputManager.addListener(actionListener, "Grenade");
         inputManager.addListener(actionListener, "K");
         inputManager.addListener(actionListener, "B");
@@ -234,34 +246,26 @@ public class InputController {
 //        }
     }
 
-    private void projectBlood(ClientGameAppState gs) {
-//        long time = System.currentTimeMillis();
-long startTime = System.nanoTime();
-
-
-
+    public static void projectBlood(ClientGameAppState gs, Vector3f from, Vector3f to) {
         for (int i = 0; i < 1; i++) {
 
-            Camera cam = gs.getCamera();
             var contactFaceNormal = new Vector3f(); // Get the normal vector of the contact face
             CollisionResults results = new CollisionResults();
-            Ray ray = new Ray(gs.getCamera().getLocation(), gs.getCamera().getDirection());
+            Ray ray = new Ray(from, to);
             gs.getMapNode().collideWith(ray, results);
             var contactPoint = new Vector3f();
-            
+
             if (results.size() > 0) {
                 CollisionResult closest = results.getClosestCollision();
                 contactFaceNormal = closest.getContactNormal();
                 contactPoint = closest.getContactPoint();
             }
-// Calculate the position aligned with the contact face normal
-//var pos = cam.getLocation().add(contactFaceNormal.mult(dist / 2));
-            var pos = contactPoint.add(contactFaceNormal.mult(0.1f));
-// Calculate the rotation aligned with the contact face normal
-//var rot = new Quaternion().lookAt(contactFaceNormal.negate(), Vector3f.UNIT_Y);
-            var rot = cam.getRotation().clone();
-            var dist = contactPoint.distance(pos) + 35f;
-//pos.addLocal(rot.getRotationColumn(2).mult(dist/2));
+
+            var dist = 0.1f;
+            var pos = contactPoint.add(contactFaceNormal.mult(dist / 2));
+//            var pos = contactPoint.add(contactFaceNormal.mult(0.1f));
+            var rot = new Quaternion().lookAt(contactFaceNormal.negate(), Vector3f.UNIT_Y);
+            pos.addLocal(rot.getRotationColumn(2).mult(dist / 2));
             var projectionBox = new Vector3f(3f, 3f, dist);
 
             var projector = new DecalProjector(gs.getMapNode(), pos, rot, projectionBox);
@@ -281,20 +285,15 @@ long startTime = System.nanoTime();
             geometry.setMaterial(material);
 
             gs.getRootNode().attachChild(geometry);
+//            var box = new Geometry("box", new Box(projectionBox.x / 2f, projectionBox.y / 2f, projectionBox.z / 2f));
+//            var boxmat = new Material(gs.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+//            boxmat.getAdditionalRenderState().setWireframe(true);
+//            boxmat.setColor("Color", ColorRGBA.White);
+//            box.setMaterial(boxmat);
+//            box.setLocalTranslation(pos);
+//            box.setLocalRotation(rot);
+//            gs.getRootNode().attachChild(box);
         }
-long endTime = System.nanoTime();
-long executionTime = endTime - startTime;
-
-System.out.println("Execution time: " + executionTime + " nanoseconds");
-//        System.out.println(System.currentTimeMillis() - time + "ms");
-//                    var box = new Geometry("box", new Box(projectionBox.x / 2f, projectionBox.y / 2f, projectionBox.z / 2f));
-//                    var boxmat = new Material(gs.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-//                    boxmat.getAdditionalRenderState().setWireframe(true);
-//                    boxmat.setColor("Color", ColorRGBA.White);
-//                    box.setMaterial(boxmat);
-//                    box.setLocalTranslation(pos);
-//                    box.setLocalRotation(rot);
-//                    gs.getRootNode().attachChild(box);
 
     }
 }
