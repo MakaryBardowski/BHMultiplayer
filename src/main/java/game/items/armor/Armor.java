@@ -20,6 +20,10 @@ public abstract class Armor extends Item implements Equippable {
         super(template);
     }
 
+    public Armor(ItemTemplates.ItemTemplate template, boolean droppable) {
+        super(template, droppable);
+    }
+
     public static void setupModelShootability(Node node, int id) {
         node.setName("" + id);
         for (Spatial spatial : node.getChildren()) {

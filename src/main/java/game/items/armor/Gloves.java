@@ -21,10 +21,13 @@ public class Gloves extends Armor {
         super(template);
     }
 
+    public Gloves(ItemTemplates.ItemTemplate template, boolean droppable) {
+        super(template, droppable);
+    }
+
     @Override
     public void playerEquip(Player m) {
-        
-        
+
         Node r = m.getSkinningControl().getAttachmentsNode("HandR");
         Node l = m.getSkinningControl().getAttachmentsNode("HandL");
         r.detachAllChildren();

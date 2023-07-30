@@ -42,6 +42,10 @@ public class Rifle extends RangedWeapon {
         super(damage, template);
     }
 
+    public Rifle(float damage, ItemTemplate template, boolean droppable) {
+        super(damage, template, droppable);
+    }
+
     @Override
     public void playerEquip(Player p) {
         playerHoldRight(p);
@@ -80,8 +84,8 @@ public class Rifle extends RangedWeapon {
         SkinningControl skinningControl = model.getChild(0).getControl(SkinningControl.class);
         muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
-        gunRecoil = new RecoilControl(0.2f,-.0f,.0f,.00f);
-        camRecoil = new CameraRecoilControl(2f,-.3f,.3f,.1f);
+        gunRecoil = new RecoilControl(0.2f, -.0f, .0f, .00f);
+        camRecoil = new CameraRecoilControl(2f, -.3f, .3f, .1f);
         p.getGunNode().addControl(gunRecoil);
         p.getMainCameraNode().addControl(camRecoil);
 
@@ -99,7 +103,7 @@ public class Rifle extends RangedWeapon {
     @Override
     public void playerAttack(Player p) {
         if (!hitscan(p, ClientGameAppState.getInstance().getMobsNode(), false)) {
-hitscan(p, ClientGameAppState.getInstance().getMapNode(), true);
+            hitscan(p, ClientGameAppState.getInstance().getMapNode(), true);
         }
 
     }

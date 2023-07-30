@@ -34,10 +34,11 @@ import com.jme3.scene.Node;
 import de.lessvoid.nifty.Nifty;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * This is the Main Class of your Game. You should only do initialization here.
@@ -47,35 +48,78 @@ import java.util.logging.Logger;
  */
 public class ClientGameAppState extends AbstractAppState implements ClientStateListener {
 
+    @Getter
     private static ClientGameAppState instance;
+    
+    @Getter
     private final int BLOCK_SIZE = 4;
+    
+    @Getter
     private final int CHUNK_SIZE = 16;
+    
+    @Getter
     private final int MAP_SIZE = 39;
 
+    @Getter
     private final Node rootNode = new Node("ROOT NODE");
+    
+    @Getter
     private final Node worldNode = new Node("WORLD NODE");
+    
+    @Getter
     private final Node mapNode = new Node("MAP NODE");
+    
+    @Getter
     private final Node debugNode = new Node("DEBUG NODE");
+    
+    @Getter
     private final Node mobsNode = new Node("ENTITY NODE");
+    
+    @Getter
     private final Node pickableNode = new Node("PICKABLE NODE");
-
+    
     private final SimpleApplication app;
+    
+    @Getter
     private final AssetManager assetManager;
+    
+    @Getter
+    private final InputManager inputManager;
+    
     private final ConcurrentLinkedQueue<AbstractMessage> messageQueue = new ConcurrentLinkedQueue<>();
+   
+    @Getter
     private final HashMap<Integer, Mob> mobs = new HashMap<>();
+    
     private final AppSettings applicationSettings;
 
+    @Getter
     private Client client;
+    
+    @Getter
+    @Setter
     private Player player;
+    
+    @Getter
+    @Setter
     private ActionListener actionListener;
+    
+    @Getter
+    @Setter
     private AnalogListener analogListener;
+    
+    @Getter
     private Map map;
+
+    @Getter
+    @Setter
     private Nifty nifty;
 
     public ClientGameAppState(Main app) {
         instance = this;
         this.app = app;
         this.assetManager = app.getAssetManager();
+        this.inputManager = app.getInputManager();
         this.applicationSettings = app.getAppSettings();
         app.getRootNode().attachChild(rootNode);
     }
@@ -129,9 +173,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     }
 
-    public Client getClient() {
-        return client;
-    }
 
     public ConcurrentLinkedQueue<AbstractMessage> getMessageQueue() {
         return messageQueue;
@@ -152,49 +193,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         return p;
     }
 
-
-    public HashMap<Integer, Mob> getMobs() {
-        return mobs;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
-
     public AppSettings getSettings() {
         return applicationSettings;
-    }
-
-    public ActionListener getActionListener() {
-        return actionListener;
-    }
-
-    public void setActionListener(ActionListener actionListener) {
-        this.actionListener = actionListener;
-    }
-
-    public Node getWorldNode() {
-        return worldNode;
-    }
-
-    public Node getMapNode() {
-        return mapNode;
-    }
-
-    public Node getDebugNode() {
-        return debugNode;
-    }
-
-    public Node getPickableNode() {
-        return pickableNode;
-    }
-
-    public Map getMap() {
-        return map;
     }
 
     public Camera getCamera() {
@@ -205,56 +205,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         return app.getFlyByCamera();
     }
 
-    public Nifty getNifty() {
-        return nifty;
-    }
-
-    public void setNifty(Nifty nifty) {
-        this.nifty = nifty;
-    }
-
-    public int getBLOCK_SIZE() {
-        return BLOCK_SIZE;
-    }
-
-    public int getCHUNK_SIZE() {
-        return CHUNK_SIZE;
-    }
-
-    public int getMAP_SIZE() {
-        return MAP_SIZE;
-    }
-
-    public Node getMobsNode() {
-        return mobsNode;
-    }
-
-    public Node getRootNode() {
-        return rootNode;
-    }
-
-    public AssetManager getAssetManager() {
-        return app.getAssetManager();
-    }
-
-    public InputManager getInputManager() {
-        return app.getInputManager();
-    }
-
     public AppStateManager getStateManager() {
         return app.getStateManager();
-    }
-
-    public static ClientGameAppState getInstance() {
-        return instance;
-    }
-
-    public AnalogListener getAnalogListener() {
-        return analogListener;
-    }
-
-    public void setAnalogListener(AnalogListener analogListener) {
-        this.analogListener = analogListener;
     }
 
 }

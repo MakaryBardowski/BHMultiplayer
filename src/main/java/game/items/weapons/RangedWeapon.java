@@ -13,8 +13,11 @@ import game.mobs.Mob;
  */
 public abstract class RangedWeapon extends Weapon {
 
-    
-    protected RangedWeapon(float damage,ItemTemplate template) {
-        super(damage,template);
+    protected RangedWeapon(float damage, ItemTemplate template) {
+        super(damage, template);
+    }
+
+    protected RangedWeapon(float damage, ItemTemplate template, boolean droppable) {
+        super(damage, template, droppable);
     }
 }

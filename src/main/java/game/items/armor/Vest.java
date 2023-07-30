@@ -20,6 +20,10 @@ public class Vest extends Armor {
         super(template);
     }
 
+    public Vest(ItemTemplates.ItemTemplate template, boolean droppable) {
+        super(template, droppable);
+    }
+
     @Override
     public void playerEquip(Player m) {
         Node n = m.getSkinningControl().getAttachmentsNode("Spine");
@@ -27,7 +31,7 @@ public class Vest extends Armor {
         Node vest = (Node) Main.getInstance().getAssetManager().loadModel(template.getFpPath());
         setupModelLight(vest);
         n.attachChild(vest);
-        setupModelShootability(vest,m.getId());
+        setupModelShootability(vest, m.getId());
     }
 
     @Override

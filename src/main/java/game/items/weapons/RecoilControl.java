@@ -47,7 +47,7 @@ public class RecoilControl extends AbstractControl{
     
     public void recoilFire(){
         targetRotationRecoil = targetRotationRecoil.add((new Quaternion()).fromAngleAxis(FastMath.PI / (6-kickback), new Vector3f(recoilX, getRandomNumber(-recoilY, recoilY), getRandomNumber(-recoilZ, recoilZ))));
-        targetVectorRecoil = targetVectorRecoil.subtract(targetRotationRecoil.getRotationColumn(2).subtract(0,0,0.2f));
+        targetVectorRecoil = targetVectorRecoil.subtract(targetRotationRecoil.getRotationColumn(2).subtract(0,0,0.4f));
             }
     
     public float getRandomNumber(float min, float max) {

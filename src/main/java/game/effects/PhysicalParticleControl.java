@@ -20,18 +20,17 @@ import java.util.List;
  *
  * @author 48793
  */
-public class GoreControl extends AbstractControl {
+public class PhysicalParticleControl extends AbstractControl {
     //Any local variables should be encapsulated by getters/setters so they
     //appear in the SDK properties window and can be edited.
     //Right-click a local variable to encapsulate it with getters and setters.
-    private List<GoreParticle> particles;
-    public GoreControl(List<GoreParticle> particles){
-        this.particles = particles;
+    private PhysicalParticle particle;
+    public PhysicalParticleControl(PhysicalParticle particle){
+        this.particle = particle;
     }
     @Override
     protected void controlUpdate(float tpf) {
-        for(GoreParticle gore: particles)
-            gore.updateParticle(tpf);
+            particle.getStrategy().updateParticle(tpf);
     }
     
     @Override
@@ -41,7 +40,7 @@ public class GoreControl extends AbstractControl {
     }
     
     public Control cloneForSpatial(Spatial spatial) {
-        GoreControl control = new GoreControl(particles);
+        PhysicalParticleControl control = new PhysicalParticleControl(particle);
         //TODO: copy parameters to new Control
         return control;
     }

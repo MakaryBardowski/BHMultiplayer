@@ -4,42 +4,41 @@
  */
 package game.items;
 
+import com.jme3.math.FastMath;
+import com.jme3.math.Vector3f;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  *
  * @author 48793
  */
 public class ItemTemplates {
 
-    public static final ItemTemplate RIFLE_MANNLICHER_95 = new ItemTemplate("Models/testRifleFP/testRifleFP.j3o", null, null);
-    public static final ItemTemplate VEST_TRENCH = new ItemTemplate("Models/officers/officersCoat.j3o", null, null);
-    public static final ItemTemplate BOOTS_TRENCH = new ItemTemplate("Models/officers/officersLeg?.j3o", null, null);
-    public static final ItemTemplate GLOVES_TRENCH = new ItemTemplate("Models/officers/officersHand?.j3o", null, null);
-    public static final ItemTemplate HEAD_1 = new ItemTemplate("Models/officers/head1.j3o", null, null);
+    private static final String ITEMS_PATH = "Models/Items/";
+    public static final ItemTemplate RIFLE_MANNLICHER_95 = new ItemTemplate(ITEMS_PATH + "Mannlicher95/Mannlicher95FP.j3o", null, ITEMS_PATH + "Mannlicher95/Mannlicher95Drop.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD)));
+    public static final ItemTemplate VEST_TRENCH = new ItemTemplate(ITEMS_PATH + "TrenchSet/officersCoat.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD)));
+    public static final ItemTemplate BOOTS_TRENCH = new ItemTemplate(ITEMS_PATH + "TrenchSet/officersLeg?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD)));
+    public static final ItemTemplate GLOVES_TRENCH = new ItemTemplate(ITEMS_PATH + "TrenchSet/officersHand?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD)));
+    public static final ItemTemplate HEAD_1 = new ItemTemplate(ITEMS_PATH + "TrenchSet/head1.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD)));
 
+    @Getter
+    @AllArgsConstructor
     public static class ItemTemplate {
 
         private final String fpPath; // path to the model seen in first person
         private final String iconPath; // path to the icon seen eq
         private final String dropPath; // path to the model seen when dropped on the ground/equipped by others
+        private final DropOffsetData dropData;
 
-        public ItemTemplate(String fpPath, String iconPath, String dropPath) {
-            this.fpPath = fpPath;
-            this.iconPath = iconPath;
-            this.dropPath = dropPath;
-        }
+    }
 
-        public String getFpPath() {
-            return fpPath;
-        }
+    @Getter
+    @AllArgsConstructor
+    public static class DropOffsetData {
 
-        public String getIconPath() {
-            return iconPath;
-        }
-
-        public String getDropPath() {
-            return dropPath;
-        }
-
+        private final Vector3f offset;
+        private final Vector3f rotation;
     }
 
 }
