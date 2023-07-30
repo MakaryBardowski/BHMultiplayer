@@ -27,7 +27,11 @@ public abstract class Weapon extends Item implements Attacks,Holdable,Equippable
     damageType = DEFAULT_DAMAGE_TYPE;
     }
     
-//
+    protected Weapon(float damage,ItemTemplate template,boolean droppable){
+    super(template,droppable);
+    this.damage = damage;
+    damageType = DEFAULT_DAMAGE_TYPE;
+    }
     
     public void setDamage(float damage) {
         this.damage = damage;

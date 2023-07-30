@@ -9,12 +9,14 @@ import game.map.collision.CollidableInterface;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import java.util.Random;
 
 /**
  *
  * @author 48793
  */
 public abstract class Mob implements CollidableInterface, MobInterface {
+
     protected static final int EQUIPMENT_SIZE = 18;
 
     private static float DEFAULT_SPEED = 10f; //20
@@ -137,5 +139,13 @@ public abstract class Mob implements CollidableInterface, MobInterface {
         this.rotInterpolationValue = rotInterpolationValue;
     }
 
+    protected void dropEquipment() {
+        Random r = new Random();
+        for (Item item : equipment) {
+            if (item != null) {
+                item.drop(node.getWorldTranslation().add(r.nextFloat(-0.25f, 0.25f), 2+r.nextFloat(-1, 1), r.nextFloat(-0.25f, 0.25f)));
+            }
+        }
+    }
 
 }

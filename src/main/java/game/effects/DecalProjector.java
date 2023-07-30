@@ -1,22 +1,31 @@
 package game.effects;
 
+import client.ClientGameAppState;
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
+import com.jme3.material.Material;
+import com.jme3.material.RenderState;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix4f;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Ray;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.shader.BufferObject.BufferType;
+import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 public class DecalProjector {
 
@@ -306,5 +315,57 @@ public class DecalProjector {
         public DecalVertex clone() {
             return new DecalVertex(position.clone(), normal.clone());
         }
+    }
+    
+    
+        public static void projectBlood(ClientGameAppState gs, Vector3f from, Vector3f to) {
+        for (int i = 0; i < 1; i++) {
+
+            var contactFaceNormal = new Vector3f(); // Get the normal vector of the contact face
+            CollisionResults results = new CollisionResults();
+            Ray ray = new Ray(from, to);
+            gs.getMapNode().collideWith(ray, results);
+            var contactPoint = new Vector3f();
+
+            if (results.size() > 0) {
+                CollisionResult closest = results.getClosestCollision();
+                contactFaceNormal = closest.getContactNormal();
+                contactPoint = closest.getContactPoint();
+            }
+
+            var dist = 0.1f;
+            var pos = contactPoint.add(contactFaceNormal.mult(dist / 2));
+//            var pos = contactPoint.add(contactFaceNormal.mult(0.1f));
+            var rot = new Quaternion().lookAt(contactFaceNormal.negate(), Vector3f.UNIT_Y);
+            pos.addLocal(rot.getRotationColumn(2).mult(dist / 2));
+            var projectionBox = new Vector3f(3f, 3f, dist);
+
+            var projector = new DecalProjector(gs.getMapNode(), pos, rot, projectionBox);
+            projector.setSeparation(0.002f);
+            var geometry = projector.project();
+
+            Texture texture = gs.getAssetManager().loadTexture("Textures/Gameplay/Decals/testBlood" + new Random().nextInt(2) + ".png");
+            Material material = new Material(gs.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+            material.setTexture("ColorMap", texture);
+            material.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+            material.getAdditionalRenderState().setDepthWrite(false);
+            material.getAdditionalRenderState().setPolyOffset(-4, -1f);
+            // Apply the material to the geometry
+            geometry.setMaterial(material);
+            geometry.setQueueBucket(RenderQueue.Bucket.Transparent);
+
+            geometry.setMaterial(material);
+
+            gs.getRootNode().attachChild(geometry);
+//            var box = new Geometry("box", new Box(projectionBox.x / 2f, projectionBox.y / 2f, projectionBox.z / 2f));
+//            var boxmat = new Material(gs.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+//            boxmat.getAdditionalRenderState().setWireframe(true);
+//            boxmat.setColor("Color", ColorRGBA.White);
+//            box.setMaterial(boxmat);
+//            box.setLocalTranslation(pos);
+//            box.setLocalRotation(rot);
+//            gs.getRootNode().attachChild(box);
+        }
+
     }
 }

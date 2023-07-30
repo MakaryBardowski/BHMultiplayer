@@ -36,6 +36,11 @@ public class Player extends HumanMob {
     private Camera mainCamera;
     private final Item[] hotbar;
     private final Node gunNode = new Node("gun node");
+    
+    //controlling player actions
+    private boolean viewingEquipment;
+    private boolean cameraMovementLocked;
+    private boolean movementControlLocked;
 
     @Override
     public void equip(Item item) {
@@ -221,4 +226,33 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
         return "Player{ mainCameraNode=" + mainCameraNode + ", firstPersonCameraNode=" + firstPersonCameraNode + ", rotationNode=" + rotationNode + ", mainCamera=" + mainCamera + ", gunNode=" + gunNode + '}';
     }
 
+    public boolean isViewingEquipment() {
+        return viewingEquipment;
+    }
+
+    public void setViewingEquipment(boolean viewingEquipment) {
+        this.viewingEquipment = viewingEquipment;
+    }
+
+    public boolean isMovementControlLocked() {
+        return movementControlLocked;
+    }
+
+    public void setMovementControlLocked(boolean movementControlLocked) {
+        this.movementControlLocked = movementControlLocked;
+    }
+
+    public boolean isCameraMovementLocked() {
+        return cameraMovementLocked;
+    }
+
+    public void setCameraMovementLocked(boolean cameraMovementLocked) {
+        this.cameraMovementLocked = cameraMovementLocked;
+    }
+    
+    
+    
+
+    
+    
 }

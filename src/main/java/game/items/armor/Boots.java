@@ -21,6 +21,10 @@ public class Boots extends Armor {
         super(template);
     }
 
+    public Boots(ItemTemplates.ItemTemplate template, boolean droppable) {
+        super(template, droppable);
+    }
+
     @Override
     public void playerEquip(Player m) {
         Node r = m.getSkinningControl().getAttachmentsNode("LegR");

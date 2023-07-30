@@ -46,7 +46,6 @@ public class PlayerHUDController implements ScreenController{
         int i = Integer.parseInt(strIndex);
         Item item = gs.getPlayer().getEquipment()[i];
         gs.getPlayer().equip(item); 
-
     }
     
     

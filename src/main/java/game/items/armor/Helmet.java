@@ -19,7 +19,9 @@ public class Helmet extends Armor {
     public Helmet(ItemTemplates.ItemTemplate template) {
         super(template);
     }
-
+    public Helmet(ItemTemplates.ItemTemplate template, boolean droppable) {
+        super(template, droppable);
+    }
     @Override
     public void playerEquip(Player m) {
         Node n = m.getSkinningControl().getAttachmentsNode("Head");

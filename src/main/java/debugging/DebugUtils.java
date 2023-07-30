@@ -4,6 +4,7 @@
  */
 package debugging;
 
+import client.Main;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -12,6 +13,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.debug.Arrow;
+import com.jme3.scene.shape.Box;
 
 /**
  *
@@ -36,4 +38,18 @@ public class DebugUtils {
         node.attachChild(g);
         return g;
     }
+     
+     public static Node createUnshadedBoxNode(){
+                  Box box2 = new Box(0.2f,0.2f,0.2f);
+        Geometry red = new Geometry("Box", box2);
+        Material mat2 = new Material(Main.getInstance().getAssetManager(),
+                "Common/MatDefs/Misc/Unshaded.j3md");
+        mat2.setColor("Color", ColorRGBA.Red);
+        red.setMaterial(mat2);
+        Node n = new Node();
+        n.attachChild(red);
+        return n;
+     }
+     
+     
 }

@@ -10,7 +10,6 @@ import game.items.armor.Helmet;
 import game.items.ItemTemplates;
 import game.items.weapons.Rifle;
 import game.items.armor.Vest;
-import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.mobs.Player;
 import client.Main;
 import com.jme3.anim.SkinningControl;
@@ -74,12 +73,12 @@ public class PlayerFactory extends MobFactory {
 
         return p;
     }
-    
-    private Player createPlayer(){
-         Node playerNode = loadPlayerModel();
+
+    private Player createPlayer() {
+        Node playerNode = loadPlayerModel();
         String name = "Player_" + mobId;
         SkinningControl skinningControl = getSkinningControl(playerNode);
-        return new Player(mobId, playerNode, name, mainCamera, skinningControl); 
+        return new Player(mobId, playerNode, name, mainCamera, skinningControl);
     }
 
     private void setupFirstPersonCamera(Player p) {
@@ -93,7 +92,7 @@ public class PlayerFactory extends MobFactory {
     }
 
     private void addStartEquipment(Player p) {
-        p.getEquipment()[0] = new Rifle(4f, ItemTemplates.RIFLE_MANNLICHER_95);
+        p.getEquipment()[0] = new Rifle(40f, ItemTemplates.RIFLE_MANNLICHER_95);
         p.getHotbar()[0] = p.getEquipment()[0];
 
         p.getEquipment()[1] = new Vest(ItemTemplates.VEST_TRENCH);
@@ -105,7 +104,7 @@ public class PlayerFactory extends MobFactory {
         p.equip(p.getEquipment()[1]);
         p.equip(p.getEquipment()[2]);
         p.equip(p.getEquipment()[3]);
-        p.equip(new Helmet(ItemTemplates.HEAD_1));
+        p.equip(new Helmet(ItemTemplates.HEAD_1,false));
     }
 
     private SkinningControl getSkinningControl(Node node) {
