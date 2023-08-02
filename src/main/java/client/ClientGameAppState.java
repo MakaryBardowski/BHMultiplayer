@@ -32,6 +32,7 @@ import com.jme3.network.ClientStateListener;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import de.lessvoid.nifty.Nifty;
+import game.mobs.InteractiveEntity;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -73,7 +74,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     private final Node debugNode = new Node("DEBUG NODE");
     
     @Getter
-    private final Node mobsNode = new Node("ENTITY NODE");
+    private final Node destructibleNode = new Node("DESTRUCTIBLE NODE");
     
     @Getter
     private final Node pickableNode = new Node("PICKABLE NODE");
@@ -89,7 +90,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     private final ConcurrentLinkedQueue<AbstractMessage> messageQueue = new ConcurrentLinkedQueue<>();
    
     @Getter
-    private final HashMap<Integer, Mob> mobs = new HashMap<>();
+    private final HashMap<Integer, InteractiveEntity> mobs = new HashMap<>();
     
     private final AppSettings applicationSettings;
 
@@ -129,7 +130,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         NetworkingInitialization.initializeSerializables();
         worldNode.attachChild(debugNode);
         worldNode.attachChild(pickableNode);
-        pickableNode.attachChild(mobsNode);
+        pickableNode.attachChild(destructibleNode);
         worldNode.attachChild(mapNode);
         rootNode.attachChild(worldNode);
 
@@ -164,9 +165,9 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         }
 
         mobs.values().forEach(x -> {
-            if (x != player) {
-                interpolateMobPosition(x, tpf);
-                interpolateMobRotation(x, tpf);
+            if (x instanceof Mob m && x != player) {
+                interpolateMobPosition(m, tpf);
+                interpolateMobRotation(m, tpf);
             }
         }
         );
@@ -188,7 +189,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     }
 
     public Player registerPlayer(Integer id, boolean setAsPlayer) {
-        Player p = new PlayerFactory(id, mobsNode, getCamera(), setAsPlayer).createClientSide();
+        Player p = new PlayerFactory(id, destructibleNode, getCamera(), setAsPlayer).createClientSide();
         this.mobs.put(id, p);
         return p;
     }

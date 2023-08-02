@@ -45,7 +45,7 @@ public class Main extends SimpleApplication {
         
         
         DetailedProfilerState dps = new DetailedProfilerState();
-//        stateManager.attach(dps);
+        stateManager.attach(dps);
     }
 
     @Override

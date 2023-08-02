@@ -23,6 +23,8 @@ import com.jme3.system.JmeContext;
 import networkingUtils.NetworkingInitialization;
 import com.jme3.network.Filters;
 import com.jme3.renderer.RenderManager;
+import game.mobs.Destructible;
+import game.mobs.InteractiveEntity;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -38,7 +40,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
 
     private static final String SERVER_IP = "localhost";
     private Server server;
-    private final HashMap<Integer, Mob> mobs = new HashMap<>();
+    private final HashMap<Integer, InteractiveEntity> mobs = new HashMap<>();
     private float tickTimer;
     private final float TIME_PER_TICK = 0.033f;
 
@@ -62,8 +64,8 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
         }
 
         int i = 5;
-        for (int row = 5; row < 6; row++) {
-            for (int x = 5; x < 6; x++) {
+        for (int row = 5; row < 8; row++) {
+            for (int x = 5; x < 8; x++) {
                 registerPlayer(i++).getNode().move(10 + row * 2, 0, 10 + (x - 5) * 4);
             }
         }
@@ -75,13 +77,13 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
         tickTimer += tpf;
         if (tickTimer >= TIME_PER_TICK) {
             tickTimer = 0;
-            mobs.entrySet().stream().forEach(x -> {
+            mobs.entrySet().stream().forEach(i -> {
                 //to be seriously optimized
-                server.broadcast(new MobPosUpdateMessage(x.getValue().getId(), x.getValue().getNode().getWorldTranslation()));
-                server.broadcast(new MobRotUpdateMessage(x.getValue().getId(), x.getValue().getNode().getLocalRotation()));
-
-                server.broadcast(new MobHealthUpdateMessage(x.getValue().getId(), x.getValue().getHealth()));
-            }
+                if(i.getValue() instanceof Destructible x){
+                server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
+                server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
+                server.broadcast(new MobHealthUpdateMessage(x.getId(), x.getHealth()));
+            }}
             );
 
         }
@@ -91,9 +93,10 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     @Override
     public void connectionAdded(Server server, HostedConnection hc) {
         mobs.entrySet().forEach(x -> {
-            Mob mob = x.getValue();
+            if(x.getValue() instanceof Mob mob){
             MobsInGameMessage m = new MobsInGameMessage(mob.getId(), mob.getNode().getWorldTranslation());
             server.broadcast(Filters.in(hc), m);
+            }
         });
 
         Mob newPlayer = registerPlayer(hc.getId());
@@ -126,7 +129,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
         return server;
     }
 
-    public HashMap<Integer, Mob> getMobs() {
+    public HashMap<Integer, InteractiveEntity> getMobs() {
         return mobs;
     }
 

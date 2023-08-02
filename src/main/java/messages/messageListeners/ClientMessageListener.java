@@ -22,6 +22,7 @@ import client.PlayerHUD;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import game.mobs.Destructible;
 import java.util.concurrent.Callable;
 
 /**
@@ -88,25 +89,25 @@ public class ClientMessageListener implements MessageListener<Client> {
     }
 
     private void placeMob(Vector3f pos, Mob p) {
-        clientApp.getMobsNode().attachChild(p.getNode());
+        clientApp.getDestructibleNode().attachChild(p.getNode());
         p.getNode().setLocalTranslation(pos);
     }
 
     private void updateMobHealth(MobHealthUpdateMessage hmsg) {
         if (mobExistsLocally(hmsg.getId())) {
-            clientApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
+            getDestructible(hmsg.getId()).setHealth(hmsg.getHealth());
         }
     }
 
     private void updateMobPosition(MobPosUpdateMessage nmsg) {
         if (mobExistsLocally(nmsg.getId())) {
-            clientApp.getMobs().get(nmsg.getId()).setServerLocation(nmsg.getPos());
+            getMob(nmsg.getId()).setServerLocation(nmsg.getPos());
         }
     }
 
     private void updateMobRotation(MobRotUpdateMessage nmsg) {
         if (mobExistsLocally(nmsg.getId())) {
-            clientApp.getMobs().get(nmsg.getId()).setServerRotation(nmsg.getRot());
+            getMob(nmsg.getId()).setServerRotation(nmsg.getRot());
         }
     }
 
@@ -156,5 +157,12 @@ public class ClientMessageListener implements MessageListener<Client> {
     private void enqueueExecution(Runnable runnable) {
         Main.getInstance().enqueue(runnable);
     }
+
+    private Mob getMob(int id) {
+        return ((Mob) clientApp.getMobs().get(id));
+    }
+    
+    private Destructible getDestructible(int id ){
+    return ((Destructible) clientApp.getMobs().get(id));}
 
 }
