@@ -505,7 +505,7 @@ public class PlayerHUD extends BaseAppState {
             CollisionResult closest = results.getClosestCollision();
             String hit = closest.getGeometry().getName();
 
-            Destructible enemyHit = gs.getMobs().get(Integer.valueOf(hit));
+            Destructible enemyHit = (Destructible)gs.getMobs().get(Integer.valueOf(hit));
 
             if (enemyHit != null) {
                 boolean switched = gs.getPlayer().getCurrentTarget() != enemyHit;

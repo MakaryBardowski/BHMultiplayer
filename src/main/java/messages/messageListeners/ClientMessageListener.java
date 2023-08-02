@@ -95,19 +95,19 @@ public class ClientMessageListener implements MessageListener<Client> {
 
     private void updateMobHealth(MobHealthUpdateMessage hmsg) {
         if (mobExistsLocally(hmsg.getId())) {
-            ((Destructible)clientApp.getMobs().get(hmsg.getId())).setHealth(hmsg.getHealth());
+            getDestructible(hmsg.getId()).setHealth(hmsg.getHealth());
         }
     }
 
     private void updateMobPosition(MobPosUpdateMessage nmsg) {
         if (mobExistsLocally(nmsg.getId())) {
-            clientApp.getMobs().get(nmsg.getId()).setServerLocation(nmsg.getPos());
+            getMob(nmsg.getId()).setServerLocation(nmsg.getPos());
         }
     }
 
     private void updateMobRotation(MobRotUpdateMessage nmsg) {
         if (mobExistsLocally(nmsg.getId())) {
-            clientApp.getMobs().get(nmsg.getId()).setServerRotation(nmsg.getRot());
+            getMob(nmsg.getId()).setServerRotation(nmsg.getRot());
         }
     }
 
@@ -157,5 +157,12 @@ public class ClientMessageListener implements MessageListener<Client> {
     private void enqueueExecution(Runnable runnable) {
         Main.getInstance().enqueue(runnable);
     }
+
+    private Mob getMob(int id) {
+        return ((Mob) clientApp.getMobs().get(id));
+    }
+    
+    private Destructible getDestructible(int id ){
+    return ((Destructible) clientApp.getMobs().get(id));}
 
 }

@@ -32,6 +32,7 @@ import com.jme3.network.ClientStateListener;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import de.lessvoid.nifty.Nifty;
+import game.mobs.InteractiveEntity;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -50,64 +51,64 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Getter
     private static ClientGameAppState instance;
-    
+
     @Getter
     private final int BLOCK_SIZE = 4;
-    
+
     @Getter
     private final int CHUNK_SIZE = 16;
-    
+
     @Getter
     private final int MAP_SIZE = 39;
 
     @Getter
     private final Node rootNode = new Node("ROOT NODE");
-    
+
     @Getter
     private final Node worldNode = new Node("WORLD NODE");
-    
+
     @Getter
     private final Node mapNode = new Node("MAP NODE");
-    
+
     @Getter
     private final Node debugNode = new Node("DEBUG NODE");
-    
+
     @Getter
     private final Node destructibleNode = new Node("DESTRUCTIBLE NODE");
-    
+
     @Getter
     private final Node pickableNode = new Node("PICKABLE NODE");
-    
+
     private final SimpleApplication app;
-    
+
     @Getter
     private final AssetManager assetManager;
-    
+
     @Getter
     private final InputManager inputManager;
-    
+
     private final ConcurrentLinkedQueue<AbstractMessage> messageQueue = new ConcurrentLinkedQueue<>();
-   
+
     @Getter
-    private final HashMap<Integer, Mob> mobs = new HashMap<>();
-    
+    private final HashMap<Integer, InteractiveEntity> mobs = new HashMap<>();
+
     private final AppSettings applicationSettings;
 
     @Getter
     private Client client;
-    
+
     @Getter
     @Setter
     private Player player;
-    
+
     @Getter
     @Setter
     private ActionListener actionListener;
-    
+
     @Getter
     @Setter
     private AnalogListener analogListener;
-    
+
     @Getter
     private Map map;
 
@@ -164,15 +165,14 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         }
 
         mobs.values().forEach(x -> {
-            if (x != player) {
-                interpolateMobPosition(x, tpf);
-                interpolateMobRotation(x, tpf);
+            if (x instanceof Mob m && x != player) {
+                interpolateMobPosition(m, tpf);
+                interpolateMobRotation(m, tpf);
             }
         }
         );
 
     }
-
 
     public ConcurrentLinkedQueue<AbstractMessage> getMessageQueue() {
         return messageQueue;
