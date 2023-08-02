@@ -4,6 +4,8 @@
  */
 package game.map;
 
+import game.map.proceduralGeneration.ProceduralMapGenerator;
+import game.map.proceduralGeneration.GenType;
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 
@@ -34,19 +36,15 @@ public class MapGenerator {
             }
         }
         
-          for (int x = 0; x < logicMap.length; x++) {
+        for (int x = 0; x < logicMap.length; x++) {
             for (int z = 0; z < logicMap.length; z++) {
+                logicMap[x][1][z] = 1;
+                logicMap[x][2][z] = 1;
                 logicMap[x][3][z] = 1;
             }
         }
         
-                for (int x = 0; x < logicMap.length; x++) {
-            for (int z = 0; z < logicMap.length; z++) {
-                logicMap[x][1][z] = 1;
-                logicMap[x][2][z] = 1;
-            }
-        }
-                for (int x = 1; x < logicMap.length-1; x++) {
+        for (int x = 1; x < logicMap.length-1; x++) {
             for (int z = 1; z < logicMap.length-1; z++) {
                 logicMap[x][1][z] = 0;
                 logicMap[x][2][z] = 0;
@@ -59,7 +57,14 @@ public class MapGenerator {
 
     private Map generateCasualMap(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
         ///generates a random map
-        byte[][][] logicMap = new byte[mapSize][mapSize][mapSize]; // blocks are added based on logicMap
+        
+        int length=mapSize, height=mapSize, minRoomSize=42, maxRoomSize=42, numOfRooms=10, numOfFloors=mapSize;
+        long SEED = 1234567890L;
+        ProceduralMapGenerator mapGen = new ProceduralMapGenerator(SEED, length, height, minRoomSize, maxRoomSize, numOfRooms, numOfFloors);
+        mapGen.generate(GenType.BSP);
+        mapGen.getFloorList().get(0).printMap();
+        byte[][][] logicMap = mapGen.getMap();
+        
 
         Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
         return map;
