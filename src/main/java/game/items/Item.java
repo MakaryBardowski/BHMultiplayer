@@ -42,6 +42,7 @@ public abstract class Item {
         Node childNode = createItemDropNode();
         applyInitialDropRotation(childNode);
         node.attachChild(childNode);
+        node.scale(template.getDropData().getScale());
         node.setLocalTranslation(itemSpawnpoint);
         ClientGameAppState.getInstance().getPickableNode().attachChild(node);
         ParticleUtils.spawnItemPhysicalParticleShaded(node, itemSpawnpoint, this);

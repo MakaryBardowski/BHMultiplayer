@@ -60,12 +60,15 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
         } catch (IOException ex) {
             Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         int i = 5;
-        for(int row = 5; row < 15; row++){
- for(int x = 5 ; x<15 ;x++)
-registerPlayer(i++).getNode().move(10+row*2,0,10+(x-5)*4);
-        }}
+        for (int row = 5; row < 6; row++) {
+            for (int x = 5; x < 6; x++) {
+                registerPlayer(i++).getNode().move(10 + row * 2, 0, 10 + (x - 5) * 4);
+            }
+        }
+    }
+
     @Override
     public void simpleUpdate(float tpf) {
         //glowna petla serwera, 30dw111w tickow (wiadomosci od serwera) na sekunde, co 0.033s kazda
@@ -84,7 +87,6 @@ registerPlayer(i++).getNode().move(10+row*2,0,10+(x-5)*4);
         }
 
     }
-
 
     @Override
     public void connectionAdded(Server server, HostedConnection hc) {
@@ -131,7 +133,7 @@ registerPlayer(i++).getNode().move(10+row*2,0,10+(x-5)*4);
     public Player registerPlayer(Integer id) {
         Player player = new PlayerFactory(id, assetManager, rootNode, renderManager).createServerSide();
         this.mobs.put(id, player);
-        System.out.println("adding player "+id);
+        System.out.println("adding player " + id);
         return player;
     }
 
