@@ -6,11 +6,8 @@
 package game.map.blocks;
 
 import com.jme3.asset.AssetManager;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import com.jme3.texture.Texture;
 import java.util.HashMap;
-import java.util.HashSet;
 import jme3tools.optimize.TextureAtlas;
 
 /**
@@ -48,7 +45,6 @@ public class BlockWorld {
 
         initializeBlocks();
         rootNode.attachChild(worldNode);
-
     }
 
     private HashMap<String, Chunk> createChunks() {
@@ -89,6 +85,19 @@ public class BlockWorld {
         c.detachBlock(b);
         return b;
     }
+    
+    public Block addBlockDataToChunk(int x, int y, int z, BlockType bt) { // o
+
+        Chunk c = chunks.get("" + (x / CHUNK_SIZE) * CHUNK_SIZE + (z / CHUNK_SIZE) * CHUNK_SIZE);
+//       Block   b = VoxelAdding.addBox((x * BLOCK_SIZE)-c.getChunkPos().getX()*BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE)-c.getChunkPos().getY()*BLOCK_SIZE, BLOCK_SIZE,  c.getBlocksCount(),  asm,  bt);
+        Block b = VoxelAdding.AddOptimizedBox(c, map, logicMap, x, y, z, BLOCK_SIZE, c.getBlocksCount(), asm, bt, (x * BLOCK_SIZE) - c.getChunkPos().getX() * BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE) - c.getChunkPos().getY() * BLOCK_SIZE);
+        map[x][y][z] = b;
+        c.addBlockData(b, asm.loadTexture(bt.textureName));
+
+        return b;
+    }
+    
+///-----------------------------------------GETTERS, SETTERS AND INITS-----------------------------------------------------------
 
     public TextureAtlas getTextureAtlas() {
         return textureAtlas;
@@ -112,17 +121,6 @@ public class BlockWorld {
 
     public int getBLOCK_SIZE() {
         return BLOCK_SIZE;
-    }
-
-    public Block addBlockDataToChunk(int x, int y, int z, BlockType bt) { // o
-
-        Chunk c = chunks.get("" + (x / CHUNK_SIZE) * CHUNK_SIZE + (z / CHUNK_SIZE) * CHUNK_SIZE);
-//       Block   b = VoxelAdding.addBox((x * BLOCK_SIZE)-c.getChunkPos().getX()*BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE)-c.getChunkPos().getY()*BLOCK_SIZE, BLOCK_SIZE,  c.getBlocksCount(),  asm,  bt);
-        Block b = VoxelAdding.AddOptimizedBox(c, map, logicMap, x, y, z, BLOCK_SIZE, c.getBlocksCount(), asm, bt, (x * BLOCK_SIZE) - c.getChunkPos().getX() * BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE) - c.getChunkPos().getY() * BLOCK_SIZE);
-        map[x][y][z] = b;
-        c.addBlockData(b, asm.loadTexture(bt.textureName));
-
-        return b;
     }
 
     public Block[][][] getMap() {
@@ -152,18 +150,13 @@ public class BlockWorld {
                     if (logicMap[x][y][z] == 1 || logicMap[x][y][z] == 9) {
                         addBlockDataToChunk(x, y, z, BlockType.STONE);
                     }
-
                 }
-
             }
-
         }
 
         for (Chunk c : chunks.values()) {
             c.generateGeometry(c.generateMesh());
         }
-
-
     }
 
 }

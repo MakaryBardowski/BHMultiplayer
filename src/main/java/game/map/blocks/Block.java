@@ -27,7 +27,6 @@ public class Block {
     private int vertexOffsetInParentChunk; // first vertex in parentChunk
 
     private float lightLevel;
-
     private final float[] faceOffsetIndexes;
 
     public Block() {
@@ -80,7 +79,6 @@ public class Block {
     }
     
     
-
     public List<Vector4f> getColors() {
         return colors;
     }

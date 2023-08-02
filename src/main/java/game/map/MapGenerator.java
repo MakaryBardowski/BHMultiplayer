@@ -4,6 +4,8 @@
  */
 package game.map;
 
+import game.map.proceduralGeneration.ProceduralMapGenerator;
+import game.map.proceduralGeneration.GenType;
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 
@@ -14,22 +16,19 @@ import com.jme3.scene.Node;
 public class MapGenerator {
 
     public Map generateMap(MapType type, int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
-        switch (type) {
-            case CASUAL:
-                return generateCasualMap(blockSize, chunkSize, mapSize, a, mapNode);
-            case BOSS:
-                return generateBossMap(blockSize, chunkSize, mapSize, a, mapNode);
-            default:
-                return generateBossMap(blockSize, chunkSize, mapSize, a, mapNode);
-
-        }
+        return switch (type) {
+            case CASUAL -> generateCasualMap(blockSize, chunkSize, mapSize, a, mapNode);
+            case BOSS -> generateBossMap(blockSize, chunkSize, mapSize, a, mapNode);
+            default -> generateBossMap(blockSize, chunkSize, mapSize, a, mapNode);
+        };
 
     }
 
     private Map generateBossMap(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
+        ///makes a square map
+        
         byte[][][] logicMap = new byte[mapSize][mapSize][mapSize]; // blocks are added based on logicMap
 
-        // generate floor 
         int floorLevel = 0;
         for (int x = 0; x < logicMap.length; x++) {
             for (int z = 0; z < logicMap.length; z++) {
@@ -37,56 +36,35 @@ public class MapGenerator {
             }
         }
         
-          for (int x = 0; x < logicMap.length; x++) {
+        for (int x = 0; x < logicMap.length; x++) {
             for (int z = 0; z < logicMap.length; z++) {
+                logicMap[x][1][z] = 1;
+                logicMap[x][2][z] = 1;
                 logicMap[x][3][z] = 1;
             }
         }
         
-                for (int x = 0; x < logicMap.length; x++) {
-            for (int z = 0; z < logicMap.length; z++) {
-                logicMap[x][1][z] = 1;
-                logicMap[x][2][z] = 1;
-            }
-        }
-                for (int x = 1; x < logicMap.length-1; x++) {
+        for (int x = 1; x < logicMap.length-1; x++) {
             for (int z = 1; z < logicMap.length-1; z++) {
                 logicMap[x][1][z] = 0;
                 logicMap[x][2][z] = 0;
             }
         }
         
-//        // generate floor 
-
-//       for (int x = 8; x < logicMap.length; x++) {
-//           for(int y = 0; y<logicMap.length;y++){
-//            for (int z = 8; z < logicMap.length; z++) {
-//                
-//                logicMap[x][y][z] = 1;
-//            }
-//           }
-//        }
-//        logicMap[15][1][13] = 1;
-//                logicMap[15][1][15] = 1;
-//        logicMap[16][1][15] = 1;
-//        logicMap[16][1][13] = 1;
-//        logicMap[17][1][14] = 1;
-//       for (int x = 6; x < 8; x++) {
-//           for(int y = 2; y<4;y++){
-//            for (int z = 6; z < 7; z++) {
-//                
-//                logicMap[x][y][z] = 1;
-//            }
-//           }
-//        }
-
-//        logicMap[15][0][13] = 0;
         Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
         return map;
     }
 
     private Map generateCasualMap(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
-        byte[][][] logicMap = new byte[mapSize][mapSize][mapSize]; // blocks are added based on logicMap
+        ///generates a random map
+        
+        int length=mapSize, height=mapSize, minRoomSize=42, maxRoomSize=42, numOfRooms=10, numOfFloors=mapSize;
+        long SEED = 1234567890L;
+        ProceduralMapGenerator mapGen = new ProceduralMapGenerator(SEED, length, height, minRoomSize, maxRoomSize, numOfRooms, numOfFloors);
+        mapGen.generate(GenType.BSP);
+        mapGen.getFloorList().get(0).printMap();
+        byte[][][] logicMap = mapGen.getMap();
+        
 
         Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
         return map;

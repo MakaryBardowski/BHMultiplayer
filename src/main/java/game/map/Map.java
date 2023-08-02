@@ -4,7 +4,6 @@
  */
 package game.map;
 
-import game.map.blocks.BlockType;
 import game.map.blocks.BlockWorld;
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
@@ -16,12 +15,12 @@ import com.jme3.scene.Node;
 public class Map {
     private BlockWorld blockWorld;
     
-    public Map(int blockSize,int chunkSize, int mapSize, byte[][][] logicMap, AssetManager a,Node mapNode){
-     blockWorld = new BlockWorld(blockSize,chunkSize,mapSize,logicMap,a,mapNode);
+    public Map(int blockSize, int chunkSize, int mapSize, byte[][][] logicMap, AssetManager a, Node mapNode){
+        blockWorld = new BlockWorld(blockSize,chunkSize,mapSize, logicMap,a,mapNode);
     }
     
     public BlockWorld getBlockWorld(){
-    return blockWorld;
+        return blockWorld;
     }
     
 }
