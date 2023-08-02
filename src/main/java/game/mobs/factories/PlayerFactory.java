@@ -95,15 +95,13 @@ public class PlayerFactory extends MobFactory {
         p.getEquipment()[0] = new Rifle(40f, ItemTemplates.RIFLE_MANNLICHER_95);
         p.getHotbar()[0] = p.getEquipment()[0];
 
-        p.getEquipment()[1] = new Vest(ItemTemplates.VEST_TRENCH);
+        p.getEquipment()[1] = new Vest(ItemTemplates.VEST_TRENCH,true,true);
         p.getEquipment()[2] = new Boots(ItemTemplates.BOOTS_TRENCH);
-        p.getEquipment()[3] = new Gloves(ItemTemplates.GLOVES_TRENCH);
     }
 
     private void equipStartEquipment(Player p) {
         p.equip(p.getEquipment()[1]);
         p.equip(p.getEquipment()[2]);
-        p.equip(p.getEquipment()[3]);
         p.equip(new Helmet(ItemTemplates.HEAD_1,false));
     }
 

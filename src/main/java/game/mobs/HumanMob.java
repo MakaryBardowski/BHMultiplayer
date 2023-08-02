@@ -44,6 +44,16 @@ public class HumanMob extends Mob {
     }
 
     @Override
+    public void onShot(Mob shooter,float damage) {
+        shooter.dealDamage(damage,this);
+    }
+
+    @Override
+    public void onInteract() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
     public void move(float tpf, ClientGameAppState cm) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }

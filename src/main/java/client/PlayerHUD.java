@@ -35,6 +35,8 @@ import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import de.lessvoid.nifty.tools.SizeValue;
+import game.mobs.Destructible;
+import game.mobs.InteractiveEntity;
 import java.util.Random;
 
 /**
@@ -475,7 +477,7 @@ public class PlayerHUD extends BaseAppState {
     @Override
     public void update(float tpf) {
         nifty.getCurrentScreen().findElementById("hp_bar").setWidth((int) ((gs.getPlayer().getHealth() / gs.getPlayer().getMaxHealth()) * (playerHealthbarWidth * nifty.getRenderEngine().getNativeWidth())));
-        checkTargetedMob(gs, gs.getMobsNode());
+        checkTargetedEntity(gs, gs.getDestructibleNode());
 
 //        System.out.println(                    nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).getText() );
         if (gs.getPlayer().getCurrentTarget() != null) {
@@ -495,7 +497,7 @@ public class PlayerHUD extends BaseAppState {
 
     }
 
-    private void checkTargetedMob(ClientGameAppState gs, Node nodeToCheckCollisionOn) {
+    private void checkTargetedEntity(ClientGameAppState gs, Node nodeToCheckCollisionOn) {
         CollisionResults results = new CollisionResults();
         Ray ray = new Ray(gs.getCamera().getLocation(), gs.getCamera().getDirection());
         nodeToCheckCollisionOn.collideWith(ray, results);
@@ -503,7 +505,7 @@ public class PlayerHUD extends BaseAppState {
             CollisionResult closest = results.getClosestCollision();
             String hit = closest.getGeometry().getName();
 
-            Mob enemyHit = gs.getMobs().get(Integer.valueOf(hit));
+            Destructible enemyHit = gs.getMobs().get(Integer.valueOf(hit));
 
             if (enemyHit != null) {
                 boolean switched = gs.getPlayer().getCurrentTarget() != enemyHit;

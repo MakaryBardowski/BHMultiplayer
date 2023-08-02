@@ -26,6 +26,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
+import game.mobs.InteractiveEntity;
 
 /**
  *
@@ -102,7 +103,7 @@ public class Rifle extends RangedWeapon {
 
     @Override
     public void playerAttack(Player p) {
-        if (!hitscan(p, ClientGameAppState.getInstance().getMobsNode(), false)) {
+        if (!hitscan(p, ClientGameAppState.getInstance().getDestructibleNode(), false)) {
             hitscan(p, ClientGameAppState.getInstance().getMapNode(), true);
         }
 
@@ -121,8 +122,8 @@ public class Rifle extends RangedWeapon {
             cp = closest.getContactPoint();
             if (!wallCheck) {
                 Integer hitId = Integer.valueOf(closest.getGeometry().getName());
-                Mob mobHit = ClientGameAppState.getInstance().getMobs().get(hitId);
-                p.dealDamage(damage, mobHit);
+                InteractiveEntity mobHit = ClientGameAppState.getInstance().getMobs().get(hitId);
+                mobHit.onShot(p,damage);
             }
             createBullet(cp);
             recoilFire();

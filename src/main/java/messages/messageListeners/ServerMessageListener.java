@@ -17,6 +17,7 @@ import server.ServerMain;
 import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
+import game.mobs.Destructible;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -46,7 +47,7 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
             serverApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(nmsg.getPos());
 
         } else if (msg instanceof MobHealthUpdateMessage hmsg) {
-            serverApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
+            ((Destructible)serverApp.getMobs().get(hmsg.getId())).setHealth(hmsg.getHealth());
         }
     }
 

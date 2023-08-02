@@ -73,7 +73,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     private final Node debugNode = new Node("DEBUG NODE");
     
     @Getter
-    private final Node mobsNode = new Node("ENTITY NODE");
+    private final Node destructibleNode = new Node("DESTRUCTIBLE NODE");
     
     @Getter
     private final Node pickableNode = new Node("PICKABLE NODE");
@@ -129,7 +129,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         NetworkingInitialization.initializeSerializables();
         worldNode.attachChild(debugNode);
         worldNode.attachChild(pickableNode);
-        pickableNode.attachChild(mobsNode);
+        pickableNode.attachChild(destructibleNode);
         worldNode.attachChild(mapNode);
         rootNode.attachChild(worldNode);
 
@@ -188,7 +188,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     }
 
     public Player registerPlayer(Integer id, boolean setAsPlayer) {
-        Player p = new PlayerFactory(id, mobsNode, getCamera(), setAsPlayer).createClientSide();
+        Player p = new PlayerFactory(id, destructibleNode, getCamera(), setAsPlayer).createClientSide();
         this.mobs.put(id, p);
         return p;
     }

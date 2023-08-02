@@ -22,6 +22,7 @@ import client.PlayerHUD;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import game.mobs.Destructible;
 import java.util.concurrent.Callable;
 
 /**
@@ -88,13 +89,13 @@ public class ClientMessageListener implements MessageListener<Client> {
     }
 
     private void placeMob(Vector3f pos, Mob p) {
-        clientApp.getMobsNode().attachChild(p.getNode());
+        clientApp.getDestructibleNode().attachChild(p.getNode());
         p.getNode().setLocalTranslation(pos);
     }
 
     private void updateMobHealth(MobHealthUpdateMessage hmsg) {
         if (mobExistsLocally(hmsg.getId())) {
-            clientApp.getMobs().get(hmsg.getId()).setHealth(hmsg.getHealth());
+            ((Destructible)clientApp.getMobs().get(hmsg.getId())).setHealth(hmsg.getHealth());
         }
     }
 

@@ -15,23 +15,17 @@ import java.util.Random;
  *
  * @author 48793
  */
-public abstract class Mob implements CollidableInterface, MobInterface {
+public abstract class Mob extends Destructible implements CollidableInterface, MobInterface {
 
     protected static final int EQUIPMENT_SIZE = 18;
-
-    private static float DEFAULT_SPEED = 10f; //20
-    protected int id;
-    protected Node node;
+    private static final float DEFAULT_SPEED = 10f; //20
 
     //mob stats
-    protected String name;
     protected float speed = DEFAULT_SPEED;
-    protected float health = 10;
-    protected float maxHealth = 10;
     protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
 
     //mob ai variables
-    protected Mob currentTarget;
+    protected Destructible currentTarget;
 
     //sync
     protected MobType mobType;
@@ -41,20 +35,12 @@ public abstract class Mob implements CollidableInterface, MobInterface {
     protected float rotInterpolationValue;
 
     public Mob(int id, Node node, String name) {
-        this.id = id;
-        this.node = node;
-        this.name = name;
+        super(id,name,node);
         this.serverLocation = node.getWorldTranslation();
         this.serverRotation = node.getLocalRotation();
     }
 
-    public int getId() {
-        return id;
-    }
 
-    public Node getNode() {
-        return node;
-    }
 
     public Vector3f getServerLocation() {
         return serverLocation;
@@ -81,31 +67,15 @@ public abstract class Mob implements CollidableInterface, MobInterface {
         this.posInterpolationValue = posInterpolationValue;
     }
 
-    public float getHealth() {
-        return health;
-    }
-
-    public void setHealth(float health) {
-        this.health = health;
-    }
-
-    public float getMaxHealth() {
-        return maxHealth;
-    }
-
-    public void setMaxHealth(float maxHealth) {
-        this.maxHealth = maxHealth;
-    }
-
     public boolean isDead() {
         return health <= 0;
     }
 
-    public Mob getCurrentTarget() {
+    public Destructible getCurrentTarget() {
         return currentTarget;
     }
 
-    public void setCurrentTarget(Mob currentTarget) {
+    public void setCurrentTarget(Destructible currentTarget) {
         this.currentTarget = currentTarget;
     }
 
@@ -113,13 +83,6 @@ public abstract class Mob implements CollidableInterface, MobInterface {
         return equipment;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public Quaternion getServerRotation() {
         return serverRotation;
