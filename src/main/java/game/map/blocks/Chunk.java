@@ -73,36 +73,6 @@ public class Chunk {
         return geometry;
     }
 
-    public Mesh generateMesh() {
-
-        Mesh mesh = new Mesh();
-
-//    
-        mesh.setBuffer(VertexBuffer.Type.Position, 3, vector3fToBuffer(positions));
-        mesh.setBuffer(VertexBuffer.Type.Index, 1, intToBuffer(indices));
-        mesh.setBuffer(VertexBuffer.Type.Normal, 3, vector3fToBuffer(normals));
-
-        mesh.setBuffer(VertexBuffer.Type.TexCoord, 2, vector2fToBuffer(uvs));
-        mesh.setBuffer(VertexBuffer.Type.Color, 4, vector4fToBuffer(colors));
-        mesh.updateBound();
-
-        return mesh;
-    }
-
-//      public Mesh updateMesh(int newPositions,int newIndices, int newTexCoords,int newColors) {
-//
-//        Mesh mesh = geometry.getMesh();
-//
-//        mesh.setBuffer(VertexBuffer.Type.Position, 3, vector3fToBuffer(positions));
-//        mesh.setBuffer(VertexBuffer.Type.Index, 1, intToBuffer(indices));
-//
-//        mesh.setBuffer(VertexBuffer.Type.TexCoord, 2, vector2fToBuffer(uvs));
-//        mesh.setBuffer(VertexBuffer.Type.Color, 4, vector4fToBuffer(colors));
-//        mesh.updateBound();
-//
-//        
-//        return mesh;
-//    }
     public Block attachBlock(Block b, Texture t) {
         b.setVertexOffsetInParentChunk(positions.size());
 
@@ -208,7 +178,38 @@ public class Chunk {
         uvs.clear();
 
     }
+    
+///---------------------------------------MESH GENERATION AND BUFFER METHODS----------------------------------------------------------------------------
 
+    public Mesh generateMesh() {
+        Mesh mesh = new Mesh();
+
+        mesh.setBuffer(VertexBuffer.Type.Position, 3, vector3fToBuffer(positions));
+        mesh.setBuffer(VertexBuffer.Type.Index, 1, intToBuffer(indices));
+        mesh.setBuffer(VertexBuffer.Type.Normal, 3, vector3fToBuffer(normals));
+
+        mesh.setBuffer(VertexBuffer.Type.TexCoord, 2, vector2fToBuffer(uvs));
+        mesh.setBuffer(VertexBuffer.Type.Color, 4, vector4fToBuffer(colors));
+        mesh.updateBound();
+
+        return mesh;
+    }
+
+//      public Mesh updateMesh(int newPositions,int newIndices, int newTexCoords,int newColors) {
+//
+//        Mesh mesh = geometry.getMesh();
+//
+//        mesh.setBuffer(VertexBuffer.Type.Position, 3, vector3fToBuffer(positions));
+//        mesh.setBuffer(VertexBuffer.Type.Index, 1, intToBuffer(indices));
+//
+//        mesh.setBuffer(VertexBuffer.Type.TexCoord, 2, vector2fToBuffer(uvs));
+//        mesh.setBuffer(VertexBuffer.Type.Color, 4, vector4fToBuffer(colors));
+//        mesh.updateBound();
+//
+//        
+//        return mesh;
+//    }
+    
     private static FloatBuffer vector3fToBuffer(List<Vector3f> list) {
         FloatBuffer buf = BufferUtils.createFloatBuffer(list.size() * 3);
         for (Vector3f vec : list) {
@@ -252,6 +253,7 @@ public class Chunk {
 //        buffer.flip();
     }
 
+///----------------------------------------GETTERS AND SETTERS--------------------------------------------------------------------------    
     public List<Vector3f> getPositions() {
         return positions;
     }

@@ -14,22 +14,19 @@ import com.jme3.scene.Node;
 public class MapGenerator {
 
     public Map generateMap(MapType type, int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
-        switch (type) {
-            case CASUAL:
-                return generateCasualMap(blockSize, chunkSize, mapSize, a, mapNode);
-            case BOSS:
-                return generateBossMap(blockSize, chunkSize, mapSize, a, mapNode);
-            default:
-                return generateBossMap(blockSize, chunkSize, mapSize, a, mapNode);
-
-        }
+        return switch (type) {
+            case CASUAL -> generateCasualMap(blockSize, chunkSize, mapSize, a, mapNode);
+            case BOSS -> generateBossMap(blockSize, chunkSize, mapSize, a, mapNode);
+            default -> generateBossMap(blockSize, chunkSize, mapSize, a, mapNode);
+        };
 
     }
 
     private Map generateBossMap(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
+        ///makes a square map
+        
         byte[][][] logicMap = new byte[mapSize][mapSize][mapSize]; // blocks are added based on logicMap
 
-        // generate floor 
         int floorLevel = 0;
         for (int x = 0; x < logicMap.length; x++) {
             for (int z = 0; z < logicMap.length; z++) {
@@ -56,36 +53,12 @@ public class MapGenerator {
             }
         }
         
-//        // generate floor 
-
-//       for (int x = 8; x < logicMap.length; x++) {
-//           for(int y = 0; y<logicMap.length;y++){
-//            for (int z = 8; z < logicMap.length; z++) {
-//                
-//                logicMap[x][y][z] = 1;
-//            }
-//           }
-//        }
-//        logicMap[15][1][13] = 1;
-//                logicMap[15][1][15] = 1;
-//        logicMap[16][1][15] = 1;
-//        logicMap[16][1][13] = 1;
-//        logicMap[17][1][14] = 1;
-//       for (int x = 6; x < 8; x++) {
-//           for(int y = 2; y<4;y++){
-//            for (int z = 6; z < 7; z++) {
-//                
-//                logicMap[x][y][z] = 1;
-//            }
-//           }
-//        }
-
-//        logicMap[15][0][13] = 0;
         Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
         return map;
     }
 
     private Map generateCasualMap(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
+        ///generates a random map
         byte[][][] logicMap = new byte[mapSize][mapSize][mapSize]; // blocks are added based on logicMap
 
         Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);

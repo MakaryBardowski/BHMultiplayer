@@ -9,5 +9,6 @@ package game.map;
  * @author 48793
  */
 public enum MapType {
-    CASUAL,BOSS
+    CASUAL,
+    BOSS
 }
