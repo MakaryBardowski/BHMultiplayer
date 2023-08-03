@@ -67,6 +67,7 @@ public class Floor {
         }
         
         guaranteeClosedMap();
+        printMap();
     }
     
     private void divideMap(boolean typeOfDivide, boolean sideDiscarded) {
@@ -106,6 +107,7 @@ public class Floor {
                 break;
             }
             addCorridor(startRoom.getCentreAsArray(), endRoom.getCentreAsArray());
+            printMap();
         }
     }
     
@@ -122,7 +124,8 @@ public class Floor {
             iterEnd = (int)end[0];
         }
         for (int i=iterStart; i<=iterEnd; i++){
-            floorMap[(int)start[1]][i] = 0;
+            if (floorMap[(int)start[1]][i] == 1)
+                floorMap[(int)start[1]][i] = 8;
         }
         
         //makes the horizontal line
@@ -134,7 +137,8 @@ public class Floor {
             iterEnd = (int)end[1];
         }
         for (int i=iterStart; i<=iterEnd; i++){
-            floorMap[i][(int)end[0]] = 0;
+            if (floorMap[i][(int)end[0]] == 1)
+                floorMap[i][(int)end[0]] = 8;
         }
     }
 
@@ -149,7 +153,7 @@ public class Floor {
     private void addEntranceToNextFloor() {
         Room randRoom = roomList.get(randomGen.nextInt(roomList.size()-1));
         int[] pos = randRoom.getRandomTile(randomGen);
-        floorMap[pos[0]][pos[1]] = 2;
+        floorMap[pos[0]][pos[1]] = 9;
     }
     
     public Vector3f getFreeSpace() {
