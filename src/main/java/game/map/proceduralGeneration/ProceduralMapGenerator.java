@@ -57,7 +57,12 @@ public class ProceduralMapGenerator {
         for (int x=0; x<map.length-1; x++){
             for (int y=1+(FLOORHEIGHT*floor.getFloorIdx()); y<FLOORHEIGHT-1+(FLOORHEIGHT*floor.getFloorIdx()); y++){
                 for (int z=0; z<map[0][0].length-1; z++){
-                    map[x][y][z] = floor.getFloorMap()[z][x];
+                    if (floor.getFloorMap()[z][x] == 8){
+                        map[x][FLOORHEIGHT-1+(FLOORHEIGHT*floor.getFloorIdx())-1][z] = 1;
+                        map[x][1+(FLOORHEIGHT*floor.getFloorIdx())][z] = 0;
+                    }else{
+                        map[x][y][z] = floor.getFloorMap()[z][x];
+                    }
                 }
             }
         }
