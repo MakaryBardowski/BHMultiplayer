@@ -58,14 +58,13 @@ public class MapGenerator {
     private Map generateCasualMap(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
         ///generates a random map
         
-        int length=mapSize, height=mapSize, minRoomSize=42, maxRoomSize=42, numOfRooms=10, numOfFloors=mapSize;
+        int minRoomSize=10, maxRoomSize=55, numOfRooms=10, numOfFloors=1;
         long SEED = 1234567890L;
-        ProceduralMapGenerator mapGen = new ProceduralMapGenerator(SEED, length, height, minRoomSize, maxRoomSize, numOfRooms, numOfFloors);
+        ProceduralMapGenerator mapGen = new ProceduralMapGenerator(SEED, mapSize, mapSize, minRoomSize, maxRoomSize, numOfRooms, numOfFloors);
         mapGen.generate(GenType.BSP);
         mapGen.getFloorList().get(0).printMap();
         byte[][][] logicMap = mapGen.getMap();
         
-
         Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
         return map;
     }

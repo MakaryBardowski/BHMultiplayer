@@ -5,30 +5,27 @@
 package game.map.proceduralGeneration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
-/**
- *
- * @author tomasz_potoczko
- */
 public class ProceduralMapGenerator {
-    private final long SEED;
     private Random randomGen;
+    private final long seed;
+    private final static int FLOORHEIGHT=4;
     
-    private byte[][][] logicMap;
+    private ArrayList<Floor> floorList;
+    
+    private byte[][][] map;
     private final int numOfRooms;
-    private final int width, length;
+    private final int sizeX; int sizeY;
     private final int numOfFloors;
     private int lowerBound=-1;
     private int upperBound=-1;
     
-    private ArrayList<Floor> floorList;
 
-    public ProceduralMapGenerator(long seed, int length, int width, int minRoomSize, int maxRoomSize, int numOfRooms, int numOfFloors) {
-        this.SEED = seed;
-        this.length = length;
-        this.width = width;
-        
+    public ProceduralMapGenerator(long seed, int sizeX, int sizeY, int minRoomSize, int maxRoomSize, int numOfRooms, int numOfFloors) {
+        this.seed = seed;
+        this.sizeX = sizeX; this.sizeY=sizeY;
         this.numOfRooms = numOfRooms;
         this.numOfFloors = numOfFloors;
         
@@ -36,8 +33,10 @@ public class ProceduralMapGenerator {
         initArrays();
         initRandom();
     }
-    
+
+
     public void generate(GenType... floorTypes) {
+        
         for (int i=0; i<numOfFloors; i++){
             int j = i%floorTypes.length;
             
@@ -49,46 +48,50 @@ public class ProceduralMapGenerator {
         }
     }
     
-///---------------------------------------------TYPES OF GENERATION-------------------------------------------------------------------
-    
     private void generateBSPFloor(int floorIdx) {
-        ///generates a BSP floor
-        floorList.add(new Floor(length, width, numOfRooms, randomGen, lowerBound, upperBound, floorIdx, floorIdx==(numOfFloors-1)));
-        logicMap[floorIdx] = floorList.get(floorIdx).getFloorMap();
+        floorList.add(new Floor(sizeX, sizeY, numOfRooms, randomGen, lowerBound, upperBound, floorIdx, floorIdx==(numOfFloors-1)));
+        addFloorToMap(floorList.get(floorIdx));
+    }
+    
+    private void addFloorToMap(Floor floor) {
+        for (int x=0; x<map.length-1; x++){
+            for (int y=1+(FLOORHEIGHT*floor.getFloorIdx()); y<FLOORHEIGHT-1+(FLOORHEIGHT*floor.getFloorIdx()); y++){
+                for (int z=0; z<map[0][0].length-1; z++){
+                    map[x][y][z] = floor.getFloorMap()[z][x];
+                }
+            }
+        }
         
     }
 
     private void generateCAFloor(int floorIdx) {
-        ///generates a CA floor
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     private void generatePNFloor(int floorIdx) {
-        ///generates a PNF floor
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
-
     
-///-----------------------------------------------INIT, GETTERS AND SETTERS---------------------------------------------------------
-
-    public byte[][][] getMap() {
-        return logicMap;    
-    }
-
-
     private void initArrays() {
-        logicMap = new byte[numOfFloors][length][width];
+        map = new byte[sizeX][sizeX][sizeY];
+        
+        for (byte[][] layer: map){
+            for (byte[] row: layer){
+                Arrays.fill(row, (byte)1);
+            }
+        }
+        
         floorList = new ArrayList<>();
     }
 
     private void initRandom() {
         randomGen = new Random();
-        randomGen.setSeed(SEED);
+        randomGen.setSeed(seed);
     }
 
-    public byte[][][] returnMap() {
-        return logicMap;
+    public byte[][][] getMap() {
+        return map;
     }
     
     private void initBounds(int minRoomSize, int maxRoomSize) {
@@ -96,7 +99,7 @@ public class ProceduralMapGenerator {
         
         int counter=1;
         while (true){
-            double size = length*width/Math.pow(2, counter);
+            double size = sizeX*sizeY/Math.pow(2, counter);
             if (size <= maxRoomSize && lowerBound==-1){
                 lowerBound = counter;
             }else if(size <= minRoomSize && lowerBound!=-1){
@@ -108,11 +111,12 @@ public class ProceduralMapGenerator {
     }
     
     public long getSeed() {
-        return SEED;
+        return seed;
     }
 
     public ArrayList<Floor> getFloorList() {
         return floorList;
     }
-    
+
 }
+

@@ -10,28 +10,28 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
+
 /**
  *
  * @author tomasz_potoczko
  */
 public class Floor {
-    ///floor data
+    
     private final int floorIdx;
     private final boolean IsLastFloor;
     private byte[][] floorMap;
     private final int numOfRooms;
-    private final int width, length;
+    private final int sizeX, sizeY;
     private final Random randomGen;
     
-    ///for map gen
     ArrayList<Room> roomList;
     private int[] start;
     private int[] end;
     private int lowerBound=-1;
     private int upperBound=-1;
 
-    public Floor(int length, int width, int numOfRooms, Random randomGen, int lowerBound, int upperBound, int floorIdx, boolean IsLastFloor) {
-        this.width = width; this.length = length;
+    Floor(int sizeX, int sizeY, int numOfRooms, Random randomGen, int lowerBound, int upperBound, int floorIdx, boolean IsLastFloor) {
+        this.sizeX = sizeX;this.sizeY = sizeY;
         this.numOfRooms = numOfRooms;
         this.randomGen=randomGen;
         this.lowerBound=lowerBound;
@@ -42,7 +42,7 @@ public class Floor {
         initRooms();
         generateBSPFloor();
     }
-
+    
     private void generateBSPFloor(){
         
         int divideCounter=0;
@@ -66,11 +66,9 @@ public class Floor {
             addEntranceToNextFloor();
         }
         
-        //printMap();
+        guaranteeClosedMap();
     }
-
-///------------------------------------------METHODS FOR GENERATION-----------------------------------------------------------------------------
-
+    
     private void divideMap(boolean typeOfDivide, boolean sideDiscarded) {
         if (typeOfDivide == true){
             //divide vertically
@@ -124,7 +122,7 @@ public class Floor {
             iterEnd = (int)end[0];
         }
         for (int i=iterStart; i<=iterEnd; i++){
-            floorMap[(int)start[1]][i] = 1;
+            floorMap[(int)start[1]][i] = 0;
         }
         
         //makes the horizontal line
@@ -136,14 +134,14 @@ public class Floor {
             iterEnd = (int)end[1];
         }
         for (int i=iterStart; i<=iterEnd; i++){
-            floorMap[i][(int)end[0]] = 1;
+            floorMap[i][(int)end[0]] = 0;
         }
     }
 
     private void addRoom() {
         for (int i=start[0];i<end[0]; i++){
             for (int j=start[1]; j<end[1];j++){
-                floorMap[j][i] = 1;
+                floorMap[j][i] = 0;
             }
         }
     }
@@ -156,15 +154,13 @@ public class Floor {
     
     public Vector3f getFreeSpace() {
         while(true){
-            int i = randomGen.nextInt(width);
-            int j = randomGen.nextInt(length);
+            int i = randomGen.nextInt(sizeX);
+            int j = randomGen.nextInt(sizeY);
             if (floorMap[i][j] == 1){
                 return new Vector3f(i*2-1, 3.1f, j*2-1);
             }
         }
     }
-    
-///-----------------------------------------UTIL METHODS------------------------------------------------------------------------------
     
     private void initStartEnd() {
         start = new int[2];
@@ -172,12 +168,18 @@ public class Floor {
         
         start[0] = 0;
         start[1]=0;
-        end[0]=width;
-        end[1]=length;
+        end[0]=sizeX;
+        end[1]=sizeY;
     }
-  
+
+    
     private void initRooms() {
-        floorMap = new byte[length][width];
+        floorMap = new byte[sizeY][sizeX];
+        
+        for (byte[] row: floorMap){
+            Arrays.fill(row, (byte)1);
+        }
+        
         roomList = new ArrayList<>();
     }
     
@@ -202,11 +204,23 @@ public class Floor {
     }
     
     public void printMap() {
-        ///outputs a map of the floor
         System.out.println("printing map of floor "+floorIdx);
         for (byte[] roomsLine: floorMap){
             System.out.println(Arrays.toString(roomsLine));
         }
     }
+
+    private void guaranteeClosedMap() {
+        for (int i=0; i<floorMap.length; i++){
+            for (int j=0; j<floorMap[0].length; j++){
+                if (i == floorMap.length-1 ||i == 0  || j == floorMap[0].length-1 ||j==0){
+                    floorMap[i][j] = 1;
+                    floorMap[i][j] = 1;
+                    floorMap[i][j] = 1;
+                }
+            }
+        }
+    }
     
 }
+
