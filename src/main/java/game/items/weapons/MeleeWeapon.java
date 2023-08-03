@@ -6,8 +6,8 @@ package game.items.weapons;
 
 import game.items.ItemTemplates;
 import game.items.ItemTemplates.ItemTemplate;
-import game.mobs.Mob;
-import game.mobs.Player;
+import game.entities.mobs.Mob;
+import game.entities.mobs.Player;
 
 /**
  *

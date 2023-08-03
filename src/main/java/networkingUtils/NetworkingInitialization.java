@@ -5,7 +5,7 @@
 package networkingUtils;
 
 import messages.messageListeners.ServerMessageListener;
-import messages.MobHealthUpdateMessage;
+import messages.DestructibleHealthUpdateMessage;
 import messages.MobUpdateMessage;
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
@@ -15,6 +15,7 @@ import messages.SetPlayerMessage;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
+import messages.ChestsInGameMessage;
 
 /**
  *
@@ -28,11 +29,12 @@ public class NetworkingInitialization {
     Serializer.registerClass(MobUpdateMessage.class);
     Serializer.registerClass(MobPosUpdateMessage.class);
     Serializer.registerClass(MobRotUpdateMessage.class);
-    Serializer.registerClass(MobHealthUpdateMessage.class);
+    Serializer.registerClass(DestructibleHealthUpdateMessage.class);
     Serializer.registerClass(PlayerJoinedMessage.class);
     Serializer.registerClass(SetPlayerMessage.class);
     Serializer.registerClass(MobsInGameMessage.class);
     Serializer.registerClass(ServerMessageListener.class);
+    Serializer.registerClass(ChestsInGameMessage.class);
     }
     
     

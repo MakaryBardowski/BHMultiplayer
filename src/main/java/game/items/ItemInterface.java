@@ -4,8 +4,8 @@
  */
 package game.items;
 
-import game.mobs.Mob;
-import game.mobs.Player;
+import game.entities.mobs.Mob;
+import game.entities.mobs.Player;
 
 /**
  *

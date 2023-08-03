@@ -4,9 +4,9 @@ import game.cameraAndInput.PlayerCameraControlAppState;
 import game.map.Map;
 import game.map.MapGenerator;
 import game.map.MapType;
-import game.mobs.Mob;
-import game.mobs.factories.PlayerFactory;
-import game.mobs.Player;
+import game.entities.mobs.Mob;
+import game.entities.mobFactories.PlayerFactory;
+import game.entities.mobs.Player;
 import messages.messageListeners.ClientMessageListener;
 import static client.ClientSynchronizationUtils.interpolateMobPosition;
 import static client.ClientSynchronizationUtils.interpolateMobRotation;
@@ -32,7 +32,7 @@ import com.jme3.network.ClientStateListener;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import de.lessvoid.nifty.Nifty;
-import game.mobs.InteractiveEntity;
+import game.entities.InteractiveEntity;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -188,7 +188,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     }
 
     public Player registerPlayer(Integer id, boolean setAsPlayer) {
-        Player p = new PlayerFactory(id, destructibleNode, getCamera(), setAsPlayer).createClientSide();
+        Player p = new PlayerFactory(id,destructibleNode, getCamera(), setAsPlayer).createClientSide();
         this.mobs.put(id, p);
         return p;
     }

@@ -4,7 +4,7 @@
  */
 package messages.messageListeners;
 
-import messages.MobHealthUpdateMessage;
+import messages.DestructibleHealthUpdateMessage;
 import messages.MobUpdateMessage;
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
@@ -17,7 +17,7 @@ import server.ServerMain;
 import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
-import game.mobs.Destructible;
+import game.entities.Destructible;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -46,7 +46,7 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
             validateMovement();
             serverApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(nmsg.getPos());
 
-        } else if (msg instanceof MobHealthUpdateMessage hmsg) {
+        } else if (msg instanceof DestructibleHealthUpdateMessage hmsg) {
             ((Destructible)serverApp.getMobs().get(hmsg.getId())).setHealth(hmsg.getHealth());
         }
     }

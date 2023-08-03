@@ -4,7 +4,7 @@
  */
 package game.effects;
 
-import game.mobs.Player;
+import game.entities.mobs.Player;
 import client.ClientGameAppState;
 import client.Main;
 import com.jme3.effect.ParticleEmitter;

@@ -6,9 +6,10 @@ package game.items.armor;
 
 import game.items.ItemTemplates;
 import static game.map.blocks.VoxelLighting.setupModelLight;
-import game.mobs.Player;
+import game.entities.mobs.Player;
 import client.Main;
 import com.jme3.scene.Node;
+import static game.entities.DestructibleUtils.setupModelShootability;
 
 /**
  *

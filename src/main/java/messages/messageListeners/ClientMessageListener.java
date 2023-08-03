@@ -5,9 +5,9 @@
 package messages.messageListeners;
 
 import game.cameraAndInput.InputController;
-import game.mobs.Mob;
-import game.mobs.Player;
-import messages.MobHealthUpdateMessage;
+import game.entities.mobs.Mob;
+import game.entities.mobs.Player;
+import messages.DestructibleHealthUpdateMessage;
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
 import messages.MobsInGameMessage;
@@ -22,8 +22,10 @@ import client.PlayerHUD;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import game.mobs.Destructible;
+import game.entities.Chest;
+import game.entities.Destructible;
 import java.util.concurrent.Callable;
+import messages.ChestsInGameMessage;
 
 /**
  *
@@ -43,10 +45,12 @@ public class ClientMessageListener implements MessageListener<Client> {
             updateMobRotation(nmsg);
         } else if (m instanceof MobPosUpdateMessage nmsg) {
             updateMobPosition(nmsg);
-        } else if (m instanceof MobHealthUpdateMessage hmsg) {
-            updateMobHealth(hmsg);
+        } else if (m instanceof DestructibleHealthUpdateMessage hmsg) {
+            updateEntityHealth(hmsg);
         } else if (m instanceof MobsInGameMessage nmsg) {
             addMob(nmsg);
+        } else if (m instanceof ChestsInGameMessage nmsg) {
+            addNewChest(nmsg);
         } else if (m instanceof PlayerJoinedMessage nmsg) {
             addNewPlayer(nmsg);
         } else if (m instanceof SetPlayerMessage nmsg) {
@@ -93,7 +97,7 @@ public class ClientMessageListener implements MessageListener<Client> {
         p.getNode().setLocalTranslation(pos);
     }
 
-    private void updateMobHealth(MobHealthUpdateMessage hmsg) {
+    private void updateEntityHealth(DestructibleHealthUpdateMessage hmsg) {
         if (mobExistsLocally(hmsg.getId())) {
             getDestructible(hmsg.getId()).setHealth(hmsg.getHealth());
         }
@@ -161,8 +165,18 @@ public class ClientMessageListener implements MessageListener<Client> {
     private Mob getMob(int id) {
         return ((Mob) clientApp.getMobs().get(id));
     }
-    
-    private Destructible getDestructible(int id ){
-    return ((Destructible) clientApp.getMobs().get(id));}
+
+    private Destructible getDestructible(int id) {
+        return ((Destructible) clientApp.getMobs().get(id));
+    }
+
+    private void addNewChest(ChestsInGameMessage nmsg) {
+        if (mobDoesNotExistLocally(nmsg.getId())) {
+            enqueueExecution(() -> {
+                Chest c = Chest.createRandomChestClient(nmsg.getId(), clientApp.getDestructibleNode(), nmsg.getPos(), clientApp.getAssetManager());
+                clientApp.getMobs().put(c.getId(), c);
+            });
+        }
+    }
 
 }

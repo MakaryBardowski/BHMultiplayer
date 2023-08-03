@@ -8,8 +8,8 @@ import game.items.Equippable;
 import game.items.Holdable;
 import game.items.Item;
 import game.items.ItemTemplates.ItemTemplate;
-import game.mobs.Mob;
-import game.mobs.Player;
+import game.entities.mobs.Mob;
+import game.entities.mobs.Player;
 
 /**
  * @author tomasz potoczko
