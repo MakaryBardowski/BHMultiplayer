@@ -4,7 +4,7 @@
  */
 package client;
 
-import game.mobs.Mob;
+import game.entities.mobs.Mob;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;

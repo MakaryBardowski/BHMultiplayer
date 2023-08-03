@@ -4,7 +4,7 @@
  */
 package game.cameraAndInput;
 
-import game.mobs.Player;
+import game.entities.mobs.Player;
 import com.jme3.math.FastMath;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;

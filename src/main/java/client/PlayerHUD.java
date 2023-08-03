@@ -5,39 +5,25 @@
  */
 package client;
 
-import game.mobs.Mob;
-import game.mobs.Player;
-import client.ClientGameAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Ray;
 import com.jme3.niftygui.NiftyJmeDisplay;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Sphere;
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.builder.EffectBuilder;
 import de.lessvoid.nifty.builder.ElementBuilder;
 import de.lessvoid.nifty.builder.HoverEffectBuilder;
 import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
-import de.lessvoid.nifty.builder.TextBuilder;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
 import de.lessvoid.nifty.screen.Screen;
-import de.lessvoid.nifty.screen.ScreenController;
-import de.lessvoid.nifty.tools.SizeValue;
-import game.mobs.Destructible;
-import game.mobs.InteractiveEntity;
-import java.util.Random;
+import game.entities.Destructible;
 
 /**
  *

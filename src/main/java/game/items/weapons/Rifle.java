@@ -7,8 +7,8 @@ package game.items.weapons;
 import game.effects.GradientParticleEmitter;
 import game.effects.GradientParticleMesh;
 import game.items.ItemTemplates.ItemTemplate;
-import game.mobs.Mob;
-import game.mobs.Player;
+import game.entities.mobs.Mob;
+import game.entities.mobs.Player;
 import projectiles.controls.BulletTracerControl;
 import client.ClientGameAppState;
 import client.Main;
@@ -26,7 +26,8 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
-import game.mobs.InteractiveEntity;
+import game.entities.Destructible;
+import game.entities.InteractiveEntity;
 
 /**
  *
@@ -122,7 +123,7 @@ public class Rifle extends RangedWeapon {
             cp = closest.getContactPoint();
             if (!wallCheck) {
                 Integer hitId = Integer.valueOf(closest.getGeometry().getName());
-                InteractiveEntity mobHit = ClientGameAppState.getInstance().getMobs().get(hitId);
+                Destructible mobHit = (Destructible)ClientGameAppState.getInstance().getMobs().get(hitId);
                 mobHit.onShot(p,damage);
             }
             createBullet(cp);

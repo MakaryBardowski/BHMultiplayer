@@ -5,7 +5,7 @@
  */
 package game.cameraAndInput;
 
-import game.mobs.Player;
+import game.entities.mobs.Player;
 import client.ClientGameAppState;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
