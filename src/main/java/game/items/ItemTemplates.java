@@ -21,7 +21,9 @@ public class ItemTemplates {
     public static final ItemTemplate BOOTS_TRENCH = new ItemTemplate(ITEMS_PATH + "TrenchSet/officersLeg?.j3o", null, ITEMS_PATH+"TrenchSet/officersBootsDrop.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD),0.75f));
     public static final ItemTemplate GLOVES_TRENCH = new ItemTemplate(ITEMS_PATH + "TrenchSet/officersHand?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD),1));
     public static final ItemTemplate HEAD_1 = new ItemTemplate(ITEMS_PATH + "TrenchSet/head1.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD),1));
+    public static final ItemTemplate AXE = new ItemTemplate(ITEMS_PATH + "Axe/axe.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD),1));
 
+    
     @Getter
     @AllArgsConstructor
     public static class ItemTemplate {
