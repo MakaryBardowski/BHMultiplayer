@@ -4,8 +4,10 @@
  */
 package game.entities;
 
+import client.ClientGameAppState;
 import client.Main;
 import com.jme3.asset.AssetManager;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.attachDestructibleToNode;
@@ -17,6 +19,8 @@ import game.items.ItemTemplates;
 import game.items.armor.Vest;
 import game.items.weapons.Rifle;
 import static game.map.blocks.VoxelLighting.setupModelLight;
+import java.util.Random;
+import messages.DestructibleHealthUpdateMessage;
 
 /**
  *
@@ -65,6 +69,8 @@ public class Chest extends Destructible implements Damageable {
     @Override
     public void receiveDamage(float damage) {
         health = health - damage;
+        DestructibleHealthUpdateMessage hpUpd = new DestructibleHealthUpdateMessage(id, health);
+        ClientGameAppState.getInstance().getClient().send(hpUpd);
         if (health <= 0) {
             die();
         }

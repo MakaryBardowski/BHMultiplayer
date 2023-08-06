@@ -6,6 +6,7 @@ package game.cameraAndInput;
 
 import game.entities.mobs.Player;
 import com.jme3.math.FastMath;
+import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.control.AbstractControl;
@@ -42,7 +43,6 @@ public class HeadBobControl extends AbstractControl{
                 headBobActive = false;
                 headBobTimer=0;
             }
-            
             spatial.move(0, (float) (Math.sin(headBobTimer*frequency)*amplitude), 0);
             
 //            //bob stabilisation <- doesnt work

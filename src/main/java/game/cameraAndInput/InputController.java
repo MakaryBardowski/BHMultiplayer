@@ -7,6 +7,8 @@ package game.cameraAndInput;
 
 import game.entities.mobs.Player;
 import client.ClientGameAppState;
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -16,8 +18,12 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
 import de.lessvoid.nifty.render.NiftyImage;
+import game.entities.Destructible;
+import game.entities.InteractiveEntity;
 
 /**
  *
@@ -128,9 +134,9 @@ public class InputController {
                     }
                 }
 
-//                if (name.equals("E") && !gs.getPlayer().isDead() && !keyPressed) {
-//                    gs.getPlayer().checkIfPlayerPicked(gs.getPickableNode(), gs);
-//                }
+                if (name.equals("E") && !gs.getPlayer().isDead() && !keyPressed) {
+                        interact();
+                }
 //                if (name.equals("R") && !gs.getPlayer().isDead() && !keyPressed) {
 //                    gs.getPlayer().getEquippedRightHand().reload(gs.getPlayer(), gs);
 //                }
@@ -250,6 +256,24 @@ public class InputController {
 //            p.getHandsAnimChannel().setLoopMode(LoopMode.DontLoop);
 //
 //        }
+    }
+    
+    
+    private void interact(){
+        ClientGameAppState cs = ClientGameAppState.getInstance();
+        Player p = cs.getPlayer();
+       CollisionResults results = new CollisionResults();
+        Vector3f shotDirection = p.getMainCamera().getDirection();
+        Vector3f shotOrigin = p.getMainCamera().getLocation();
+        Ray ray = new Ray(shotOrigin, shotDirection);
+        cs.getPickableNode().collideWith(ray, results);
+        if (results.size() > 0) {
+            CollisionResult closest = results.getClosestCollision();
+                Integer hitId = Integer.valueOf(closest.getGeometry().getName());
+                InteractiveEntity mobHit = (InteractiveEntity)ClientGameAppState.getInstance().getMobs().get(hitId);
+                mobHit.onInteract();
+            
+        }
     }
 
 }

@@ -123,7 +123,7 @@ public class Rifle extends RangedWeapon {
             cp = closest.getContactPoint();
             if (!wallCheck) {
                 Integer hitId = Integer.valueOf(closest.getGeometry().getName());
-                Destructible mobHit = (Destructible)ClientGameAppState.getInstance().getMobs().get(hitId);
+                InteractiveEntity mobHit = ClientGameAppState.getInstance().getMobs().get(hitId);
                 mobHit.onShot(p,damage);
             }
             createBullet(cp);

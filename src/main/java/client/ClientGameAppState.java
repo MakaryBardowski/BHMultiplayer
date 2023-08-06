@@ -77,6 +77,9 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     private final Node destructibleNode = new Node("DESTRUCTIBLE NODE");
 
     @Getter
+    private final Node entityNode = new Node("ENTITY NODE");
+    
+    @Getter
     private final Node pickableNode = new Node("PICKABLE NODE");
 
     private final SimpleApplication app;
@@ -129,8 +132,9 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     public void initialize(AppStateManager stateManager, Application app) {        // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
         NetworkingInitialization.initializeSerializables();
         worldNode.attachChild(debugNode);
-        worldNode.attachChild(pickableNode);
+        worldNode.attachChild(entityNode);
         pickableNode.attachChild(destructibleNode);
+        entityNode.attachChild(pickableNode);
         worldNode.attachChild(mapNode);
         rootNode.attachChild(worldNode);
 

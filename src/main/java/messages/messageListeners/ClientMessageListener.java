@@ -78,7 +78,7 @@ public class ClientMessageListener implements MessageListener<Client> {
 
     private void placeMyPlayer(SetPlayerMessage nmsg, Player p) {
         Node playerNode = p.getNode();
-        clientApp.getPickableNode().attachChild(playerNode);
+        clientApp.getEntityNode().attachChild(playerNode);
         playerNode.setCullHint(Spatial.CullHint.Always);
         p.getNode().setLocalTranslation(nmsg.getPos());
 
