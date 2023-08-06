@@ -4,12 +4,9 @@
  */
 package game.entities.mobFactories;
 
-import client.ClientGameAppState;
 import game.items.armor.Boots;
-import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.ItemTemplates;
-import game.items.weapons.Rifle;
 import game.items.armor.Vest;
 import game.entities.mobs.Player;
 import client.Main;
@@ -23,6 +20,8 @@ import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.entities.DestructibleUtils;
+import game.items.weapons.Axe;
+import game.items.weapons.Rifle;
 
 /**
  *
@@ -88,14 +87,16 @@ public class PlayerFactory extends MobFactory {
     private Node loadPlayerModel() {
         Node node = (Node) assetManager.loadModel("Models/testSkeleton/testSkeleton.j3o");
         return node;
-    }           
+    }
 
     private void addStartEquipment(Player p) {
-        p.getEquipment()[0] = new Rifle(4f, ItemTemplates.RIFLE_MANNLICHER_95);
+        p.getEquipment()[0] = new Rifle(40f, ItemTemplates.RIFLE_MANNLICHER_95);
+        p.getEquipment()[3] = new Axe(15f, ItemTemplates.AXE);
         p.getHotbar()[0] = p.getEquipment()[0];
 
         p.getEquipment()[1] = new Vest(ItemTemplates.VEST_TRENCH,true,true);
         p.getEquipment()[2] = new Boots(ItemTemplates.BOOTS_TRENCH);
+        
     }
 
     private void equipStartEquipment(Player p) {
