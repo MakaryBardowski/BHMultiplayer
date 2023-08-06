@@ -88,10 +88,10 @@ public class PlayerFactory extends MobFactory {
     private Node loadPlayerModel() {
         Node node = (Node) assetManager.loadModel("Models/testSkeleton/testSkeleton.j3o");
         return node;
-    }
+    }           
 
     private void addStartEquipment(Player p) {
-        p.getEquipment()[0] = new Rifle(40f, ItemTemplates.RIFLE_MANNLICHER_95);
+        p.getEquipment()[0] = new Rifle(4f, ItemTemplates.RIFLE_MANNLICHER_95);
         p.getHotbar()[0] = p.getEquipment()[0];
 
         p.getEquipment()[1] = new Vest(ItemTemplates.VEST_TRENCH,true,true);

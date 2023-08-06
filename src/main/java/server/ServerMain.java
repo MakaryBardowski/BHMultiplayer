@@ -89,10 +89,12 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
             tickTimer = 0;
             mobs.entrySet().stream().forEach(i -> {
                 //to be seriously optimized
-                if (i.getValue() instanceof Mob x) {
-                    server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
-                    server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
-                    server.broadcast(new DestructibleHealthUpdateMessage(x.getId(), x.getHealth()));
+                if (i.getValue() instanceof Destructible d) {
+                    server.broadcast(new DestructibleHealthUpdateMessage(d.getId(), d.getHealth()));
+                    if (d instanceof Mob x) {
+                        server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
+                        server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
+                    }
                 }
             }
             );
@@ -160,7 +162,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
 
     public Chest registerRandomChest() {
         Random r = new Random();
-        Vector3f offset = new Vector3f(r.nextFloat() * 30*4, 4, r.nextFloat() * 30*4);
+        Vector3f offset = new Vector3f(r.nextFloat() * 30 * 4, 4, r.nextFloat() * 30 * 4);
         Chest chest = Chest.createRandomChestServer(currentMaxId++, rootNode, offset, assetManager);
         this.mobs.put(chest.getId(), chest);
         System.out.println("adding chest " + chest.getId());
