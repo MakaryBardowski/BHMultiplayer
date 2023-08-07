@@ -4,14 +4,15 @@
  */
 package game.map.proceduralGeneration;
 
+import com.jme3.math.Vector3f;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
 public class ProceduralMapGenerator {
     private Random randomGen;
-    private final long seed;
-    private final static int FLOORHEIGHT=4;
+    private final long SEED;
+    private final static int blockSize=4;
     
     private ArrayList<Floor> floorList;
     
@@ -23,8 +24,8 @@ public class ProceduralMapGenerator {
     private int upperBound=-1;
     
 
-    public ProceduralMapGenerator(long seed, int sizeX, int sizeY, int minRoomSize, int maxRoomSize, int numOfRooms, int numOfFloors) {
-        this.seed = seed;
+    public ProceduralMapGenerator(final long seed, int sizeX, int sizeY, int minRoomSize, int maxRoomSize, int numOfRooms, int numOfFloors) {
+        this.SEED = seed;
         this.sizeX = sizeX; this.sizeY=sizeY;
         this.numOfRooms = numOfRooms;
         this.numOfFloors = numOfFloors;
@@ -36,16 +37,20 @@ public class ProceduralMapGenerator {
 
 
     public void generate(GenType... floorTypes) {
-        
-        for (int i=0; i<numOfFloors; i++){
+        if (numOfRooms>1){
+            for (int i=0; i<numOfFloors; i++){
             int j = i%floorTypes.length;
             
-            switch (floorTypes[j]) {
-                case BSP -> generateBSPFloor(i);
-                case CellularAutomata -> generateCAFloor(i);
-                default -> generatePNFloor(i);
+                switch (floorTypes[j]) {
+                    case BSP -> generateBSPFloor(i);
+                    case CellularAutomata -> generateCAFloor(i);
+                    default -> generatePNFloor(i);
+                }
             }
+        }else{
+            makeBossRoomMap();
         }
+
     }
     
     private void generateBSPFloor(int floorIdx) {
@@ -55,11 +60,11 @@ public class ProceduralMapGenerator {
     
     private void addFloorToMap(Floor floor) {
         for (int x=0; x<map.length-1; x++){
-            for (int y=1+(FLOORHEIGHT*floor.getFloorIdx()); y<FLOORHEIGHT-1+(FLOORHEIGHT*floor.getFloorIdx()); y++){
+            for (int y=1+(blockSize*floor.getFloorIdx()); y<blockSize-1+(blockSize*floor.getFloorIdx()); y++){
                 for (int z=0; z<map[0][0].length-1; z++){
                     if (floor.getFloorMap()[z][x] == 8){
-                        map[x][FLOORHEIGHT-1+(FLOORHEIGHT*floor.getFloorIdx())-1][z] = 1;
-                        map[x][1+(FLOORHEIGHT*floor.getFloorIdx())][z] = 0;
+                        map[x][blockSize-1+(blockSize*floor.getFloorIdx())-1][z] = 1;
+                        map[x][1+(blockSize*floor.getFloorIdx())][z] = 0;
                     }else{
                         map[x][y][z] = floor.getFloorMap()[z][x];
                     }
@@ -92,7 +97,7 @@ public class ProceduralMapGenerator {
 
     private void initRandom() {
         randomGen = new Random();
-        randomGen.setSeed(seed);
+        randomGen.setSeed(SEED);
     }
 
     public byte[][][] getMap() {
@@ -115,8 +120,14 @@ public class ProceduralMapGenerator {
         }
     }
     
+    private void makeBossRoomMap() {
+        floorList.add(new Floor(sizeX, sizeY, numOfRooms, randomGen, lowerBound, upperBound, 0, true));
+        addFloorToMap(floorList.get(0));
+        
+    }
+    
     public long getSeed() {
-        return seed;
+        return SEED;
     }
 
     public ArrayList<Floor> getFloorList() {
