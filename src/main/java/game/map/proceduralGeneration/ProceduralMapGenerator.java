@@ -4,7 +4,6 @@
  */
 package game.map.proceduralGeneration;
 
-import com.jme3.math.Vector3f;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -12,7 +11,7 @@ import java.util.Random;
 public class ProceduralMapGenerator {
     private Random randomGen;
     private final long SEED;
-    private final static int blockSize=4;
+    private final static int BLOCK_SIZE=4;
     
     private ArrayList<Floor> floorList;
     
@@ -60,17 +59,23 @@ public class ProceduralMapGenerator {
     
     private void addFloorToMap(Floor floor) {
         for (int x=0; x<map.length-1; x++){
-            for (int y=1+(blockSize*floor.getFloorIdx()); y<blockSize-1+(blockSize*floor.getFloorIdx()); y++){
+            for (int y=getGroundLevel(floor); y<getCeilingLevel(floor); y++){
                 for (int z=0; z<map[0][0].length-1; z++){
                     if (floor.getFloorMap()[z][x] == 8){
-                        map[x][blockSize-1+(blockSize*floor.getFloorIdx())-1][z] = 1;
-                        map[x][1+(blockSize*floor.getFloorIdx())][z] = 0;
+                        map[x][getCeilingLevel(floor)][z] = 1;
+                        map[x][getGroundLevel(floor)][z] = 0;
                     }else{
                         map[x][y][z] = floor.getFloorMap()[z][x];
                     }
                 }
             }
         }
+        
+    }
+    
+    private void makeBossRoomMap() {
+        floorList.add(new Floor(sizeX, sizeY, numOfRooms, randomGen, lowerBound, upperBound, 0, true));
+        addFloorToMap(floorList.get(0));
         
     }
 
@@ -120,12 +125,6 @@ public class ProceduralMapGenerator {
         }
     }
     
-    private void makeBossRoomMap() {
-        floorList.add(new Floor(sizeX, sizeY, numOfRooms, randomGen, lowerBound, upperBound, 0, true));
-        addFloorToMap(floorList.get(0));
-        
-    }
-    
     public long getSeed() {
         return SEED;
     }
@@ -134,5 +133,12 @@ public class ProceduralMapGenerator {
         return floorList;
     }
 
+    private int getGroundLevel(Floor floor) {
+        return 1+(BLOCK_SIZE*floor.getFloorIdx());
+    }
+
+    private int getCeilingLevel(Floor floor) {
+        return BLOCK_SIZE-1+(BLOCK_SIZE*floor.getFloorIdx());
+    }
 }
 
