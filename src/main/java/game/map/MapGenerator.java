@@ -8,12 +8,18 @@ import game.map.proceduralGeneration.ProceduralMapGenerator;
 import game.map.proceduralGeneration.GenType;
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
+import lombok.Getter;
 
 /**
  *
  * @author 48793
  */
 public class MapGenerator {
+    @Getter
+    private final long SEED = 12345678901L;
+    @Getter
+    ProceduralMapGenerator mapGen;
+
 
     public Map generateMap(MapType type, int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
         return switch (type) {
@@ -27,30 +33,13 @@ public class MapGenerator {
     private Map generateBossMap(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
         ///makes a square map
         
-        byte[][][] logicMap = new byte[mapSize][mapSize][mapSize]; // blocks are added based on logicMap
+        int minRoomSize=1, maxRoomSize=1, numOfRooms=1, numOfFloors=1;
+        
+        mapGen = new ProceduralMapGenerator(SEED, mapSize, mapSize, minRoomSize, maxRoomSize, numOfRooms, numOfFloors);
+        mapGen.generate(GenType.BSP);
+        mapGen.getFloorList().get(0).printMap();
+        byte[][][] logicMap = mapGen.getMap();
 
-        int floorLevel = 0;
-        for (int x = 0; x < logicMap.length; x++) {
-            for (int z = 0; z < logicMap.length; z++) {
-                logicMap[x][floorLevel][z] = 1;
-            }
-        }
-        
-        for (int x = 0; x < logicMap.length; x++) {
-            for (int z = 0; z < logicMap.length; z++) {
-                logicMap[x][1][z] = 1;
-                logicMap[x][2][z] = 1;
-                logicMap[x][3][z] = 1;
-            }
-        }
-        
-        for (int x = 1; x < logicMap.length-1; x++) {
-            for (int z = 1; z < logicMap.length-1; z++) {
-                logicMap[x][1][z] = 0;
-                logicMap[x][2][z] = 0;
-            }
-        }
-        
         Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
         return map;
     }
@@ -59,10 +48,8 @@ public class MapGenerator {
         ///generates a random map
         
         int minRoomSize=10, maxRoomSize=55, numOfRooms=10, numOfFloors=1;
-        long SEED = 1234567890L;
-        ProceduralMapGenerator mapGen = new ProceduralMapGenerator(SEED, mapSize, mapSize, minRoomSize, maxRoomSize, numOfRooms, numOfFloors);
+        mapGen = new ProceduralMapGenerator(SEED, mapSize, mapSize, minRoomSize, maxRoomSize, numOfRooms, numOfFloors);
         mapGen.generate(GenType.BSP);
-        mapGen.getFloorList().get(0).printMap();
         byte[][][] logicMap = mapGen.getMap();
         
         Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
