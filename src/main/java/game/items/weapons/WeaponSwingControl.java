@@ -21,12 +21,14 @@ import java.util.Collection;
  * @author tomasz_potoczko
  */
 public class WeaponSwingControl extends AbstractControl{
-    Quaternion currentRotation = new Quaternion(0,0,0,1);
-    Quaternion targetRotation = new Quaternion(0,0,0,1);
-    int snap=10;
-    boolean swinging = false;
-    boolean peaked = false;
-    ArrayList<InteractiveEntity> mobs;
+    private Quaternion currentRotation = new Quaternion(0,0,0,1);
+    private Quaternion targetRotation = new Quaternion(0,0,0,1);
+    private int snap=10;
+    private boolean swinging = false;
+    private boolean peaked = false;
+    private ArrayList<InteractiveEntity> mobs;
+    
+    private final float peakRange = 0.001f;
 
     WeaponSwingControl(Collection<InteractiveEntity> mobCollection) {
         this.mobs = new ArrayList<>(mobCollection);
@@ -75,37 +77,37 @@ public class WeaponSwingControl extends AbstractControl{
             double angle = 180 - Math.toDegrees(FastMath.acos((float) (dotProd / (casterRotMag * vectorMag))));
 
             float distanceToMob = FastMath.sqrt(FastMath.pow(casterPos.getX()-mobPos.getX(), 2) + FastMath.pow(casterPos.getZ()-mobPos.getZ(), 2));
-            if (angle <= coneAngle && distanceToMob <= range){
+            if (angle <= coneAngle && distanceToMob <= range && distanceToMob > 0){
                 collisions.add(mob);
             }
+            
             //System.out.println("mob:"+mob.getName());
             //System.out.println("\tdistance and angle "+distanceToMob+" "+angle);
         }
-
         return collisions;
     }
     
     ///sets booleans so that we collide only on the way to the peaked rotation and not on the way back
     private void updateSwingStatus() {
         if (!peaked){
-            swinging = targetRotation.getY() > 0.001;
+            swinging = targetRotation.getY() > peakRange;
             peaked = currentRotation.getY() > targetRotation.getY();
         } else{
             swinging=false;
         } 
         
-        if (targetRotation.getY() < 0.001){
+        if (targetRotation.getY() < peakRange){
             peaked=false;
         }
     }
 
     ///increase rarget rotation by an angle and set booleans so when swinging mid swing it can collide
-    ArrayList<InteractiveEntity> swing() {
+    ArrayList<InteractiveEntity> swing(float coneAngle, float weaponRange) {
         targetRotation = targetRotation.add((new Quaternion()).fromAngleAxis(1.5f*FastMath.PI, new Vector3f(2, 2, -1)));
         swinging=true;
         peaked=false;
         
-        return coneCollisionCheck(45, 4.1f);
+        return coneCollisionCheck(coneAngle, weaponRange);
     }
     
     @Override

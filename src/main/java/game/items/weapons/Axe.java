@@ -17,6 +17,8 @@ import game.entities.mobs.Mob;
 import game.entities.mobs.Player;
 import game.items.ItemTemplates;
 import java.util.ArrayList;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
@@ -24,6 +26,11 @@ import java.util.ArrayList;
  */
 public class Axe extends MeleeWeapon{
     private WeaponSwingControl weaponSwingControl;
+    
+    @Getter @Setter
+    private float weaponRange = 4.1f;
+    @Getter @Setter
+    private float weaponCleaveAngle = 45;
     
     public Axe(float damage, ItemTemplates.ItemTemplate template, boolean droppable) {
         super(damage, template, droppable);
@@ -80,7 +87,7 @@ public class Axe extends MeleeWeapon{
     
     @Override
     public void playerAttack(Player p) {
-        ArrayList<InteractiveEntity> collisions = weaponSwingControl.swing();
+        ArrayList<InteractiveEntity> collisions = weaponSwingControl.swing(weaponCleaveAngle, weaponRange);
         collisions.forEach(collision -> {
             Destructible mobHit = (Destructible)ClientGameAppState.getInstance().getMobs().get(collision.getId());
             mobHit.onShot(p, damage);
