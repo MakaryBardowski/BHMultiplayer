@@ -92,7 +92,6 @@ public class PlayerHUD extends BaseAppState {
 
         nifty = niftyDisplay.getNifty();
         gs.setNifty(nifty);
-        System.out.println("ENABLE--------------------------");
         getApplication().getGuiViewPort().addProcessor(niftyDisplay);
         ((SimpleApplication) getApplication()).getFlyByCamera().setDragToRotate(true);
 
@@ -341,7 +340,6 @@ public class PlayerHUD extends BaseAppState {
 
                             cnt++;
                             final double marginTop = cnt * eqSlotSizePx;
-                            System.out.println("marginTop: " + marginTop);
                             for (int slotNumber = 0; slotNumber < gs.getPlayer().getEquipment().length / ROWS; slotNumber++) {
                                 final int i = slotNumber;
 //                                cnt = slotNumber;

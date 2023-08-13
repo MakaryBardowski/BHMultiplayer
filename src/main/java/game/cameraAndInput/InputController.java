@@ -57,7 +57,6 @@ public class InputController {
 
     private ActionListener initActionListener(final ClientGameAppState gs) {
         final Player player = gs.getPlayer();
-        System.out.println("player " + player);
         ActionListener actionListener = new ActionListener() {
             @Override
             public void onAction(String name, boolean keyPressed, float tpf) {

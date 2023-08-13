@@ -60,8 +60,10 @@ public class ClientMessageListener implements MessageListener<Client> {
         } else if (m instanceof DestructibleHealthUpdateMessage hmsg) {
             updateEntityHealth(hmsg);
         } else if (m instanceof ItemInteractionMessage iimsg) {
+            System.out.println("got a message about equipment! for mob: " + iimsg.getMobId() + " (item id = " + iimsg.getItemId());
             handleItemInteraction(iimsg);
         } else if (m instanceof NewItemMessage imsg) {
+            System.out.println("registering item: " + imsg.getId());
             addNewItem(imsg);
         } else if (m instanceof NewMobMessage nmsg) {
             addMob(nmsg);
@@ -144,7 +146,7 @@ public class ClientMessageListener implements MessageListener<Client> {
     private void addMyPlayer(SetPlayerMessage nmsg) {
         enqueueExecution(() -> {
             createMyPlayer(nmsg);
-            System.out.println("my (id = "+nmsg.getId()+") eq "+ Arrays.toString(getMobById(nmsg.getId()).getEquipment()));
+            System.out.println("my (id = " + nmsg.getId() + ") eq " + Arrays.toString(getMobById(nmsg.getId()).getEquipment()));
         });
     }
 
@@ -205,40 +207,43 @@ public class ClientMessageListener implements MessageListener<Client> {
         if (imsg instanceof NewHelmetMessage nhmsg) {
             Item i = ifa.createItem(nhmsg.getId(), nhmsg.getTemplate(), nhmsg.isDroppable());
             clientApp.registerEntity(i);
-            System.out.println("registering Helmet " + i + " with id = " + i.getId());
+//            System.out.println("registering Helmet " + i + " with id = " + i.getId());
 
         } else if (imsg instanceof NewVestMessage nvmsg) {
             Item i = ifa.createItem(nvmsg.getId(), nvmsg.getTemplate(), nvmsg.isDroppable());
             clientApp.registerEntity(i);
-            System.out.println("registering Vest " + i + " with id = " + i.getId());
+//            System.out.println("registering Vest " + i + " with id = " + i.getId());
 
         } else if (imsg instanceof NewGlovesMessage ngmsg) {
             Item i = ifa.createItem(ngmsg.getId(), ngmsg.getTemplate(), ngmsg.isDroppable());
             clientApp.registerEntity(i);
-            System.out.println("registering Gloves " + i + " with id = " + i.getId());
+//            System.out.println("registering Gloves " + i + " with id = " + i.getId());
 
         } else if (imsg instanceof NewBootsMessage nbmsg) {
             Item i = ifa.createItem(nbmsg.getId(), nbmsg.getTemplate(), nbmsg.isDroppable());
             clientApp.registerEntity(i);
-            System.out.println("registering Boots " + i + " with id = " + i.getId());
+//            System.out.println("registering Boots " + i + " with id = " + i.getId());
         }
+
     }
 
     private void handleItemInteraction(ItemInteractionMessage iimsg) {
         enqueueExecution(() -> {
-            if (null != iimsg.getInteractionType()) 
+            if (null != iimsg.getInteractionType()) {
                 switch (iimsg.getInteractionType()) {
-                case EQUIP:
-                    getMobById(iimsg.getMobId()).equip(getItemById(iimsg.getItemId()));
-                    break;
-                case UNEQUIP:
-                    break;
-                case PICK_UP:
-                    break;
-                case DROP:
-                    break;
-                default:
-                    break;
+                    case EQUIP:
+                        getMobById(iimsg.getMobId()).equip(getItemById(iimsg.getItemId()));
+                        break;
+                    case UNEQUIP:
+                        break;
+                    case PICK_UP:
+                        getMobById(iimsg.getMobId()).addToEquipment(getItemById(iimsg.getItemId()));
+                        break;
+                    case DROP:
+                        break;
+                    default:
+                        break;
+                }
             }
         });
     }

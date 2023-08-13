@@ -21,7 +21,6 @@ public class DestructibleUtils {
     }
     public static void setupModelShootability(Node node, int id) {
         node.setName("" + id);
-        System.out.println("setting name to "+node.getName());
         for (Spatial spatial : node.getChildren()) {
             if (spatial != null && spatial instanceof Node n) {
                 setupModelShootability(n, id);

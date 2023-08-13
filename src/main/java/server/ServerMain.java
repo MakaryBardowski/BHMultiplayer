@@ -13,6 +13,7 @@ import messages.SetPlayerMessage;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.Vector3f;
+import com.jme3.network.AbstractMessage;
 
 import com.jme3.network.ConnectionListener;
 import com.jme3.network.Filter;
@@ -135,8 +136,12 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
         PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation());
         msg.setReliable(true);
         server.broadcast(Filters.notEqualTo(hc), msg);
-        sendMobEquipmentInfo(newPlayer, Filters.notEqualTo(hc));
 
+        for (Item i : newPlayer.getEquipment()) {
+            if (i != null) {
+                server.broadcast(i.createNewEntityMessage());
+            }
+        }
         sendMobEquipmentInfo(newPlayer, null);
 
     }
@@ -206,15 +211,22 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     private void sendMobEquipmentInfo(Mob mob, Filter<HostedConnection> filter) {
         for (Item i : mob.getEquipment()) {
             if (i != null) {
-                ItemInteractionMessage imsg = new ItemInteractionMessage(i, mob, ItemInteractionType.EQUIP);
-                imsg.setReliable(true);
-                if (filter == null) {
-                    System.out.println(" sending "+i.getId()+" equipped by "+mob.getId()+" to all");
-                    server.broadcast(imsg);
-                } else {
-                    server.broadcast(filter, imsg);
-                }
+                ItemInteractionMessage pmsg = new ItemInteractionMessage(i, mob, ItemInteractionType.PICK_UP);
+                sendMessage(pmsg, filter);
+
+                ItemInteractionMessage emsg = new ItemInteractionMessage(i, mob, ItemInteractionType.EQUIP);
+                sendMessage(emsg, filter);
+
             }
+        }
+    }
+
+    private void sendMessage(AbstractMessage imsg, Filter<HostedConnection> filter) {
+        imsg.setReliable(true);
+        if (filter == null) {
+            server.broadcast(imsg);
+        } else {
+            server.broadcast(filter, imsg);
         }
     }
 }

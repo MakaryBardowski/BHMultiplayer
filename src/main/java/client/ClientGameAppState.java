@@ -34,6 +34,7 @@ import com.jme3.scene.Node;
 import de.lessvoid.nifty.Nifty;
 import game.entities.InteractiveEntity;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
@@ -166,6 +167,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
         if (player != null) {
             player.move(tpf, this);
+            System.out.println(Arrays.toString(player.getEquipment()));
         }
 
         mobs.values().forEach(x -> {

@@ -225,7 +225,7 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
 
     @Override
     public String toString() {
-        return "Player{ mainCameraNode=" + mainCameraNode + ", firstPersonCameraNode=" + firstPersonCameraNode + ", rotationNode=" + rotationNode + ", mainCamera=" + mainCamera + ", gunNode=" + gunNode + '}';
+        return "Player{"+id+"}";
     }
 
     public boolean isViewingEquipment() {
