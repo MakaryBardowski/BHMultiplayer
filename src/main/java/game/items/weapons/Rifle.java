@@ -23,6 +23,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
+import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
@@ -35,17 +36,18 @@ import game.entities.InteractiveEntity;
  */
 public class Rifle extends RangedWeapon {
 
-    private Node muzzleNode;
     private static final float BULLET_SPEED = 1200f;
+
+    private Node muzzleNode;
     private CameraRecoilControl camRecoil;
     private RecoilControl gunRecoil;
 
-    public Rifle(float damage, ItemTemplate template) {
-        super(damage, template);
+    public Rifle(int id, float damage, ItemTemplate template, String name, Node node) {
+        super(id, damage, template, name, node);
     }
 
-    public Rifle(float damage, ItemTemplate template, boolean droppable) {
-        super(damage, template, droppable);
+    public Rifle(int id, float damage, ItemTemplate template, String name, Node node, boolean droppable) {
+        super(id, damage, template, name, node, droppable);
     }
 
     @Override
@@ -124,7 +126,7 @@ public class Rifle extends RangedWeapon {
             if (!wallCheck) {
                 Integer hitId = Integer.valueOf(closest.getGeometry().getName());
                 InteractiveEntity mobHit = ClientGameAppState.getInstance().getMobs().get(hitId);
-                mobHit.onShot(p,damage);
+                mobHit.onShot(p, damage);
             }
             createBullet(cp);
             recoilFire();
@@ -178,6 +180,24 @@ public class Rifle extends RangedWeapon {
         Texture tex1 = Main.getInstance().getAssetManager().loadTexture("Effects/Particles/part_beam.png");
         mat.setTexture("Texture", tex1);
         return mat;
+    }
+
+    @Override
+    public void onShot(Mob shooter, float damage) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void onInteract() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public AbstractMessage createNewEntityMessage() {
+//        NewAxeMessage msg = new NewAxeMessage(this);
+//        msg.setReliable(true);
+//        return msg;
+        return null;
     }
 
 }

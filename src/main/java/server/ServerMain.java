@@ -7,7 +7,7 @@ import messages.messageListeners.ServerMessageListener;
 import messages.DestructibleHealthUpdateMessage;
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
-import messages.MobsInGameMessage;
+import messages.NewMobMessage;
 import messages.PlayerJoinedMessage;
 import messages.SetPlayerMessage;
 
@@ -15,6 +15,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.math.Vector3f;
 
 import com.jme3.network.ConnectionListener;
+import com.jme3.network.Filter;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
@@ -28,12 +29,20 @@ import com.jme3.scene.Node;
 import game.entities.Chest;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
+import game.items.Item;
+import game.items.ItemTemplates;
+import game.items.ItemTemplates.ItemTemplate;
+import game.items.armor.Vest;
+import game.items.factories.ItemFactory;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import messages.ChestsInGameMessage;
+import messages.NewChestMessage;
+import messages.items.ItemInteractionMessage;
+import messages.items.ItemInteractionMessage.ItemInteractionType;
 
 /**
  * This is the Main Class of your Game. You should only do initialization here.
@@ -105,15 +114,15 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
 
     @Override
     public void connectionAdded(Server server, HostedConnection hc) {
+
         mobs.entrySet().forEach(x -> {
-            if (x.getValue() instanceof Mob mob) {
-                MobsInGameMessage m = new MobsInGameMessage(mob.getId(), mob.getNode().getWorldTranslation());
-                m.setReliable(true);
-                server.broadcast(Filters.in(hc), m);
+            if (x.getValue() instanceof Item item) {
+                server.broadcast(Filters.in(hc), item.createNewEntityMessage());
+            } else if (x.getValue() instanceof Mob mob) {
+                server.broadcast(Filters.in(hc), mob.createNewEntityMessage());
+                sendMobEquipmentInfo(mob, Filters.in(hc));
             } else if (x.getValue() instanceof Chest chest) {
-                ChestsInGameMessage m = new ChestsInGameMessage(chest.getId(), chest.getNode().getWorldTranslation());
-                m.setReliable(true);
-                server.broadcast(Filters.in(hc), m);
+                server.broadcast(Filters.in(hc), chest.createNewEntityMessage());
             }
         });
 
@@ -122,9 +131,13 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
         messageToNewPlayer.setReliable(true);
         server.broadcast(Filters.in(hc), messageToNewPlayer);
 
+        // send info about new player eq
         PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation());
         msg.setReliable(true);
         server.broadcast(Filters.notEqualTo(hc), msg);
+        sendMobEquipmentInfo(newPlayer, Filters.notEqualTo(hc));
+
+        sendMobEquipmentInfo(newPlayer, null);
 
     }
 
@@ -154,20 +167,54 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     }
 
     public Player registerPlayer() {
+        /*
+        adding equipment to a mob goes as below:
+        1. Item i = registerItem( template)
+        2. Mob m = ...
+        m. addItem( i )
+        3. send interactionMessage ( i, m , ItemInteractionType.PICKUP/EQUIP )
+         */
+        Item playerVest = registerItem(ItemTemplates.VEST_TRENCH, true);
+        Item playerBoots = registerItem(ItemTemplates.BOOTS_TRENCH, true);
         Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide();
-        this.mobs.put(player.getId(), player);
-        System.out.println("adding player " + player.getId());
-        return player;
+        player.addToEquipment(playerVest);
+        player.addToEquipment(playerBoots);
+
+//        System.out.print("adding player " + player.getId() + "\n Their Equipment: ");
+//        System.out.println(Arrays.toString(player.getEquipment()));
+        return registerEntity(player);
+    }
+
+    public Item registerItem(ItemTemplate template, boolean droppable) {
+        ItemFactory ifa = new ItemFactory(null);
+        Item item = ifa.createItem(currentMaxId++, template, droppable);
+        return registerEntity(item);
     }
 
     public Chest registerRandomChest() {
         Random r = new Random();
         Vector3f offset = new Vector3f(r.nextFloat() * 30 * 4, 4, r.nextFloat() * 30 * 4);
         Chest chest = Chest.createRandomChestServer(currentMaxId++, rootNode, offset, assetManager);
-        this.mobs.put(chest.getId(), chest);
-        System.out.println("adding chest " + chest.getId());
-
-        return chest;
+        return registerEntity(chest);
     }
 
+    private <T extends InteractiveEntity> T registerEntity(T entity) {
+        this.mobs.put(entity.getId(), entity);
+        return entity;
+    }
+
+    private void sendMobEquipmentInfo(Mob mob, Filter<HostedConnection> filter) {
+        for (Item i : mob.getEquipment()) {
+            if (i != null) {
+                ItemInteractionMessage imsg = new ItemInteractionMessage(i, mob, ItemInteractionType.EQUIP);
+                imsg.setReliable(true);
+                if (filter == null) {
+                    System.out.println(" sending "+i.getId()+" equipped by "+mob.getId()+" to all");
+                    server.broadcast(imsg);
+                } else {
+                    server.broadcast(filter, imsg);
+                }
+            }
+        }
+    }
 }

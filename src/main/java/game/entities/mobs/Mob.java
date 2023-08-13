@@ -41,7 +41,6 @@ public abstract class Mob extends Destructible implements CollidableInterface, M
         this.serverRotation = node.getLocalRotation();
     }
 
-
     public Vector3f getServerLocation() {
         return serverLocation;
     }
@@ -103,11 +102,23 @@ public abstract class Mob extends Destructible implements CollidableInterface, M
 
     protected void dropEquipment() {
         Random r = new Random();
-        for (Item item : equipment) {
+        for (int i = 0; i < equipment.length; i++) {
+            Item item = equipment[i];
             if (item != null) {
                 item.drop(node.getWorldTranslation().add(r.nextFloat(-0.25f, 0.25f), 2 + r.nextFloat(-1, 1), r.nextFloat(-0.25f, 0.25f)));
+                equipment[i] = null;
             }
         }
+    }
+
+    public Item addToEquipment(Item item) {
+        for (int i = 0; i < equipment.length; i++) {
+            if (equipment[i] == null) {
+                equipment[i] = item;
+                break;
+            }
+        }
+        return item;
     }
 
 }

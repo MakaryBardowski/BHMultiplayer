@@ -14,17 +14,17 @@ import com.jme3.network.serializing.Serializable;
  * @author 48793
  */
 @Serializable
-public class MobsInGameMessage extends AbstractMessage {
+public class NewMobMessage extends AbstractMessage {
 
     private int id;
     private float x;
     private float y;
     private float z;
 
-    public MobsInGameMessage() {
+    public NewMobMessage() {
     }
 
-    public MobsInGameMessage(int id, Vector3f pos) {
+    public NewMobMessage(int id, Vector3f pos) {
         this.id = id;
         this.x = pos.getX();
         this.y = pos.getY();

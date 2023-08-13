@@ -9,6 +9,7 @@ import game.items.Item;
 import game.items.ItemTemplates;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import game.items.ItemTemplates.ItemTemplate;
 
 /**
  *
@@ -16,12 +17,12 @@ import com.jme3.scene.Spatial;
  */
 public abstract class Armor extends Item implements Equippable {
 
-    public Armor(ItemTemplates.ItemTemplate template) {
-        super(template);
+    public Armor(int id, ItemTemplate template,String name,Node node) {
+        super(id,template,name,node);
     }
 
-    public Armor(ItemTemplates.ItemTemplate template, boolean droppable) {
-        super(template, droppable);
+    public Armor(int id, ItemTemplate template,String name,Node node, boolean droppable) {
+        super(id,template,name,node,droppable);
     }
 
 

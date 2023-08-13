@@ -4,6 +4,7 @@
  */
 package game.entities;
 
+import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import game.entities.mobs.Mob;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.Setter;
  *
  * @author 48793
  */
+@AllArgsConstructor
 @Getter
 public abstract class InteractiveEntity {
 
@@ -22,14 +24,12 @@ public abstract class InteractiveEntity {
     protected String name;
     protected Node node;
 
-    public InteractiveEntity(int id, String name, Node node) {
-        this.id = id;
-        this.name = name;
-        this.node = node;
-    }
 
     public abstract void onShot(Mob shooter, float damage);
 
     public abstract void onInteract();
+    
+    
+    public abstract AbstractMessage createNewEntityMessage();
 
 }

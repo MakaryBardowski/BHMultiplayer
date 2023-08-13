@@ -4,35 +4,38 @@
  */
 package game.items.weapons;
 
+import com.jme3.scene.Node;
 import game.items.Equippable;
 import game.items.Holdable;
 import game.items.Item;
 import game.items.ItemTemplates.ItemTemplate;
 import game.entities.mobs.Mob;
 import game.entities.mobs.Player;
+import game.items.ItemTemplates;
 
 /**
  * @author tomasz potoczko
  */
-public abstract class Weapon extends Item implements Attacks,Holdable,Equippable{
+public abstract class Weapon extends Item implements Attacks, Holdable, Equippable {
+
     private static final DamageType DEFAULT_DAMAGE_TYPE = DamageType.PHYSICAL;
     protected float damage;
     protected float range;
     protected DamageType damageType;
     protected float attackSpeed;
-    
-    protected Weapon(float damage,ItemTemplate template){
-    super(template);
-    this.damage = damage;
-    damageType = DEFAULT_DAMAGE_TYPE;
+
+    public Weapon(int id,float damage, ItemTemplates.ItemTemplate template, String name, Node node) {
+        super(id, template, name, node);
+        this.damage = damage;
+        damageType = DEFAULT_DAMAGE_TYPE;
     }
-    
-    protected Weapon(float damage,ItemTemplate template,boolean droppable){
-    super(template,droppable);
-    this.damage = damage;
-    damageType = DEFAULT_DAMAGE_TYPE;
+
+    public Weapon(int id,float damage, ItemTemplates.ItemTemplate template, String name, Node node,boolean droppable) {
+        super(id, template, name, node,droppable);
+        this.damage = damage;
+        damageType = DEFAULT_DAMAGE_TYPE;
     }
-    
+
     public void setDamage(float damage) {
         this.damage = damage;
     }
@@ -60,10 +63,9 @@ public abstract class Weapon extends Item implements Attacks,Holdable,Equippable
     public float getAttackSpeed() {
         return attackSpeed;
     }
-    
-    public float getDamage(){
+
+    public float getDamage() {
         return damage;
     }
-    
-    
+
 }

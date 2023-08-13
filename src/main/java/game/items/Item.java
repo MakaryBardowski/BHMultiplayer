@@ -9,6 +9,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import game.effects.ParticleUtils;
+import game.entities.InteractiveEntity;
 import game.items.ItemTemplates.ItemTemplate;
 import lombok.Getter;
 
@@ -17,19 +18,20 @@ import lombok.Getter;
  * @author 48793
  */
 @Getter
-public abstract class Item {
+public abstract class Item extends InteractiveEntity {
 
     protected boolean droppable;
-    protected String name;
     protected String description;
     protected ItemTemplate template;
 
-    protected Item(ItemTemplate template) {
+    protected Item(int id, ItemTemplate template,String name,Node node) {
+        super(id, name, node);
         this.template = template;
         this.droppable = true;
     }
 
-    protected Item(ItemTemplate template, boolean droppable) {
+    protected Item(int id, ItemTemplate template,String name,Node node, boolean droppable) {
+        super(id, name, node);
         this.template = template;
         this.droppable = droppable;
     }
@@ -38,23 +40,16 @@ public abstract class Item {
         if (!droppable) {
             return;
         }
-        Node node = new Node();
-        Node childNode = createItemDropNode();
-        applyInitialDropRotation(childNode);
-        node.attachChild(childNode);
-        node.scale(template.getDropData().getScale());
-        node.setLocalTranslation(itemSpawnpoint);
-        ClientGameAppState.getInstance().getPickableNode().attachChild(node);
-        ParticleUtils.spawnItemPhysicalParticleShaded(node, itemSpawnpoint, this);
+        Node parentNode = new Node();
+        applyInitialDropRotation(node);
+        parentNode.attachChild(node);
+        parentNode.scale(template.getDropData().getScale());
+        parentNode.setLocalTranslation(itemSpawnpoint);
+        ClientGameAppState.getInstance().getPickableNode().attachChild(parentNode);
+        ParticleUtils.spawnItemPhysicalParticleShaded(parentNode, itemSpawnpoint, this);
     }
 
-    private Node createItemDropNode() {
-        if (template.getDropPath() != null) {
-            return (Node) ClientGameAppState.getInstance().getAssetManager().loadModel(template.getDropPath());
-        } else {
-            return (Node) ClientGameAppState.getInstance().getAssetManager().loadModel(ItemTemplates.RIFLE_MANNLICHER_95.getDropPath());
-        }
-    }
+
 
     private void applyInitialDropRotation(Node childNode) {
         Vector3f dr = template.getDropData().getRotation();

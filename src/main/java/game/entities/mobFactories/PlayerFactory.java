@@ -4,6 +4,7 @@
  */
 package game.entities.mobFactories;
 
+import client.ClientGameAppState;
 import game.items.armor.Boots;
 import game.items.armor.Helmet;
 import game.items.ItemTemplates;
@@ -20,6 +21,7 @@ import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.entities.DestructibleUtils;
+import game.items.factories.ItemFactory;
 import game.items.weapons.Axe;
 import game.items.weapons.Rifle;
 
@@ -58,8 +60,7 @@ public class PlayerFactory extends MobFactory {
         if (setAsPlayer) {
             setupFirstPersonCamera(p);
         }
-        addStartEquipment(p);
-        equipStartEquipment(p);
+
         return p;
     }
 
@@ -67,8 +68,6 @@ public class PlayerFactory extends MobFactory {
     public Player createServerSide() {
         Player p = createPlayer();
         DestructibleUtils.attachDestructibleToNode(p,mobsNode, playerSpawnpoint);
-        addStartEquipment(p);
-
         return p;
     }
 
@@ -89,21 +88,6 @@ public class PlayerFactory extends MobFactory {
         return node;
     }
 
-    private void addStartEquipment(Player p) {
-        p.getEquipment()[0] = new Rifle(40f, ItemTemplates.RIFLE_MANNLICHER_95);
-        p.getEquipment()[3] = new Axe(15f, ItemTemplates.AXE);
-        p.getHotbar()[0] = p.getEquipment()[0];
-
-        p.getEquipment()[1] = new Vest(ItemTemplates.VEST_TRENCH,true,true);
-        p.getEquipment()[2] = new Boots(ItemTemplates.BOOTS_TRENCH);
-        
-    }
-
-    private void equipStartEquipment(Player p) {
-        p.equip(p.getEquipment()[1]);
-        p.equip(p.getEquipment()[2]);
-        p.equip(new Helmet(ItemTemplates.HEAD_1,false));
-    }
 
     private SkinningControl getSkinningControl(Node node) {
         return node.getChild(0).getControl(SkinningControl.class);

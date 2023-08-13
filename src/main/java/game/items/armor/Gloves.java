@@ -9,8 +9,12 @@ import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.entities.mobs.Player;
 import client.Main;
 import com.jme3.math.FastMath;
+import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
+import game.entities.mobs.Mob;
+import messages.items.NewBootsMessage;
+import messages.items.NewGlovesMessage;
 
 /**
  *
@@ -18,12 +22,12 @@ import static game.entities.DestructibleUtils.setupModelShootability;
  */
 public class Gloves extends Armor {
 
-    public Gloves(ItemTemplates.ItemTemplate template) {
-        super(template);
+    public Gloves(int id, ItemTemplates.ItemTemplate template, String name, Node node) {
+        super(id, template, name, node);
     }
 
-    public Gloves(ItemTemplates.ItemTemplate template, boolean droppable) {
-        super(template, droppable);
+    public Gloves(int id, ItemTemplates.ItemTemplate template, String name, Node node, boolean droppable) {
+        super(id, template, name, node, droppable);
     }
 
     @Override
@@ -50,6 +54,23 @@ public class Gloves extends Armor {
     @Override
     public void playerUnequip(Player m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void onShot(Mob shooter, float damage) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void onInteract() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public AbstractMessage createNewEntityMessage() {
+        NewGlovesMessage msg = new NewGlovesMessage(this);
+        msg.setReliable(true);
+        return msg;
     }
 
 }

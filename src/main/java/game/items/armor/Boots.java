@@ -9,8 +9,11 @@ import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.entities.mobs.Player;
 import client.Main;
 import com.jme3.math.FastMath;
+import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
+import game.entities.mobs.Mob;
+import messages.items.NewBootsMessage;
 
 /**
  *
@@ -18,14 +21,13 @@ import static game.entities.DestructibleUtils.setupModelShootability;
  */
 public class Boots extends Armor {
 
-    public Boots(ItemTemplates.ItemTemplate template) {
-        super(template);
+    public Boots(int id, ItemTemplates.ItemTemplate template,String name,Node node) {
+        super(id,template,name,node);
     }
 
-    public Boots(ItemTemplates.ItemTemplate template, boolean droppable) {
-        super(template, droppable);
+    public Boots(int id, ItemTemplates.ItemTemplate template,String name,Node node, boolean droppable) {
+        super(id,template,name,node,droppable);
     }
-
     @Override
     public void playerEquip(Player m) {
         Node r = m.getSkinningControl().getAttachmentsNode("LegR");
@@ -49,6 +51,23 @@ public class Boots extends Armor {
     @Override
     public void playerUnequip(Player m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void onShot(Mob shooter, float damage) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void onInteract() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public AbstractMessage createNewEntityMessage() {
+        NewBootsMessage msg = new NewBootsMessage(this);
+        msg.setReliable(true);
+        return msg;    
     }
 
 }

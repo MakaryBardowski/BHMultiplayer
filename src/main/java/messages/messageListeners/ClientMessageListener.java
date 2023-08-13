@@ -10,7 +10,7 @@ import game.entities.mobs.Player;
 import messages.DestructibleHealthUpdateMessage;
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
-import messages.MobsInGameMessage;
+import messages.NewMobMessage;
 import messages.PlayerJoinedMessage;
 import messages.SetPlayerMessage;
 import com.jme3.network.Client;
@@ -24,8 +24,18 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.entities.Chest;
 import game.entities.Destructible;
+import game.items.Item;
+import game.items.factories.ItemFactory;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
-import messages.ChestsInGameMessage;
+import messages.NewChestMessage;
+import messages.items.ItemInteractionMessage;
+import messages.items.ItemInteractionMessage.ItemInteractionType;
+import messages.items.NewBootsMessage;
+import messages.items.NewGlovesMessage;
+import messages.items.NewHelmetMessage;
+import messages.items.NewItemMessage;
+import messages.items.NewVestMessage;
 
 /**
  *
@@ -34,9 +44,11 @@ import messages.ChestsInGameMessage;
 public class ClientMessageListener implements MessageListener<Client> {
 
     private final ClientGameAppState clientApp;
+    private final ItemFactory ifa;
 
     public ClientMessageListener(ClientGameAppState c) {
         this.clientApp = c;
+        ifa = new ItemFactory(c.getAssetManager());
     }
 
     @Override
@@ -47,9 +59,13 @@ public class ClientMessageListener implements MessageListener<Client> {
             updateMobPosition(nmsg);
         } else if (m instanceof DestructibleHealthUpdateMessage hmsg) {
             updateEntityHealth(hmsg);
-        } else if (m instanceof MobsInGameMessage nmsg) {
+        } else if (m instanceof ItemInteractionMessage iimsg) {
+            handleItemInteraction(iimsg);
+        } else if (m instanceof NewItemMessage imsg) {
+            addNewItem(imsg);
+        } else if (m instanceof NewMobMessage nmsg) {
             addMob(nmsg);
-        } else if (m instanceof ChestsInGameMessage nmsg) {
+        } else if (m instanceof NewChestMessage nmsg) {
             addNewChest(nmsg);
         } else if (m instanceof PlayerJoinedMessage nmsg) {
             addNewPlayer(nmsg);
@@ -99,19 +115,19 @@ public class ClientMessageListener implements MessageListener<Client> {
 
     private void updateEntityHealth(DestructibleHealthUpdateMessage hmsg) {
         if (mobExistsLocally(hmsg.getId())) {
-            getDestructible(hmsg.getId()).setHealth(hmsg.getHealth());
+            getDestructibleById(hmsg.getId()).setHealth(hmsg.getHealth());
         }
     }
 
     private void updateMobPosition(MobPosUpdateMessage nmsg) {
         if (mobExistsLocally(nmsg.getId())) {
-            getMob(nmsg.getId()).setServerLocation(nmsg.getPos());
+            getMobById(nmsg.getId()).setServerLocation(nmsg.getPos());
         }
     }
 
     private void updateMobRotation(MobRotUpdateMessage nmsg) {
         if (mobExistsLocally(nmsg.getId())) {
-            getMob(nmsg.getId()).setServerRotation(nmsg.getRot());
+            getMobById(nmsg.getId()).setServerRotation(nmsg.getRot());
         }
     }
 
@@ -128,10 +144,11 @@ public class ClientMessageListener implements MessageListener<Client> {
     private void addMyPlayer(SetPlayerMessage nmsg) {
         enqueueExecution(() -> {
             createMyPlayer(nmsg);
+            System.out.println("my (id = "+nmsg.getId()+") eq "+ Arrays.toString(getMobById(nmsg.getId()).getEquipment()));
         });
     }
 
-    private void addMob(MobsInGameMessage nmsg) {
+    private void addMob(NewMobMessage nmsg) {
         if (mobDoesNotExistLocally(nmsg.getId())) {
             enqueueExecution(() -> {
                 Mob p = clientApp.registerPlayer(nmsg.getId(), false);
@@ -162,21 +179,68 @@ public class ClientMessageListener implements MessageListener<Client> {
         Main.getInstance().enqueue(runnable);
     }
 
-    private Mob getMob(int id) {
+    private Mob getMobById(int id) {
         return ((Mob) clientApp.getMobs().get(id));
     }
 
-    private Destructible getDestructible(int id) {
+    private Item getItemById(int id) {
+        return ((Item) clientApp.getMobs().get(id));
+    }
+
+    private Destructible getDestructibleById(int id) {
         return ((Destructible) clientApp.getMobs().get(id));
     }
 
-    private void addNewChest(ChestsInGameMessage nmsg) {
+    private void addNewChest(NewChestMessage nmsg) {
         if (mobDoesNotExistLocally(nmsg.getId())) {
             enqueueExecution(() -> {
                 Chest c = Chest.createRandomChestClient(nmsg.getId(), clientApp.getDestructibleNode(), nmsg.getPos(), clientApp.getAssetManager());
                 clientApp.getMobs().put(c.getId(), c);
             });
         }
+    }
+
+    private void addNewItem(NewItemMessage imsg) {
+
+        if (imsg instanceof NewHelmetMessage nhmsg) {
+            Item i = ifa.createItem(nhmsg.getId(), nhmsg.getTemplate(), nhmsg.isDroppable());
+            clientApp.registerEntity(i);
+            System.out.println("registering Helmet " + i + " with id = " + i.getId());
+
+        } else if (imsg instanceof NewVestMessage nvmsg) {
+            Item i = ifa.createItem(nvmsg.getId(), nvmsg.getTemplate(), nvmsg.isDroppable());
+            clientApp.registerEntity(i);
+            System.out.println("registering Vest " + i + " with id = " + i.getId());
+
+        } else if (imsg instanceof NewGlovesMessage ngmsg) {
+            Item i = ifa.createItem(ngmsg.getId(), ngmsg.getTemplate(), ngmsg.isDroppable());
+            clientApp.registerEntity(i);
+            System.out.println("registering Gloves " + i + " with id = " + i.getId());
+
+        } else if (imsg instanceof NewBootsMessage nbmsg) {
+            Item i = ifa.createItem(nbmsg.getId(), nbmsg.getTemplate(), nbmsg.isDroppable());
+            clientApp.registerEntity(i);
+            System.out.println("registering Boots " + i + " with id = " + i.getId());
+        }
+    }
+
+    private void handleItemInteraction(ItemInteractionMessage iimsg) {
+        enqueueExecution(() -> {
+            if (null != iimsg.getInteractionType()) 
+                switch (iimsg.getInteractionType()) {
+                case EQUIP:
+                    getMobById(iimsg.getMobId()).equip(getItemById(iimsg.getItemId()));
+                    break;
+                case UNEQUIP:
+                    break;
+                case PICK_UP:
+                    break;
+                case DROP:
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 
 }

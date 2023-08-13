@@ -19,6 +19,8 @@ import com.jme3.anim.SkinningControl;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
+import com.jme3.network.AbstractMessage;
+import com.jme3.network.Filters;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -27,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import messages.NewMobMessage;
 
 /**
  *
@@ -38,20 +41,19 @@ public class HumanMob extends Mob {
     protected Holdable equippedLeftHand;
     protected SkinningControl skinningControl;
 
-    public HumanMob(int id,Node node, String name, SkinningControl skinningControl) {
-        super(id,node, name);
+    public HumanMob(int id, Node node, String name, SkinningControl skinningControl) {
+        super(id, node, name);
         this.skinningControl = skinningControl;
     }
 
-
     @Override
-    public void onShot(Mob shooter,float damage) {
-        shooter.dealDamage(damage,this);
+    public void onShot(Mob shooter, float damage) {
+        shooter.dealDamage(damage, this);
     }
 
     @Override
     public void onInteract() {
-        System.err.println(name+" says hi! ");
+        System.out.println(name + " says hi! ");
     }
 
     @Override
@@ -182,4 +184,10 @@ public class HumanMob extends Mob {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+    @Override
+    public AbstractMessage createNewEntityMessage() {
+        NewMobMessage msg = new NewMobMessage(id, node.getWorldTranslation());
+        msg.setReliable(true);
+        return msg;
+    }
 }

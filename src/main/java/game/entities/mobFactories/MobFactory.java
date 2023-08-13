@@ -21,7 +21,7 @@ public abstract class MobFactory {
 
     protected AssetManager assetManager;
     protected Node mobsNode;
-        protected int id;
+    protected int id;
 
 
     protected MobFactory(int id,AssetManager assetManager, Node mobsNode) {

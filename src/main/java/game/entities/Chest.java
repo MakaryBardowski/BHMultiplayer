@@ -9,6 +9,7 @@ import client.Main;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
+import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.attachDestructibleToNode;
 import static game.entities.DestructibleUtils.setupModelShootability;
@@ -20,6 +21,7 @@ import game.items.armor.Vest;
 import game.items.weapons.Rifle;
 import static game.map.blocks.VoxelLighting.setupModelLight;
 import java.util.Random;
+import messages.NewChestMessage;
 import messages.DestructibleHealthUpdateMessage;
 
 /**
@@ -35,8 +37,8 @@ public class Chest extends Destructible implements Damageable {
     public Chest(int id, String name, Node node) {
         super(id, name, node);
         locked = true;
-        drop[0] = new Rifle(1, ItemTemplates.RIFLE_MANNLICHER_95);
-        drop[1] = new Vest(ItemTemplates.VEST_TRENCH);
+//        drop[0] = new Rifle(1, ItemTemplates.RIFLE_MANNLICHER_95);
+//        drop[1] = new Vest(ItemTemplates.VEST_TRENCH);
     }
 
     public static Chest createRandomChestClient(int id, Node parentNode, Vector3f offset, AssetManager a) {
@@ -63,7 +65,7 @@ public class Chest extends Destructible implements Damageable {
 
     @Override
     public void onInteract() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("This "+name+" might contain valuable loot.");
     }
 
     @Override
@@ -84,6 +86,13 @@ public class Chest extends Destructible implements Damageable {
             }
         }
         node.removeFromParent();
+    }
+
+    @Override
+    public AbstractMessage createNewEntityMessage() {
+        NewChestMessage msg = new NewChestMessage(id, node.getWorldTranslation());
+        msg.setReliable(true);
+        return msg ;
     }
 
     enum ChestType {

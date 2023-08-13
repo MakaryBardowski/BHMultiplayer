@@ -15,6 +15,7 @@ import client.ClientGameAppState;
 import com.jme3.anim.SkinningControl;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.math.Vector3f;
+import com.jme3.network.AbstractMessage;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
@@ -41,6 +42,7 @@ public class Player extends HumanMob {
     private boolean viewingEquipment;
     private boolean cameraMovementLocked;
     private boolean movementControlLocked;
+    
 
     @Override
     public void equip(Item item) {

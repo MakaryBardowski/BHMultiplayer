@@ -78,7 +78,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Getter
     private final Node entityNode = new Node("ENTITY NODE");
-    
+
     @Getter
     private final Node pickableNode = new Node("PICKABLE NODE");
 
@@ -192,7 +192,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     }
 
     public Player registerPlayer(Integer id, boolean setAsPlayer) {
-        Player p = new PlayerFactory(id,destructibleNode, getCamera(), setAsPlayer).createClientSide();
+        Player p = new PlayerFactory(id, destructibleNode, getCamera(), setAsPlayer).createClientSide();
         this.mobs.put(id, p);
         return p;
     }
@@ -211,6 +211,11 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     public AppStateManager getStateManager() {
         return app.getStateManager();
+    }
+
+    public <T extends InteractiveEntity> T registerEntity(T entity) {
+        this.mobs.put(entity.getId(), entity);
+        return entity;
     }
 
 }
