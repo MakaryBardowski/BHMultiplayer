@@ -24,6 +24,8 @@ import de.lessvoid.nifty.controls.label.LabelControl;
 import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
 import de.lessvoid.nifty.screen.Screen;
 import game.entities.Destructible;
+import game.items.Item;
+import java.util.Arrays;
 
 /**
  *
@@ -327,11 +329,11 @@ public class PlayerHUD extends BaseAppState {
                     }
                 });
 
-                // DRAW EQUIPMENT SLOTS
+                // DRAW EQUIPMENT
                 eqSlotSizePx = nifty.getRenderEngine().getNativeHeight() * 0.08;
 
                 for (int j = 0; j < ROWS; j++) {
-
+                    final int currentRow=j;
                     layer(new LayerBuilder("playerEquipmentLayer") {
                         {
 
@@ -341,36 +343,24 @@ public class PlayerHUD extends BaseAppState {
 
                             cnt++;
                             final double marginTop = cnt * eqSlotSizePx;
-                            System.out.println("marginTop: " + marginTop);
-                            for (int slotNumber = 0; slotNumber < gs.getPlayer().getEquipment().length / ROWS; slotNumber++) {
-                                final int i = slotNumber;
-//                                cnt = slotNumber;
+                            final int numOfColumns = gs.getPlayer().getEquipment().length / ROWS;
+                            for (int slotNumber = 0; slotNumber < numOfColumns; slotNumber++) {
+                                final Item item = gs.getPlayer().getEquipment()[numOfColumns*currentRow+slotNumber];
                                 image(new ImageBuilder("slot" + equipmentSlotAdded) {
                                     {
+                                        String filename = "Textures/GUI/equipmentSlotEmpty.png";
+                                        if (item != null){
+                                            filename = item.getTemplate().getIconPath();
+                                        }
+                                        
                                         visible(false);
-                                        filename("Textures/GUI/equipmentSlotEmpty.png");
-//                        alignCenter();
-//                        valignCenter();
-//                                    height("8%");
-//                                    width("8%");
+                                        filename(filename);
 
                                         height(nifty.getRenderEngine().getNativeHeight() * 0.08 + "px");
                                         width(nifty.getRenderEngine().getNativeHeight() * 0.08 + "px");
                                         visibleToMouse(true);
                                         interactOnClick("playerEquipItem(" + equipmentSlotAdded++ + ")");
-//                        interactOnMouseOver("getItemInfo("+i+")");
 
-//onHoverEffect(new HoverEffectBuilder("changeMouseCursor") {{
-//      }});
-//                                    onEndHoverEffect(new HoverEffectBuilder("border") {
-//                                        {
-//                                            effectParameter("hoverHeight", "100%");
-//                                            effectParameter("hoverWidth", "100%");
-//                                            effectParameter("color", "#ffff");
-//                                            effectParameter("border", "2px");
-//                                            effectParameter("onStartEffect", "hideTooltip()");
-//                                        }
-//                                    });
                                         onStartHoverEffect(new HoverEffectBuilder("border") {
                                             {
                                                 effectParameter("hoverHeight", "100%");
