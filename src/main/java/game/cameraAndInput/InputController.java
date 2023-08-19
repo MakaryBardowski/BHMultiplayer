@@ -21,6 +21,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
@@ -124,11 +125,11 @@ public class InputController {
                     p.setViewingEquipment(!p.isViewingEquipment());
 
                     for (int eqSlot = 0; eqSlot < p.getEquipment().length; eqSlot++) {
-//                        if (p.getEquipment()[eqSlot] != null) {
-//
-//                            guiElement = gs.getNifty().getRenderEngine().createImage(gs.getNifty().getCurrentScreen(), gs.getPlayer().getEquipment()[eqSlot].getIconPath(), false);
-//                            gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).getRenderer(ImageRenderer.class).setImage(guiElement);
-//                        }
+                        if (p.getEquipment()[eqSlot] != null) {
+
+                            guiElement = gs.getNifty().getRenderEngine().createImage(gs.getNifty().getCurrentScreen(), gs.getPlayer().getEquipment()[eqSlot].getTemplate().getIconPath(), false);
+                            gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).getRenderer(ImageRenderer.class).setImage(guiElement);
+                        }
 
                         gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).setVisible(!gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).isVisible());
                     }

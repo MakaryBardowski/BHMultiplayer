@@ -333,7 +333,6 @@ public class PlayerHUD extends BaseAppState {
                 eqSlotSizePx = nifty.getRenderEngine().getNativeHeight() * 0.08;
 
                 for (int j = 0; j < ROWS; j++) {
-                    final int currentRow=j;
                     layer(new LayerBuilder("playerEquipmentLayer") {
                         {
 
@@ -345,16 +344,10 @@ public class PlayerHUD extends BaseAppState {
                             final double marginTop = cnt * eqSlotSizePx;
                             final int numOfColumns = gs.getPlayer().getEquipment().length / ROWS;
                             for (int slotNumber = 0; slotNumber < numOfColumns; slotNumber++) {
-                                final Item item = gs.getPlayer().getEquipment()[numOfColumns*currentRow+slotNumber];
                                 image(new ImageBuilder("slot" + equipmentSlotAdded) {
                                     {
-                                        String filename = "Textures/GUI/equipmentSlotEmpty.png";
-                                        if (item != null){
-                                            filename = item.getTemplate().getIconPath();
-                                        }
-                                        
                                         visible(false);
-                                        filename(filename);
+                                        filename("Textures/GUI/equipmentSlotEmpty.png");
 
                                         height(nifty.getRenderEngine().getNativeHeight() * 0.08 + "px");
                                         width(nifty.getRenderEngine().getNativeHeight() * 0.08 + "px");
