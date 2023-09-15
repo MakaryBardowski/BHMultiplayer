@@ -37,12 +37,11 @@ public class Player extends HumanMob {
     private Camera mainCamera;
     private final Item[] hotbar;
     private final Node gunNode = new Node("gun node");
-    
+
     //controlling player actions
     private boolean viewingEquipment;
     private boolean cameraMovementLocked;
     private boolean movementControlLocked;
-    
 
     @Override
     public void equip(Item item) {
@@ -51,12 +50,19 @@ public class Player extends HumanMob {
         }
     }
 
+    @Override
+    public void unequip(Item item) {
+        if (item instanceof Equippable equippableItem) {
+            equippableItem.playerUnequip(this);
+        }
+    }
+
     public Node getGunNode() {
         return gunNode;
     }
 
-    public Player(int id,Node node, String name, Camera mainCamera, SkinningControl skinningControl) {
-        super(id,node, name, skinningControl);
+    public Player(int id, Node node, String name, Camera mainCamera, SkinningControl skinningControl) {
+        super(id, node, name, skinningControl);
         this.mainCamera = mainCamera;
         hotbar = new Item[HOTBAR_SIZE];
 
@@ -211,8 +217,6 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
 //            insert(cm.getWorldGrid());
         }
     }
-    
-    
 
     @Override
     public void die() {
@@ -225,7 +229,7 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
 
     @Override
     public String toString() {
-        return "Player{"+id+"}";
+        return "Player{" + id + "}";
     }
 
     public boolean isViewingEquipment() {
@@ -251,10 +255,5 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
     public void setCameraMovementLocked(boolean cameraMovementLocked) {
         this.cameraMovementLocked = cameraMovementLocked;
     }
-    
-    
-    
 
-    
-    
 }

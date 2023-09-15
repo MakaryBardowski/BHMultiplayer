@@ -4,6 +4,7 @@
  */
 package game.items.armor;
 
+import client.ClientGameAppState;
 import game.items.ItemTemplates;
 import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.entities.mobs.Player;
@@ -12,6 +13,8 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.Mob;
+import java.util.Arrays;
+import messages.items.ItemInteractionMessage;
 import messages.items.NewHelmetMessage;
 import messages.items.NewVestMessage;
 
@@ -37,7 +40,6 @@ public class Vest extends Armor {
         setupModelLight(vest);
         n.attachChild(vest);
         setupModelShootability(vest, m.getId());
-        System.out.println("EQUIPPING!");
     }
 
     @Override
@@ -52,7 +54,12 @@ public class Vest extends Armor {
 
     @Override
     public void onInteract() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+
+        ClientGameAppState gs = ClientGameAppState.getInstance();
+        ItemInteractionMessage imsg = new ItemInteractionMessage(this, gs.getPlayer(), ItemInteractionMessage.ItemInteractionType.PICK_UP);
+        imsg.setReliable(true);
+        gs.getClient().send(imsg);
+
     }
 
     @Override

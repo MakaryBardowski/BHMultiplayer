@@ -12,15 +12,15 @@ import com.jme3.network.serializing.Serializable;
  * @author 48793
  */
 @Serializable
-public class DestructibleHealthUpdateMessage extends AbstractMessage {
+public class SystemHealthUpdateMessage extends AbstractMessage {
 
     protected int id;
     protected float health;
 
-    public DestructibleHealthUpdateMessage() {
+    public SystemHealthUpdateMessage() {
     }
 
-    public DestructibleHealthUpdateMessage(int id,float health) {
+    public SystemHealthUpdateMessage(int id,float health) {
         this.id = id;
         this.health = health;
     }

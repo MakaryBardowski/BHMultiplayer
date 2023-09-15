@@ -7,8 +7,8 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import game.effects.particleStrategies.DroppedItemParticleMovementStrategy;
-import game.effects.particleStrategies.GoreParticleMovementStrategy;
+import game.effects.particleStrategies.DroppedItem;
+import game.effects.particleStrategies.GoreParticle;
 import game.effects.particleStrategies.ParticleMovementStrategy;
 import game.items.Item;
 import java.util.List;
@@ -20,19 +20,19 @@ public class ParticleUtils {
 
     public static void spawnGorePhysicalParticleShaded(Node particleNode, Vector3f initialPos) {
         setMaterialForShadedParticles(particleNode);
-        attachParticleNode(particleNode);
+        attachParticleNode(particleNode,ClientGameAppState.getInstance().getDebugNode());
         moveParticleToSpawnpoint(particleNode, initialPos);
         float finalY = 4f;
-        GoreParticleMovementStrategy strategy = createGoreParticleStrategy(particleNode, generateRandomVelocity(), generateRandomRotationalVelocity(), finalY);
+        GoreParticle strategy = createGoreParticleStrategy(particleNode, generateRandomVelocity(), generateRandomRotationalVelocity(), finalY);
         createParticle(particleNode, strategy);
     }
 
     public static void spawnItemPhysicalParticleShaded(Node particleNode, Vector3f initialPos,Item i) {
         setMaterialForShadedParticles(particleNode);
-        attachParticleNode(particleNode);
+        attachParticleNode(particleNode,ClientGameAppState.getInstance().getPickableNode());
         moveParticleToSpawnpoint(particleNode, initialPos);
         float finalY = 4f;
-        DroppedItemParticleMovementStrategy strategy = createDroppedItemParticleStrategy(particleNode, generateRandomVelocity(), generateRandomRotationalVelocity(), finalY,i);
+        DroppedItem strategy = createDroppedItemParticleStrategy(particleNode, generateRandomVelocity(), generateRandomRotationalVelocity(), finalY,i);
         createParticle(particleNode, strategy);
     }
 
@@ -81,16 +81,16 @@ public class ParticleUtils {
         return rotVelocity;
     }
 
-    private static GoreParticleMovementStrategy createGoreParticleStrategy(Node particleNode, Vector3f velocity, Vector3f rotVelocity, float finalY) {
-        return new GoreParticleMovementStrategy(particleNode, velocity, rotVelocity, finalY);
+    private static GoreParticle createGoreParticleStrategy(Node particleNode, Vector3f velocity, Vector3f rotVelocity, float finalY) {
+        return new GoreParticle(particleNode, velocity, rotVelocity, finalY);
     }
 
-    private static DroppedItemParticleMovementStrategy createDroppedItemParticleStrategy(Node particleNode, Vector3f velocity, Vector3f rotVelocity, float finalY,Item i) {
-        return new DroppedItemParticleMovementStrategy(particleNode, velocity, rotVelocity, finalY,i);
+    private static DroppedItem createDroppedItemParticleStrategy(Node particleNode, Vector3f velocity, Vector3f rotVelocity, float finalY,Item i) {
+        return new DroppedItem(particleNode, velocity, rotVelocity, finalY,i);
     }
 
-    private static void attachParticleNode(Node particleNode) {
-        ClientGameAppState.getInstance().getDebugNode().attachChild(particleNode);
+    private static void attachParticleNode(Node particleNode,Node parentNode) {
+        parentNode.attachChild(particleNode);
     }
 
     private static void moveParticleToSpawnpoint(Node particleNode, Vector3f initialPos) {

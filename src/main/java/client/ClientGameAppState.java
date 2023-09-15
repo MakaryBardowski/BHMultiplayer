@@ -36,6 +36,7 @@ import game.entities.InteractiveEntity;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -94,7 +95,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     private final ConcurrentLinkedQueue<AbstractMessage> messageQueue = new ConcurrentLinkedQueue<>();
 
     @Getter
-    private final HashMap<Integer, InteractiveEntity> mobs = new HashMap<>();
+    private final ConcurrentHashMap<Integer, InteractiveEntity> mobs = new ConcurrentHashMap<>();
 
     private final AppSettings applicationSettings;
 
@@ -167,7 +168,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
         if (player != null) {
             player.move(tpf, this);
-            System.out.println(Arrays.toString(player.getEquipment()));
         }
 
         mobs.values().forEach(x -> {

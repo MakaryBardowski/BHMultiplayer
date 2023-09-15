@@ -4,7 +4,7 @@ import game.entities.mobs.Mob;
 import game.entities.mobFactories.PlayerFactory;
 import game.entities.mobs.Player;
 import messages.messageListeners.ServerMessageListener;
-import messages.DestructibleHealthUpdateMessage;
+import messages.SystemHealthUpdateMessage;
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
 import messages.NewMobMessage;
@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import messages.NewChestMessage;
@@ -55,7 +56,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
 
     private static final String SERVER_IP = "localhost";
     private Server server;
-    private final HashMap<Integer, InteractiveEntity> mobs = new HashMap<>();
+    private final ConcurrentHashMap<Integer, InteractiveEntity> mobs = new ConcurrentHashMap<>();
     private float tickTimer;
     private final float TIME_PER_TICK = 0.033f;
     private int currentMaxId = 0;
@@ -100,7 +101,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
             mobs.entrySet().stream().forEach(i -> {
                 //to be seriously optimized
                 if (i.getValue() instanceof Destructible d) {
-                    server.broadcast(new DestructibleHealthUpdateMessage(d.getId(), d.getHealth()));
+//                    server.broadcast(new SystemHealthUpdateMessage(d.getId(), d.getHealth()));
                     if (d instanceof Mob x) {
                         server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
                         server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
@@ -121,7 +122,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
                 server.broadcast(Filters.in(hc), item.createNewEntityMessage());
             } else if (x.getValue() instanceof Mob mob) {
                 server.broadcast(Filters.in(hc), mob.createNewEntityMessage());
-                sendMobEquipmentInfo(mob, Filters.in(hc));
+                sendNewMobEquipmentInfo(mob, Filters.in(hc));
             } else if (x.getValue() instanceof Chest chest) {
                 server.broadcast(Filters.in(hc), chest.createNewEntityMessage());
             }
@@ -142,7 +143,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
                 server.broadcast(i.createNewEntityMessage());
             }
         }
-        sendMobEquipmentInfo(newPlayer, null);
+        sendNewMobEquipmentInfo(newPlayer, null);
 
     }
 
@@ -167,7 +168,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
         return server;
     }
 
-    public HashMap<Integer, InteractiveEntity> getMobs() {
+    public ConcurrentHashMap<Integer, InteractiveEntity> getMobs() {
         return mobs;
     }
 
@@ -180,10 +181,16 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
         3. send interactionMessage ( i, m , ItemInteractionType.PICKUP/EQUIP )
          */
         Item playerVest = registerItem(ItemTemplates.VEST_TRENCH, true);
+        Item playerHead = registerItem(ItemTemplates.HEAD_1,false);
         Item playerBoots = registerItem(ItemTemplates.BOOTS_TRENCH, true);
+        Item playerRifle = registerItem(ItemTemplates.RIFLE_MANNLICHER_95,true);
+        Item playerGloves = registerItem(ItemTemplates.GLOVES_TRENCH,false);
         Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide();
         player.addToEquipment(playerVest);
         player.addToEquipment(playerBoots);
+        player.addToEquipment(playerRifle);
+        player.addToEquipment(playerHead);
+        player.addToEquipment(playerGloves);
 
 //        System.out.print("adding player " + player.getId() + "\n Their Equipment: ");
 //        System.out.println(Arrays.toString(player.getEquipment()));
@@ -208,15 +215,16 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
         return entity;
     }
 
-    private void sendMobEquipmentInfo(Mob mob, Filter<HostedConnection> filter) {
+    private void sendNewMobEquipmentInfo(Mob mob, Filter<HostedConnection> filter) {
         for (Item i : mob.getEquipment()) {
             if (i != null) {
                 ItemInteractionMessage pmsg = new ItemInteractionMessage(i, mob, ItemInteractionType.PICK_UP);
+                pmsg.setReliable(true);
                 sendMessage(pmsg, filter);
 
                 ItemInteractionMessage emsg = new ItemInteractionMessage(i, mob, ItemInteractionType.EQUIP);
+                emsg.setReliable(true);
                 sendMessage(emsg, filter);
-
             }
         }
     }

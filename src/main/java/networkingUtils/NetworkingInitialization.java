@@ -5,7 +5,7 @@
 package networkingUtils;
 
 import messages.messageListeners.ServerMessageListener;
-import messages.DestructibleHealthUpdateMessage;
+import messages.SystemHealthUpdateMessage;
 import messages.MobUpdateMessage;
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
@@ -15,12 +15,14 @@ import messages.SetPlayerMessage;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
+import messages.DestructibleDamageReceiveMessage;
 import messages.NewChestMessage;
 import messages.items.ItemInteractionMessage;
 import messages.items.NewBootsMessage;
 import messages.items.NewGlovesMessage;
 import messages.items.NewHelmetMessage;
 import messages.items.NewItemMessage;
+import messages.items.NewRifleMessage;
 import messages.items.NewVestMessage;
 
 /**
@@ -35,18 +37,21 @@ public class NetworkingInitialization {
         Serializer.registerClass(MobUpdateMessage.class);
         Serializer.registerClass(MobPosUpdateMessage.class);
         Serializer.registerClass(MobRotUpdateMessage.class);
-        Serializer.registerClass(DestructibleHealthUpdateMessage.class);
+        Serializer.registerClass(SystemHealthUpdateMessage.class);
         Serializer.registerClass(PlayerJoinedMessage.class);
         Serializer.registerClass(SetPlayerMessage.class);
         Serializer.registerClass(NewMobMessage.class);
         Serializer.registerClass(ServerMessageListener.class);
         Serializer.registerClass(NewChestMessage.class);
+        Serializer.registerClass(DestructibleDamageReceiveMessage.class);
 
         Serializer.registerClass(NewItemMessage.class);
         Serializer.registerClass(NewHelmetMessage.class);
         Serializer.registerClass(NewVestMessage.class);
         Serializer.registerClass(NewBootsMessage.class);
         Serializer.registerClass(NewGlovesMessage.class);
+        Serializer.registerClass(NewRifleMessage.class);
+
         Serializer.registerClass(ItemInteractionMessage.class);
 
     }

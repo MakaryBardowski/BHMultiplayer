@@ -22,13 +22,13 @@ import game.items.weapons.Rifle;
 import static game.map.blocks.VoxelLighting.setupModelLight;
 import java.util.Random;
 import messages.NewChestMessage;
-import messages.DestructibleHealthUpdateMessage;
+import messages.SystemHealthUpdateMessage;
 
 /**
  *
  * @author 48793
  */
-public class Chest extends Destructible implements Damageable {
+public class Chest extends Destructible {
 
     private Item[] drop = new Item[3];
     private boolean locked;
@@ -71,7 +71,7 @@ public class Chest extends Destructible implements Damageable {
     @Override
     public void receiveDamage(float damage) {
         health = health - damage;
-        DestructibleHealthUpdateMessage hpUpd = new DestructibleHealthUpdateMessage(id, health);
+        SystemHealthUpdateMessage hpUpd = new SystemHealthUpdateMessage(id, health);
         ClientGameAppState.getInstance().getClient().send(hpUpd);
         if (health <= 0) {
             die();

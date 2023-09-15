@@ -8,7 +8,11 @@ package clientGui;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.asset.AssetManager;
+import com.jme3.audio.AudioRenderer;
+import com.jme3.input.InputManager;
 import com.jme3.niftygui.NiftyJmeDisplay;
+import com.jme3.renderer.ViewPort;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
@@ -25,7 +29,7 @@ public class MainMenuAppState extends BaseAppState {
 
     private Nifty nifty;
 
-    public MainMenuAppState() {
+    public MainMenuAppState(AssetManager assetManager, InputManager inputManager, AudioRenderer audioRenderer, ViewPort guiViewPort) {
     }
 
     @Override
@@ -68,7 +72,7 @@ public class MainMenuAppState extends BaseAppState {
                 getApplication().getAudioRenderer(),
                 getApplication().getGuiViewPort());
         nifty = niftyDisplay.getNifty();
-        nifty.fromXml("Interface/MainMenuLayout.xml", "MainMenu");
+        nifty.fromXml("Interface/MainMenu.xml", "MainMenu");
 
         getApplication().getGuiViewPort().addProcessor(niftyDisplay);
         ((SimpleApplication) getApplication()).getFlyByCamera().setDragToRotate(true);

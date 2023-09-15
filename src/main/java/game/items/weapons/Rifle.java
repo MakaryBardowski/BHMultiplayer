@@ -29,6 +29,7 @@ import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
+import messages.items.NewRifleMessage;
 
 /**
  *
@@ -52,12 +53,14 @@ public class Rifle extends RangedWeapon {
 
     @Override
     public void playerEquip(Player p) {
+        playerUnequip(p);
         playerHoldRight(p);
     }
 
     @Override
-    public void playerUnequip(Player m) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void playerUnequip(Player p) {
+        p.setEquippedRightHand(null);
+        p.getGunNode().detachAllChildren();
     }
 
     @Override
@@ -68,6 +71,8 @@ public class Rifle extends RangedWeapon {
     @Override
     public void playerHoldRight(Player p) {
         p.setEquippedRightHand(this);
+        
+        if(isEquippedByMe(p)){
 
         AssetManager assetManager = Main.getInstance().getAssetManager();
         Node model = (Node) assetManager.loadModel(template.getFpPath());
@@ -75,15 +80,11 @@ public class Rifle extends RangedWeapon {
         model.move(-.57f, -.65f, 2.3f);
         model.setLocalRotation((new Quaternion()).fromAngleAxis(FastMath.PI / 48, new Vector3f(-.15f, .5f, 0)));
 
-//        model.move(-.48f, -.52f, 1.8f);
-//        model.setLocalRotation((new Quaternion()).fromAngleAxis(FastMath.PI / 32, new Vector3f(-.15f, .5f, 0)));
-        /// i don't know why the setupModelLight() method doesn't work <<-- big congo
         Geometry ge = (Geometry) ((Node) model.getChild(0)).getChild(0);
         Material originalMaterial = ge.getMaterial();
         Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
         newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
         ge.setMaterial(newMaterial);
-        ///
 
         SkinningControl skinningControl = model.getChild(0).getControl(SkinningControl.class);
         muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
@@ -93,10 +94,10 @@ public class Rifle extends RangedWeapon {
         p.getGunNode().addControl(gunRecoil);
         p.getMainCameraNode().addControl(camRecoil);
 
-        p.getGunNode().detachAllChildren();
         p.getGunNode().attachChild(model);
         p.getFirstPersonCameraNode().attachChild(p.getGunNode());
         model.move(new Vector3f(0.43199998f, 0.46799996f, -1.6199999f));
+        }
     }
 
     @Override
@@ -194,10 +195,13 @@ public class Rifle extends RangedWeapon {
 
     @Override
     public AbstractMessage createNewEntityMessage() {
-//        NewAxeMessage msg = new NewAxeMessage(this);
-//        msg.setReliable(true);
-//        return msg;
-        return null;
+        NewRifleMessage msg = new NewRifleMessage(this);
+        msg.setReliable(true);
+        return msg;
+    }
+    
+    private boolean isEquippedByMe(Player p){
+    return p == ClientGameAppState.getInstance().getPlayer();
     }
 
 }

@@ -105,6 +105,7 @@ public abstract class Mob extends Destructible implements CollidableInterface, M
         for (int i = 0; i < equipment.length; i++) {
             Item item = equipment[i];
             if (item != null) {
+                System.out.println("dropping "+item+" its node "+item.getNode() +" its position "+item.getNode().getWorldTranslation());
                 item.drop(node.getWorldTranslation().add(r.nextFloat(-0.25f, 0.25f), 2 + r.nextFloat(-1, 1), r.nextFloat(-0.25f, 0.25f)));
                 equipment[i] = null;
             }

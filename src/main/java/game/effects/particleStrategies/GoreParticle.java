@@ -15,14 +15,14 @@ import java.util.Random;
  *
  * @author 48793
  */
-public class GoreParticleMovementStrategy extends ParticleMovementStrategy {
+public class GoreParticle extends ParticleMovementStrategy {
 
     private final Vector3f velocity;
     private final Vector3f rotationVelocity;
     private final float finalY;
     private static final float GRAVITY = 13.81f;//9.81f;
 
-    public GoreParticleMovementStrategy(Node node, Vector3f velocity, Vector3f rotationVelocity, float finalY) {
+    public GoreParticle(Node node, Vector3f velocity, Vector3f rotationVelocity, float finalY) {
         super(node);
         this.velocity = velocity;
         this.rotationVelocity = rotationVelocity;

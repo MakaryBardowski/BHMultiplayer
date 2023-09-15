@@ -21,7 +21,9 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import de.lessvoid.nifty.render.NiftyImage;
+import debugging.DebugUtils;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
 
@@ -134,7 +136,7 @@ public class InputController {
                 }
 
                 if (name.equals("E") && !gs.getPlayer().isDead() && !keyPressed) {
-                        interact();
+                    interact();
                 }
 //                if (name.equals("R") && !gs.getPlayer().isDead() && !keyPressed) {
 //                    gs.getPlayer().getEquippedRightHand().reload(gs.getPlayer(), gs);
@@ -256,22 +258,24 @@ public class InputController {
 //
 //        }
     }
-    
-    
-    private void interact(){
+
+    private void interact() {
         ClientGameAppState cs = ClientGameAppState.getInstance();
         Player p = cs.getPlayer();
-       CollisionResults results = new CollisionResults();
+        CollisionResults results = new CollisionResults();
         Vector3f shotDirection = p.getMainCamera().getDirection();
         Vector3f shotOrigin = p.getMainCamera().getLocation();
         Ray ray = new Ray(shotOrigin, shotDirection);
         cs.getPickableNode().collideWith(ray, results);
+        
+
+        
         if (results.size() > 0) {
             CollisionResult closest = results.getClosestCollision();
-                Integer hitId = Integer.valueOf(closest.getGeometry().getName());
-                InteractiveEntity mobHit = (InteractiveEntity)ClientGameAppState.getInstance().getMobs().get(hitId);
-                mobHit.onInteract();
-            
+            Integer hitId = Integer.valueOf(closest.getGeometry().getName());
+            InteractiveEntity mobHit = (InteractiveEntity) ClientGameAppState.getInstance().getMobs().get(hitId);
+            mobHit.onInteract();
+            System.out.println("hit ! "+mobHit);
         }
     }
 

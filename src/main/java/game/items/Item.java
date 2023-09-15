@@ -9,6 +9,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import game.effects.ParticleUtils;
+import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.InteractiveEntity;
 import game.items.ItemTemplates.ItemTemplate;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public abstract class Item extends InteractiveEntity {
     protected boolean droppable;
     protected String description;
     protected ItemTemplate template;
+    protected Node droppedItemNode;
 
     protected Item(int id, ItemTemplate template,String name,Node node) {
         super(id, name, node);
@@ -41,10 +43,12 @@ public abstract class Item extends InteractiveEntity {
             return;
         }
         Node parentNode = new Node();
+        setupModelShootability(node,id);
         applyInitialDropRotation(node);
         parentNode.attachChild(node);
         parentNode.scale(template.getDropData().getScale());
         parentNode.setLocalTranslation(itemSpawnpoint);
+        droppedItemNode = parentNode;
         ClientGameAppState.getInstance().getPickableNode().attachChild(parentNode);
         ParticleUtils.spawnItemPhysicalParticleShaded(parentNode, itemSpawnpoint, this);
     }

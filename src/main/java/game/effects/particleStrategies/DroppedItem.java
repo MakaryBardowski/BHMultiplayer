@@ -15,7 +15,7 @@ import game.items.Item;
  *
  * @author 48793
  */
-public class DroppedItemParticleMovementStrategy extends ParticleMovementStrategy {
+public class DroppedItem extends ParticleMovementStrategy {
 
     private final Vector3f velocity;
     private final Vector3f rotationVelocity;
@@ -23,7 +23,7 @@ public class DroppedItemParticleMovementStrategy extends ParticleMovementStrateg
     private final Item item;
     private static final float GRAVITY = 13.81f;//9.81f;
 
-    public DroppedItemParticleMovementStrategy(Node node, Vector3f velocity, Vector3f rotationVelocity, float finalY,Item item) {
+    public DroppedItem(Node node, Vector3f velocity, Vector3f rotationVelocity, float finalY,Item item) {
         super(node);
         this.velocity = velocity;
         this.rotationVelocity = rotationVelocity;

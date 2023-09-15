@@ -26,20 +26,13 @@ public class EmitterPooler {
     private static final Queue<ParticleEmitter> bloodEmitters = new LinkedList<>();
     private static ParticleEmitter temp;
     private static final byte BLOOD_POOL_SIZE = 6;
-static{
-  for (int i = 0; i < BLOOD_POOL_SIZE; i++) {
-                bloodEmitters.offer(setupBloodEmitter());
-            }
-}
-//    public static EmitterPooler getInstance() {
-//        if (instance == null) {
-//            instance = new EmitterPooler();
-//            for (int i = 0; i < BLOOD_POOL_SIZE; i++) {
-//                instance.bloodEmitters.offer(setupBloodEmitter());
-//            }
-//        }
-//        return instance;
-//    }
+
+    static {
+        for (int i = 0; i < BLOOD_POOL_SIZE; i++) {
+            bloodEmitters.offer(setupBloodEmitter());
+        }
+    }
+
 
     public static ParticleEmitter getBlood() {
         temp = bloodEmitters.poll();

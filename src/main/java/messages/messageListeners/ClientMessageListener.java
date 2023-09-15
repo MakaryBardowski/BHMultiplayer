@@ -7,7 +7,7 @@ package messages.messageListeners;
 import game.cameraAndInput.InputController;
 import game.entities.mobs.Mob;
 import game.entities.mobs.Player;
-import messages.DestructibleHealthUpdateMessage;
+import messages.SystemHealthUpdateMessage;
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
 import messages.NewMobMessage;
@@ -28,6 +28,7 @@ import game.items.Item;
 import game.items.factories.ItemFactory;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
+import messages.DestructibleDamageReceiveMessage;
 import messages.NewChestMessage;
 import messages.items.ItemInteractionMessage;
 import messages.items.ItemInteractionMessage.ItemInteractionType;
@@ -35,6 +36,7 @@ import messages.items.NewBootsMessage;
 import messages.items.NewGlovesMessage;
 import messages.items.NewHelmetMessage;
 import messages.items.NewItemMessage;
+import messages.items.NewRifleMessage;
 import messages.items.NewVestMessage;
 
 /**
@@ -57,13 +59,13 @@ public class ClientMessageListener implements MessageListener<Client> {
             updateMobRotation(nmsg);
         } else if (m instanceof MobPosUpdateMessage nmsg) {
             updateMobPosition(nmsg);
-        } else if (m instanceof DestructibleHealthUpdateMessage hmsg) {
+        } else if (m instanceof DestructibleDamageReceiveMessage hmsg) {
+            entityReceiveDamage(hmsg);
+        } else if (m instanceof SystemHealthUpdateMessage hmsg) {
             updateEntityHealth(hmsg);
         } else if (m instanceof ItemInteractionMessage iimsg) {
-            System.out.println("got a message about equipment! for mob: " + iimsg.getMobId() + " (item id = " + iimsg.getItemId());
             handleItemInteraction(iimsg);
         } else if (m instanceof NewItemMessage imsg) {
-            System.out.println("registering item: " + imsg.getId());
             addNewItem(imsg);
         } else if (m instanceof NewMobMessage nmsg) {
             addMob(nmsg);
@@ -72,6 +74,7 @@ public class ClientMessageListener implements MessageListener<Client> {
         } else if (m instanceof PlayerJoinedMessage nmsg) {
             addNewPlayer(nmsg);
         } else if (m instanceof SetPlayerMessage nmsg) {
+            System.out.println("got my player!");
             addMyPlayer(nmsg);
         }
 
@@ -115,7 +118,7 @@ public class ClientMessageListener implements MessageListener<Client> {
         p.getNode().setLocalTranslation(pos);
     }
 
-    private void updateEntityHealth(DestructibleHealthUpdateMessage hmsg) {
+    private void updateEntityHealth(SystemHealthUpdateMessage hmsg) {
         if (mobExistsLocally(hmsg.getId())) {
             getDestructibleById(hmsg.getId()).setHealth(hmsg.getHealth());
         }
@@ -146,7 +149,6 @@ public class ClientMessageListener implements MessageListener<Client> {
     private void addMyPlayer(SetPlayerMessage nmsg) {
         enqueueExecution(() -> {
             createMyPlayer(nmsg);
-            System.out.println("my (id = " + nmsg.getId() + ") eq " + Arrays.toString(getMobById(nmsg.getId()).getEquipment()));
         });
     }
 
@@ -155,6 +157,7 @@ public class ClientMessageListener implements MessageListener<Client> {
             enqueueExecution(() -> {
                 Mob p = clientApp.registerPlayer(nmsg.getId(), false);
                 placeMob(nmsg.getPos(), p);
+                p.setHealth(nmsg.getHealth());
             }
             );
         }
@@ -203,7 +206,6 @@ public class ClientMessageListener implements MessageListener<Client> {
     }
 
     private void addNewItem(NewItemMessage imsg) {
-
         if (imsg instanceof NewHelmetMessage nhmsg) {
             Item i = ifa.createItem(nhmsg.getId(), nhmsg.getTemplate(), nhmsg.isDroppable());
             clientApp.registerEntity(i);
@@ -223,6 +225,9 @@ public class ClientMessageListener implements MessageListener<Client> {
             Item i = ifa.createItem(nbmsg.getId(), nbmsg.getTemplate(), nbmsg.isDroppable());
             clientApp.registerEntity(i);
 //            System.out.println("registering Boots " + i + " with id = " + i.getId());
+        } else if (imsg instanceof NewRifleMessage rmsg) {
+            Item i = ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
+            clientApp.registerEntity(i);
         }
 
     }
@@ -232,12 +237,22 @@ public class ClientMessageListener implements MessageListener<Client> {
             if (null != iimsg.getInteractionType()) {
                 switch (iimsg.getInteractionType()) {
                     case EQUIP:
-                        getMobById(iimsg.getMobId()).equip(getItemById(iimsg.getItemId()));
+                        Item equipped = getItemById(iimsg.getItemId());
+                        getMobById(iimsg.getMobId()).equip(equipped);
                         break;
                     case UNEQUIP:
+                        Item unequipped = getItemById(iimsg.getItemId());
+                        getMobById(iimsg.getMobId()).unequip(unequipped);
                         break;
                     case PICK_UP:
-                        getMobById(iimsg.getMobId()).addToEquipment(getItemById(iimsg.getItemId()));
+                        Item pickedUp = getItemById(iimsg.getItemId());
+
+                        if (pickedUp.getDroppedItemNode() != null) {
+                            pickedUp.getDroppedItemNode().removeFromParent();
+                        }
+
+                        getMobById(iimsg.getMobId()).addToEquipment(pickedUp);
+                        System.out.println(getMobById(iimsg.getMobId()) + " podniosl item " + pickedUp);
                         break;
                     case DROP:
                         break;
@@ -245,6 +260,13 @@ public class ClientMessageListener implements MessageListener<Client> {
                         break;
                 }
             }
+        });
+    }
+
+    private void entityReceiveDamage(DestructibleDamageReceiveMessage hmsg) {
+        enqueueExecution(() -> {
+            Destructible d = getDestructibleById(hmsg.getTargetId());
+            d.receiveDamage(hmsg.getDamage());
         });
     }
 

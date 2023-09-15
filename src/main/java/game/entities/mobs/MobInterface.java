@@ -12,9 +12,16 @@ import client.ClientGameAppState;
  *
  * @author 48793
  */
-public interface MobInterface extends Damageable{
+public interface MobInterface {
+
     public void move(float tpf, ClientGameAppState cm);
+
     public void attack();
-    public void dealDamage(float damage, Mob mob);
+
+    public void notifyServerAboutDealingDamage(float damage, Mob mob);
+
     public void equip(Item e);
+
+    public void unequip(Item e);
+
 }

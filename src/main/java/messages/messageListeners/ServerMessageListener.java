@@ -4,7 +4,7 @@
  */
 package messages.messageListeners;
 
-import messages.DestructibleHealthUpdateMessage;
+import messages.SystemHealthUpdateMessage;
 import messages.MobUpdateMessage;
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
@@ -18,7 +18,12 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.Destructible;
+import game.entities.mobs.Mob;
+import game.items.Item;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import messages.DestructibleDamageReceiveMessage;
+import messages.items.ItemInteractionMessage;
+import messages.items.ItemInteractionMessage.ItemInteractionType;
 
 /**
  *
@@ -43,16 +48,42 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
             serverApp.getMobs().get(nmsg.getId()).getNode().setLocalRotation(nmsg.getRot());
 
         } else if (msg instanceof MobPosUpdateMessage nmsg) {
-            validateMovement();
             serverApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(nmsg.getPos());
 
-        } else if (msg instanceof DestructibleHealthUpdateMessage hmsg) {
-            ((Destructible)serverApp.getMobs().get(hmsg.getId())).setHealth(hmsg.getHealth());
+        } else if (msg instanceof DestructibleDamageReceiveMessage hmsg) {
+            Destructible d = ((Destructible) serverApp.getMobs().get(hmsg.getTargetId()));
+            d.setHealth(d.getHealth()-hmsg.getDamage());
+            hmsg.setReliable(true);
+            serverApp.getServer().broadcast(hmsg);
+        } else if (msg instanceof ItemInteractionMessage imsg) {
+            handleItemInteraction(imsg);
         }
     }
 
-    private void validateMovement() {
-        // validate
+    public void handleItemInteraction(ItemInteractionMessage imsg) {
+        if (imsg.getInteractionType() == ItemInteractionType.PICK_UP) {
+//            getMobById(imsg.getMobId()).addToEquipment(getItemById(imsg.getItemId()));
+            serverApp.getServer().broadcast(imsg);
+        } else if (imsg.getInteractionType() == ItemInteractionType.EQUIP) {
+//            getMobById(imsg.getMobId()).equip(getItemById(imsg.getItemId()));
+            serverApp.getServer().broadcast(imsg);
+        } else if (imsg.getInteractionType() == ItemInteractionType.UNEQUIP) {
+//            getMobById(imsg.getMobId()).unequip(getItemById(imsg.getItemId()));
+            serverApp.getServer().broadcast(imsg);
+        } else if (imsg.getInteractionType() == ItemInteractionType.DROP) {
+
+        }
     }
 
+    private Mob getMobById(int id) {
+        return ((Mob) serverApp.getMobs().get(id));
+    }
+
+    private Item getItemById(int id) {
+        return ((Item) serverApp.getMobs().get(id));
+    }
+
+    private Destructible getDestructibleById(int id) {
+        return ((Destructible) serverApp.getMobs().get(id));
+    }
 }

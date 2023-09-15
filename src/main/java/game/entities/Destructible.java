@@ -5,6 +5,7 @@
 package game.entities;
 
 import com.jme3.scene.Node;
+import game.entities.mobs.Damageable;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +15,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public abstract class Destructible extends InteractiveEntity {
+public abstract class Destructible extends InteractiveEntity implements Damageable{
 
     protected float health = 10;
     protected float maxHealth = 10;

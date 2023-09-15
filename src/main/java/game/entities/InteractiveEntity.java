@@ -24,12 +24,10 @@ public abstract class InteractiveEntity {
     protected String name;
     protected Node node;
 
-
     public abstract void onShot(Mob shooter, float damage);
 
     public abstract void onInteract();
-    
-    
+
     public abstract AbstractMessage createNewEntityMessage();
 
 }

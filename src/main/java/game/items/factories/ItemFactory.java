@@ -15,6 +15,7 @@ import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
+import game.items.weapons.Rifle;
 
 /**
  *
@@ -40,7 +41,7 @@ public class ItemFactory {
                 case BOOTS:
                     return createBoots(id, template, droppable);
                 case RIFLE:
-                    break;
+                    return createRifle(id, template, droppable);
                 case AXE:
                     break;
                 default:
@@ -72,6 +73,12 @@ public class ItemFactory {
         Node dropNode = createItemDropNode(template);
         Boots boots = new Boots(id, template, "Boots", dropNode, droppable);
         return boots;
+    }
+
+    private Rifle createRifle(int id, ItemTemplate template, boolean droppable) {
+        Node dropNode = createItemDropNode(template);
+        Rifle rifle = new Rifle(id, 3f, template, "Rifle", dropNode, droppable);
+        return rifle;
     }
 
     /**

@@ -12,7 +12,7 @@ import game.items.Holdable;
 import game.items.Item;
 import game.map.collision.CollidableInterface;
 import game.map.collision.WorldGrid;
-import messages.DestructibleHealthUpdateMessage;
+import messages.SystemHealthUpdateMessage;
 import client.ClientGameAppState;
 import client.Main;
 import com.jme3.anim.SkinningControl;
@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import messages.DestructibleDamageReceiveMessage;
 import messages.NewMobMessage;
 
 /**
@@ -48,7 +49,7 @@ public class HumanMob extends Mob {
 
     @Override
     public void onShot(Mob shooter, float damage) {
-        shooter.dealDamage(damage, this);
+        shooter.notifyServerAboutDealingDamage(damage, this);
     }
 
     @Override
@@ -109,10 +110,7 @@ public class HumanMob extends Mob {
 
     @Override
     public void receiveDamage(float damage) {
-        health = health - damage;
-        DestructibleHealthUpdateMessage hpUpd = new DestructibleHealthUpdateMessage(id, health);
-        ClientGameAppState.getInstance().getClient().send(hpUpd);
-
+        health -= damage;
         ParticleEmitter blood = EmitterPooler.getBlood();
         Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 2, 0);
         blood.setLocalTranslation(bloodPos);
@@ -125,8 +123,10 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public void dealDamage(float damage, Mob mob) {
-        mob.receiveDamage(damage);
+    public void notifyServerAboutDealingDamage(float damage, Mob mob) {
+        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(mob.getId(), damage);
+        hpUpd.setReliable(true);
+        ClientGameAppState.getInstance().getClient().send(hpUpd);
     }
 
     @Override
@@ -186,8 +186,13 @@ public class HumanMob extends Mob {
 
     @Override
     public AbstractMessage createNewEntityMessage() {
-        NewMobMessage msg = new NewMobMessage(id, node.getWorldTranslation());
+        NewMobMessage msg = new NewMobMessage(this, node.getWorldTranslation());
         msg.setReliable(true);
         return msg;
+    }
+
+    @Override
+    public void unequip(Item e) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

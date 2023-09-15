@@ -8,6 +8,7 @@ import game.entities.mobs.MobType;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
+import game.entities.mobs.Mob;
 
 /**
  *
@@ -17,6 +18,7 @@ import com.jme3.network.serializing.Serializable;
 public class NewMobMessage extends AbstractMessage {
 
     private int id;
+    private float health;
     private float x;
     private float y;
     private float z;
@@ -24,8 +26,9 @@ public class NewMobMessage extends AbstractMessage {
     public NewMobMessage() {
     }
 
-    public NewMobMessage(int id, Vector3f pos) {
-        this.id = id;
+    public NewMobMessage(Mob mob, Vector3f pos) {
+        this.id = mob.getId();
+        this.health = mob.getHealth();
         this.x = pos.getX();
         this.y = pos.getY();
         this.z = pos.getZ();
@@ -33,6 +36,10 @@ public class NewMobMessage extends AbstractMessage {
 
     public int getId() {
         return id;
+    }
+    
+    public float getHealth(){
+    return health;
     }
 
     public Vector3f getPos(){
