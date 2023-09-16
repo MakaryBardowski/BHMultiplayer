@@ -29,6 +29,7 @@ import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
+import messages.HitscanTrailMessage;
 import messages.items.NewRifleMessage;
 
 /**
@@ -124,12 +125,17 @@ public class Rifle extends RangedWeapon {
         if (results.size() > 0) {
             CollisionResult closest = results.getClosestCollision();
             cp = closest.getContactPoint();
+            
+            int hostedConnectionId = ClientGameAppState.getInstance().getClient().getId();
+            HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(),cp.clone(),hostedConnectionId);
+            ClientGameAppState.getInstance().getClient().send(trailMessage);
+            
             if (!wallCheck) {
                 Integer hitId = Integer.valueOf(closest.getGeometry().getName());
                 InteractiveEntity mobHit = ClientGameAppState.getInstance().getMobs().get(hitId);
                 mobHit.onShot(p, damage);
             }
-            createBullet(cp);
+            createBullet(muzzleNode.getWorldTranslation(),cp);
             recoilFire();
             return true;
         }
@@ -142,22 +148,22 @@ public class Rifle extends RangedWeapon {
 
     }
 
-    private void createBullet(Vector3f destination) {
+    public static void createBullet(Vector3f spawnpoint, Vector3f destination) {
         Node bullet = new Node("boolet");
         ClientGameAppState.getInstance().getDebugNode().attachChild(bullet);
-        bullet.move(muzzleNode.getWorldTranslation());
+        bullet.move(spawnpoint);
         GradientParticleEmitter trail = createTrail();
         bullet.attachChild(trail);
         bullet.addControl(new BulletTracerControl(bullet, destination, BULLET_SPEED, trail));
 
     }
 
-    private GradientParticleEmitter createTrail() {
+    private static GradientParticleEmitter createTrail() {
         Material trailMat = createTrailMaterial();
         GradientParticleEmitter fire = new GradientParticleEmitter("Debris", GradientParticleMesh.Type.Triangle, 400);
         fire.setMaterial(trailMat);
-        fire.setLowLife(0.7f);
-        fire.setHighLife(0.7f);
+        fire.setLowLife(0.7f);  // 0.7f
+        fire.setHighLife(0.7f); // 0.7f
         fire.setStartSize(0.02f);
         fire.setEndSize(0.00f);
         fire.setRotateSpeed(0);
@@ -174,7 +180,7 @@ public class Rifle extends RangedWeapon {
         return fire;
     }
 
-    private Material createTrailMaterial() {
+    private static Material createTrailMaterial() {
         Material mat = new Material(Main.getInstance().getAssetManager(), "Common/MatDefs/Misc/Particle.j3md");
         mat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
         mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Off);

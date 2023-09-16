@@ -1,44 +1,133 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 package client;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AbstractAppState;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioRenderer;
 import com.jme3.input.InputManager;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.ViewPort;
 import de.lessvoid.nifty.Nifty;
-import lombok.AllArgsConstructor;
+import de.lessvoid.nifty.builder.LayerBuilder;
+import de.lessvoid.nifty.builder.PanelBuilder;
+import de.lessvoid.nifty.builder.ScreenBuilder;
+import de.lessvoid.nifty.controls.button.builder.ButtonBuilder;
+import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
+import de.lessvoid.nifty.screen.Screen;
+import lombok.Getter;
 
 /**
  *
  * @author 48793
  */
-@AllArgsConstructor
-public class MainMenuAppState extends AbstractAppState {
+public class MainMenuAppState extends BaseAppState {
 
-    private final AssetManager assetManager;
-    private final InputManager inputManager;
-    private final AudioRenderer audioRenderer;
-    private final ViewPort guiViewPort;
+    @Getter
+    private static Nifty nifty;
+    
+    private static NiftyJmeDisplay niftyDisplay;
+
+    public MainMenuAppState(AssetManager assetManager, InputManager inputManager, AudioRenderer audioRenderer, ViewPort guiViewPort) {
+    }
 
     @Override
-    public void initialize(AppStateManager stateManager, Application app) {        // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
-        NiftyJmeDisplay niftyDisplay = NiftyJmeDisplay.newNiftyJmeDisplay(
-                assetManager,
-                inputManager,
-                audioRenderer,
-                guiViewPort);
-        Nifty nifty = niftyDisplay.getNifty();
+    protected void initialize(Application app) {
+
+        //It is technically safe to do all initialization and cleanup in the
+        //onEnable()/onDisable() methods. Choosing to use initialize() and
+        //cleanup() for this is a matter of performance specifics for the
+        //implementor.
+        //TODO: initialize your AppState, e.g. attach spatials to rootNode
+    }
+
+    @Override
+    protected void cleanup(Application app) {
+        //TODO: clean up what you initialized in the initialize method,
+        //e.g. remove all spatials from rootNode
+    }
+
+    //onEnable()/onDisable() can be used for managing things that should
+    //only exist while the state is enabled. Prime examples would be scene
+    //graph attachment or input listener attachment.
+    public void bind(Nifty nifty, Screen screen) {
+
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void onStartScreen() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void onEndScreen() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected void onEnable() {
+         niftyDisplay = NiftyJmeDisplay.newNiftyJmeDisplay(
+                getApplication().getAssetManager(),
+                getApplication().getInputManager(),
+                getApplication().getAudioRenderer(),
+                getApplication().getGuiViewPort());
+        nifty = niftyDisplay.getNifty();
         nifty.fromXml("Interface/MainMenu.xml", "MainMenu");
-//        nifty.setDebugOptionPanelColors(true);
-        // attach the nifty display to the gui view port as a processor
-        guiViewPort.addProcessor(niftyDisplay);
+
+        getApplication().getGuiViewPort().addProcessor(niftyDisplay);
+        ((SimpleApplication) getApplication()).getFlyByCamera().setDragToRotate(true);
+
+        nifty.loadStyleFile("nifty-default-styles.xml");
+        nifty.loadControlFile("nifty-default-controls.xml");
+
+        // <screen>
+//        nifty.addScreen("MainMenu", new ScreenBuilder("Hello Nifty Screen") {
+//            {
+//                controller(new MainMenuScreenController()); // Screen properties
+//                layer(new LayerBuilder("modifiableLayer") {
+//                    {
+//                        childLayoutVertical(); // layer properties, add more...
+//
+//                                // GUI elements
+//                                control(new ButtonBuilder("Play", "Play") {
+//                                    {
+//                                        paddingLeft("72%");
+//                                        paddingTop("30%");
+////                                        alignCenter();
+////                                        valignCenter();
+//                                        height("10%");
+//                                        width("25%");
+//                                        color("#A9A9A9");
+//                                        visibleToMouse(true);
+//                                    }
+//                                });
+//
+//                    }
+//                });
+//            }
+//        }.build(nifty));
+//        // </screen>
+
+            
+
+        nifty.gotoScreen("MainMenu"); // start the screen   
+//        gs.getFlyCam().setDragToRotate(false);
+    }
+
+    @Override
+    protected void onDisable() {
+           if (nifty != null) {
+        getApplication().getGuiViewPort().removeProcessor(niftyDisplay);
+    }
+    }
+
+    @Override
+    public void update(float tpf) {
+
     }
 
 }

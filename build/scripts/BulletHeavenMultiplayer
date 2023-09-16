@@ -201,7 +201,7 @@ fi
 
 set -- \
         -classpath "$CLASSPATH" \
-        server.ServerMain \
+        client.Main \
         "$@"
 
 # Stop when "xargs" is not available.

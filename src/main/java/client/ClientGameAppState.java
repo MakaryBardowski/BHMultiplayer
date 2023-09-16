@@ -120,19 +120,23 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     @Getter
     @Setter
     private Nifty nifty;
+    
+    @Getter
+    private String serverIp;
 
-    public ClientGameAppState(Main app) {
+    public ClientGameAppState(Main app,String serverIp) {
         instance = this;
         this.app = app;
         this.assetManager = app.getAssetManager();
         this.inputManager = app.getInputManager();
         this.applicationSettings = app.getAppSettings();
         app.getRootNode().attachChild(rootNode);
+        this.serverIp = serverIp;
     }
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {        // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
-        NetworkingInitialization.initializeSerializables();
+//        NetworkingInitialization.initializeSerializables();
         worldNode.attachChild(debugNode);
         worldNode.attachChild(entityNode);
         pickableNode.attachChild(destructibleNode);
@@ -143,7 +147,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         stateManager.attach(new PlayerCameraControlAppState(this));
 
         try {
-            client = Network.connectToServer("localhost", NetworkingInitialization.PORT);
+            client = Network.connectToServer(serverIp, NetworkingInitialization.PORT);
             client.addClientStateListener(this);
             client.start();
 

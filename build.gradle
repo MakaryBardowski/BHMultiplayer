@@ -6,7 +6,7 @@ plugins {
 group 'com.mygame'
 version '1.0'
 
-mainClassName = "com.mygame.ServerMain"
+mainClassName = "client.Main"
 
 repositories {
     mavenCentral()

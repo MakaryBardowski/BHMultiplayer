@@ -15,6 +15,7 @@ import com.jme3.network.MessageListener;
 import client.ClientGameAppState;
 import server.ServerMain;
 import com.jme3.math.Vector3f;
+import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.Destructible;
@@ -22,6 +23,7 @@ import game.entities.mobs.Mob;
 import game.items.Item;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import messages.DestructibleDamageReceiveMessage;
+import messages.HitscanTrailMessage;
 import messages.items.ItemInteractionMessage;
 import messages.items.ItemInteractionMessage.ItemInteractionType;
 
@@ -55,6 +57,11 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
             d.setHealth(d.getHealth()-hmsg.getDamage());
             hmsg.setReliable(true);
             serverApp.getServer().broadcast(hmsg);
+        } else if (msg instanceof HitscanTrailMessage hmsg){
+            
+           HostedConnection hc = serverApp.getServer().getConnection(hmsg.getClientId());
+           serverApp.getServer().broadcast(Filters.notIn(hc),hmsg);
+
         } else if (msg instanceof ItemInteractionMessage imsg) {
             handleItemInteraction(imsg);
         }

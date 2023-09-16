@@ -1,5 +1,6 @@
 package server;
 
+import com.jme3.app.Application;
 import game.entities.mobs.Mob;
 import game.entities.mobFactories.PlayerFactory;
 import game.entities.mobs.Player;
@@ -12,6 +13,9 @@ import messages.PlayerJoinedMessage;
 import messages.SetPlayerMessage;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.state.AppStateManager;
+import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 
@@ -52,7 +56,7 @@ import messages.items.ItemInteractionMessage.ItemInteractionType;
  *
  * @author normenhansen
  */
-public class ServerMain extends SimpleApplication implements ConnectionListener, MessageListener<HostedConnection> {
+public class ServerMain extends AbstractAppState implements ConnectionListener, MessageListener<HostedConnection> {
 
     private static final String SERVER_IP = "localhost";
     private Server server;
@@ -60,15 +64,24 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     private float tickTimer;
     private final float TIME_PER_TICK = 0.033f;
     private int currentMaxId = 0;
-
-    public static void main(String[] args) {
-        NetworkingInitialization.initializeSerializables();
-        ServerMain app = new ServerMain();
-        app.start(JmeContext.Type.Headless);
+    private AssetManager assetManager;
+    private RenderManager renderManager;
+    private Node rootNode;
+    
+    public ServerMain(AssetManager assetManager,RenderManager renderManager){
+    this.assetManager = assetManager;
+    this.renderManager = renderManager;
+    this.rootNode = new Node("server rootNode");
     }
 
+//    public static void main(String[] args) {
+////        ServerMain app = new ServerMain();
+////        app.start(JmeContext.Type.Headless);
+//    }
+
     @Override
-    public void simpleInitApp() {
+    public void initialize(AppStateManager stateManager, Application app) {
+
         try {
             server = Network.createServer(NetworkingInitialization.PORT);
             server.addConnectionListener(this);
@@ -93,7 +106,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     }
 
     @Override
-    public void simpleUpdate(float tpf) {
+    public void update(float tpf) {
         //glowna petla serwera, 30dw111w tickow (wiadomosci od serwera) na sekunde, co 0.033s kazda
         tickTimer += tpf;
         if (tickTimer >= TIME_PER_TICK) {
@@ -119,9 +132,13 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
 
         mobs.entrySet().forEach(x -> {
             if (x.getValue() instanceof Item item) {
-                server.broadcast(Filters.in(hc), item.createNewEntityMessage());
+                AbstractMessage msg = item.createNewEntityMessage();
+                msg.setReliable(true);
+                server.broadcast(Filters.in(hc), msg);
             } else if (x.getValue() instanceof Mob mob) {
-                server.broadcast(Filters.in(hc), mob.createNewEntityMessage());
+                AbstractMessage msg = mob.createNewEntityMessage();
+                msg.setReliable(true);
+                server.broadcast(Filters.in(hc), msg);
                 sendNewMobEquipmentInfo(mob, Filters.in(hc));
             } else if (x.getValue() instanceof Chest chest) {
                 server.broadcast(Filters.in(hc), chest.createNewEntityMessage());
@@ -155,14 +172,14 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     public void messageReceived(HostedConnection s, Message msg) {
     }
 
-    @Override
-    public void destroy() {
-        for (HostedConnection h : server.getConnections()) {
-            h.close("server shutdown");
-        }
-        server.close();
-        super.destroy();
-    }
+//    @Override
+//    public void destroy() {
+//        for (HostedConnection h : server.getConnections()) {
+//            h.close("server shutdown");
+//        }
+//        server.close();
+//        super.destroy();
+//    }
 
     public Server getServer() {
         return server;

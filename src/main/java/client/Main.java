@@ -1,6 +1,5 @@
 package client;
 
-import clientGui.MainMenuAppState;
 import com.jme3.app.DetailedProfilerState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.FlyByCamera;
@@ -15,6 +14,8 @@ import com.jme3.system.JmeContext;
 import de.lessvoid.nifty.Nifty;
 import java.util.Random;
 import com.jme3.niftygui.NiftyJmeDisplay;
+import networkingUtils.NetworkingInitialization;
+import server.ServerMain;
 
 /**
  * This is the Main Class of your Game. You should only do initialization here.
@@ -23,9 +24,9 @@ import com.jme3.niftygui.NiftyJmeDisplay;
  * @author normenhansen
  */
 public class Main extends SimpleApplication {
-    
+
     private static Main instance;
-    
+
     private static final short STARTING_RESOLUTION_WIDTH = 1920;
     private static final short STARTING_RESOLUTION_HEIGHT = 1080;
 //    private static final short STARTING_RESOLUTION_WIDTH = 1000;
@@ -35,43 +36,42 @@ public class Main extends SimpleApplication {
         Main app = new Main();
         setupSettings(app);
         app.start();
-        
+
     }
-    
+
     @Override
     public void simpleInitApp() {
         speed = 1f;
         instance = this;
-//        stateManager.attach(new MainMenuAppState());
+        NetworkingInitialization.initializeSerializables();
 
 //        this.start(JmeContext.Type.Display);
-//        stateManager.attach(new ClientGameAppState(this));
-        
 //        DetailedProfilerState dps = new DetailedProfilerState();
 //        stateManager.attach(dps);
-        
+
         MainMenuAppState mms = new MainMenuAppState(assetManager, inputManager, audioRenderer, guiViewPort);
         stateManager.attach(mms);
+
     }
-    
+
     @Override
     public void simpleUpdate(float tpf) {
         //TODO: add update code
     }
-    
+
     @Override
     public void simpleRender(RenderManager rm) {
         //TODO: add render code
     }
-    
+
     public FlyByCamera getFlyCam() {
         return flyCam;
     }
-    
+
     public AppSettings getAppSettings() {
         return settings;
     }
-    
+
     private static void setupSettings(SimpleApplication app) {
         AppSettings settings1 = new AppSettings(true);
         settings1.setResolution(STARTING_RESOLUTION_WIDTH, STARTING_RESOLUTION_HEIGHT);
@@ -94,11 +94,11 @@ public class Main extends SimpleApplication {
         System.out.println(settings1);
         app.setPauseOnLostFocus(false);
         app.setSettings(settings1);
-        
+
     }
-    
+
     public static Main getInstance() {
         return instance;
     }
-    
+
 }

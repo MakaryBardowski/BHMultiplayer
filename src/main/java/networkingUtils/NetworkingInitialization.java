@@ -16,6 +16,7 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
 import messages.DestructibleDamageReceiveMessage;
+import messages.HitscanTrailMessage;
 import messages.NewChestMessage;
 import messages.items.ItemInteractionMessage;
 import messages.items.NewBootsMessage;
@@ -53,6 +54,7 @@ public class NetworkingInitialization {
         Serializer.registerClass(NewRifleMessage.class);
 
         Serializer.registerClass(ItemInteractionMessage.class);
+        Serializer.registerClass(HitscanTrailMessage.class);
 
     }
 

@@ -26,9 +26,11 @@ import game.entities.Chest;
 import game.entities.Destructible;
 import game.items.Item;
 import game.items.factories.ItemFactory;
+import game.items.weapons.Rifle;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import messages.DestructibleDamageReceiveMessage;
+import messages.HitscanTrailMessage;
 import messages.NewChestMessage;
 import messages.items.ItemInteractionMessage;
 import messages.items.ItemInteractionMessage.ItemInteractionType;
@@ -63,7 +65,9 @@ public class ClientMessageListener implements MessageListener<Client> {
             entityReceiveDamage(hmsg);
         } else if (m instanceof SystemHealthUpdateMessage hmsg) {
             updateEntityHealth(hmsg);
-        } else if (m instanceof ItemInteractionMessage iimsg) {
+        } else if (m instanceof HitscanTrailMessage tmsg){
+            handleHitscanTrail(tmsg);
+        }else if (m instanceof ItemInteractionMessage iimsg) {
             handleItemInteraction(iimsg);
         } else if (m instanceof NewItemMessage imsg) {
             addNewItem(imsg);
@@ -268,6 +272,14 @@ public class ClientMessageListener implements MessageListener<Client> {
             Destructible d = getDestructibleById(hmsg.getTargetId());
             d.receiveDamage(hmsg.getDamage());
         });
+    }
+    
+    
+    private void handleHitscanTrail(HitscanTrailMessage tmsg){
+    enqueueExecution(() -> {
+    Mob mob = getMobById(tmsg.getId());
+    Rifle.createBullet(mob.getNode().getWorldTranslation().clone().add(0,1,0), tmsg.getShotPos());
+    });
     }
 
 }
