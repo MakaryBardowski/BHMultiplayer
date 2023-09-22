@@ -6,6 +6,7 @@ package messages.items;
 
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
+import game.entities.Chest;
 import game.entities.mobs.Mob;
 import game.items.Item;
 import game.items.ItemTemplates;
@@ -19,34 +20,32 @@ import lombok.Getter;
  * new item.
  */
 @Serializable
-public class ItemInteractionMessage extends AbstractMessage {
+public class ChestItemInteractionMessage extends AbstractMessage {
 
     @Getter
     protected int itemId;
     
     @Getter
-    protected int mobId;
+    protected int chestId;
     
     protected int interactionTypeIndex;
 
-    public ItemInteractionMessage() {
+    public ChestItemInteractionMessage() {
     }
 
-    public ItemInteractionMessage(Item item, Mob mob, ItemInteractionType type) {
+    public ChestItemInteractionMessage(Item item, Chest chest, ChestItemInteractionType type) {
         this.itemId = item.getId();
-        this.mobId = mob.getId();
+        this.chestId = chest.getId();
         this.interactionTypeIndex = type.ordinal();
     }
 
-    public enum ItemInteractionType {
-        PICK_UP,
-        DROP,
-        EQUIP,
-        UNEQUIP
+    public enum ChestItemInteractionType {
+        INSERT,
+        TAKE_OUT
     }
 
-    public ItemInteractionType getInteractionType() {
-        return ItemInteractionType.values()[interactionTypeIndex];
+    public ChestItemInteractionType getInteractionType() {
+        return ChestItemInteractionType.values()[interactionTypeIndex];
     }
 
 }

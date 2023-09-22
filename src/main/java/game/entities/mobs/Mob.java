@@ -18,12 +18,13 @@ import java.util.Random;
  */
 public abstract class Mob extends Destructible implements CollidableInterface, MobInterface {
 
-    protected static final int EQUIPMENT_SIZE = 18;
     private static final float DEFAULT_SPEED = 10f; //20
+    protected static final int EQUIPMENT_SIZE = 18;
+
+    protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
 
     //mob stats
     protected float speed = DEFAULT_SPEED;
-    protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
 
     //mob ai variables
     protected Destructible currentTarget;
@@ -34,6 +35,7 @@ public abstract class Mob extends Destructible implements CollidableInterface, M
     protected Quaternion serverRotation;
     protected float posInterpolationValue;
     protected float rotInterpolationValue;
+    
 
     public Mob(int id, Node node, String name) {
         super(id, name, node);
@@ -105,7 +107,7 @@ public abstract class Mob extends Destructible implements CollidableInterface, M
         for (int i = 0; i < equipment.length; i++) {
             Item item = equipment[i];
             if (item != null) {
-                System.out.println("dropping "+item+" its node "+item.getNode() +" its position "+item.getNode().getWorldTranslation());
+                System.out.println("dropping " + item + " its node " + item.getNode() + " its position " + item.getNode().getWorldTranslation());
                 item.drop(node.getWorldTranslation().add(r.nextFloat(-0.25f, 0.25f), 2 + r.nextFloat(-1, 1), r.nextFloat(-0.25f, 0.25f)));
                 equipment[i] = null;
             }
@@ -121,5 +123,5 @@ public abstract class Mob extends Destructible implements CollidableInterface, M
         }
         return item;
     }
-
+    
 }

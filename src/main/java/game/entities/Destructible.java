@@ -6,6 +6,7 @@ package game.entities;
 
 import com.jme3.scene.Node;
 import game.entities.mobs.Damageable;
+import game.map.collision.RectangleCollisionShape;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,9 +20,16 @@ public abstract class Destructible extends InteractiveEntity implements Damageab
 
     protected float health = 10;
     protected float maxHealth = 10;
+    protected RectangleCollisionShape collisionShape;
+    protected Node hitboxNode = new Node();
 
     public Destructible(int id,String name, Node node) {
         super(id,name, node);
+        node.attachChild(hitboxNode);
     }
+    
+    protected abstract void createHitbox();
+    protected abstract void showHitboxIndicator();
+    protected abstract void hideHitboxIndicator();
 
 }

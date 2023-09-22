@@ -5,6 +5,8 @@
  */
 package game.map.collision;
 
+import client.ClientGameAppState;
+import game.entities.InteractiveEntity;
 import java.util.HashSet;
 
 /**
@@ -12,15 +14,7 @@ import java.util.HashSet;
  * @author 48793
  */
 public interface CollidableInterface {
-    
-    
-    public void insert(WorldGrid wg); //insert object into the worldGrid
-        public void removeFromGrid(WorldGrid wg);
-    public HashSet<CollidableInterface> getFromCellsImIn(WorldGrid wg);
-    public HashSet<CollidableInterface> getEntitiesFromTilesInRange(WorldGrid wg,float distance);
 
-    
-    public void checkCollision();
     public void onCollision();
-    
+
 }

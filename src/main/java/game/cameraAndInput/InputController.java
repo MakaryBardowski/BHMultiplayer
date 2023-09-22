@@ -22,6 +22,7 @@ import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
 import debugging.DebugUtils;
 import game.entities.Destructible;
@@ -106,11 +107,10 @@ public class InputController {
                 }
 
                 // attack test
-                if (!player.isDead() && !player.isViewingEquipment() && name.equals("Attack") && !keyPressed) {
+                if (!player.isDead() && !player.isViewingEquipment() && player.getEquippedRightHand() != null && name.equals("Attack") && !keyPressed) {
 //                    player.setShooting(false);
-                    player.getEquippedRightHand().playerUseRight(player);
 
-//                    projectBlood(gs);
+                    player.getEquippedRightHand().playerUseRight(player);
                 }
                 if (!player.isDead() && !player.isViewingEquipment() && name.equals("AttackR") && !keyPressed) {
 
@@ -125,11 +125,17 @@ public class InputController {
                     p.setViewingEquipment(!p.isViewingEquipment());
 
                     for (int eqSlot = 0; eqSlot < p.getEquipment().length; eqSlot++) {
-//                        if (p.getEquipment()[eqSlot] != null) {
-//
-//                            guiElement = gs.getNifty().getRenderEngine().createImage(gs.getNifty().getCurrentScreen(), gs.getPlayer().getEquipment()[eqSlot].getIconPath(), false);
-//                            gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).getRenderer(ImageRenderer.class).setImage(guiElement);
-//                        }
+                        if (p.getEquipment()[eqSlot] != null) {
+
+                            String iconString = gs.getPlayer().getEquipment()[eqSlot].getTemplate().getIconPath();
+                            if (p.getEquipment()[eqSlot].getTemplate().getIconPath() == null) {
+                                iconString = "Textures/GUI/EquipmentIcons/equipmentSlotEmpty.png";
+                            }
+
+                            guiElement = gs.getNifty().getRenderEngine().createImage(gs.getNifty().getCurrentScreen(), iconString, false);
+                            gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).getRenderer(ImageRenderer.class).setImage(guiElement);
+
+                        }
 
                         gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).setVisible(!gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).isVisible());
                     }
@@ -267,15 +273,13 @@ public class InputController {
         Vector3f shotOrigin = p.getMainCamera().getLocation();
         Ray ray = new Ray(shotOrigin, shotDirection);
         cs.getPickableNode().collideWith(ray, results);
-        
 
-        
         if (results.size() > 0) {
             CollisionResult closest = results.getClosestCollision();
             Integer hitId = Integer.valueOf(closest.getGeometry().getName());
             InteractiveEntity mobHit = (InteractiveEntity) ClientGameAppState.getInstance().getMobs().get(hitId);
             mobHit.onInteract();
-            System.out.println("hit ! "+mobHit);
+            System.out.println("hit ! " + mobHit);
         }
     }
 

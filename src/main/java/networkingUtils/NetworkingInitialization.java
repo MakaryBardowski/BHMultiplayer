@@ -18,13 +18,15 @@ import com.jme3.network.serializing.Serializer;
 import messages.DestructibleDamageReceiveMessage;
 import messages.HitscanTrailMessage;
 import messages.NewChestMessage;
-import messages.items.ItemInteractionMessage;
+import messages.items.ChestItemInteractionMessage;
+import messages.items.MobItemInteractionMessage;
 import messages.items.NewBootsMessage;
 import messages.items.NewGlovesMessage;
 import messages.items.NewHelmetMessage;
 import messages.items.NewItemMessage;
 import messages.items.NewRifleMessage;
 import messages.items.NewVestMessage;
+import messages.items.SetDefaultItemMessage;
 
 /**
  *
@@ -53,8 +55,10 @@ public class NetworkingInitialization {
         Serializer.registerClass(NewGlovesMessage.class);
         Serializer.registerClass(NewRifleMessage.class);
 
-        Serializer.registerClass(ItemInteractionMessage.class);
+        Serializer.registerClass(MobItemInteractionMessage.class);
+        Serializer.registerClass(ChestItemInteractionMessage.class);
         Serializer.registerClass(HitscanTrailMessage.class);
+        Serializer.registerClass(SetDefaultItemMessage.class);
 
     }
 

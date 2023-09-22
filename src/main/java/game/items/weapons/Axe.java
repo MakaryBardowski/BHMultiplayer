@@ -14,6 +14,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
+import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
 import game.entities.mobs.Player;
 import game.items.ItemTemplates;
@@ -106,6 +107,16 @@ public class Axe extends MeleeWeapon {
 //        msg.setReliable(true);
 //        return msg;
         return null;
+    }
+
+    @Override
+    public void playerServerEquip(HumanMob m) {
+        m.setEquippedRightHand(this);
+    }
+
+    @Override
+    public void playerServerUnequip(HumanMob m) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
 }

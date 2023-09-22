@@ -4,6 +4,7 @@
  */
 package game.items.armor;
 
+import client.ClientGameAppState;
 import game.items.ItemTemplates;
 import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.entities.mobs.Player;
@@ -11,8 +12,10 @@ import client.Main;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
+import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
 import game.items.ItemTemplates.ItemTemplate;
+import messages.items.MobItemInteractionMessage;
 import messages.items.NewGlovesMessage;
 import messages.items.NewHelmetMessage;
 
@@ -32,6 +35,7 @@ public class Helmet extends Armor {
 
     @Override
     public void playerEquip(Player m) {
+        m.setHelmet(this);
         Node n = m.getSkinningControl().getAttachmentsNode("Head");
         n.detachAllChildren();
         Node head = (Node) Main.getInstance().getAssetManager().loadModel(template.getFpPath());
@@ -52,7 +56,10 @@ public class Helmet extends Armor {
 
     @Override
     public void onInteract() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        ClientGameAppState gs = ClientGameAppState.getInstance();
+        MobItemInteractionMessage imsg = new MobItemInteractionMessage(this, gs.getPlayer(), MobItemInteractionMessage.ItemInteractionType.PICK_UP);
+        imsg.setReliable(true);
+        gs.getClient().send(imsg);
     }
 
     @Override
@@ -60,6 +67,16 @@ public class Helmet extends Armor {
         NewHelmetMessage msg = new NewHelmetMessage(this);
         msg.setReliable(true);
         return msg;
+    }
+
+    @Override
+    public void playerServerEquip(HumanMob m) {
+        m.setHelmet(this);
+    }
+
+    @Override
+    public void playerServerUnequip(HumanMob m) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
 }

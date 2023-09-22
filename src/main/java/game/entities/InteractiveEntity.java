@@ -4,6 +4,7 @@
  */
 package game.entities;
 
+import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import game.entities.mobs.Mob;
@@ -28,6 +29,10 @@ public abstract class InteractiveEntity {
 
     public abstract void onInteract();
 
+    public abstract void setPosition(Vector3f newPos);
+    
     public abstract AbstractMessage createNewEntityMessage();
+    
+    
 
 }

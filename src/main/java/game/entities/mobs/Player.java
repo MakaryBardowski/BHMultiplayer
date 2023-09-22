@@ -7,18 +7,27 @@ package game.entities.mobs;
 import game.effects.EmitterPooler;
 import game.items.Equippable;
 import game.items.Item;
-import static game.map.collision.MovementCollisionUtils.canMoveToLocationGround;
 
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
 import client.ClientGameAppState;
 import com.jme3.anim.SkinningControl;
 import com.jme3.effect.ParticleEmitter;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import game.entities.Destructible;
+import game.entities.InteractiveEntity;
+import game.map.collision.CollisionDebugUtils;
+import game.map.collision.HitboxDebugControl;
+import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
+import game.map.collision.RectangleCollisionShape;
+import game.map.collision.WorldGrid;
+import java.util.List;
 
 /**
  *
@@ -147,10 +156,11 @@ public class Player extends HumanMob {
         MobRotUpdateMessage rotu = new MobRotUpdateMessage(id, node.getLocalRotation());
         cm.getClient().send(rotu);
 
+//        WorldGrid collisionGrid = ClientGameAppState.getInstance().getGrid();
+//        collisionGrid.remove(this);
+//        
+//        System.out.println(collisionGrid);
 
-        /*tpf is time per frame,
-which makes movement rate independent of fps,  checks for WSAD input and moves if detected
-         */
         if (forward || backward || left || right) {
             Vector3f movementVector = new Vector3f(0, 0, 0);
 
@@ -198,14 +208,14 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
                 UMC.setZ(UMC.getZ() + wallCollisionRange);
             }
 
-            boolean[] canMoveOnAxes = canMoveToLocationGround(node, UMC, cm.getMap().getBlockWorld().getLogicMap(), cm.getBLOCK_SIZE());
+            boolean[] canMoveOnAxes = collisionCheckWithMap(node, UMC, cm.getMap().getBlockWorld().getLogicMap(), cm.getBLOCK_SIZE());
             boolean canMoveOnAxisX = canMoveOnAxes[0];
             boolean canMoveOnAxisZ = canMoveOnAxes[2];
 
-            if (canMoveOnAxisZ) {
+            if (canMoveOnAxisZ && doesNotCollideWithOtherObjects(new Vector3f(0, 0, movementVector.getZ()))) {
                 node.move(0, 0, movementVector.getZ());
             }
-            if (canMoveOnAxisX) {
+            if (canMoveOnAxisX && doesNotCollideWithOtherObjects(new Vector3f(movementVector.getX(), 0, 0))) {
                 node.move(movementVector.getX(), 0, 0);
             }
 
@@ -214,7 +224,14 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
                 cm.getClient().send(posu);
             }
 
-//            insert(cm.getWorldGrid());
+            
+            for(int i = 0 ;i < 10000;i++){
+            doesNotCollideWithOtherObjects(new Vector3f(0, 0, movementVector.getZ()));
+                        doesNotCollideWithOtherObjects(new Vector3f(0, 0, movementVector.getX()));
+
+            }
+            
+//            collisionGrid.insert(this);
         }
     }
 
@@ -254,6 +271,19 @@ which makes movement rate independent of fps,  checks for WSAD input and moves i
 
     public void setCameraMovementLocked(boolean cameraMovementLocked) {
         this.cameraMovementLocked = cameraMovementLocked;
+    }
+
+    private boolean doesNotCollideWithOtherObjects(Vector3f moveVec) {
+
+        List<InteractiveEntity> ent = ClientGameAppState.getInstance().getMobs().values().stream().toList();
+        List<Destructible> mobs = ent.stream().filter(e -> e instanceof Destructible).map(e -> (Destructible) e).toList();
+        for (Destructible m : mobs) {
+            if (this != m && collisionShape.wouldCollideAfterMovement(m.getCollisionShape(), moveVec)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

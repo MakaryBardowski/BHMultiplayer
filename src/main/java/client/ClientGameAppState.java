@@ -33,6 +33,8 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import de.lessvoid.nifty.Nifty;
 import game.entities.InteractiveEntity;
+import game.entities.mobs.HumanMob;
+import game.map.collision.WorldGrid;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,6 +58,9 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Getter
     private final int BLOCK_SIZE = 4;
+    
+    @Getter
+    private final int COLLISION_GRID_CELL_SIZE = 16;
 
     @Getter
     private final int CHUNK_SIZE = 16;
@@ -116,6 +121,9 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Getter
     private Map map;
+    
+    @Getter
+    private WorldGrid grid;
 
     @Getter
     @Setter
@@ -158,6 +166,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         client.addMessageListener(new ClientMessageListener(this));
         app.getViewPort().setBackgroundColor(ColorRGBA.Cyan);
 
+        grid = new WorldGrid(COLLISION_GRID_CELL_SIZE); 
+        
         MapGenerator mg = new MapGenerator();
         map = mg.generateMap(MapType.BOSS, BLOCK_SIZE, CHUNK_SIZE, MAP_SIZE, assetManager, mapNode);
 
@@ -182,6 +192,17 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         }
         );
 
+//                mobs.values().stream()
+//                    .filter(x -> x instanceof HumanMob)
+//                    .map(x -> (HumanMob) x)
+//                    .forEach((x) -> {
+//                        System.err.println("----CLIENT----Player " + x.getId());
+//                        System.err.println("equipped helmet =" + x.getHelmet() + " (default " + x.getDefaultHelmet());
+//                        System.err.println("equipped vest =" + x.getVest() + " (default " + x.getDefaultVest());
+//                        System.err.println("equipped gloves =" + x.getGloves() + " (default " + x.getDefaultGloves());
+//                        System.err.println("equipped boots =" + x.getBoots() + " (default " + x.getDefaultBoots());
+//                        System.err.println("equipment = "+Arrays.toString(x.getEquipment()));
+//                    });
     }
 
     public ConcurrentLinkedQueue<AbstractMessage> getMessageQueue() {

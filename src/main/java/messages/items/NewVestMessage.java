@@ -7,6 +7,7 @@ package messages.items;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import game.items.Item;
+import game.items.armor.Vest;
 import lombok.Getter;
 
 /**
@@ -16,13 +17,12 @@ import lombok.Getter;
  */
 @Serializable
 @Getter
-public class NewVestMessage extends NewItemMessage {
-
-
+public class NewVestMessage extends NewArmorMessage {
+    
     public NewVestMessage() {
     }
 
-    public NewVestMessage(Item item) {
+    public NewVestMessage(Vest item) {
         super(item);
     }
 

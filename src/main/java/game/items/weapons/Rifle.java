@@ -29,7 +29,9 @@ import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
+import game.entities.mobs.HumanMob;
 import messages.HitscanTrailMessage;
+import messages.items.MobItemInteractionMessage;
 import messages.items.NewRifleMessage;
 
 /**
@@ -196,7 +198,10 @@ public class Rifle extends RangedWeapon {
 
     @Override
     public void onInteract() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        ClientGameAppState gs = ClientGameAppState.getInstance();
+        MobItemInteractionMessage imsg = new MobItemInteractionMessage(this, gs.getPlayer(), MobItemInteractionMessage.ItemInteractionType.PICK_UP);
+        imsg.setReliable(true);
+        gs.getClient().send(imsg);
     }
 
     @Override
@@ -210,4 +215,13 @@ public class Rifle extends RangedWeapon {
     return p == ClientGameAppState.getInstance().getPlayer();
     }
 
+        @Override
+    public void playerServerEquip(HumanMob m) {
+        m.setEquippedRightHand(this);
+    }
+
+    @Override
+    public void playerServerUnequip(HumanMob m) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }

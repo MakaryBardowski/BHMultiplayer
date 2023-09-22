@@ -77,7 +77,7 @@ public class ItemFactory {
 
     private Rifle createRifle(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        Rifle rifle = new Rifle(id, 3f, template, "Rifle", dropNode, droppable);
+        Rifle rifle = new Rifle(id, 1.3f, template, "Rifle", dropNode, droppable);
         return rifle;
     }
 

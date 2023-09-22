@@ -5,10 +5,10 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.input.FlyByCamera;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.network.ClientStateListener;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeContext;
 import de.lessvoid.nifty.Nifty;
@@ -75,8 +75,11 @@ public class Main extends SimpleApplication {
     private static void setupSettings(SimpleApplication app) {
         AppSettings settings1 = new AppSettings(true);
         settings1.setResolution(STARTING_RESOLUTION_WIDTH, STARTING_RESOLUTION_HEIGHT);
-//        settings1.setFullscreen(true);
+        settings1.setFullscreen(true);
+        settings1.setVSync(true);
         settings1.setFrameRate(2000);
+        
+
 
 //                settings1.setResolution(800, 800);
 //        app.setDisplayFps(false);

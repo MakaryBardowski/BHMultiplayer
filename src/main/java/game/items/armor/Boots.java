@@ -4,6 +4,7 @@
  */
 package game.items.armor;
 
+import client.ClientGameAppState;
 import game.items.ItemTemplates;
 import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.entities.mobs.Player;
@@ -12,7 +13,9 @@ import com.jme3.math.FastMath;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
+import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
+import messages.items.MobItemInteractionMessage;
 import messages.items.NewBootsMessage;
 
 /**
@@ -30,6 +33,7 @@ public class Boots extends Armor {
     }
     @Override
     public void playerEquip(Player m) {
+        m.setBoots(this);
         Node r = m.getSkinningControl().getAttachmentsNode("LegR");
         Node l = m.getSkinningControl().getAttachmentsNode("LegL");
         r.detachAllChildren();
@@ -60,7 +64,10 @@ public class Boots extends Armor {
 
     @Override
     public void onInteract() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        ClientGameAppState gs = ClientGameAppState.getInstance();
+        MobItemInteractionMessage imsg = new MobItemInteractionMessage(this, gs.getPlayer(), MobItemInteractionMessage.ItemInteractionType.PICK_UP);
+        imsg.setReliable(true);
+        gs.getClient().send(imsg);
     }
 
     @Override
@@ -68,6 +75,16 @@ public class Boots extends Armor {
         NewBootsMessage msg = new NewBootsMessage(this);
         msg.setReliable(true);
         return msg;    
+    }
+
+    @Override
+    public void playerServerEquip(HumanMob m) {
+        m.setBoots(this);
+    }
+
+    @Override
+    public void playerServerUnequip(HumanMob m) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
 }

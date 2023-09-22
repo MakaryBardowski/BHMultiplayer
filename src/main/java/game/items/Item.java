@@ -60,5 +60,15 @@ public abstract class Item extends InteractiveEntity {
         float[] angles = {dr.getX(), dr.getY(), dr.getZ()};
         childNode.setLocalRotation(new Quaternion().fromAngles(angles));
     }
+    
+    @Override
+    public void setPosition(Vector3f newPos){
+        if(droppedItemNode != null){
+        droppedItemNode.setLocalTranslation(newPos);
+        }else{
+        throw new IllegalStateException("the "+this+" cannot be moved - it is not on the ground!");
+        }
+    
+    }
 
 }

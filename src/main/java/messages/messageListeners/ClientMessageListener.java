@@ -24,7 +24,12 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.entities.Chest;
 import game.entities.Destructible;
+import game.entities.mobs.HumanMob;
 import game.items.Item;
+import game.items.armor.Boots;
+import game.items.armor.Gloves;
+import game.items.armor.Helmet;
+import game.items.armor.Vest;
 import game.items.factories.ItemFactory;
 import game.items.weapons.Rifle;
 import java.util.Arrays;
@@ -32,14 +37,20 @@ import java.util.concurrent.Callable;
 import messages.DestructibleDamageReceiveMessage;
 import messages.HitscanTrailMessage;
 import messages.NewChestMessage;
-import messages.items.ItemInteractionMessage;
-import messages.items.ItemInteractionMessage.ItemInteractionType;
+import messages.items.ChestItemInteractionMessage;
+import messages.items.MobItemInteractionMessage;
+import messages.items.MobItemInteractionMessage.ItemInteractionType;
+import static messages.items.MobItemInteractionMessage.ItemInteractionType.DROP;
+import static messages.items.MobItemInteractionMessage.ItemInteractionType.EQUIP;
+import static messages.items.MobItemInteractionMessage.ItemInteractionType.PICK_UP;
+import static messages.items.MobItemInteractionMessage.ItemInteractionType.UNEQUIP;
 import messages.items.NewBootsMessage;
 import messages.items.NewGlovesMessage;
 import messages.items.NewHelmetMessage;
 import messages.items.NewItemMessage;
 import messages.items.NewRifleMessage;
 import messages.items.NewVestMessage;
+import messages.items.SetDefaultItemMessage;
 
 /**
  *
@@ -65,14 +76,18 @@ public class ClientMessageListener implements MessageListener<Client> {
             entityReceiveDamage(hmsg);
         } else if (m instanceof SystemHealthUpdateMessage hmsg) {
             updateEntityHealth(hmsg);
-        } else if (m instanceof HitscanTrailMessage tmsg){
+        } else if (m instanceof HitscanTrailMessage tmsg) {
             handleHitscanTrail(tmsg);
-        }else if (m instanceof ItemInteractionMessage iimsg) {
-            handleItemInteraction(iimsg);
+        } else if (m instanceof MobItemInteractionMessage iimsg) {
+            handleMobItemInteraction(iimsg);
         } else if (m instanceof NewItemMessage imsg) {
             addNewItem(imsg);
         } else if (m instanceof NewMobMessage nmsg) {
             addMob(nmsg);
+        } else if (m instanceof SetDefaultItemMessage dmsg) {
+            setHumanMobDefaultItem(dmsg);
+        } else if (m instanceof ChestItemInteractionMessage cimsg) {
+            handleChestItemInteraction(cimsg);
         } else if (m instanceof NewChestMessage nmsg) {
             addNewChest(nmsg);
         } else if (m instanceof PlayerJoinedMessage nmsg) {
@@ -192,6 +207,10 @@ public class ClientMessageListener implements MessageListener<Client> {
         return ((Mob) clientApp.getMobs().get(id));
     }
 
+    private Chest getChestById(int id) {
+        return ((Chest) clientApp.getMobs().get(id));
+    }
+
     private Item getItemById(int id) {
         return ((Item) clientApp.getMobs().get(id));
     }
@@ -205,30 +224,32 @@ public class ClientMessageListener implements MessageListener<Client> {
             enqueueExecution(() -> {
                 Chest c = Chest.createRandomChestClient(nmsg.getId(), clientApp.getDestructibleNode(), nmsg.getPos(), clientApp.getAssetManager());
                 clientApp.getMobs().put(c.getId(), c);
+                c.setHealth(nmsg.getHealth());
+
             });
         }
     }
 
     private void addNewItem(NewItemMessage imsg) {
         if (imsg instanceof NewHelmetMessage nhmsg) {
-            Item i = ifa.createItem(nhmsg.getId(), nhmsg.getTemplate(), nhmsg.isDroppable());
+            Helmet i = (Helmet) ifa.createItem(nhmsg.getId(), nhmsg.getTemplate(), nhmsg.isDroppable());
+            i.setArmorValue(nhmsg.getArmorValue());
             clientApp.registerEntity(i);
-//            System.out.println("registering Helmet " + i + " with id = " + i.getId());
 
         } else if (imsg instanceof NewVestMessage nvmsg) {
-            Item i = ifa.createItem(nvmsg.getId(), nvmsg.getTemplate(), nvmsg.isDroppable());
+            Vest i = (Vest) ifa.createItem(nvmsg.getId(), nvmsg.getTemplate(), nvmsg.isDroppable());
+            i.setArmorValue(nvmsg.getArmorValue());
             clientApp.registerEntity(i);
-//            System.out.println("registering Vest " + i + " with id = " + i.getId());
 
         } else if (imsg instanceof NewGlovesMessage ngmsg) {
-            Item i = ifa.createItem(ngmsg.getId(), ngmsg.getTemplate(), ngmsg.isDroppable());
+            Gloves i = (Gloves) ifa.createItem(ngmsg.getId(), ngmsg.getTemplate(), ngmsg.isDroppable());
+            i.setArmorValue(ngmsg.getArmorValue());
             clientApp.registerEntity(i);
-//            System.out.println("registering Gloves " + i + " with id = " + i.getId());
 
         } else if (imsg instanceof NewBootsMessage nbmsg) {
-            Item i = ifa.createItem(nbmsg.getId(), nbmsg.getTemplate(), nbmsg.isDroppable());
+            Boots i = (Boots) ifa.createItem(nbmsg.getId(), nbmsg.getTemplate(), nbmsg.isDroppable());
+            i.setArmorValue(nbmsg.getArmorValue());
             clientApp.registerEntity(i);
-//            System.out.println("registering Boots " + i + " with id = " + i.getId());
         } else if (imsg instanceof NewRifleMessage rmsg) {
             Item i = ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
             clientApp.registerEntity(i);
@@ -236,13 +257,35 @@ public class ClientMessageListener implements MessageListener<Client> {
 
     }
 
-    private void handleItemInteraction(ItemInteractionMessage iimsg) {
+    private void handleChestItemInteraction(ChestItemInteractionMessage cimsg) {
+        enqueueExecution(() -> {
+            if (null != cimsg.getInteractionType()) {
+                switch (cimsg.getInteractionType()) {
+                    case INSERT:
+                        Item inserted = getItemById(cimsg.getItemId());
+                        getChestById(cimsg.getChestId()).addToEquipment(inserted);
+                        System.out.println(" inserted ");
+                        break;
+                    case TAKE_OUT:
+                        Item takenOut = getItemById(cimsg.getItemId());
+                        getChestById(cimsg.getChestId()).removeFromEquipment(takenOut);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        });
+    }
+
+    private void handleMobItemInteraction(MobItemInteractionMessage iimsg) {
         enqueueExecution(() -> {
             if (null != iimsg.getInteractionType()) {
                 switch (iimsg.getInteractionType()) {
                     case EQUIP:
                         Item equipped = getItemById(iimsg.getItemId());
                         getMobById(iimsg.getMobId()).equip(equipped);
+                        System.out.println("player " + getMobById(iimsg.getMobId()) + " equips " + equipped + " (item id = " + iimsg.getItemId() + ")");
                         break;
                     case UNEQUIP:
                         Item unequipped = getItemById(iimsg.getItemId());
@@ -271,15 +314,34 @@ public class ClientMessageListener implements MessageListener<Client> {
         enqueueExecution(() -> {
             Destructible d = getDestructibleById(hmsg.getTargetId());
             d.receiveDamage(hmsg.getDamage());
+            if (d.getHealth() <= 0) {
+                clientApp.getMobs().remove(d.getId());
+            }
         });
     }
-    
-    
-    private void handleHitscanTrail(HitscanTrailMessage tmsg){
-    enqueueExecution(() -> {
-    Mob mob = getMobById(tmsg.getId());
-    Rifle.createBullet(mob.getNode().getWorldTranslation().clone().add(0,1,0), tmsg.getShotPos());
-    });
+
+    private void handleHitscanTrail(HitscanTrailMessage tmsg) {
+        enqueueExecution(() -> {
+            Mob mob = getMobById(tmsg.getId());
+            Rifle.createBullet(mob.getNode().getWorldTranslation().clone().add(0, 1, 0), tmsg.getShotPos());
+        });
     }
 
+    private void setHumanMobDefaultItem(SetDefaultItemMessage dmsg) {
+        enqueueExecution(() -> {
+            HumanMob human = (HumanMob) getMobById(dmsg.getMobId());
+            System.out.println("human " + human.getId() + " registering item...");
+            Item item = getItemById(dmsg.getItemId());
+            if (item instanceof Vest v) {
+                human.setDefaultVest(v);
+            } else if (item instanceof Helmet h) {
+                human.setDefaultHelmet(h);
+            } else if (item instanceof Gloves g) {
+                human.setDefaultGloves(g);
+            } else if (item instanceof Boots b) {
+                human.setDefaultBoots(b);
+            }
+        });
+
+    }
 }

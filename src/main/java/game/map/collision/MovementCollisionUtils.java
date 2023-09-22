@@ -8,14 +8,24 @@ import client.ClientGameAppState;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import java.util.Arrays;
+import messages.MobPosUpdateMessage;
 
 /**
  *
  * @author 48793
  */
 public class MovementCollisionUtils {
+    
+    public static boolean validateMobMovement(MobPosUpdateMessage nmsg) {
+        boolean valid = false;
+        
+        
+        
+        return valid;
+    }
+    
 
-    public static boolean[] canMoveToLocationGround(Node node, Vector3f movementVector, byte[][][] logicMap, int blockSize) {
+    public static boolean[] collisionCheckWithMap(Node node, Vector3f movementVector, byte[][][] logicMap, int blockSize) {
         Vector3f newPosInLogicMap = calculateNewPosInLogicMap(node,movementVector,blockSize);
         boolean[] canMoveOnAxes = new boolean[3];
         canMoveOnAxes[0] = canMoveToLocationGroundX(node, newPosInLogicMap, logicMap, blockSize);
@@ -42,10 +52,5 @@ public class MovementCollisionUtils {
                 (float) Math.floor(node.getWorldTranslation().add(UMC).getY() / blockSize),
                 (float) Math.floor(node.getWorldTranslation().add(UMC).getZ() / blockSize));
   }
-
-    public static boolean canMoveToLocationFlying(Vector3f newPosition, ClientGameAppState cm) {
-
-        return false;
-    }
 
 }

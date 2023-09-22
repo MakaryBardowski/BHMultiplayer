@@ -19,13 +19,15 @@ import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.Destructible;
+import game.entities.InteractiveEntity;
 import game.entities.mobs.Mob;
 import game.items.Item;
+import game.map.collision.MovementCollisionUtils;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import messages.DestructibleDamageReceiveMessage;
 import messages.HitscanTrailMessage;
-import messages.items.ItemInteractionMessage;
-import messages.items.ItemInteractionMessage.ItemInteractionType;
+import messages.items.MobItemInteractionMessage;
+import messages.items.MobItemInteractionMessage.ItemInteractionType;
 
 /**
  *
@@ -47,32 +49,52 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
     @Override
     public void messageReceived(HostedConnection s, Message msg) {
         if (msg instanceof MobRotUpdateMessage nmsg) {
-            serverApp.getMobs().get(nmsg.getId()).getNode().setLocalRotation(nmsg.getRot());
+            if (mobExists(nmsg.getId())) {
+                serverApp.getMobs().get(nmsg.getId()).getNode().setLocalRotation(nmsg.getRot());
+            }
 
         } else if (msg instanceof MobPosUpdateMessage nmsg) {
-            serverApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(nmsg.getPos());
+            if (mobExists(nmsg.getId())) {
+
+                if (nmsg.getId() != ClientGameAppState.getInstance().getPlayer().getId()) {
+                    MovementCollisionUtils.validateMobMovement(nmsg);
+                }
+
+                serverApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(nmsg.getPos());
+            }
 
         } else if (msg instanceof DestructibleDamageReceiveMessage hmsg) {
-            Destructible d = ((Destructible) serverApp.getMobs().get(hmsg.getTargetId()));
-            d.setHealth(d.getHealth()-hmsg.getDamage());
-            hmsg.setReliable(true);
-            serverApp.getServer().broadcast(hmsg);
-        } else if (msg instanceof HitscanTrailMessage hmsg){
-            
-           HostedConnection hc = serverApp.getServer().getConnection(hmsg.getClientId());
-           serverApp.getServer().broadcast(Filters.notIn(hc),hmsg);
+            InteractiveEntity i = serverApp.getMobs().get(hmsg.getTargetId());
+            if (i != null) { // if the mob doesnt exist, it means the 
+                // info was sent from a lagged user - dont forward it to others
+                Destructible d = ((Destructible) i);
 
-        } else if (msg instanceof ItemInteractionMessage imsg) {
+                d.setHealth(d.getHealth() - d.calculateDamage(hmsg.getDamage()));
+                hmsg.setReliable(true);
+                serverApp.getServer().broadcast(hmsg);
+                System.out.println(d.getName() + " has " + d.getHealth() + " HP on server");
+
+                if (d.getHealth() <= 0) {
+                    System.out.println(d.getName() + " died on server");
+                    serverApp.getMobs().remove(d.getId());
+                }
+            }
+        } else if (msg instanceof HitscanTrailMessage hmsg) {
+
+            HostedConnection hc = serverApp.getServer().getConnection(hmsg.getClientId());
+            serverApp.getServer().broadcast(Filters.notIn(hc), hmsg);
+
+        } else if (msg instanceof MobItemInteractionMessage imsg) {
             handleItemInteraction(imsg);
         }
     }
 
-    public void handleItemInteraction(ItemInteractionMessage imsg) {
+    public void handleItemInteraction(MobItemInteractionMessage imsg) {
         if (imsg.getInteractionType() == ItemInteractionType.PICK_UP) {
 //            getMobById(imsg.getMobId()).addToEquipment(getItemById(imsg.getItemId()));
             serverApp.getServer().broadcast(imsg);
         } else if (imsg.getInteractionType() == ItemInteractionType.EQUIP) {
-//            getMobById(imsg.getMobId()).equip(getItemById(imsg.getItemId()));
+            getMobById(imsg.getMobId()).equipServer(getItemById(imsg.getItemId()));
             serverApp.getServer().broadcast(imsg);
         } else if (imsg.getInteractionType() == ItemInteractionType.UNEQUIP) {
 //            getMobById(imsg.getMobId()).unequip(getItemById(imsg.getItemId()));
@@ -93,4 +115,10 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
     private Destructible getDestructibleById(int id) {
         return ((Destructible) serverApp.getMobs().get(id));
     }
+
+    private boolean mobExists(int id) {
+        return serverApp.getMobs().keySet().contains(id);
+    }
+
+
 }

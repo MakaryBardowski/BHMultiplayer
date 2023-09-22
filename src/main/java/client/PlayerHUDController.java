@@ -10,8 +10,8 @@ import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import messages.MobRotUpdateMessage;
-import messages.items.ItemInteractionMessage;
-import messages.items.ItemInteractionMessage.ItemInteractionType;
+import messages.items.MobItemInteractionMessage;
+import messages.items.MobItemInteractionMessage.ItemInteractionType;
 
 /**
  *
@@ -50,7 +50,8 @@ public class PlayerHUDController implements ScreenController {
         
     private static void sendEquipMessageToServer(Item item){
             if (item != null) {
-            ItemInteractionMessage imsg = new ItemInteractionMessage(item, gs.getPlayer(), ItemInteractionType.EQUIP);
+            MobItemInteractionMessage imsg = new MobItemInteractionMessage(item, gs.getPlayer(), ItemInteractionType.EQUIP);
+            imsg.setReliable(true);
             gs.getClient().send(imsg);
         }
     }

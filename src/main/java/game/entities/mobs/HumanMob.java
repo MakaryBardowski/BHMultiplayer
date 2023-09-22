@@ -18,6 +18,7 @@ import client.Main;
 import com.jme3.anim.SkinningControl;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.Filters;
@@ -25,10 +26,20 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.effects.ParticleUtils;
+import game.entities.Destructible;
+import game.items.armor.Boots;
+import game.items.armor.Gloves;
+import game.items.armor.Helmet;
+import game.items.armor.Vest;
+import game.map.collision.CollisionDebugUtils;
+import game.map.collision.HitboxDebugControl;
+import game.map.collision.RectangleCollisionShape;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import lombok.Getter;
+import lombok.Setter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewMobMessage;
 
@@ -42,9 +53,36 @@ public class HumanMob extends Mob {
     protected Holdable equippedLeftHand;
     protected SkinningControl skinningControl;
 
+    @Getter
+    @Setter
+    protected Helmet helmet;
+    @Getter
+    @Setter
+    protected Helmet defaultHelmet; // equipped when nothing is equipped (bare head)
+    @Getter
+    @Setter
+    protected Vest vest;
+    @Getter
+    @Setter
+    protected Vest defaultVest;
+    @Getter
+    @Setter
+    protected Boots boots;
+    @Getter
+    @Setter
+    protected Boots defaultBoots;
+    @Getter
+    @Setter
+    protected Gloves gloves;
+    @Getter
+    @Setter
+    protected Gloves defaultGloves;
+
     public HumanMob(int id, Node node, String name, SkinningControl skinningControl) {
         super(id, node, name);
         this.skinningControl = skinningControl;
+
+        createHitbox();
     }
 
     @Override
@@ -110,7 +148,8 @@ public class HumanMob extends Mob {
 
     @Override
     public void receiveDamage(float damage) {
-        health -= damage;
+
+        health -= calculateDamage(damage);
         ParticleEmitter blood = EmitterPooler.getBlood();
         Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 2, 0);
         blood.setLocalTranslation(bloodPos);
@@ -123,35 +162,10 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public void notifyServerAboutDealingDamage(float damage, Mob mob) {
+    public void notifyServerAboutDealingDamage(float damage, Destructible mob) {
         DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(mob.getId(), damage);
         hpUpd.setReliable(true);
         ClientGameAppState.getInstance().getClient().send(hpUpd);
-    }
-
-    @Override
-    public void insert(WorldGrid wg) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void removeFromGrid(WorldGrid wg) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public HashSet<CollidableInterface> getFromCellsImIn(WorldGrid wg) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public HashSet<CollidableInterface> getEntitiesFromTilesInRange(WorldGrid wg, float distance) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void checkCollision() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
@@ -194,5 +208,64 @@ public class HumanMob extends Mob {
     @Override
     public void unequip(Item e) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void equipServer(Item e) {
+        if (e instanceof Equippable equippableItem) {
+            equippableItem.playerServerEquip(this);
+        }
+    }
+
+    @Override
+    public void unequipServer(Item e) {
+        if (e instanceof Equippable equippableItem) {
+            equippableItem.playerServerUnequip(this);
+        }
+    }
+
+    @Override
+    public float getArmorValue() {
+
+        return helmet.getArmorValue() + vest.getArmorValue()
+                + gloves.getArmorValue()
+                + boots.getArmorValue();
+    }
+
+    @Override
+    public float calculateDamage(float damage) {
+        float reducedDmg = damage - getArmorValue();
+        return reducedDmg > 0 ? reducedDmg : 0;
+    }
+
+    @Override
+    protected final void createHitbox() {
+        float hitboxWidth = 0.5f;
+        float hitboxHeight = 1.25f;
+        float hitboxLength = 0.5f;
+
+        hitboxNode.move(0, hitboxHeight, 0);
+        collisionShape = new RectangleCollisionShape(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
+        showHitboxIndicator();
+
+    }
+
+    @Override
+    protected void showHitboxIndicator() {
+        Geometry hitboxDebug = CollisionDebugUtils.createHitboxGeometry(collisionShape.getWidth(), collisionShape.getHeight(), collisionShape.getLength(), ColorRGBA.Green);
+        ClientGameAppState.getInstance().getDebugNode().attachChild(hitboxDebug);
+        hitboxDebug.addControl(new HitboxDebugControl(hitboxNode));
+    }
+
+    @Override
+    protected void hideHitboxIndicator() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void setPosition(Vector3f newPos) {
+        ClientGameAppState.getInstance().getGrid().remove(this);
+        node.setLocalTranslation(newPos);
+        ClientGameAppState.getInstance().getGrid().insert(this);
     }
 }
