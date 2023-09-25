@@ -1,6 +1,7 @@
 package game.map.collision;
 
 import com.jme3.math.Vector3f;
+import lombok.Setter;
 
 /**
  *
@@ -9,8 +10,11 @@ import com.jme3.math.Vector3f;
 public class RectangleCollisionShape {
     
     protected Vector3f position;
+    @Setter
     private float width;
+    @Setter
     private float height;
+    @Setter
     private float length;
 
     public RectangleCollisionShape(Vector3f position, float width, float height, float length) {
@@ -82,6 +86,38 @@ public class RectangleCollisionShape {
 
         return true;
     }
+    
+    
+        public boolean wouldCollideAtPosition(RectangleCollisionShape other, Vector3f newPos) {
+        if (other == this) {
+            return false;
+        }
+
+        Vector3f otherPosition = other.position;
+
+        float tMinX = newPos.getX() - width;
+        float tMaxX = newPos.getX() + width;
+        float tMinY = newPos.getY() - height;
+        float tMaxY = newPos.getY() + height;
+        float tMinZ = newPos.getZ() - length;
+        float tMaxZ = newPos.getZ() + length;
+
+        float oMinX = otherPosition.getX() - other.width;
+        float oMaxX = otherPosition.getX() + other.width;
+        float oMinY = otherPosition.getY() - other.height;
+        float oMaxY = otherPosition.getY() + other.height;
+        float oMinZ = otherPosition.getZ() - other.length;
+        float oMaxZ = otherPosition.getZ() + other.length;
+
+        if (tMaxX < oMinX || tMinX > oMaxX
+                || tMaxY < oMinY || tMinY > oMaxY
+                || tMaxZ < oMinZ || tMinZ > oMaxZ) {
+            return false;
+        }
+
+        return true;
+    }
+    
 
     public float getWidth() {
         return width;

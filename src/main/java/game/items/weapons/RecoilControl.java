@@ -43,6 +43,7 @@ public class RecoilControl extends AbstractControl{
         
         spatial.setLocalRotation(currentRotationRecoil);
         spatial.setLocalTranslation(currentVectorRecoil);
+        
     }
     
     public void recoilFire(){

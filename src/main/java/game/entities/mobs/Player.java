@@ -4,7 +4,6 @@
  */
 package game.entities.mobs;
 
-import game.effects.EmitterPooler;
 import game.items.Equippable;
 import game.items.Item;
 
@@ -12,22 +11,17 @@ import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
 import client.ClientGameAppState;
 import com.jme3.anim.SkinningControl;
-import com.jme3.effect.ParticleEmitter;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import game.entities.Collidable;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
-import game.map.collision.CollisionDebugUtils;
-import game.map.collision.HitboxDebugControl;
 import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
-import game.map.collision.RectangleCollisionShape;
 import game.map.collision.WorldGrid;
 import java.util.List;
+import messages.PlayerPosUpdateRequest;
 
 /**
  *
@@ -74,7 +68,7 @@ public class Player extends HumanMob {
         super(id, node, name, skinningControl);
         this.mainCamera = mainCamera;
         hotbar = new Item[HOTBAR_SIZE];
-
+        forward = true;
     }
 
     @Override
@@ -156,13 +150,11 @@ public class Player extends HumanMob {
         MobRotUpdateMessage rotu = new MobRotUpdateMessage(id, node.getLocalRotation());
         cm.getClient().send(rotu);
 
-//        WorldGrid collisionGrid = ClientGameAppState.getInstance().getGrid();
-//        collisionGrid.remove(this);
-//        
-//        System.out.println(collisionGrid);
-
         if (forward || backward || left || right) {
             Vector3f movementVector = new Vector3f(0, 0, 0);
+            System.out.println("\n\n");
+            WorldGrid collisionGrid = ClientGameAppState.getInstance().getGrid();
+            collisionGrid.remove(this);
 
             if (forward) {
 
@@ -212,26 +204,28 @@ public class Player extends HumanMob {
             boolean canMoveOnAxisX = canMoveOnAxes[0];
             boolean canMoveOnAxisZ = canMoveOnAxes[2];
 
-            if (canMoveOnAxisZ && doesNotCollideWithOtherObjects(new Vector3f(0, 0, movementVector.getZ()))) {
+            if (canMoveOnAxisZ && wouldNotCollideWithEntitiesAfterMove(new Vector3f(0, 0, movementVector.getZ()))) {
                 node.move(0, 0, movementVector.getZ());
+                System.out.println("canMoveX "+true);
             }
-            if (canMoveOnAxisX && doesNotCollideWithOtherObjects(new Vector3f(movementVector.getX(), 0, 0))) {
+            if (canMoveOnAxisX && wouldNotCollideWithEntitiesAfterMove(new Vector3f(movementVector.getX(), 0, 0))) {
                 node.move(movementVector.getX(), 0, 0);
+                                System.out.println("canMoveZ "+true);
+
             }
 
             if (node.getWorldTranslation().distance(serverLocation) > speed * tpf) {
-                MobPosUpdateMessage posu = new MobPosUpdateMessage(id, node.getWorldTranslation());
+                PlayerPosUpdateRequest posu = new PlayerPosUpdateRequest(id, node.getWorldTranslation());
                 cm.getClient().send(posu);
+                System.out.println(posu);
             }
 
-            
-            for(int i = 0 ;i < 10000;i++){
-            doesNotCollideWithOtherObjects(new Vector3f(0, 0, movementVector.getZ()));
-                        doesNotCollideWithOtherObjects(new Vector3f(0, 0, movementVector.getX()));
-
-            }
-            
-//            collisionGrid.insert(this);
+//            for(int i = 0 ;i < 10000;i++){
+//            wouldNotCollideWithEntitiesAfterMove(new Vector3f(0, 0, movementVector.getZ()));
+//                        wouldNotCollideWithEntitiesAfterMove(new Vector3f(0, 0, movementVector.getX()));
+//
+//            }
+            collisionGrid.insert(this);
         }
     }
 
@@ -271,19 +265,6 @@ public class Player extends HumanMob {
 
     public void setCameraMovementLocked(boolean cameraMovementLocked) {
         this.cameraMovementLocked = cameraMovementLocked;
-    }
-
-    private boolean doesNotCollideWithOtherObjects(Vector3f moveVec) {
-
-        List<InteractiveEntity> ent = ClientGameAppState.getInstance().getMobs().values().stream().toList();
-        List<Destructible> mobs = ent.stream().filter(e -> e instanceof Destructible).map(e -> (Destructible) e).toList();
-        for (Destructible m : mobs) {
-            if (this != m && collisionShape.wouldCollideAfterMovement(m.getCollisionShape(), moveVec)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
 }

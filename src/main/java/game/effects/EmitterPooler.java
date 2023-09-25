@@ -58,8 +58,8 @@ public class EmitterPooler {
         blood.setEndColor(new ColorRGBA(1f, 0f, 0f, 1f));   // red
         blood.setStartColor(new ColorRGBA(1f, 1f, 0f, 0.5f)); // yellow
         blood.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 1, 0));
-        blood.setStartSize(1.2f);
-        blood.setEndSize(0.6f);
+        blood.setStartSize(1.2f); //1.2f
+        blood.setEndSize(0.6f); //0.6f
         blood.setGravity(0, 9, 0);
         blood.setLowLife(2f);
         blood.setHighLife(3f);

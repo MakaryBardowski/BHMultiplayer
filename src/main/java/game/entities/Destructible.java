@@ -16,20 +16,17 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public abstract class Destructible extends InteractiveEntity implements Damageable{
+public abstract class Destructible extends Collidable implements Damageable{
 
     protected float health = 10;
     protected float maxHealth = 10;
-    protected RectangleCollisionShape collisionShape;
-    protected Node hitboxNode = new Node();
+
 
     public Destructible(int id,String name, Node node) {
         super(id,name, node);
-        node.attachChild(hitboxNode);
     }
     
     protected abstract void createHitbox();
-    protected abstract void showHitboxIndicator();
-    protected abstract void hideHitboxIndicator();
+
 
 }

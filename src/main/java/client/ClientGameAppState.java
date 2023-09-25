@@ -31,17 +31,21 @@ import com.jme3.light.AmbientLight;
 import com.jme3.network.ClientStateListener;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
+import com.jme3.ui.Picture;
 import de.lessvoid.nifty.Nifty;
+import game.entities.Collidable;
 import game.entities.InteractiveEntity;
 import game.entities.mobs.HumanMob;
 import game.map.collision.WorldGrid;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -58,7 +62,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Getter
     private final int BLOCK_SIZE = 4;
-    
+
     @Getter
     private final int COLLISION_GRID_CELL_SIZE = 16;
 
@@ -120,19 +124,22 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     private AnalogListener analogListener;
 
     @Getter
-    private Map map;
-    
+    private game.map.Map map;
+
     @Getter
     private WorldGrid grid;
 
     @Getter
     @Setter
     private Nifty nifty;
-    
+
     @Getter
     private String serverIp;
+    
+    @Getter
+    private boolean debug;
 
-    public ClientGameAppState(Main app,String serverIp) {
+    public ClientGameAppState(Main app, String serverIp) {
         instance = this;
         this.app = app;
         this.assetManager = app.getAssetManager();
@@ -144,6 +151,12 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {        // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
+              Picture crosshair = new Picture("crosshair");
+        crosshair.setImage(assetManager, "Textures/GUI/crosshair.png", true);
+        crosshair.setWidth(applicationSettings.getHeight() * 0.04f);
+        crosshair.setHeight(applicationSettings.getHeight() * 0.04f); //0.04f
+        crosshair.setPosition((applicationSettings.getWidth() / 2) - applicationSettings.getHeight() * 0.04f / 2, applicationSettings.getHeight() / 2 - applicationSettings.getHeight() * 0.04f / 2);
+        Main.getInstance().getGuiNode().attachChild(crosshair);
 //        NetworkingInitialization.initializeSerializables();
         worldNode.attachChild(debugNode);
         worldNode.attachChild(entityNode);
@@ -166,8 +179,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         client.addMessageListener(new ClientMessageListener(this));
         app.getViewPort().setBackgroundColor(ColorRGBA.Cyan);
 
-        grid = new WorldGrid(COLLISION_GRID_CELL_SIZE); 
-        
+        grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
+
         MapGenerator mg = new MapGenerator();
         map = mg.generateMap(MapType.BOSS, BLOCK_SIZE, CHUNK_SIZE, MAP_SIZE, assetManager, mapNode);
 
@@ -186,12 +199,20 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
         mobs.values().forEach(x -> {
             if (x instanceof Mob m && x != player) {
-                interpolateMobPosition(m, tpf);
+//                System.out.println(m.getNode().getWorldTranslation());
+                if (!m.getNode().getWorldTranslation().equals(m.getServerLocation())) {
+                    grid.remove(m);
+                    interpolateMobPosition(m, tpf);
+                    grid.insert(m);
+                }
                 interpolateMobRotation(m, tpf);
             }
         }
         );
 
+//
+//        
+//        System.out.println("\n\n\n");
 //                mobs.values().stream()
 //                    .filter(x -> x instanceof HumanMob)
 //                    .map(x -> (HumanMob) x)

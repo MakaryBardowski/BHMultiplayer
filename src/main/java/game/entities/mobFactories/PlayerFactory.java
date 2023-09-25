@@ -24,6 +24,7 @@ import game.entities.DestructibleUtils;
 import game.items.factories.ItemFactory;
 import game.items.weapons.Axe;
 import game.items.weapons.Rifle;
+import server.ServerMain;
 
 /**
  *
@@ -38,15 +39,15 @@ public class PlayerFactory extends MobFactory {
     private boolean setAsPlayer;
     private final Vector3f playerSpawnpoint = new Vector3f(10, 4, 10);
 
-    public PlayerFactory(int id,AssetManager assetManager, Node mobNode, RenderManager renderManager) {
-        super(id,assetManager, mobNode);
+    public PlayerFactory(int id, AssetManager assetManager, Node mobNode, RenderManager renderManager) {
+        super(id, assetManager, mobNode);
         this.mainCamera = null;
         this.firstPersonCamera = null;
         this.renderManager = renderManager;
     }
 
-    public PlayerFactory(int id,Node mobNode, Camera mainCamera, boolean setAsPlayer) {
-        super(id,mobNode);
+    public PlayerFactory(int id, Node mobNode, Camera mainCamera, boolean setAsPlayer) {
+        super(id, mobNode);
         this.mainCamera = mainCamera;
         this.firstPersonCamera = mainCamera.clone();
         this.renderManager = Main.getInstance().getRenderManager();
@@ -56,26 +57,25 @@ public class PlayerFactory extends MobFactory {
     @Override
     public Player createClientSide() {
         Player p = createPlayer();
-        DestructibleUtils.attachDestructibleToNode(p,mobsNode, playerSpawnpoint);
+        DestructibleUtils.attachDestructibleToNode(p, mobsNode, playerSpawnpoint);
         if (setAsPlayer) {
             setupFirstPersonCamera(p);
         }
-
         return p;
     }
 
     @Override
     public Player createServerSide() {
         Player p = createPlayer();
-        DestructibleUtils.attachDestructibleToNode(p,mobsNode, playerSpawnpoint);
+        DestructibleUtils.attachDestructibleToNode(p, mobsNode, playerSpawnpoint);
         return p;
     }
 
     private Player createPlayer() {
         Node playerNode = loadPlayerModel();
-        String name = "Player_"+id;
+        String name = "Player_" + id;
         SkinningControl skinningControl = getSkinningControl(playerNode);
-        return new Player(id,playerNode, name, mainCamera, skinningControl);
+        return new Player(id, playerNode, name, mainCamera, skinningControl);
     }
 
     private void setupFirstPersonCamera(Player p) {
@@ -87,7 +87,6 @@ public class PlayerFactory extends MobFactory {
         Node node = (Node) assetManager.loadModel("Models/testSkeleton/testSkeleton.j3o");
         return node;
     }
-
 
     private SkinningControl getSkinningControl(Node node) {
         return node.getChild(0).getControl(SkinningControl.class);

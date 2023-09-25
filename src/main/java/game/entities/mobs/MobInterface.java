@@ -7,6 +7,7 @@ package game.entities.mobs;
 import game.items.Equippable;
 import game.items.Item;
 import client.ClientGameAppState;
+import com.jme3.math.Vector3f;
 import game.entities.Destructible;
 
 /**
@@ -16,7 +17,8 @@ import game.entities.Destructible;
 public interface MobInterface {
 
     public void move(float tpf, ClientGameAppState cm);
-
+    public boolean wouldNotCollideWithEntitiesAfterMove(Vector3f moveVec);
+    
     public void attack();
 
     public void notifyServerAboutDealingDamage(float damage, Destructible mob);
@@ -28,4 +30,6 @@ public interface MobInterface {
     public void equipServer(Item e);
     
     public void unequipServer(Item e);
+    
+    
 }

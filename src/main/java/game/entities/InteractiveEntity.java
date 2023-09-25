@@ -30,6 +30,8 @@ public abstract class InteractiveEntity {
     public abstract void onInteract();
 
     public abstract void setPosition(Vector3f newPos);
+    public abstract void setPositionServer(Vector3f newPos);
+    
     
     public abstract AbstractMessage createNewEntityMessage();
     

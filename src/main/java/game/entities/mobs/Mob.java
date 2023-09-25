@@ -4,12 +4,15 @@
  */
 package game.entities.mobs;
 
+import client.ClientGameAppState;
 import game.entities.Destructible;
 import game.items.Item;
 import game.map.collision.CollidableInterface;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import game.entities.Collidable;
+import game.map.collision.WorldGrid;
 import java.util.Random;
 
 /**
@@ -18,7 +21,7 @@ import java.util.Random;
  */
 public abstract class Mob extends Destructible implements CollidableInterface, MobInterface {
 
-    private static final float DEFAULT_SPEED = 10f; //20
+    private static final float DEFAULT_SPEED = 10; //10
     protected static final int EQUIPMENT_SIZE = 18;
 
     protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
@@ -41,6 +44,16 @@ public abstract class Mob extends Destructible implements CollidableInterface, M
         super(id, name, node);
         this.serverLocation = node.getWorldTranslation();
         this.serverRotation = node.getLocalRotation();
+    }
+    
+    public boolean doesNotCollideWithEntitiesAtPosition(Vector3f newPos,WorldGrid grid){
+            for (Collidable m : grid.getNearbyAfterMove(this)) {
+            if (this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(),newPos)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public Vector3f getServerLocation() {

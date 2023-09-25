@@ -24,6 +24,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.entities.Chest;
 import game.entities.Destructible;
+import game.entities.InteractiveEntity;
 import game.entities.mobs.HumanMob;
 import game.items.Item;
 import game.items.armor.Boots;
@@ -36,6 +37,7 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 import messages.DestructibleDamageReceiveMessage;
 import messages.HitscanTrailMessage;
+import messages.InstantEntityPosCorrectionMessage;
 import messages.NewChestMessage;
 import messages.items.ChestItemInteractionMessage;
 import messages.items.MobItemInteractionMessage;
@@ -76,6 +78,8 @@ public class ClientMessageListener implements MessageListener<Client> {
             entityReceiveDamage(hmsg);
         } else if (m instanceof SystemHealthUpdateMessage hmsg) {
             updateEntityHealth(hmsg);
+        } else if (m instanceof InstantEntityPosCorrectionMessage cmsg) {
+            correctPosition(cmsg);
         } else if (m instanceof HitscanTrailMessage tmsg) {
             handleHitscanTrail(tmsg);
         } else if (m instanceof MobItemInteractionMessage iimsg) {
@@ -121,7 +125,7 @@ public class ClientMessageListener implements MessageListener<Client> {
         clientApp.getEntityNode().attachChild(playerNode);
         playerNode.setCullHint(Spatial.CullHint.Always);
         p.getNode().setLocalTranslation(nmsg.getPos());
-
+        ClientGameAppState.getInstance().getGrid().insert(p);
     }
 
     private Player registerOtherPlayer(PlayerJoinedMessage nmsg) {
@@ -135,6 +139,7 @@ public class ClientMessageListener implements MessageListener<Client> {
     private void placeMob(Vector3f pos, Mob p) {
         clientApp.getDestructibleNode().attachChild(p.getNode());
         p.getNode().setLocalTranslation(pos);
+        ClientGameAppState.getInstance().getGrid().insert(p);
     }
 
     private void updateEntityHealth(SystemHealthUpdateMessage hmsg) {
@@ -219,13 +224,17 @@ public class ClientMessageListener implements MessageListener<Client> {
         return ((Destructible) clientApp.getMobs().get(id));
     }
 
+    private InteractiveEntity getEntityById(int id) {
+        return clientApp.getMobs().get(id);
+    }
+
     private void addNewChest(NewChestMessage nmsg) {
         if (mobDoesNotExistLocally(nmsg.getId())) {
             enqueueExecution(() -> {
                 Chest c = Chest.createRandomChestClient(nmsg.getId(), clientApp.getDestructibleNode(), nmsg.getPos(), clientApp.getAssetManager());
                 clientApp.getMobs().put(c.getId(), c);
                 c.setHealth(nmsg.getHealth());
-
+                ClientGameAppState.getInstance().getGrid().insert(c);
             });
         }
     }
@@ -343,5 +352,11 @@ public class ClientMessageListener implements MessageListener<Client> {
             }
         });
 
+    }
+
+    private void correctPosition(InstantEntityPosCorrectionMessage cmsg) {
+        enqueueExecution(() -> {
+            getEntityById(cmsg.getId()).setPosition(cmsg.getPos());
+        });
     }
 }

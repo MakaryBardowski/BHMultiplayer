@@ -4,29 +4,23 @@
  */
 package game.map.collision;
 
-import client.ClientGameAppState;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import java.util.Arrays;
-import messages.MobPosUpdateMessage;
+import game.entities.mobs.Mob;
+
 
 /**
  *
  * @author 48793
  */
 public class MovementCollisionUtils {
-    
-    public static boolean validateMobMovement(MobPosUpdateMessage nmsg) {
-        boolean valid = false;
-        
-        
-        
-        return valid;
+
+    public static boolean isValidMobMovement(Mob m, Vector3f newPos,WorldGrid grid) {
+        return m.doesNotCollideWithEntitiesAtPosition(newPos,grid);
     }
     
-
     public static boolean[] collisionCheckWithMap(Node node, Vector3f movementVector, byte[][][] logicMap, int blockSize) {
-        Vector3f newPosInLogicMap = calculateNewPosInLogicMap(node,movementVector,blockSize);
+        Vector3f newPosInLogicMap = calculateNewPosInLogicMap(node, movementVector, blockSize);
         boolean[] canMoveOnAxes = new boolean[3];
         canMoveOnAxes[0] = canMoveToLocationGroundX(node, newPosInLogicMap, logicMap, blockSize);
 //        canMoveOnAxes[1] = canMoveToLocationGroundY(node, newPosInLogicMap, logicMap, blockSize);
@@ -37,13 +31,13 @@ public class MovementCollisionUtils {
     private static boolean canMoveToLocationGroundX(Node node, Vector3f newPosInLogicMap, byte[][][] logicMap, int blockSize) {
         return newPosInLogicMap.getX() < logicMap.length
                 && newPosInLogicMap.getX() > -1
-                && logicMap[(byte) newPosInLogicMap.getX()][(byte) Math.floor(node.getWorldTranslation().getY() / blockSize)][(byte) Math.floor(node.getWorldTranslation().getZ() / blockSize)] == 0;
+                && logicMap[(short) newPosInLogicMap.getX()][(short) Math.floor(node.getWorldTranslation().getY() / blockSize)][(short) Math.floor(node.getWorldTranslation().getZ() / blockSize)] == 0;
     }
 
     private static boolean canMoveToLocationGroundZ(Node node, Vector3f newPosInLogicMap, byte[][][] logicMap, int blockSize) {
         return newPosInLogicMap.getZ() < logicMap[0][0].length
                 && newPosInLogicMap.getZ() > -1
-                && logicMap[(byte) Math.floor(node.getWorldTranslation().getX() / blockSize)][(byte) Math.floor(node.getWorldTranslation().getY() / blockSize)][(byte) newPosInLogicMap.getZ()] == 0;
+                && logicMap[(short) Math.floor(node.getWorldTranslation().getX() / blockSize)][(short) Math.floor(node.getWorldTranslation().getY() / blockSize)][(short) newPosInLogicMap.getZ()] == 0;
 
     }
 
@@ -51,6 +45,6 @@ public class MovementCollisionUtils {
         return new Vector3f((float) Math.floor(node.getWorldTranslation().add(UMC).getX() / blockSize),
                 (float) Math.floor(node.getWorldTranslation().add(UMC).getY() / blockSize),
                 (float) Math.floor(node.getWorldTranslation().add(UMC).getZ() / blockSize));
-  }
+    }
 
 }

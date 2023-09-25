@@ -17,12 +17,13 @@ import game.entities.mobs.Mob;
 import game.items.Item;
 import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.map.collision.CollisionDebugUtils;
-import game.map.collision.HitboxDebugControl;
 import game.map.collision.RectangleCollisionShape;
+import game.map.collision.WorldGrid;
 import lombok.Getter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewChestMessage;
 import messages.SystemHealthUpdateMessage;
+import server.ServerMain;
 
 /**
  *
@@ -112,6 +113,9 @@ public class Chest extends Destructible {
             }
         }
         node.removeFromParent();
+        ClientGameAppState.getInstance().getGrid().remove(this);
+        hideHitboxIndicator();
+
     }
 
     @Override
@@ -134,24 +138,13 @@ public class Chest extends Destructible {
 
     @Override
     protected final void createHitbox() {
-        float hitboxWidth = 0.8f;
-        float hitboxHeight = 0.8f;
-        float hitboxLength = 0.8f;
+        float hitboxWidth = 1f;
+        float hitboxHeight = 1f;
+        float hitboxLength = 1f;
         hitboxNode.move(0, hitboxHeight, 0);
         collisionShape = new RectangleCollisionShape(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
         showHitboxIndicator();
-    }
 
-    @Override
-    protected void showHitboxIndicator() {
-        Geometry hitboxDebug = CollisionDebugUtils.createHitboxGeometry(collisionShape.getWidth(), collisionShape.getHeight(), collisionShape.getLength(), ColorRGBA.Green);
-        ClientGameAppState.getInstance().getDebugNode().attachChild(hitboxDebug);
-        hitboxDebug.addControl(new HitboxDebugControl(hitboxNode));
-    }
-
-    @Override
-    protected void hideHitboxIndicator() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
@@ -159,6 +152,14 @@ public class Chest extends Destructible {
         ClientGameAppState.getInstance().getGrid().remove(this);
         node.setLocalTranslation(newPos);
         ClientGameAppState.getInstance().getGrid().insert(this);
+    }
+
+    @Override
+    public void setPositionServer(Vector3f newPos) {
+        WorldGrid grid = ServerMain.getInstance().getGrid();
+        grid.remove(this);
+        node.setLocalTranslation(newPos);
+        grid.insert(this);
     }
 
     enum ChestType {

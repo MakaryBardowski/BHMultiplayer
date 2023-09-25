@@ -26,13 +26,13 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.effects.ParticleUtils;
+import game.entities.Collidable;
 import game.entities.Destructible;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.map.collision.CollisionDebugUtils;
-import game.map.collision.HitboxDebugControl;
 import game.map.collision.RectangleCollisionShape;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -42,6 +42,7 @@ import lombok.Getter;
 import lombok.Setter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewMobMessage;
+import server.ServerMain;
 
 /**
  *
@@ -77,6 +78,8 @@ public class HumanMob extends Mob {
     @Getter
     @Setter
     protected Gloves defaultGloves;
+
+    private Geometry hitboxDebug;
 
     public HumanMob(int id, Node node, String name, SkinningControl skinningControl) {
         super(id, node, name);
@@ -139,6 +142,8 @@ public class HumanMob extends Mob {
             gut.scale(1 + r.nextFloat(0.25f));
         }
         node.removeFromParent();
+        ClientGameAppState.getInstance().getGrid().remove(this);
+        hideHitboxIndicator();
     }
 
     @Override
@@ -243,29 +248,37 @@ public class HumanMob extends Mob {
         float hitboxWidth = 0.5f;
         float hitboxHeight = 1.25f;
         float hitboxLength = 0.5f;
-
         hitboxNode.move(0, hitboxHeight, 0);
         collisionShape = new RectangleCollisionShape(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
         showHitboxIndicator();
-
-    }
-
-    @Override
-    protected void showHitboxIndicator() {
-        Geometry hitboxDebug = CollisionDebugUtils.createHitboxGeometry(collisionShape.getWidth(), collisionShape.getHeight(), collisionShape.getLength(), ColorRGBA.Green);
-        ClientGameAppState.getInstance().getDebugNode().attachChild(hitboxDebug);
-        hitboxDebug.addControl(new HitboxDebugControl(hitboxNode));
-    }
-
-    @Override
-    protected void hideHitboxIndicator() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public void setPosition(Vector3f newPos) {
-        ClientGameAppState.getInstance().getGrid().remove(this);
+        WorldGrid grid = ClientGameAppState.getInstance().getGrid();
+        grid.remove(this);
         node.setLocalTranslation(newPos);
-        ClientGameAppState.getInstance().getGrid().insert(this);
+        grid.insert(this);
     }
+
+    @Override
+    public void setPositionServer(Vector3f newPos) {
+//        System.out.println("AHAHAHAHAHAHAHAHAHHAHHAHAHAH "+newPos);
+        WorldGrid grid = ServerMain.getInstance().getGrid();
+        grid.remove(this);
+        node.setLocalTranslation(newPos);
+        grid.insert(this);
+    }
+
+    @Override
+    public boolean wouldNotCollideWithEntitiesAfterMove(Vector3f moveVec) {
+        for (Collidable m : ClientGameAppState.getInstance().getGrid().getNearbyAfterMove(this,moveVec)) {
+            if (this != m && collisionShape.wouldCollideAfterMovement(m.getCollisionShape(), moveVec)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }

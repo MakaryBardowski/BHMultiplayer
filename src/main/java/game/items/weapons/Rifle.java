@@ -12,18 +12,21 @@ import game.entities.mobs.Player;
 import projectiles.controls.BulletTracerControl;
 import client.ClientGameAppState;
 import client.Main;
+import com.jme3.anim.AnimComposer;
 import com.jme3.anim.SkinningControl;
 import com.jme3.asset.AssetManager;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
+import com.jme3.effect.ParticleEmitter;
+import com.jme3.effect.ParticleMesh;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
+import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
@@ -45,6 +48,8 @@ public class Rifle extends RangedWeapon {
     private Node muzzleNode;
     private CameraRecoilControl camRecoil;
     private RecoilControl gunRecoil;
+
+    private ParticleEmitter muzzleEmitter;
 
     public Rifle(int id, float damage, ItemTemplate template, String name, Node node) {
         super(id, damage, template, name, node);
@@ -74,32 +79,39 @@ public class Rifle extends RangedWeapon {
     @Override
     public void playerHoldRight(Player p) {
         p.setEquippedRightHand(this);
-        
-        if(isEquippedByMe(p)){
 
-        AssetManager assetManager = Main.getInstance().getAssetManager();
-        Node model = (Node) assetManager.loadModel(template.getFpPath());
+        if (isEquippedByMe(p)) {
 
-        model.move(-.57f, -.65f, 2.3f);
-        model.setLocalRotation((new Quaternion()).fromAngleAxis(FastMath.PI / 48, new Vector3f(-.15f, .5f, 0)));
+            AssetManager assetManager = Main.getInstance().getAssetManager();
+            Node model = (Node) assetManager.loadModel(template.getFpPath());
 
-        Geometry ge = (Geometry) ((Node) model.getChild(0)).getChild(0);
-        Material originalMaterial = ge.getMaterial();
-        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
-        ge.setMaterial(newMaterial);
+            model.move(-.52f, -.65f, 2.3f);
+//        model.setLocalRotation((new Quaternion()).fromAngleAxis(-FastMath.PI / 1, new Vector3f(-.0f, .0f, 0)));
+            model.rotate(0, 1.5f * FastMath.DEG_TO_RAD, 0);
+            Geometry ge = (Geometry) ((Node) model.getChild(0)).getChild(0);
+            Material originalMaterial = ge.getMaterial();
+            Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+            newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+            ge.setMaterial(newMaterial);
 
-        SkinningControl skinningControl = model.getChild(0).getControl(SkinningControl.class);
-        muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
+            SkinningControl skinningControl = model.getChild(0).getControl(SkinningControl.class);
+            muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
-        gunRecoil = new RecoilControl(0.2f, -.0f, .0f, .00f);
-        camRecoil = new CameraRecoilControl(2f, -.3f, .3f, .1f);
-        p.getGunNode().addControl(gunRecoil);
-        p.getMainCameraNode().addControl(camRecoil);
+            gunRecoil = new RecoilControl(0.2f, -.0f, .0f, .00f);
+            camRecoil = new CameraRecoilControl(2f, -.3f, .3f, .1f);
+            p.getGunNode().addControl(gunRecoil);
+            p.getMainCameraNode().addControl(camRecoil);
 
-        p.getGunNode().attachChild(model);
-        p.getFirstPersonCameraNode().attachChild(p.getGunNode());
-        model.move(new Vector3f(0.43199998f, 0.46799996f, -1.6199999f));
+            p.getGunNode().attachChild(model);
+            model.scale(1.1f);
+            p.getFirstPersonCameraNode().attachChild(p.getGunNode());
+            model.move(new Vector3f(0.43199998f, 0.46799996f, -1.6199999f));
+
+            AnimComposer composer = model.getChild(0).getControl(AnimComposer.class);
+            composer.setCurrentAction("idle");
+
+            muzzleEmitter = setupMuzzleFlashEmitter();
+            muzzleNode.attachChild(muzzleEmitter);
         }
     }
 
@@ -110,6 +122,7 @@ public class Rifle extends RangedWeapon {
 
     @Override
     public void playerAttack(Player p) {
+        muzzleEmitter.emitParticles(1);
         if (!hitscan(p, ClientGameAppState.getInstance().getDestructibleNode(), false)) {
             hitscan(p, ClientGameAppState.getInstance().getMapNode(), true);
         }
@@ -127,17 +140,17 @@ public class Rifle extends RangedWeapon {
         if (results.size() > 0) {
             CollisionResult closest = results.getClosestCollision();
             cp = closest.getContactPoint();
-            
+
             int hostedConnectionId = ClientGameAppState.getInstance().getClient().getId();
-            HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(),cp.clone(),hostedConnectionId);
+            HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(), cp.clone(), hostedConnectionId);
             ClientGameAppState.getInstance().getClient().send(trailMessage);
-            
+
             if (!wallCheck) {
                 Integer hitId = Integer.valueOf(closest.getGeometry().getName());
                 InteractiveEntity mobHit = ClientGameAppState.getInstance().getMobs().get(hitId);
                 mobHit.onShot(p, damage);
             }
-            createBullet(muzzleNode.getWorldTranslation(),cp);
+            createBullet(muzzleNode.getWorldTranslation(), cp);
             recoilFire();
             return true;
         }
@@ -210,12 +223,12 @@ public class Rifle extends RangedWeapon {
         msg.setReliable(true);
         return msg;
     }
-    
-    private boolean isEquippedByMe(Player p){
-    return p == ClientGameAppState.getInstance().getPlayer();
+
+    private boolean isEquippedByMe(Player p) {
+        return p == ClientGameAppState.getInstance().getPlayer();
     }
 
-        @Override
+    @Override
     public void playerServerEquip(HumanMob m) {
         m.setEquippedRightHand(this);
     }
@@ -223,5 +236,38 @@ public class Rifle extends RangedWeapon {
     @Override
     public void playerServerUnequip(HumanMob m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    private static ParticleEmitter setupMuzzleFlashEmitter() {
+        ParticleEmitter blood
+                = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 10);
+        Material mat_red = new Material(Main.getInstance().getAssetManager(),
+                "Common/MatDefs/Misc/Particle.j3md");
+        Texture t = Main.getInstance().getAssetManager().loadTexture(
+                "Textures/Gameplay/Effects/muzzleFlash.png");
+        t.setMagFilter(Texture.MagFilter.Nearest);
+        mat_red.setTexture("Texture", t);
+
+        mat_red.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+        blood.setQueueBucket(RenderQueue.Bucket.Transparent);
+        blood.setMaterial(mat_red);
+        blood.setImagesX(1);
+        blood.setImagesY(1); // 2x2 texture animation
+        blood.setInWorldSpace(false);
+        blood.setSelectRandomImage(true);
+        blood.setRandomAngle(true);
+//        blood.setEndColor(ColorRGBA.White);
+//        blood.setStartColor(ColorRGBA.White);
+
+        blood.setEndColor(new ColorRGBA(1f, 1f, 1f, 0.5f));   // red
+        blood.setStartColor(new ColorRGBA(1f, 1f, 1f, 0.5f)); // yellow
+        blood.setStartSize(0.7f); //1f
+        blood.setEndSize(0.8f); //1.1f
+        blood.setGravity(0, 0, 0);
+        blood.setLowLife(0.03f);
+        blood.setHighLife(0.05f);
+//        blood.getParticleInfluencer().setVelocityVariation(0f);
+        blood.setParticlesPerSec(0);
+        return blood;
     }
 }

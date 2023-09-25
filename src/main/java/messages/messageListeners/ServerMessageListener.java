@@ -18,14 +18,20 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
+import game.entities.Collidable;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
 import game.entities.mobs.Mob;
+import game.entities.mobs.Player;
 import game.items.Item;
 import game.map.collision.MovementCollisionUtils;
+import game.map.collision.WorldGrid;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import messages.DestructibleDamageReceiveMessage;
 import messages.HitscanTrailMessage;
+import messages.InstantEntityPosCorrectionMessage;
+import messages.PlayerPosUpdateRequest;
 import messages.items.MobItemInteractionMessage;
 import messages.items.MobItemInteractionMessage.ItemInteractionType;
 
@@ -53,14 +59,31 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
                 serverApp.getMobs().get(nmsg.getId()).getNode().setLocalRotation(nmsg.getRot());
             }
 
-        } else if (msg instanceof MobPosUpdateMessage nmsg) {
+        } else if (msg instanceof PlayerPosUpdateRequest nmsg) {
             if (mobExists(nmsg.getId())) {
+                Player p = (Player) serverApp.getMobs().get(nmsg.getId());
 
-                if (nmsg.getId() != ClientGameAppState.getInstance().getPlayer().getId()) {
-                    MovementCollisionUtils.validateMobMovement(nmsg);
-                }
+//                if (p.getId() != ClientGameAppState.getInstance().getPlayer().getId()) {
 
-                serverApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(nmsg.getPos());
+                    if (MovementCollisionUtils.isValidMobMovement(p, nmsg.getPos(), serverApp.getGrid())) {
+                        WorldGrid grid = serverApp.getGrid();
+                        grid.remove(p);
+                        p.getNode().setLocalTranslation(nmsg.getPos());
+                        grid.insert(p);
+                    } else {
+                        InstantEntityPosCorrectionMessage corrMsg = new InstantEntityPosCorrectionMessage(p, p.getNode().getWorldTranslation());
+                        corrMsg.setReliable(true);
+                        serverApp.getServer().broadcast(Filters.in(getHostedConnectionByPlayer(p)), corrMsg);
+                    }
+
+//                } else {
+//                    WorldGrid grid = serverApp.getGrid();
+//                    grid.remove(p);
+//                    p.getNode().setLocalTranslation(nmsg.getPos());
+//                    grid.insert(p);
+//
+//                }
+
             }
 
         } else if (msg instanceof DestructibleDamageReceiveMessage hmsg) {
@@ -72,10 +95,10 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
                 d.setHealth(d.getHealth() - d.calculateDamage(hmsg.getDamage()));
                 hmsg.setReliable(true);
                 serverApp.getServer().broadcast(hmsg);
-                System.out.println(d.getName() + " has " + d.getHealth() + " HP on server");
 
                 if (d.getHealth() <= 0) {
-                    System.out.println(d.getName() + " died on server");
+                    WorldGrid grid = serverApp.getGrid();
+                    grid.remove(d);
                     serverApp.getMobs().remove(d.getId());
                 }
             }
@@ -120,5 +143,8 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
         return serverApp.getMobs().keySet().contains(id);
     }
 
+    private HostedConnection getHostedConnectionByPlayer(Player p) {
+        return serverApp.getConnectionsById().get(p.getId());
+    }
 
 }
