@@ -11,13 +11,14 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import static game.entities.DestructibleUtils.attachDestructibleToNode;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.Mob;
 import game.items.Item;
 import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.map.collision.CollisionDebugUtils;
-import game.map.collision.RectangleCollisionShape;
+import game.map.collision.RectangleAABB;
 import game.map.collision.WorldGrid;
 import lombok.Getter;
 import messages.DestructibleDamageReceiveMessage;
@@ -115,7 +116,6 @@ public class Chest extends Destructible {
         node.removeFromParent();
         ClientGameAppState.getInstance().getGrid().remove(this);
         hideHitboxIndicator();
-
     }
 
     @Override
@@ -142,7 +142,7 @@ public class Chest extends Destructible {
         float hitboxHeight = 1f;
         float hitboxLength = 1f;
         hitboxNode.move(0, hitboxHeight, 0);
-        collisionShape = new RectangleCollisionShape(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
+        collisionShape = new RectangleAABB(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
         showHitboxIndicator();
 
     }
@@ -167,6 +167,14 @@ public class Chest extends Destructible {
         WEAK_LOOT_CHEST,
         MEDIUM_LOOT_CHEST,
         GOOD_LOOT_CHEST
+    }
+
+    @Override
+    public void onCollisionClient(Collidable other) {
+    }
+    
+    @Override
+    public void onCollisionServer(Collidable other) {
     }
 
 }

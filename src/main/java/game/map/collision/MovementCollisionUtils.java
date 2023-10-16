@@ -6,8 +6,11 @@ package game.map.collision;
 
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import game.entities.Collidable;
 import game.entities.mobs.Mob;
-
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -15,10 +18,24 @@ import game.entities.mobs.Mob;
  */
 public class MovementCollisionUtils {
 
-    public static boolean isValidMobMovement(Mob m, Vector3f newPos,WorldGrid grid) {
-        return m.doesNotCollideWithEntitiesAtPosition(newPos,grid);
+    public static boolean isValidMobMovement(Mob m, Vector3f newPos, WorldGrid grid, ArrayList<Collidable> solidCollidables) {
+        return m.doesNotCollideWithEntitiesAtPositionServer(newPos, grid, solidCollidables);
     }
-    
+
+    public static void checkPassableCollisions(Mob m, WorldGrid grid, ArrayList<Collidable> passableCollidables) {
+         m.checkPassableCollisionsServer(grid, passableCollidables);
+    }
+
+    public static void sortByPassability(Set<Collidable> all, ArrayList<Collidable> solid, ArrayList<Collidable> passable) {
+        for (Collidable c : all) {
+            if (Collidable.isCollisionShapePassable(c)) {
+                passable.add(c);
+            } else {
+                solid.add(c);
+            }
+        }
+    }
+
     public static boolean[] collisionCheckWithMap(Node node, Vector3f movementVector, byte[][][] logicMap, int blockSize) {
         Vector3f newPosInLogicMap = calculateNewPosInLogicMap(node, movementVector, blockSize);
         boolean[] canMoveOnAxes = new boolean[3];

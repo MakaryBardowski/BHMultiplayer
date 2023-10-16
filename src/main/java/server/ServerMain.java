@@ -3,7 +3,7 @@ package server;
 import client.ClientGameAppState;
 import com.jme3.app.Application;
 import game.entities.mobs.Mob;
-import game.entities.mobFactories.PlayerFactory;
+import game.entities.factories.PlayerFactory;
 import game.entities.mobs.Player;
 import messages.messageListeners.ServerMessageListener;
 import messages.MobPosUpdateMessage;
@@ -30,8 +30,12 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 import game.entities.Chest;
 import game.entities.Collidable;
+import game.entities.DecorationTemplates;
+import game.entities.DecorationTemplates.DecorationTemplate;
 import game.entities.Destructible;
+import game.entities.DestructibleDecoration;
 import game.entities.InteractiveEntity;
+import game.entities.factories.DestructibleDecorationFactory;
 import game.entities.mobs.HumanMob;
 import game.items.Item;
 import game.items.ItemTemplates;
@@ -64,10 +68,10 @@ import messages.items.SetDefaultItemMessage;
  * @author normenhansen
  */
 public class ServerMain extends AbstractAppState implements ConnectionListener, MessageListener<HostedConnection> {
-    
+
     @Getter
     private static ServerMain instance;
-    
+
     private static final byte MAX_PLAYERS = 4;
     private static final String SERVER_IP = "localhost";
     private Server server;
@@ -78,13 +82,13 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     private AssetManager assetManager;
     private RenderManager renderManager;
     private Node rootNode;
-    
+
     @Getter
     private WorldGrid grid;
-    
+
     @Getter
     private HashMap<Integer, HostedConnection> connectionsById = new HashMap<>(MAX_PLAYERS);
-    
+
     public ServerMain(AssetManager assetManager, RenderManager renderManager) {
         this.assetManager = assetManager;
         this.renderManager = renderManager;
@@ -92,51 +96,23 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
         instance = this;
     }
 
-//    public static void main(String[] args) {
-////        ServerMain app = new ServerMain();
-////        app.start(JmeContext.Type.Headless);
-//    }
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
-        
-        try {
-            server = Network.createServer(NetworkingInitialization.PORT);
-            server.addConnectionListener(this);
-            server.addMessageListener(new ServerMessageListener(this));
-            server.start();
-        } catch (IOException ex) {
-            Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-
-        grid = new WorldGrid(39, 4, 16);
-        
-        for (int i = 0; i < 10; i++) {
-            Random r = new Random();
-            registerRandomChestLocal(new Vector3f(r.nextInt(38 * 4) + 4, 4, r.nextInt(38 * 4) + 4));
-            registerPlayer(null).setPositionServer(new Vector3f(r.nextInt(38 * 4) + 4, 4, r.nextInt(38 * 4) + 4));
-            
-        }
-
-//        populateMap();
+        startServer();
+        initializeCollisionGrid();
+        pupulateMap();
     }
-    
+
     @Override
     public void update(float tpf) {
         tickTimer += tpf;
-        
-//        if(ClientGameAppState.getInstance() != null && ClientGameAppState.getInstance().getPlayer() != null){
-//                    System.out.println("SERVER"+grid.getNearbyAfterMove(ClientGameAppState.getInstance().getPlayer()));
-//
-//        }
-        
+
         if (tickTimer >= TIME_PER_TICK) {
             tickTimer = 0;
             mobs.entrySet().stream().forEach(i -> {
                 //to be seriously optimized
                 if (i.getValue() instanceof Destructible d) {
                     if (d instanceof Mob x) {
-//                        System.out.println(x.getId() +" position "+x.getNode().getWorldTranslation());
                         server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
                         server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
                     }
@@ -144,27 +120,15 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
             }
             );
 
-//            System.err.println("server mobs " + mobs);
-//            mobs.values().stream()
-//                    .filter(x -> x instanceof HumanMob)
-//                    .map(x -> (HumanMob) x)
-//                    .forEach((x) -> {
-//                        System.out.println("--------Player " + x.getId());
-//                        System.out.println("equipped helmet =" + x.getHelmet() + " (default " + x.getDefaultHelmet());
-//                        System.out.println("equipped vest =" + x.getVest() + " (default " + x.getDefaultVest());
-//                        System.out.println("equipped gloves =" + x.getGloves() + " (default " + x.getDefaultGloves());
-//                        System.out.println("equipped boots =" + x.getBoots() + " (default " + x.getDefaultBoots());
-//
-//                    });
         }
-        
+
     }
-    
+
     @Override
     public void connectionAdded(Server server, HostedConnection hc) {
         Player newPlayer = registerPlayer(hc);
         connectionsById.put(newPlayer.getId(), hc);
-        
+
         List<Item> itemsInGame = mobs.entrySet().stream()
                 .filter(entry -> entry.getValue() instanceof Item)
                 .map(entity -> (Item) entity.getValue())
@@ -177,26 +141,34 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
                 .filter(entry -> entry.getValue() instanceof Chest)
                 .map(entity -> (Chest) entity.getValue())
                 .toList();
-        
+
+        List<DestructibleDecoration> destructibleDecorationsInGame = mobs.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof DestructibleDecoration)
+                .map(entity -> (DestructibleDecoration) entity.getValue())
+                .toList();
+
         itemsInGame.forEach(item -> {
             AbstractMessage msg = item.createNewEntityMessage();
             msg.setReliable(true);
             server.broadcast(Filters.in(hc), msg);
         });
-        
+
         mobsInGame.forEach(mob -> {
             AbstractMessage msg = mob.createNewEntityMessage();
-            msg.setReliable(true);
             server.broadcast(Filters.in(hc), msg);
         });
-        
+
         mobsInGame.forEach(mob -> {
             sendNewEntityEquipmentInfo(mob, Filters.in(hc));
         });
-        
+
+        destructibleDecorationsInGame.forEach(dd -> {
+            AbstractMessage msg = dd.createNewEntityMessage();
+            server.broadcast(Filters.in(hc), msg);
+        });
+
         chestsInGame.forEach(chest -> {
             AbstractMessage chestMsg = chest.createNewEntityMessage();
-            chestMsg.setReliable(true);
             server.broadcast(Filters.in(hc), chestMsg);
             for (Item item : chest.getEquipment()) {
                 if (item != null) {
@@ -205,9 +177,9 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
                     server.broadcast(Filters.in(hc), msg);
                 }
             }
-            
+
         });
-        
+
         SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation());
         messageToNewPlayer.setReliable(true);
         server.broadcast(Filters.in(hc), messageToNewPlayer);
@@ -216,42 +188,151 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
         PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation());
         msg.setReliable(true);
         server.broadcast(Filters.notEqualTo(hc), msg);
-        
+
         sendNewEntityEquipmentInfo(newPlayer, null);
-        
+
     }
-    
+
     @Override
     public void connectionRemoved(Server server, HostedConnection hc) {
     }
-    
+
     @Override
     public void messageReceived(HostedConnection s, Message msg) {
     }
-    
+
     public Server getServer() {
         return server;
     }
-    
+
     public ConcurrentHashMap<Integer, InteractiveEntity> getMobs() {
         return mobs;
     }
-    
+
     private Item registerItemAndNotifyTCP(ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
         Item i = registerItemLocal(template, droppable);
         sendMessageTCP(i.createNewEntityMessage(), notificationFilter);
         return i;
     }
-    
+
     public Item registerItemLocal(ItemTemplate template, boolean droppable) {
         ItemFactory ifa = new ItemFactory(null);
         Item item = ifa.createItem(currentMaxId++, template, droppable);
         return registerEntityLocal(item);
     }
-    
-    public Chest registerRandomChestLocal(Vector3f offset) {
+
+    private <T extends InteractiveEntity> T registerEntityLocal(T entity) {
+        this.mobs.put(entity.getId(), entity);
+        return entity;
+    }
+
+    private void sendNewEntityEquipmentInfo(Mob mob, Filter<HostedConnection> filter) {
+        if (mob instanceof HumanMob hm) {
+            SetDefaultItemMessage dhmsg = new SetDefaultItemMessage(hm.getDefaultHelmet(), hm);
+            sendMessageTCP(dhmsg, filter);
+
+            SetDefaultItemMessage dvmsg = new SetDefaultItemMessage(hm.getDefaultVest(), hm);
+            sendMessageTCP(dvmsg, filter);
+
+            SetDefaultItemMessage dgmsg = new SetDefaultItemMessage(hm.getDefaultGloves(), hm);
+            sendMessageTCP(dgmsg, filter);
+
+            SetDefaultItemMessage dbmsg = new SetDefaultItemMessage(hm.getDefaultBoots(), hm);
+            sendMessageTCP(dbmsg, filter);
+
+            Item[] initalEq = {hm.getHelmet(), hm.getVest(), hm.getGloves(), hm.getBoots()};
+
+            for (Item i : initalEq) {
+                if (i != null) {
+                    MobItemInteractionMessage pmsg = new MobItemInteractionMessage(i, mob, ItemInteractionType.EQUIP);
+                    sendMessageTCP(pmsg, filter);
+                }
+            }
+        }
+
+        for (Item i : mob.getEquipment()) {
+            if (i != null) {
+                MobItemInteractionMessage pmsg = new MobItemInteractionMessage(i, mob, ItemInteractionType.PICK_UP);
+                sendMessageTCP(pmsg, filter);
+            }
+        }
+
+    }
+
+    private void sendMessageTCP(AbstractMessage imsg, Filter<HostedConnection> filter) {
+        imsg.setReliable(true);
+        if (filter == null) {
+            server.broadcast(imsg);
+        } else {
+            server.broadcast(filter, imsg);
+        }
+    }
+
+    public void populateMap() {
+        registerRandomChest(new Vector3f(17, 4, 5));
+        registerRandomChest(new Vector3f(17 + 2.3f * 0.8f, 4, 5));
+
+    }
+
+    public void insertIntoCollisionGrid(Collidable c) {
+        grid.insert(c);
+    }
+
+    private void pupulateMap() {
+        for (int i = 0; i < 10; i++) {
+            Random r = new Random();
+            registerRandomChest(new Vector3f(r.nextInt(38 * 4) + 4, 4, r.nextInt(38 * 4) + 4));
+            registerPlayer(null).setPositionServer(new Vector3f(r.nextInt(38 * 4) + 4, 4, r.nextInt(38 * 4) + 4));
+            registerRandomDestructibleDecoration(new Vector3f(r.nextInt(38 * 4) + 4, 4, r.nextInt(38 * 4) + 4));
+
+        }
+    }
+
+    private void registerRandomDestructibleDecoration(Vector3f pos) {
+        int randomNumber = new Random().nextInt(2);
+        DecorationTemplate template = DecorationTemplates.TABLE;
+        if (randomNumber == 0) {
+            template = DecorationTemplates.TABLE;
+        } else if (randomNumber == 1) {
+            template = DecorationTemplates.BARBED_WIRE;
+        }
+
+        DestructibleDecoration d = DestructibleDecorationFactory.createDecoration(currentMaxId++, rootNode, pos, template, assetManager);
+        registerEntityLocal(d);
+        insertIntoCollisionGrid(d);
+    }
+
+    public Player registerPlayer(HostedConnection hc) {
+        Helmet playerHead = (Helmet) registerItemAndNotifyTCP(ItemTemplates.HEAD_1, false, Filters.notIn(hc));
+        Vest playerVest = (Vest) registerItemAndNotifyTCP(ItemTemplates.TORSO_1, false, Filters.notIn(hc));
+        Gloves playerGloves = (Gloves) registerItemAndNotifyTCP(ItemTemplates.HAND_1, false, Filters.notIn(hc));
+        Boots playerBoots = (Boots) registerItemAndNotifyTCP(ItemTemplates.LEG_1, false, Filters.notIn(hc));
+        Rifle playerRifle = (Rifle) registerItemAndNotifyTCP(ItemTemplates.RIFLE_MANNLICHER_95, true, Filters.notIn(hc));
+
+        Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide();
+
+        player.addToEquipment(playerRifle);
+        player.equipServer(playerRifle);
+
+        player.equipServer(playerHead);
+        player.setDefaultHelmet(playerHead);
+
+        player.equipServer(playerVest);
+        player.setDefaultVest(playerVest);
+
+        player.equipServer(playerGloves);
+        player.setDefaultGloves(playerGloves);
+
+        player.equipServer(playerBoots);
+        player.setDefaultBoots(playerBoots);
+
+        insertIntoCollisionGrid(player);
+
+        return registerEntityLocal(player);
+    }
+
+    public Chest registerRandomChest(Vector3f offset) {
         Chest chest = Chest.createRandomChestServer(currentMaxId++, rootNode, offset, assetManager);
-        
         Random r = new Random();
         int randomValue = r.nextInt(6);
         if (randomValue < 2) {
@@ -264,96 +345,25 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
             playerBoots.setArmorValue(0.25f);
             chest.addToEquipment(playerBoots);
         }
-        
+
         insertIntoCollisionGrid(chest);
-        
+
         return registerEntityLocal(chest);
     }
-    
-    private <T extends InteractiveEntity> T registerEntityLocal(T entity) {
-        this.mobs.put(entity.getId(), entity);
-        return entity;
-    }
-    
-    private void sendNewEntityEquipmentInfo(Mob mob, Filter<HostedConnection> filter) {
-        if (mob instanceof HumanMob hm) {
-            SetDefaultItemMessage dhmsg = new SetDefaultItemMessage(hm.getDefaultHelmet(), hm);
-            sendMessageTCP(dhmsg, filter);
-            
-            SetDefaultItemMessage dvmsg = new SetDefaultItemMessage(hm.getDefaultVest(), hm);
-            sendMessageTCP(dvmsg, filter);
-            
-            SetDefaultItemMessage dgmsg = new SetDefaultItemMessage(hm.getDefaultGloves(), hm);
-            sendMessageTCP(dgmsg, filter);
-            
-            SetDefaultItemMessage dbmsg = new SetDefaultItemMessage(hm.getDefaultBoots(), hm);
-            sendMessageTCP(dbmsg, filter);
-            
-            Item[] initalEq = {hm.getHelmet(), hm.getVest(), hm.getGloves(), hm.getBoots()};
-            
-            for (Item i : initalEq) {
-                if (i != null) {
-                    MobItemInteractionMessage pmsg = new MobItemInteractionMessage(i, mob, ItemInteractionType.EQUIP);
-                    sendMessageTCP(pmsg, filter);
-                }
-            }
-        }
-        
-        for (Item i : mob.getEquipment()) {
-            if (i != null) {
-                MobItemInteractionMessage pmsg = new MobItemInteractionMessage(i, mob, ItemInteractionType.PICK_UP);
-                sendMessageTCP(pmsg, filter);
-            }
-        }
-        
-    }
-    
-    private void sendMessageTCP(AbstractMessage imsg, Filter<HostedConnection> filter) {
-        imsg.setReliable(true);
-        if (filter == null) {
-            server.broadcast(imsg);
-        } else {
-            server.broadcast(filter, imsg);
+
+    private void startServer() {
+        try {
+            server = Network.createServer(NetworkingInitialization.PORT);
+            server.addConnectionListener(this);
+            server.addMessageListener(new ServerMessageListener(this));
+            server.start();
+        } catch (IOException ex) {
+            Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public Player registerPlayer(HostedConnection hc) {
-        Helmet playerHead = (Helmet) registerItemAndNotifyTCP(ItemTemplates.HEAD_1, false, Filters.notIn(hc));
-        Vest playerVest = (Vest) registerItemAndNotifyTCP(ItemTemplates.TORSO_1, false, Filters.notIn(hc));
-        Gloves playerGloves = (Gloves) registerItemAndNotifyTCP(ItemTemplates.HAND_1, false, Filters.notIn(hc));
-        Boots playerBoots = (Boots) registerItemAndNotifyTCP(ItemTemplates.LEG_1, false, Filters.notIn(hc));
-        Rifle playerRifle = (Rifle) registerItemAndNotifyTCP(ItemTemplates.RIFLE_MANNLICHER_95, true, Filters.notIn(hc));
-        
-        Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide();
-        
-        player.addToEquipment(playerRifle);
-        player.equipServer(playerRifle);
-        
-        player.equipServer(playerHead);
-        player.setDefaultHelmet(playerHead);
-        
-        player.equipServer(playerVest);
-        player.setDefaultVest(playerVest);
-        
-        player.equipServer(playerGloves);
-        player.setDefaultGloves(playerGloves);
-        
-        player.equipServer(playerBoots);
-        player.setDefaultBoots(playerBoots);
-        
-        insertIntoCollisionGrid(player);
-        
-        return registerEntityLocal(player);
+
+    private void initializeCollisionGrid() {
+        grid = new WorldGrid(39, 4, 16);
+
     }
-    
-    public void populateMap() {
-        registerRandomChestLocal(new Vector3f(17, 4, 5));
-        registerRandomChestLocal(new Vector3f(17 + 2.3f * 0.8f, 4, 5));
-        
-    }
-    
-    public void insertIntoCollisionGrid(Collidable c) {
-        grid.insert(c);
-    }
-    
 }

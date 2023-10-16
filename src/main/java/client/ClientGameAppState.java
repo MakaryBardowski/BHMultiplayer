@@ -5,7 +5,7 @@ import game.map.Map;
 import game.map.MapGenerator;
 import game.map.MapType;
 import game.entities.mobs.Mob;
-import game.entities.mobFactories.PlayerFactory;
+import game.entities.factories.PlayerFactory;
 import game.entities.mobs.Player;
 import messages.messageListeners.ClientMessageListener;
 import static client.ClientSynchronizationUtils.interpolateMobPosition;

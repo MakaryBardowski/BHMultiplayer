@@ -17,7 +17,7 @@ import game.entities.Destructible;
 public interface MobInterface {
 
     public void move(float tpf, ClientGameAppState cm);
-    public boolean wouldNotCollideWithEntitiesAfterMove(Vector3f moveVec);
+    public boolean wouldNotCollideWithSolidEntitiesAfterMove(Vector3f moveVec);
     
     public void attack();
 

@@ -54,7 +54,6 @@ public class WorldGrid {
         return x * 1000 + z + y * 1_000_000;
     }
 
-
     public void insert(Collidable entity) {
         float centerX = entity.getHitboxNode().getWorldTranslation().getX();
 
@@ -113,12 +112,12 @@ public class WorldGrid {
             }
         }
     }
-
-    public Set<Collidable> getNearbyAfterMove(Collidable entity) {
+    
+        public Set<Collidable> getNearbyAtPosition(Collidable entity,Vector3f pos) {
         HashSet<Collidable> output = new HashSet<>();
-        float centerX = entity.getHitboxNode().getWorldTranslation().getX();
-        float centerY = entity.getHitboxNode().getWorldTranslation().getY();
-        float centerZ = entity.getHitboxNode().getWorldTranslation().getZ();
+        float centerX = pos.getX();
+        float centerY = pos.getY();
+        float centerZ = pos.getZ();
         float width = entity.getCollisionShape().getWidth();
         float height = entity.getCollisionShape().getHeight();
         float depth = entity.getCollisionShape().getLength();
@@ -141,9 +140,12 @@ public class WorldGrid {
         }
         return output;
     }
-    
-    
-        public Set<Collidable> getNearbyAfterMove(Collidable entity,Vector3f moveVec) {
+
+    public Set<Collidable> getNearby(Collidable entity) {
+        return getNearbyAtPosition(entity,entity.getHitboxNode().getWorldTranslation());
+    }
+
+    public Set<Collidable> getNearbyAfterMove(Collidable entity, Vector3f moveVec) {
         HashSet<Collidable> output = new HashSet<>();
         Vector3f newPos = entity.getHitboxNode().getWorldTranslation().add(moveVec);
         float centerX = newPos.getX();

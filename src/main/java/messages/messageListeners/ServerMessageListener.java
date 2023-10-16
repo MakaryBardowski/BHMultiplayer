@@ -26,6 +26,7 @@ import game.entities.mobs.Player;
 import game.items.Item;
 import game.map.collision.MovementCollisionUtils;
 import game.map.collision.WorldGrid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import messages.DestructibleDamageReceiveMessage;
@@ -63,26 +64,23 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
             if (mobExists(nmsg.getId())) {
                 Player p = (Player) serverApp.getMobs().get(nmsg.getId());
 
-//                if (p.getId() != ClientGameAppState.getInstance().getPlayer().getId()) {
-
-                    if (MovementCollisionUtils.isValidMobMovement(p, nmsg.getPos(), serverApp.getGrid())) {
-                        WorldGrid grid = serverApp.getGrid();
-                        grid.remove(p);
-                        p.getNode().setLocalTranslation(nmsg.getPos());
-                        grid.insert(p);
-                    } else {
-                        InstantEntityPosCorrectionMessage corrMsg = new InstantEntityPosCorrectionMessage(p, p.getNode().getWorldTranslation());
-                        corrMsg.setReliable(true);
-                        serverApp.getServer().broadcast(Filters.in(getHostedConnectionByPlayer(p)), corrMsg);
-                    }
-
-//                } else {
-//                    WorldGrid grid = serverApp.getGrid();
-//                    grid.remove(p);
-//                    p.getNode().setLocalTranslation(nmsg.getPos());
-//                    grid.insert(p);
-//
-//                }
+                var allCollidables = serverApp.getGrid().getNearbyAtPosition(p, nmsg.getPos());
+                var solid = new ArrayList<Collidable>();
+                var passable = new ArrayList<Collidable>();
+                MovementCollisionUtils.sortByPassability(allCollidables,solid,passable);
+                
+                if (MovementCollisionUtils.isValidMobMovement(p, nmsg.getPos(), serverApp.getGrid(),solid)) {
+                    WorldGrid grid = serverApp.getGrid();
+                    grid.remove(p);
+                    p.getNode().setLocalTranslation(nmsg.getPos());
+                    grid.insert(p);
+                    
+                    MovementCollisionUtils.checkPassableCollisions(p, grid, passable);
+                } else {
+                    InstantEntityPosCorrectionMessage corrMsg = new InstantEntityPosCorrectionMessage(p, p.getNode().getWorldTranslation());
+                    corrMsg.setReliable(true);
+                    serverApp.getServer().broadcast(Filters.in(getHostedConnectionByPlayer(p)), corrMsg);
+                }
 
             }
 

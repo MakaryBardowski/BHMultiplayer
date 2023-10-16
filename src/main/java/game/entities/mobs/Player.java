@@ -152,7 +152,7 @@ public class Player extends HumanMob {
 
         if (forward || backward || left || right) {
             Vector3f movementVector = new Vector3f(0, 0, 0);
-            System.out.println("\n\n");
+
             WorldGrid collisionGrid = ClientGameAppState.getInstance().getGrid();
             collisionGrid.remove(this);
 
@@ -182,8 +182,8 @@ public class Player extends HumanMob {
             }
 
             movementVector.setY(0);
-            // UMC odpowiada za to zebys nie mogl stanac bardzo blisko sciany, daje minimalna odleglosc miedzy toba a sciana
-//            removeFromGrid(cm.getWorldGrid());
+
+            
             Vector3f UMC = movementVector.clone();
             float wallCollisionRange = 0.75f;
             if (UMC.getX() < 0) {
@@ -204,27 +204,21 @@ public class Player extends HumanMob {
             boolean canMoveOnAxisX = canMoveOnAxes[0];
             boolean canMoveOnAxisZ = canMoveOnAxes[2];
 
-            if (canMoveOnAxisZ && wouldNotCollideWithEntitiesAfterMove(new Vector3f(0, 0, movementVector.getZ()))) {
+            if (canMoveOnAxisZ && wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(0, 0, movementVector.getZ()))) {
                 node.move(0, 0, movementVector.getZ());
-                System.out.println("canMoveX "+true);
             }
-            if (canMoveOnAxisX && wouldNotCollideWithEntitiesAfterMove(new Vector3f(movementVector.getX(), 0, 0))) {
+            if (canMoveOnAxisX && wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(movementVector.getX(), 0, 0))) {
                 node.move(movementVector.getX(), 0, 0);
-                                System.out.println("canMoveZ "+true);
 
             }
 
             if (node.getWorldTranslation().distance(serverLocation) > speed * tpf) {
                 PlayerPosUpdateRequest posu = new PlayerPosUpdateRequest(id, node.getWorldTranslation());
                 cm.getClient().send(posu);
-                System.out.println(posu);
             }
 
-//            for(int i = 0 ;i < 10000;i++){
-//            wouldNotCollideWithEntitiesAfterMove(new Vector3f(0, 0, movementVector.getZ()));
-//                        wouldNotCollideWithEntitiesAfterMove(new Vector3f(0, 0, movementVector.getX()));
-//
-//            }
+            checkCollisionWithPassableEntities();
+
             collisionGrid.insert(this);
         }
     }
@@ -266,5 +260,7 @@ public class Player extends HumanMob {
     public void setCameraMovementLocked(boolean cameraMovementLocked) {
         this.cameraMovementLocked = cameraMovementLocked;
     }
+
+
 
 }

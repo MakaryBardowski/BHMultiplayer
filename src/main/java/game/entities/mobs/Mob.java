@@ -12,14 +12,16 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import game.entities.Collidable;
+import game.entities.StatusEffectContainer;
 import game.map.collision.WorldGrid;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
  *
  * @author 48793
  */
-public abstract class Mob extends Destructible implements CollidableInterface, MobInterface {
+public abstract class Mob extends StatusEffectContainer implements CollidableInterface, MobInterface {
 
     private static final float DEFAULT_SPEED = 10; //10
     protected static final int EQUIPMENT_SIZE = 18;
@@ -38,22 +40,28 @@ public abstract class Mob extends Destructible implements CollidableInterface, M
     protected Quaternion serverRotation;
     protected float posInterpolationValue;
     protected float rotInterpolationValue;
-    
 
     public Mob(int id, Node node, String name) {
         super(id, name, node);
         this.serverLocation = node.getWorldTranslation();
         this.serverRotation = node.getLocalRotation();
     }
-    
-    public boolean doesNotCollideWithEntitiesAtPosition(Vector3f newPos,WorldGrid grid){
-            for (Collidable m : grid.getNearbyAfterMove(this)) {
-            if (this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(),newPos)) {
+
+    public boolean doesNotCollideWithEntitiesAtPositionServer(Vector3f newPos, WorldGrid grid,ArrayList<Collidable> solidCollidables) {
+        for (Collidable m : solidCollidables) {
+            if (this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
                 return false;
             }
         }
-
         return true;
+    }
+
+    public void checkPassableCollisionsServer(WorldGrid grid,ArrayList<Collidable> passableCollidables) {
+        for (Collidable m : passableCollidables) {
+            if (this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), this.getNode().getWorldTranslation())) {
+                m.onCollisionServer(this);
+            }
+        }
     }
 
     public Vector3f getServerLocation() {
@@ -136,5 +144,5 @@ public abstract class Mob extends Destructible implements CollidableInterface, M
         }
         return item;
     }
-    
+
 }

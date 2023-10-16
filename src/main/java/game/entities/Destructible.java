@@ -6,7 +6,6 @@ package game.entities;
 
 import com.jme3.scene.Node;
 import game.entities.mobs.Damageable;
-import game.map.collision.RectangleCollisionShape;
 import lombok.Getter;
 import lombok.Setter;
 

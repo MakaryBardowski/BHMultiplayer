@@ -20,6 +20,7 @@ import messages.HitscanTrailMessage;
 import messages.NewChestMessage;
 import messages.PlayerPosUpdateRequest;
 import messages.InstantEntityPosCorrectionMessage;
+import messages.NewDestructibleDecorationMessage;
 import messages.items.ChestItemInteractionMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewBootsMessage;
@@ -63,6 +64,7 @@ public class NetworkingInitialization {
         Serializer.registerClass(SetDefaultItemMessage.class);
         Serializer.registerClass(PlayerPosUpdateRequest.class);
         Serializer.registerClass(InstantEntityPosCorrectionMessage.class);
+        Serializer.registerClass(NewDestructibleDecorationMessage.class);
 
     }
 

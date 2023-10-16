@@ -46,8 +46,8 @@ public class Main extends SimpleApplication {
         NetworkingInitialization.initializeSerializables();
 
 //        this.start(JmeContext.Type.Display);
-//        DetailedProfilerState dps = new DetailedProfilerState();
-//        stateManager.attach(dps);
+        DetailedProfilerState dps = new DetailedProfilerState();
+        stateManager.attach(dps);
 
         MainMenuAppState mms = new MainMenuAppState(assetManager, inputManager, audioRenderer, guiViewPort);
         stateManager.attach(mms);
@@ -75,7 +75,7 @@ public class Main extends SimpleApplication {
     private static void setupSettings(SimpleApplication app) {
         AppSettings settings1 = new AppSettings(true);
         settings1.setResolution(STARTING_RESOLUTION_WIDTH, STARTING_RESOLUTION_HEIGHT);
-//        settings1.setFullscreen(true);
+        settings1.setFullscreen(true);
         settings1.setVSync(true);
         settings1.setFrameRate(2000);
         

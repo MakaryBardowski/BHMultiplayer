@@ -33,7 +33,8 @@ import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.map.collision.CollisionDebugUtils;
-import game.map.collision.RectangleCollisionShape;
+import game.map.collision.CollisionShape;
+import game.map.collision.RectangleAABB;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -175,7 +176,6 @@ public class HumanMob extends Mob {
 
     @Override
     public void onCollision() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     public Holdable getEquippedRightHand() {
@@ -249,7 +249,7 @@ public class HumanMob extends Mob {
         float hitboxHeight = 1.25f;
         float hitboxLength = 0.5f;
         hitboxNode.move(0, hitboxHeight, 0);
-        collisionShape = new RectangleCollisionShape(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
+        collisionShape = new RectangleAABB(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
         showHitboxIndicator();
     }
 
@@ -271,14 +271,33 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public boolean wouldNotCollideWithEntitiesAfterMove(Vector3f moveVec) {
+    public boolean wouldNotCollideWithSolidEntitiesAfterMove(Vector3f moveVec) {
+        Vector3f newPos = collisionShape.getPosition().add(moveVec);
         for (Collidable m : ClientGameAppState.getInstance().getGrid().getNearbyAfterMove(this,moveVec)) {
-            if (this != m && collisionShape.wouldCollideAfterMovement(m.getCollisionShape(), moveVec)) {
+            if (isNotCollisionShapePassable(m) && this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
                 return false;
             }
         }
 
         return true;
+    }
+    
+    protected void checkCollisionWithPassableEntities() {
+        Vector3f newPos = collisionShape.getPosition();
+        for (Collidable m : ClientGameAppState.getInstance().getGrid().getNearby(this)) {
+            if (isCollisionShapePassable(m) && this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
+                m.onCollisionClient(this); // mine explodes etc
+            }
+        }
+
+    }
+
+    @Override
+    public void onCollisionClient(Collidable other) {
+    }
+    
+    @Override
+    public void onCollisionServer(Collidable other) {
     }
 
 }

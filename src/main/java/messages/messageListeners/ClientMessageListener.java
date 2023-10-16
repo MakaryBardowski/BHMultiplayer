@@ -24,7 +24,9 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.entities.Chest;
 import game.entities.Destructible;
+import game.entities.DestructibleDecoration;
 import game.entities.InteractiveEntity;
+import game.entities.factories.DestructibleDecorationFactory;
 import game.entities.mobs.HumanMob;
 import game.items.Item;
 import game.items.armor.Boots;
@@ -39,6 +41,7 @@ import messages.DestructibleDamageReceiveMessage;
 import messages.HitscanTrailMessage;
 import messages.InstantEntityPosCorrectionMessage;
 import messages.NewChestMessage;
+import messages.NewDestructibleDecorationMessage;
 import messages.items.ChestItemInteractionMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.MobItemInteractionMessage.ItemInteractionType;
@@ -92,6 +95,8 @@ public class ClientMessageListener implements MessageListener<Client> {
             setHumanMobDefaultItem(dmsg);
         } else if (m instanceof ChestItemInteractionMessage cimsg) {
             handleChestItemInteraction(cimsg);
+        } else if (m instanceof NewDestructibleDecorationMessage nmsg) {
+            addNewDestructibleDecoration(nmsg);
         } else if (m instanceof NewChestMessage nmsg) {
             addNewChest(nmsg);
         } else if (m instanceof PlayerJoinedMessage nmsg) {
@@ -359,4 +364,13 @@ public class ClientMessageListener implements MessageListener<Client> {
             getEntityById(cmsg.getId()).setPosition(cmsg.getPos());
         });
     }
+
+    private void addNewDestructibleDecoration(NewDestructibleDecorationMessage nmsg) {
+        if (mobDoesNotExistLocally(nmsg.getId())) {
+            enqueueExecution(() -> {
+                DestructibleDecoration d = DestructibleDecorationFactory.createDecoration(nmsg.getId(),clientApp.getDestructibleNode(),nmsg.getPos(),nmsg.getTemplate(),clientApp.getAssetManager());
+                clientApp.getMobs().put(d.getId(), d);
+                ClientGameAppState.getInstance().getGrid().insert(d);
+            });
+        }    }
 }
