@@ -8,14 +8,16 @@ package statusEffects;
  *
  * @author 48793
  */
-public class TemporaryEffect extends StatusEffect {
+public abstract class TemporaryEffect extends StatusEffect {
 
-    protected int ticks = 0;
+    protected int ticks = -1; //effect starts immediately
     protected int maxTicks;
 
-    public TemporaryEffect(String name, EffectProcType procType,int maxTicks) {
+    public TemporaryEffect(String name, EffectProcType procType, int maxTicks) {
         super(name, procType);
         this.maxTicks = maxTicks;
     }
+
+
 
 }

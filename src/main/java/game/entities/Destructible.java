@@ -17,8 +17,8 @@ import lombok.Setter;
 @Setter
 public abstract class Destructible extends Collidable implements Damageable{
 
-    protected float health = 10;
-    protected float maxHealth = 10;
+    protected float health = 12;
+    protected float maxHealth = 12;
 
 
     public Destructible(int id,String name, Node node) {
@@ -26,6 +26,6 @@ public abstract class Destructible extends Collidable implements Damageable{
     }
     
     protected abstract void createHitbox();
-
+    public void onDeathServer(){};
 
 }

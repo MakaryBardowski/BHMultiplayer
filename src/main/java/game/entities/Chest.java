@@ -66,8 +66,9 @@ public class Chest extends Destructible {
 
     public static Chest createRandomChestClient(int id, Node parentNode, Vector3f offset, AssetManager a) {
         Node node = (Node) a.loadModel(WOODEN_CRATE);
-        Chest chest = new Chest(id, "Crate", node);
+        Chest chest = new Chest(id, "Crate "+id, node);
         node.scale(0.8f);
+        chest.hitboxNode.scale(1.25f);
         attachDestructibleToNode(chest, parentNode, offset);
         setupModelShootability(node, id);
         setupModelLight(node);
@@ -76,7 +77,7 @@ public class Chest extends Destructible {
 
     public static Chest createRandomChestServer(int id, Node parentNode, Vector3f offset, AssetManager a) {
         Node node = (Node) a.loadModel(WOODEN_CRATE);
-        Chest chest = new Chest(id, "Crate", node);
+        Chest chest = new Chest(id, "Crate "+id, node);
         attachDestructibleToNode(chest, parentNode, offset);
         return chest;
     }

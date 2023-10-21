@@ -4,15 +4,18 @@
  */
 package statusEffects;
 
+import game.entities.StatusEffectContainer;
+
 /**
  *
  * @author 48793
  */
 public class EffectFactory {
-    
-    public DamageOverTimeEffect createBleedEffect(){
-//    return new DamageOverTimeEffect("bleed",PERIODICAL,);
-return null;
+
+    public static DamageOverTimeEffect createBleedEffect(StatusEffectContainer target, float damage, int maxTicks, int procsEvery) {
+        var dot = new DamageOverTimeEffect("Bleed", EffectProcType.PERIODICAL, maxTicks, procsEvery, damage);
+        dot.setTarget(target);
+        return dot;
     }
-    
+
 }

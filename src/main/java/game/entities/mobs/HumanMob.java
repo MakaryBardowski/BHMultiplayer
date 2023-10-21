@@ -156,6 +156,8 @@ public class HumanMob extends Mob {
     public void receiveDamage(float damage) {
 
         health -= calculateDamage(damage);
+        
+        if(this != ClientGameAppState.getInstance().getPlayer()){
         ParticleEmitter blood = EmitterPooler.getBlood();
         Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 2, 0);
         blood.setLocalTranslation(bloodPos);
@@ -164,6 +166,7 @@ public class HumanMob extends Mob {
             die();
         } else {
             blood.emitParticles(20);
+        }
         }
     }
 

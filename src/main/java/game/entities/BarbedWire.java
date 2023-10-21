@@ -13,14 +13,18 @@ import game.map.collision.RectangleAABB;
 import game.map.collision.RectangleOBB;
 import messages.DestructibleDamageReceiveMessage;
 import server.ServerMain;
+import statusEffects.DamageOverTimeEffect;
+import statusEffects.EffectFactory;
+import statusEffects.EffectProcType;
+import statusEffects.TimedSlowEffect;
 
 /**
  *
  * @author 48793
  */
 public class BarbedWire extends DestructibleDecoration {
-    
-    private float damage = 0.2f;
+
+    private float damage = 2f;
 
     public BarbedWire(int id, String name, Node node, DecorationTemplates.DecorationTemplate template) {
         super(id, name, node, template);
@@ -45,15 +49,15 @@ public class BarbedWire extends DestructibleDecoration {
 
     @Override
     public void onCollisionClient(Collidable other) {
-        System.out.println("you receive CLIENT damage!");
+
     }
 
     @Override
     public void onCollisionServer(Collidable other) {
         if (other instanceof Mob m) {
-            DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(m.getId(), damage);
-            hpUpd.setReliable(true);
-            ServerMain.getInstance().getServer().broadcast(hpUpd);
+            DamageOverTimeEffect dot = EffectFactory.createBleedEffect(m, damage, 4, 5);
+            m.addEffect(dot);
+
         }
     }
 }

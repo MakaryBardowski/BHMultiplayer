@@ -68,7 +68,7 @@ public class Player extends HumanMob {
         super(id, node, name, skinningControl);
         this.mainCamera = mainCamera;
         hotbar = new Item[HOTBAR_SIZE];
-        forward = true;
+//        forward = true;
     }
 
     @Override

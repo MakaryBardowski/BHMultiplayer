@@ -4,17 +4,10 @@
  */
 package messages.messageListeners;
 
-import messages.SystemHealthUpdateMessage;
-import messages.MobUpdateMessage;
-import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
-import com.jme3.network.AbstractMessage;
-import com.jme3.network.Client;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
-import client.ClientGameAppState;
 import server.ServerMain;
-import com.jme3.math.Vector3f;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
@@ -27,8 +20,6 @@ import game.items.Item;
 import game.map.collision.MovementCollisionUtils;
 import game.map.collision.WorldGrid;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import messages.DestructibleDamageReceiveMessage;
 import messages.HitscanTrailMessage;
 import messages.InstantEntityPosCorrectionMessage;
@@ -67,14 +58,14 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
                 var allCollidables = serverApp.getGrid().getNearbyAtPosition(p, nmsg.getPos());
                 var solid = new ArrayList<Collidable>();
                 var passable = new ArrayList<Collidable>();
-                MovementCollisionUtils.sortByPassability(allCollidables,solid,passable);
-                
-                if (MovementCollisionUtils.isValidMobMovement(p, nmsg.getPos(), serverApp.getGrid(),solid)) {
+                MovementCollisionUtils.sortByPassability(allCollidables, solid, passable);
+
+                if (MovementCollisionUtils.isValidMobMovement(p, nmsg.getPos(), serverApp.getGrid(), solid)) {
                     WorldGrid grid = serverApp.getGrid();
                     grid.remove(p);
                     p.getNode().setLocalTranslation(nmsg.getPos());
                     grid.insert(p);
-                    
+
                     MovementCollisionUtils.checkPassableCollisions(p, grid, passable);
                 } else {
                     InstantEntityPosCorrectionMessage corrMsg = new InstantEntityPosCorrectionMessage(p, p.getNode().getWorldTranslation());
@@ -89,16 +80,8 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
             if (i != null) { // if the mob doesnt exist, it means the 
                 // info was sent from a lagged user - dont forward it to others
                 Destructible d = ((Destructible) i);
+                handleDestructibleDamageReceive(d, hmsg, serverApp);
 
-                d.setHealth(d.getHealth() - d.calculateDamage(hmsg.getDamage()));
-                hmsg.setReliable(true);
-                serverApp.getServer().broadcast(hmsg);
-
-                if (d.getHealth() <= 0) {
-                    WorldGrid grid = serverApp.getGrid();
-                    grid.remove(d);
-                    serverApp.getMobs().remove(d.getId());
-                }
             }
         } else if (msg instanceof HitscanTrailMessage hmsg) {
 
@@ -143,6 +126,26 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
 
     private HostedConnection getHostedConnectionByPlayer(Player p) {
         return serverApp.getConnectionsById().get(p.getId());
+    }
+
+    public static void checkAndManageDestructibleDeath(Destructible d, ServerMain serverApp) {
+        if (d.getHealth() <= 0) {
+            WorldGrid grid = serverApp.getGrid();
+            grid.remove(d);
+            serverApp.getMobs().remove(d.getId());
+            d.onDeathServer();
+        }
+    }
+
+    public static void applyDestructibleDamageAndNotifyClients(Destructible d, DestructibleDamageReceiveMessage hmsg, ServerMain serverApp) {
+        d.setHealth(d.getHealth() - d.calculateDamage(hmsg.getDamage()));
+        hmsg.setReliable(true);
+        serverApp.getServer().broadcast(hmsg);
+    }
+
+    public static void handleDestructibleDamageReceive(Destructible d, DestructibleDamageReceiveMessage hmsg, ServerMain serverApp) {
+        applyDestructibleDamageAndNotifyClients(d, hmsg, serverApp);
+        checkAndManageDestructibleDeath(d, serverApp);
     }
 
 }

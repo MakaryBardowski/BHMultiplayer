@@ -8,11 +8,11 @@ package statusEffects;
  *
  * @author 48793
  */
-public class RepeatedTemporaryEffect extends TemporaryEffect{
-    protected int activationsOverTime;
+public abstract class RepeatedTemporaryEffect extends TemporaryEffect{
+    protected int ticksPerProc;
     
-    public RepeatedTemporaryEffect(String name, EffectProcType procType,int maxTicks, int activationsOverTime) {
+    public RepeatedTemporaryEffect(String name, EffectProcType procType,int maxTicks, int ticksPerProc) {
         super(name, procType,maxTicks);
-        this.activationsOverTime = activationsOverTime;
+        this.ticksPerProc = ticksPerProc;
     }
 }

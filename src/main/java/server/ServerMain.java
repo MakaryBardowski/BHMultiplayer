@@ -35,6 +35,7 @@ import game.entities.DecorationTemplates.DecorationTemplate;
 import game.entities.Destructible;
 import game.entities.DestructibleDecoration;
 import game.entities.InteractiveEntity;
+import game.entities.StatusEffectContainer;
 import game.entities.factories.DestructibleDecorationFactory;
 import game.entities.mobs.HumanMob;
 import game.items.Item;
@@ -112,6 +113,10 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
             mobs.entrySet().stream().forEach(i -> {
                 //to be seriously optimized
                 if (i.getValue() instanceof Destructible d) {
+                    if (d instanceof StatusEffectContainer c) {
+                        c.updateTemporaryEffectsServer();
+                    }
+
                     if (d instanceof Mob x) {
                         server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
                         server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
@@ -279,22 +284,23 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     }
 
     private void pupulateMap() {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 40; i++) {
             Random r = new Random();
             registerRandomChest(new Vector3f(r.nextInt(38 * 4) + 4, 4, r.nextInt(38 * 4) + 4));
             registerPlayer(null).setPositionServer(new Vector3f(r.nextInt(38 * 4) + 4, 4, r.nextInt(38 * 4) + 4));
             registerRandomDestructibleDecoration(new Vector3f(r.nextInt(38 * 4) + 4, 4, r.nextInt(38 * 4) + 4));
-
         }
     }
 
     private void registerRandomDestructibleDecoration(Vector3f pos) {
-        int randomNumber = new Random().nextInt(2);
+        int randomNumber = new Random().nextInt(3);
         DecorationTemplate template = DecorationTemplates.TABLE;
         if (randomNumber == 0) {
             template = DecorationTemplates.TABLE;
         } else if (randomNumber == 1) {
             template = DecorationTemplates.BARBED_WIRE;
+        } else if (randomNumber == 2) {
+            template = DecorationTemplates.MINE;
         }
 
         DestructibleDecoration d = DestructibleDecorationFactory.createDecoration(currentMaxId++, rootNode, pos, template, assetManager);

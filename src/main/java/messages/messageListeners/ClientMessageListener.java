@@ -325,13 +325,17 @@ public class ClientMessageListener implements MessageListener<Client> {
     }
 
     private void entityReceiveDamage(DestructibleDamageReceiveMessage hmsg) {
-        enqueueExecution(() -> {
-            Destructible d = getDestructibleById(hmsg.getTargetId());
-            d.receiveDamage(hmsg.getDamage());
-            if (d.getHealth() <= 0) {
-                clientApp.getMobs().remove(d.getId());
-            }
-        });
+        if (mobExistsLocally(hmsg.getTargetId())) {
+            enqueueExecution(() -> {
+                Destructible d = getDestructibleById(hmsg.getTargetId());
+//                System.out.println("\n\nTO BE DAMAGED" + hmsg.getTargetId() + " DAMAGE " + hmsg.getDamage());
+//                System.out.println("ACTUAL " + d);
+                d.receiveDamage(hmsg.getDamage());
+                if (d.getHealth() <= 0) {
+                    clientApp.getMobs().remove(d.getId());
+                }
+            });
+        }
     }
 
     private void handleHitscanTrail(HitscanTrailMessage tmsg) {
@@ -368,9 +372,10 @@ public class ClientMessageListener implements MessageListener<Client> {
     private void addNewDestructibleDecoration(NewDestructibleDecorationMessage nmsg) {
         if (mobDoesNotExistLocally(nmsg.getId())) {
             enqueueExecution(() -> {
-                DestructibleDecoration d = DestructibleDecorationFactory.createDecoration(nmsg.getId(),clientApp.getDestructibleNode(),nmsg.getPos(),nmsg.getTemplate(),clientApp.getAssetManager());
+                DestructibleDecoration d = DestructibleDecorationFactory.createDecoration(nmsg.getId(), clientApp.getDestructibleNode(), nmsg.getPos(), nmsg.getTemplate(), clientApp.getAssetManager());
                 clientApp.getMobs().put(d.getId(), d);
                 ClientGameAppState.getInstance().getGrid().insert(d);
             });
-        }    }
+        }
+    }
 }

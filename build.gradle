@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.mygame'
-version '0.0.2'
+version '0.0.3'
 
 mainClassName = "client.Main"
 

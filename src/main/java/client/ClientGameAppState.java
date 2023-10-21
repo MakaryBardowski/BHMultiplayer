@@ -195,6 +195,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
         if (player != null) {
             player.move(tpf, this);
+            player.updateTemporaryEffectsClient();
         }
 
         mobs.values().forEach(x -> {

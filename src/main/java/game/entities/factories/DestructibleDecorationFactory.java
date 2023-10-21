@@ -13,6 +13,7 @@ import game.entities.DecorationTemplates.DecorationTemplate;
 import game.entities.DestructibleDecoration;
 import static game.entities.DestructibleUtils.attachDestructibleToNode;
 import static game.entities.DestructibleUtils.setupModelShootability;
+import game.entities.Mine;
 import static game.map.blocks.VoxelLighting.setupModelLight;
 
 /**
@@ -24,7 +25,7 @@ public class DestructibleDecorationFactory {
     public static DestructibleDecoration createTable(int id, Node parentNode, Vector3f pos, AssetManager a) {
         Node node = (Node) a.loadModel(DecorationTemplates.TABLE.getModelPath());
         node.scale(DecorationTemplates.TABLE.getScale());
-        DestructibleDecoration d = new DestructibleDecoration(id, "Table", node, DecorationTemplates.TABLE);
+        DestructibleDecoration d = new DestructibleDecoration(id, "Table "+id, node, DecorationTemplates.TABLE);
         attachDestructibleToNode(d, parentNode, pos);
         setupModelShootability(node, id);
         setupModelLight(node);
@@ -32,9 +33,21 @@ public class DestructibleDecorationFactory {
     }
 
     public static DestructibleDecoration createBarbedWire(int id, Node parentNode, Vector3f pos, AssetManager a) {
-        Node node = (Node) a.loadModel(DecorationTemplates.BARBED_WIRE.getModelPath());
-        node.scale(DecorationTemplates.BARBED_WIRE.getScale());
-        BarbedWire d = new BarbedWire(id, "Barbed Wire", node, DecorationTemplates.BARBED_WIRE);
+        DecorationTemplate template = DecorationTemplates.BARBED_WIRE;
+        Node node = (Node) a.loadModel(template.getModelPath());
+        node.scale(template.getScale());
+        BarbedWire d = new BarbedWire(id, "Barbed Wire "+id, node, template);
+        attachDestructibleToNode(d, parentNode, pos);
+        setupModelShootability(node, id);
+        setupModelLight(node);
+        return d;
+    }
+
+    public static DestructibleDecoration createMine(int id, Node parentNode, Vector3f pos, AssetManager a) {
+        DecorationTemplate template = DecorationTemplates.MINE;
+        Node node = (Node) a.loadModel(template.getModelPath());
+        node.scale(template.getScale());
+        Mine d = new Mine(id, "Landmine "+id, node, template);
         attachDestructibleToNode(d, parentNode, pos);
         setupModelShootability(node, id);
         setupModelLight(node);
@@ -46,6 +59,8 @@ public class DestructibleDecorationFactory {
             return createTable(id, parentNode, pos, a);
         } else if (template.equals(DecorationTemplates.BARBED_WIRE)) {
             return createBarbedWire(id, parentNode, pos, a);
+        } else if (template.equals(DecorationTemplates.MINE)) {
+            return createMine(id, parentNode, pos, a);
         }
 
         return null;

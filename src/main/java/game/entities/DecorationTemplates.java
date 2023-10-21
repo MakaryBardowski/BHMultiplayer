@@ -25,10 +25,12 @@ public class DecorationTemplates {
 
     public static final DecorationTemplate TABLE = new DecorationTemplate(DECO_PATH + "table.j3o", 1f, 0, 0.6f, 0.65f, 0.6f);
     public static final DecorationTemplate BARBED_WIRE = new DecorationTemplate(DECO_PATH + "barbedWire.j3o", 1f, 1, 1.2f, 0.6f, 0.75f);
+    public static final DecorationTemplate MINE = new DecorationTemplate(DECO_PATH + "mine.j3o", 1f, 2, 0.3f, 0.3f, 0.3f);
 
     static {
         templates.add(TABLE.templateIndex, TABLE);
         templates.add(BARBED_WIRE.templateIndex, BARBED_WIRE);
+        templates.add(MINE.templateIndex, MINE);
 
     }
 

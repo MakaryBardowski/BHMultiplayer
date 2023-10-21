@@ -45,7 +45,6 @@ public class Main extends SimpleApplication {
         instance = this;
         NetworkingInitialization.initializeSerializables();
 
-//        this.start(JmeContext.Type.Display);
         DetailedProfilerState dps = new DetailedProfilerState();
         stateManager.attach(dps);
 

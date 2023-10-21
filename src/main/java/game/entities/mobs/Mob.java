@@ -23,7 +23,7 @@ import java.util.Random;
  */
 public abstract class Mob extends StatusEffectContainer implements CollidableInterface, MobInterface {
 
-    private static final float DEFAULT_SPEED = 10; //10
+    private static final float DEFAULT_SPEED = 30; //10
     protected static final int EQUIPMENT_SIZE = 18;
 
     protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
