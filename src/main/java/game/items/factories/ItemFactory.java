@@ -15,6 +15,7 @@ import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
+import game.items.weapons.Pistol;
 import game.items.weapons.Rifle;
 
 /**
@@ -42,6 +43,9 @@ public class ItemFactory {
                     return createBoots(id, template, droppable);
                 case RIFLE:
                     return createRifle(id, template, droppable);
+                case PISTOL:
+                    return createPistol(id, template, droppable);
+
                 case AXE:
                     break;
                 default:
@@ -77,7 +81,7 @@ public class ItemFactory {
 
     private Rifle createRifle(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        Rifle rifle = new Rifle(id, 2.6f, template, "Rifle", dropNode, droppable);
+        Rifle rifle = new Rifle(id, 3.25f, template, "Rifle", dropNode, droppable);
         return rifle;
     }
 
@@ -96,6 +100,12 @@ public class ItemFactory {
         } else {
             return (Node) assetManager.loadModel(ItemTemplates.RIFLE_MANNLICHER_95.getDropPath());
         }
+    }
+
+    private Item createPistol(int id, ItemTemplate template, boolean droppable) {
+        Node dropNode = createItemDropNode(template);
+        Pistol pistol = new Pistol(id, 1.3f, template, "Pistol", dropNode, droppable);
+        return pistol;
     }
 
 }

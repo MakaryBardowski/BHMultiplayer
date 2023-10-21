@@ -8,8 +8,8 @@ import client.ClientGameAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import static game.effects.DecalProjector.projectBlood;
 import java.util.Random;
+import static game.effects.DecalProjector.projectFromTo;
 
 /**
  *
@@ -46,7 +46,7 @@ public class GoreParticle extends ParticleMovementStrategy {
         startQ[2] = 0;
         node.setLocalRotation(new Quaternion().fromAngles(startQ));
         node.getWorldTranslation().setY(finalY);
-        projectBlood(ClientGameAppState.getInstance(), node.getWorldTranslation().clone().add(0, 1, 0), new Vector3f(0, -1, 0));
+        projectFromTo(ClientGameAppState.getInstance(), node.getWorldTranslation().clone().add(0, 1, 0), new Vector3f(0, -1, 0),"Textures/Gameplay/Decals/testBlood" + new Random().nextInt(2) + ".png",new Random().nextInt(2)+2f);
         removeControl();
     }
 

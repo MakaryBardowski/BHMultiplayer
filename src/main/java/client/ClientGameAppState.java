@@ -175,6 +175,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         } catch (IOException ex) {
             Logger.getLogger(ClientGameAppState.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
 
         client.addMessageListener(new ClientMessageListener(this));
         app.getViewPort().setBackgroundColor(ColorRGBA.Cyan);
@@ -196,6 +197,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         if (player != null) {
             player.move(tpf, this);
             player.updateTemporaryEffectsClient();
+
         }
 
         mobs.values().forEach(x -> {

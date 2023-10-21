@@ -483,25 +483,33 @@ public class PlayerHUD extends BaseAppState {
 
     private void checkTargetedEntity(ClientGameAppState gs, Node nodeToCheckCollisionOn) {
         CollisionResults results = new CollisionResults();
+
         Ray ray = new Ray(gs.getCamera().getLocation(), gs.getCamera().getDirection());
+        float distanceToFirstWall = Float.MAX_VALUE;
+        if (gs.getMapNode().collideWith(ray, results) > 0) {
+            distanceToFirstWall = results.getClosestCollision().getDistance();
+        }
+        results = new CollisionResults();
         nodeToCheckCollisionOn.collideWith(ray, results);
+
         if (results.size() > 0) {
-            CollisionResult closest = results.getClosestCollision();
-            String hit = closest.getGeometry().getName();
 
-            Destructible enemyHit = (Destructible)gs.getMobs().get(Integer.valueOf(hit));
+            float distanceToFirstTarget = results.getClosestCollision().getDistance();
 
-            if (enemyHit != null) {
-                boolean switched = gs.getPlayer().getCurrentTarget() != enemyHit;
-                gs.getPlayer().setCurrentTarget(enemyHit);
-                if (switched) {
-                    nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).setText(enemyHit.getName());
-                    nifty.getCurrentScreen().findElementById("hp_bar_target_yellow").setWidth((int) ((gs.getPlayer().getCurrentTarget().getHealth() / gs.getPlayer().getCurrentTarget().getMaxHealth()) * (percentMobHealthbarLength * nifty.getRenderEngine().getNativeWidth())));
-                    nifty.getCurrentScreen().findElementById("hp_bar_target_gray").setVisible(true);
-                    nifty.getCurrentScreen().findElementById("hp_bar_target_label").setVisible(true);
+            if (distanceToFirstTarget < distanceToFirstWall) {
+                CollisionResult closest = results.getClosestCollision();
+                String hit = closest.getGeometry().getName();
+
+                Destructible enemyHit = (Destructible) gs.getMobs().get(Integer.valueOf(hit));
+
+                if (enemyHit != null) {
+                    boolean switched = gs.getPlayer().getCurrentTarget() != enemyHit;
+                    gs.getPlayer().setCurrentTarget(enemyHit);
+                    if (switched) {
+                        updateTargetHealthbar();
+                    }
 
                 }
-
             }
         }
 
@@ -521,6 +529,13 @@ public class PlayerHUD extends BaseAppState {
 
     public void setClient(ClientGameAppState gs) {
         this.gs = gs;
+    }
+
+    private void updateTargetHealthbar() {
+        nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).setText(gs.getPlayer().getCurrentTarget().getName());
+        nifty.getCurrentScreen().findElementById("hp_bar_target_yellow").setWidth((int) ((gs.getPlayer().getCurrentTarget().getHealth() / gs.getPlayer().getCurrentTarget().getMaxHealth()) * (percentMobHealthbarLength * nifty.getRenderEngine().getNativeWidth())));
+        nifty.getCurrentScreen().findElementById("hp_bar_target_gray").setVisible(true);
+        nifty.getCurrentScreen().findElementById("hp_bar_target_label").setVisible(true);
     }
 
 }

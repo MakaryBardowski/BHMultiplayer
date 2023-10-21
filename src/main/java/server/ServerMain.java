@@ -46,6 +46,7 @@ import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.items.factories.ItemFactory;
+import game.items.weapons.Pistol;
 import game.items.weapons.Rifle;
 import game.map.collision.WorldGrid;
 import java.io.IOException;
@@ -313,7 +314,13 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
         Vest playerVest = (Vest) registerItemAndNotifyTCP(ItemTemplates.TORSO_1, false, Filters.notIn(hc));
         Gloves playerGloves = (Gloves) registerItemAndNotifyTCP(ItemTemplates.HAND_1, false, Filters.notIn(hc));
         Boots playerBoots = (Boots) registerItemAndNotifyTCP(ItemTemplates.LEG_1, false, Filters.notIn(hc));
-        Rifle playerRifle = (Rifle) registerItemAndNotifyTCP(ItemTemplates.RIFLE_MANNLICHER_95, true, Filters.notIn(hc));
+        Item playerRifle;
+        if (new Random().nextInt(2) == 0) {
+            playerRifle = (Rifle) registerItemAndNotifyTCP(ItemTemplates.RIFLE_MANNLICHER_95, true, Filters.notIn(hc));
+        } else {
+            playerRifle = (Pistol) registerItemAndNotifyTCP(ItemTemplates.PISTOL_C96, true, Filters.notIn(hc));
+
+        }
 
         Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide();
 

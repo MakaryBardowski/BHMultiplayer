@@ -21,7 +21,7 @@ public class ItemTemplates {
     private static final String ITEMS_PATH = "Models/Items/";
     private static final String ICON_PATH = "Textures/GUI/EquipmentIcons/";
 
-    public static final ItemTemplate RIFLE_MANNLICHER_95 = new ItemTemplate(ITEMS_PATH + "Mannlicher95/mannlicher95.j3o", null, ITEMS_PATH + "Mannlicher95/Mannlicher95Drop.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f), ItemType.RIFLE, 0);
+    public static final ItemTemplate RIFLE_MANNLICHER_95 = new ItemTemplate(ITEMS_PATH + "Mannlicher95/mannlicher95.j3o", ICON_PATH + "equipmentMannlicher95.png", ITEMS_PATH + "Mannlicher95/Mannlicher95Drop.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f), ItemType.RIFLE, 0);
     public static final ItemTemplate VEST_TRENCH = new ItemTemplate(ITEMS_PATH + "TrenchSet/officersCoat.j3o", ICON_PATH + "equipmentTrenchCoat.png", ITEMS_PATH + "TrenchSet/officersCoatDrop.j3o", new DropOffsetData(new Vector3f(0, 0.15f, 0), new Vector3f(-90 * FastMath.DEG_TO_RAD, 0, 0 * FastMath.DEG_TO_RAD), 0.85f), ItemType.VEST, 1);
     public static final ItemTemplate BOOTS_TRENCH = new ItemTemplate(ITEMS_PATH + "TrenchSet/officersLeg?.j3o", ICON_PATH + "equipmentTrenchShoes.png", ITEMS_PATH + "TrenchSet/officersBootsDrop.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 0.75f), ItemType.BOOTS, 2);
     public static final ItemTemplate GLOVES_TRENCH = new ItemTemplate(ITEMS_PATH + "TrenchSet/officersHand?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1), ItemType.GLOVES, 3);
@@ -32,6 +32,7 @@ public class ItemTemplates {
     public static final ItemTemplate TORSO_1 = new ItemTemplate(ITEMS_PATH + "Bare/torsoBare.j3o", null, null, null, ItemType.VEST, 6);
     public static final ItemTemplate LEG_1 = new ItemTemplate(ITEMS_PATH + "Bare/leg?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 0.75f), ItemType.BOOTS, 7);
     public static final ItemTemplate HAND_1 = new ItemTemplate(ITEMS_PATH + "Bare/hand?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 0.75f), ItemType.GLOVES, 8);
+    public static final ItemTemplate PISTOL_C96 = new ItemTemplate(ITEMS_PATH + "C96/c96.j3o", ICON_PATH + "equipmentC96.png", ITEMS_PATH + "C96/c96drop.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f), ItemType.PISTOL, 9);
 
     static {
         templates.add(RIFLE_MANNLICHER_95.getTemplateIndex(), RIFLE_MANNLICHER_95);
@@ -44,6 +45,7 @@ public class ItemTemplates {
         templates.add(TORSO_1.getTemplateIndex(), TORSO_1);
         templates.add(LEG_1.getTemplateIndex(), LEG_1);
         templates.add(HAND_1.getTemplateIndex(), HAND_1);
+        templates.add(PISTOL_C96.getTemplateIndex(), PISTOL_C96);
 
     }
 
@@ -70,7 +72,7 @@ public class ItemTemplates {
     }
 
     public enum ItemType {
-        HELMET, VEST, GLOVES, BOOTS, RIFLE, AXE
+        HELMET, VEST, GLOVES, BOOTS, RIFLE, PISTOL, AXE
     }
 
 }

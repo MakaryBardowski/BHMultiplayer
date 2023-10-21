@@ -29,6 +29,7 @@ public class Main extends SimpleApplication {
 
     private static final short STARTING_RESOLUTION_WIDTH = 1920;
     private static final short STARTING_RESOLUTION_HEIGHT = 1080;
+    private static final boolean fullscreen = true;
 //    private static final short STARTING_RESOLUTION_WIDTH = 1000;
 //    private static final short STARTING_RESOLUTION_HEIGHT = 800;
 
@@ -46,7 +47,7 @@ public class Main extends SimpleApplication {
         NetworkingInitialization.initializeSerializables();
 
         DetailedProfilerState dps = new DetailedProfilerState();
-        stateManager.attach(dps);
+//        stateManager.attach(dps);
 
         MainMenuAppState mms = new MainMenuAppState(assetManager, inputManager, audioRenderer, guiViewPort);
         stateManager.attach(mms);
@@ -74,7 +75,7 @@ public class Main extends SimpleApplication {
     private static void setupSettings(SimpleApplication app) {
         AppSettings settings1 = new AppSettings(true);
         settings1.setResolution(STARTING_RESOLUTION_WIDTH, STARTING_RESOLUTION_HEIGHT);
-        settings1.setFullscreen(true);
+        settings1.setFullscreen(fullscreen);
         settings1.setVSync(true);
         settings1.setFrameRate(2000);
         

@@ -59,7 +59,8 @@ public class MainMenuController implements ScreenController {
         String serverIpAddress = textFieldControl.getDisplayedText();
 
         Main instance = Main.getInstance();
-        instance.getStateManager().attach(new ClientGameAppState(Main.getInstance(), serverIpAddress));
+        var clientGameState = new ClientGameAppState(Main.getInstance(), serverIpAddress);
+        instance.getStateManager().attach(clientGameState);
 
         MainMenuAppState m = instance.getStateManager().getState(MainMenuAppState.class);
         instance.getStateManager().detach(m);

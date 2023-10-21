@@ -15,6 +15,7 @@ import game.entities.Collidable;
 import game.entities.StatusEffectContainer;
 import game.map.collision.WorldGrid;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -23,7 +24,7 @@ import java.util.Random;
  */
 public abstract class Mob extends StatusEffectContainer implements CollidableInterface, MobInterface {
 
-    private static final float DEFAULT_SPEED = 30; //10
+    private static final float DEFAULT_SPEED = 10; //10
     protected static final int EQUIPMENT_SIZE = 18;
 
     protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
@@ -125,6 +126,9 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 
     protected void dropEquipment() {
         Random r = new Random();
+                    System.err.println("player "+this+" equipment:\n"+Arrays.toString(this.getEquipment())+"\n\n");
+
+        System.out.println("eq to be dropped: "+Arrays.toString(equipment));
         for (int i = 0; i < equipment.length; i++) {
             Item item = equipment[i];
             if (item != null) {

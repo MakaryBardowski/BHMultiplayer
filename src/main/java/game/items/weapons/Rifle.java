@@ -84,7 +84,6 @@ public class Rifle extends RangedWeapon {
 
             AssetManager assetManager = Main.getInstance().getAssetManager();
             Node model = (Node) assetManager.loadModel(template.getFpPath());
-
             model.move(-.52f, -.65f, 2.3f);
 //        model.setLocalRotation((new Quaternion()).fromAngleAxis(-FastMath.PI / 1, new Vector3f(-.0f, .0f, 0)));
             model.rotate(0, 1.5f * FastMath.DEG_TO_RAD, 0);
@@ -112,6 +111,7 @@ public class Rifle extends RangedWeapon {
 
             muzzleEmitter = setupMuzzleFlashEmitter();
             muzzleNode.attachChild(muzzleEmitter);
+
         }
     }
 
@@ -123,38 +123,46 @@ public class Rifle extends RangedWeapon {
     @Override
     public void playerAttack(Player p) {
         muzzleEmitter.emitParticles(1);
-        if (!hitscan(p, ClientGameAppState.getInstance().getDestructibleNode(), false)) {
-            hitscan(p, ClientGameAppState.getInstance().getMapNode(), true);
-        }
-
+        hitscan(p);
     }
 
-    private boolean hitscan(Player p, Node collsionNode, boolean wallCheck) {
+    private void hitscan(Player p) {
+        var cs = ClientGameAppState.getInstance();
         CollisionResults results = new CollisionResults();
         Vector3f shotDirection = p.getMainCamera().getDirection();
         Vector3f shotOrigin = p.getMainCamera().getLocation();
         Ray ray = new Ray(shotOrigin, shotDirection);
-        collsionNode.collideWith(ray, results);
+        float distanceToFirstWall = Float.MAX_VALUE;
 
         Vector3f cp = null;
+
+        if (cs.getMapNode().collideWith(ray, results) > 0) {
+            distanceToFirstWall = results.getClosestCollision().getDistance();
+            cp = results.getClosestCollision().getContactPoint();
+
+        }
+
+        results = new CollisionResults();
+        cs.getDestructibleNode().collideWith(ray, results);
+
         if (results.size() > 0) {
-            CollisionResult closest = results.getClosestCollision();
-            cp = closest.getContactPoint();
 
-            int hostedConnectionId = ClientGameAppState.getInstance().getClient().getId();
-            HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(), cp.clone(), hostedConnectionId);
-            ClientGameAppState.getInstance().getClient().send(trailMessage);
+            float distanceToFirstTarget = results.getClosestCollision().getDistance();
+            if (distanceToFirstTarget < distanceToFirstWall) {
+                CollisionResult closest = results.getClosestCollision();
+                cp = closest.getContactPoint();
 
-            if (!wallCheck) {
+                int hostedConnectionId = cs.getClient().getId();
+                HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(), cp.clone(), hostedConnectionId);
+                cs.getClient().send(trailMessage);
+
                 Integer hitId = Integer.valueOf(closest.getGeometry().getName());
-                InteractiveEntity mobHit = ClientGameAppState.getInstance().getMobs().get(hitId);
+                InteractiveEntity mobHit = cs.getMobs().get(hitId);
                 mobHit.onShot(p, damage);
             }
-            createBullet(muzzleNode.getWorldTranslation(), cp);
-            recoilFire();
-            return true;
         }
-        return false;
+        createBullet(muzzleNode.getWorldTranslation(), cp);
+        recoilFire();
     }
 
     private void recoilFire() {

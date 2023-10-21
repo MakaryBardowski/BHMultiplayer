@@ -56,6 +56,37 @@ public class MapGenerator {
             }
         }
 
+        logicMap[10][1][16] = 1;
+        logicMap[13][1][16] = 1;
+        logicMap[10][2][16] = 1;
+        logicMap[13][2][16] = 1;
+
+        logicMap[11][1][16] = 1;
+        logicMap[12][1][16] = 1;
+        logicMap[11][2][16] = 1;
+        logicMap[12][2][16] = 1;
+
+        logicMap[10][1][10] = 1;
+        logicMap[14][1][10] = 1;
+        logicMap[10][2][10] = 1;
+        logicMap[14][2][10] = 1;
+
+        logicMap[11][1][10] = 1;
+        logicMap[12][1][10] = 1;
+        logicMap[11][2][10] = 1;
+        logicMap[12][2][10] = 1;
+
+        logicMap[20][1][12] = 1;
+        logicMap[20][1][19] = 1;
+        logicMap[20][2][12] = 1;
+        logicMap[20][2][19] = 1;
+
+        logicMap[26][1][12] = 1;
+        logicMap[27][1][19] = 1;
+        logicMap[16][1][22] = 1;
+        logicMap[30][1][23] = 1;
+        logicMap[11][1][23] = 1;
+
         Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
         return map;
     }

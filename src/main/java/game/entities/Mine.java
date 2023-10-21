@@ -36,6 +36,7 @@ import statusEffects.DamageOverTimeEffect;
 import statusEffects.EffectFactory;
 import statusEffects.EffectProcType;
 import statusEffects.TimedSlowEffect;
+import static game.effects.DecalProjector.projectFromTo;
 
 /**
  *
@@ -43,6 +44,7 @@ import statusEffects.TimedSlowEffect;
  */
 public class Mine extends DestructibleDecoration {
 
+    private float explosionSize = 3;
     private float damage = 25f;
 
     public Mine(int id, String name, Node node, DecorationTemplates.DecorationTemplate template) {
@@ -65,9 +67,9 @@ public class Mine extends DestructibleDecoration {
         hitboxDebug.setName("" + id);
         hitboxNode.attachChild(hitboxDebug);
 
-        Geometry explosionDebug = CollisionDebugUtils.createHitboxGeometry(4, 4, 4, ColorRGBA.Magenta);
-        explosionDebug.setName("" + id);
-        hitboxNode.attachChild(explosionDebug);
+//        Geometry explosionDebug = CollisionDebugUtils.createHitboxGeometry(3, 3, 3, ColorRGBA.Magenta);
+//        explosionDebug.setName("" + id);
+//        hitboxNode.attachChild(explosionDebug);
     }
 
     @Override
@@ -99,7 +101,7 @@ public class Mine extends DestructibleDecoration {
 
     @Override
     public void onCollisionClient(Collidable other) {
-        spawnExplosionVisuals();
+//        spawnExplosionVisuals();
         if (other instanceof Mob m) {
             float slowStrength = 90; //in %
             m.addEffect(new TimedSlowEffect("Mine slow", EffectProcType.PERIODICAL, 20, m, slowStrength));
@@ -117,11 +119,8 @@ public class Mine extends DestructibleDecoration {
 
         ServerMain serverApp = ServerMain.getInstance();
 
-        System.out.println("(MINE ID = " + id + ") CLOSE TO MINE:");
-        RectangleAABB explosionHitbox = new RectangleAABB(node.getWorldTranslation(), 4, 4, 4);
+        RectangleAABB explosionHitbox = new RectangleAABB(node.getWorldTranslation(), explosionSize, explosionSize, explosionSize);
         for (Collidable c : serverApp.getGrid().getNearbyCollisionShapeAtPos(explosionHitbox.getPosition(), explosionHitbox)) {
-            System.out.println("  -" + c.getName());
-
             if (c instanceof Destructible de && c.getCollisionShape().wouldCollideAtPosition(explosionHitbox, c.getCollisionShape().getPosition())) {
                 if (c != this) {
                     var emsg = new DestructibleDamageReceiveMessage(de.getId(), damage);
@@ -159,6 +158,8 @@ public class Mine extends DestructibleDecoration {
         smoke.emitAllParticles();
         smoke.setParticlesPerEmission(0);
         explosion.emitAllParticles();
+
+        projectFromTo(ClientGameAppState.getInstance(), node.getWorldTranslation().clone().add(0, 1, 0), new Vector3f(0, -1, 0), "Textures/Gameplay/Decals/mineCrater.png", 5);
 
         explosion.addControl(new TimedSpatialRemoveControl(1.25f));
         smoke.addControl(new TimedSpatialRemoveControl(1.25f));

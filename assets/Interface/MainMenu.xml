@@ -10,7 +10,7 @@
 
 <!--backgroundColor="#55a5"-->
             <panel childLayout="vertical" align="right" valign="center" width="30%" height="100%"  padding="10">
-                <control id="single" name="button" label="Play" width = "100%" height = "10%" marginTop = "20%" />
+                <control id="single" name="button" label="Play" width = "100%" height = "10%" marginTop = "10%" />
                 <control id="host" name="button" label="Host (LAN)" width = "100%" height = "10%" marginTop = "10%">
                     <interact onClick="startServer()"/>  
                 </control>
@@ -18,7 +18,8 @@
                 <control id="join" name="button" label="Join (LAN)" width = "100%" height = "10%" marginTop = "10%">
                     <interact onClick="joinGame()"/>
                 </control>
-                <control id="ip-textfield" name="textfield" label="Join (LAN)" width = "100%" height = "5%" marginTop = "10%" />
+                <control id="ip-textfield" name="textfield" text="IP" width = "100%" height = "5%" marginTop = "10%" />
+                <control id="name-textfield" name="textfield" text="NICK" width = "100%" height = "5%" marginTop = "10%" />
 
                 <!--                <control id="sliderV" name="verticalSlider" height="200px" />
                 <panel width="10" />

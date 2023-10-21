@@ -8,8 +8,8 @@ import client.ClientGameAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import static game.effects.DecalProjector.projectBlood;
 import game.items.Item;
+import static game.effects.DecalProjector.projectFromTo;
 
 /**
  *

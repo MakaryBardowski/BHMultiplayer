@@ -318,7 +318,7 @@ public class DecalProjector {
     }
     
     
-        public static void projectBlood(ClientGameAppState gs, Vector3f from, Vector3f to) {
+        public static void projectFromTo(ClientGameAppState gs, Vector3f from, Vector3f to, String texturePath,float projectionBoxSize) {
         for (int i = 0; i < 1; i++) {
 
             var contactFaceNormal = new Vector3f(); // Get the normal vector of the contact face
@@ -338,13 +338,13 @@ public class DecalProjector {
 //            var pos = contactPoint.add(contactFaceNormal.mult(0.1f));
             var rot = new Quaternion().lookAt(contactFaceNormal.negate(), Vector3f.UNIT_Y);
             pos.addLocal(rot.getRotationColumn(2).mult(dist / 2));
-            var projectionBox = new Vector3f(3f, 3f, dist);
+            var projectionBox = new Vector3f(projectionBoxSize, projectionBoxSize, dist);
 
             var projector = new DecalProjector(gs.getMapNode(), pos, rot, projectionBox);
             projector.setSeparation(0.002f);
             var geometry = projector.project();
-
-            Texture texture = gs.getAssetManager().loadTexture("Textures/Gameplay/Decals/testBlood" + new Random().nextInt(2) + ".png");
+            Texture texture = gs.getAssetManager().loadTexture(texturePath);
+            texture.setMagFilter(Texture.MagFilter.Nearest);
             Material material = new Material(gs.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
             material.setTexture("ColorMap", texture);
             material.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);

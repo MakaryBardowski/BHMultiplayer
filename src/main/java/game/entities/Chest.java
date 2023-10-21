@@ -139,9 +139,9 @@ public class Chest extends Destructible {
 
     @Override
     protected final void createHitbox() {
-        float hitboxWidth = 1f;
-        float hitboxHeight = 1f;
-        float hitboxLength = 1f;
+        float hitboxWidth = 0.8f;
+        float hitboxHeight = 0.8f;
+        float hitboxLength = 0.8f;
         hitboxNode.move(0, hitboxHeight, 0);
         collisionShape = new RectangleAABB(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
         showHitboxIndicator();

@@ -325,17 +325,19 @@ public class ClientMessageListener implements MessageListener<Client> {
     }
 
     private void entityReceiveDamage(DestructibleDamageReceiveMessage hmsg) {
-        if (mobExistsLocally(hmsg.getTargetId())) {
-            enqueueExecution(() -> {
+        enqueueExecution(() -> {
+            if (mobExistsLocally(hmsg.getTargetId())) {
+
                 Destructible d = getDestructibleById(hmsg.getTargetId());
-//                System.out.println("\n\nTO BE DAMAGED" + hmsg.getTargetId() + " DAMAGE " + hmsg.getDamage());
-//                System.out.println("ACTUAL " + d);
                 d.receiveDamage(hmsg.getDamage());
                 if (d.getHealth() <= 0) {
                     clientApp.getMobs().remove(d.getId());
                 }
-            });
-        }
+            }
+            }
+        );
+    
+
     }
 
     private void handleHitscanTrail(HitscanTrailMessage tmsg) {

@@ -7,6 +7,7 @@ package game.entities;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import game.map.collision.CollisionDebugUtils;
 import game.map.collision.CollisionShape;
 import game.map.collision.RectangleAABB;
@@ -29,6 +30,7 @@ public abstract class Collidable extends InteractiveEntity {
     public Collidable(int id, String name, Node node) {
         super(id, name, node);
         node.attachChild(hitboxNode);
+        hitboxNode.setCullHint(Spatial.CullHint.Always);
     }
 
     public abstract void onCollisionClient(Collidable other);
