@@ -2,6 +2,7 @@ package client;
 
 import com.jme3.app.DetailedProfilerState;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.input.FlyByCamera;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -49,6 +50,9 @@ public class Main extends SimpleApplication {
         DetailedProfilerState dps = new DetailedProfilerState();
 //        stateManager.attach(dps);
 
+        ScreenshotAppState screenShotState = new ScreenshotAppState();
+        stateManager.attach(screenShotState);
+
         MainMenuAppState mms = new MainMenuAppState(assetManager, inputManager, audioRenderer, guiViewPort);
         stateManager.attach(mms);
 
@@ -78,8 +82,6 @@ public class Main extends SimpleApplication {
         settings1.setFullscreen(fullscreen);
         settings1.setVSync(true);
         settings1.setFrameRate(2000);
-        
-
 
 //                settings1.setResolution(800, 800);
 //        app.setDisplayFps(false);
@@ -93,8 +95,6 @@ public class Main extends SimpleApplication {
 //        }
 //        
         settings1.setTitle("BH");
-        app.setSettings(settings1);
-        System.out.println(settings1);
         app.setPauseOnLostFocus(false);
         app.setSettings(settings1);
 

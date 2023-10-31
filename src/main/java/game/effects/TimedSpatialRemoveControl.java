@@ -1,5 +1,7 @@
 package game.effects;
 
+import com.epagagames.particles.Emitter;
+import com.epagagames.particles.influencers.ParticleInfluencer;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
@@ -10,6 +12,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import com.jme3.scene.control.Control;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  *
@@ -54,6 +57,15 @@ public class TimedSpatialRemoveControl extends AbstractControl implements Savabl
     protected void controlUpdate(float tpf) {
         time += tpf;
         if (time >= timeToLive) {
+            if (spatial instanceof Emitter e) {
+                e.setEnabled(false);
+                var it = e.getInfluencerMap().iterator();
+                while (it.hasNext()) {
+                    it.next();
+                    it.remove();
+                }
+                System.out.println(e.getActiveParticleCount());
+            }
             spatial.removeFromParent();
             spatial.removeControl(this);
         }

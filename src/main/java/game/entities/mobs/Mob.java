@@ -17,6 +17,8 @@ import game.map.collision.WorldGrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
@@ -37,9 +39,19 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 
     //sync
     protected MobType mobType;
+
+    @Getter
     protected Vector3f serverLocation; // updated by the server
+
+    @Getter
     protected Quaternion serverRotation;
+
+    @Getter
+    @Setter
     protected float posInterpolationValue;
+
+    @Getter
+    @Setter
     protected float rotInterpolationValue;
 
     public Mob(int id, Node node, String name) {
@@ -48,7 +60,7 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
         this.serverRotation = node.getLocalRotation();
     }
 
-    public boolean doesNotCollideWithEntitiesAtPositionServer(Vector3f newPos, WorldGrid grid,ArrayList<Collidable> solidCollidables) {
+    public boolean doesNotCollideWithEntitiesAtPositionServer(Vector3f newPos, WorldGrid grid, ArrayList<Collidable> solidCollidables) {
         for (Collidable m : solidCollidables) {
             if (this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
                 return false;
@@ -57,21 +69,12 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
         return true;
     }
 
-    public void checkPassableCollisionsServer(WorldGrid grid,ArrayList<Collidable> passableCollidables) {
+    public void checkPassableCollisionsServer(WorldGrid grid, ArrayList<Collidable> passableCollidables) {
         for (Collidable m : passableCollidables) {
             if (this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), this.getNode().getWorldTranslation())) {
                 m.onCollisionServer(this);
             }
         }
-    }
-
-    public Vector3f getServerLocation() {
-        return serverLocation;
-    }
-
-    public void setServerLocation(Vector3f serverLocation) {
-        this.serverLocation = serverLocation;
-        this.posInterpolationValue = 0;
     }
 
     public float getSpeed() {
@@ -80,14 +83,6 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 
     public void setSpeed(float speed) {
         this.speed = speed;
-    }
-
-    public float getPosInterpolationValue() {
-        return posInterpolationValue;
-    }
-
-    public void setPosInterpolationValue(float posInterpolationValue) {
-        this.posInterpolationValue = posInterpolationValue;
     }
 
     public boolean isDead() {
@@ -106,29 +101,21 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
         return equipment;
     }
 
-    public Quaternion getServerRotation() {
-        return serverRotation;
+    public void setServerLocation(Vector3f serverLocation) {
+        this.serverLocation = serverLocation;
+        this.posInterpolationValue = 0;
     }
 
     public void setServerRotation(Quaternion serverRotation) {
         this.serverRotation = serverRotation;
         this.rotInterpolationValue = 0;
-
-    }
-
-    public float getRotInterpolationValue() {
-        return rotInterpolationValue;
-    }
-
-    public void setRotInterpolationValue(float rotInterpolationValue) {
-        this.rotInterpolationValue = rotInterpolationValue;
     }
 
     protected void dropEquipment() {
         Random r = new Random();
-                    System.err.println("player "+this+" equipment:\n"+Arrays.toString(this.getEquipment())+"\n\n");
+        System.err.println("player " + this + " equipment:\n" + Arrays.toString(this.getEquipment()) + "\n\n");
 
-        System.out.println("eq to be dropped: "+Arrays.toString(equipment));
+        System.out.println("eq to be dropped: " + Arrays.toString(equipment));
         for (int i = 0; i < equipment.length; i++) {
             Item item = equipment[i];
             if (item != null) {
@@ -143,6 +130,16 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
         for (int i = 0; i < equipment.length; i++) {
             if (equipment[i] == null) {
                 equipment[i] = item;
+                break;
+            }
+        }
+        return item;
+    }
+
+    public Item removeFromEquipment(Item item) {
+        for (int i = 0; i < equipment.length; i++) {
+            if (equipment[i] == item) {
+                equipment[i] = null;
                 break;
             }
         }

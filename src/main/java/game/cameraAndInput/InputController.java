@@ -21,16 +21,12 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
-import debugging.DebugUtils;
-import game.entities.Destructible;
 import game.entities.InteractiveEntity;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import server.ServerMain;
+import game.items.weapons.Grenade;
+import game.items.weapons.RangedWeapon;
+import java.util.Arrays;
 
 /**
  *
@@ -111,47 +107,47 @@ public class InputController {
                 }
 
                 // attack test
-                if (!player.isDead() && !player.isViewingEquipment() && player.getEquippedRightHand() != null && name.equals("Attack") && !keyPressed) {
-//                    player.setShooting(false);
-
-                    player.getEquippedRightHand().playerUseRight(player);
+                if (!player.isViewingEquipment() && player.getEquippedRightHand() != null && name.equals("Attack") && !keyPressed) {
+                    if (player.getEquippedRightHand() instanceof Grenade) { // if its a grenade, dont throw when released
+                        player.getEquippedRightHand().playerUseInRightHand(player);
+                    } else {
+                        player.setHoldsTrigger(false);
+                    }
+                } else if (!player.isDead() && !player.isViewingEquipment() && player.getEquippedRightHand() != null && name.equals("Attack") && keyPressed) {
+                    if (player.getEquippedRightHand() instanceof RangedWeapon) { // if its a ranged weapon, set holds trigger which makes the auto shoot
+                        player.setHoldsTrigger(true);
+                    }
                 }
-                if (!player.isDead() && !player.isViewingEquipment() && name.equals("AttackR") && !keyPressed) {
-
-                }
-//                else if (!player.isDead() && name.equals("Attack")) {
-//                    player.setShooting(true);
-//                }
 
                 if (name.equals("I") && !gs.getPlayer().isDead() && !keyPressed) {
                     gs.getFlyCam().setDragToRotate(!gs.getFlyCam().isDragToRotate());
                     Player p = gs.getPlayer();
                     p.setViewingEquipment(!p.isViewingEquipment());
+                    p.setHoldsTrigger(false);
 
                     for (int eqSlot = 0; eqSlot < p.getEquipment().length; eqSlot++) {
-                        if (p.getEquipment()[eqSlot] != null) {
-
-                            String iconString = gs.getPlayer().getEquipment()[eqSlot].getTemplate().getIconPath();
-                            if (p.getEquipment()[eqSlot].getTemplate().getIconPath() == null) {
-                                iconString = "Textures/GUI/EquipmentIcons/equipmentSlotEmpty.png";
-                            }
-
-                            guiElement = gs.getNifty().getRenderEngine().createImage(gs.getNifty().getCurrentScreen(), iconString, false);
-                            gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).getRenderer(ImageRenderer.class).setImage(guiElement);
-
+                        String iconString = "Textures/GUI/EquipmentIcons/equipmentSlotEmpty.png";
+                        if (p.getEquipment()[eqSlot] != null && p.getEquipment()[eqSlot].getTemplate().getIconPath() != null) {
+                            iconString = gs.getPlayer().getEquipment()[eqSlot].getTemplate().getIconPath();
                         }
+
+                        guiElement = gs.getNifty().getRenderEngine().createImage(gs.getNifty().getCurrentScreen(), iconString, false);
+                        gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).getRenderer(ImageRenderer.class).setImage(guiElement);
 
                         gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).setVisible(!gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).isVisible());
                     }
                 }
 
-                if (name.equals("E") && !gs.getPlayer().isDead() && !keyPressed) {
+                if (name.equals(
+                        "E") && !gs.getPlayer().isDead() && !keyPressed) {
                     interact();
                 }
 //                if (name.equals("R") && !gs.getPlayer().isDead() && !keyPressed) {
 //                    gs.getPlayer().getEquippedRightHand().reload(gs.getPlayer(), gs);
 //                }
-                if (name.equals("K") && !keyPressed) {
+
+                if (name.equals(
+                        "K") && !keyPressed) {
 //                    gs.chatPutMessage("Cheat!");
                 }
 

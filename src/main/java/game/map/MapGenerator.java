@@ -31,6 +31,25 @@ public class MapGenerator {
 
     private Map generateBossMap(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
         ///makes a square map
+        var logicMap = createBossLogicMap(mapSize);
+        Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
+        return map;
+    }
+
+    private Map generateCasualMap(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
+        ///generates a random map
+        var logicMap = createCasualLogicMap(mapSize);
+        Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
+        return map;
+    }
+
+    private Map generateArmory(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
+        var logicMap = createArmoryLogicMap(mapSize);
+        Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
+        return map;
+    }
+
+    public byte[][][] createBossLogicMap(int mapSize) {
 
         byte[][][] logicMap = new byte[mapSize][mapSize][mapSize]; // blocks are added based on logicMap
 
@@ -86,26 +105,20 @@ public class MapGenerator {
         logicMap[16][1][22] = 1;
         logicMap[30][1][23] = 1;
         logicMap[11][1][23] = 1;
-
-        Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
-        return map;
+        return logicMap;
     }
 
-    private Map generateCasualMap(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
-        ///generates a random map
-
+    public byte[][][] createCasualLogicMap(int mapSize) {
         int minRoomSize = 10, maxRoomSize = 55, numOfRooms = 10, numOfFloors = 1;
         long SEED = 1234567890L;
         ProceduralMapGenerator mapGen = new ProceduralMapGenerator(SEED, mapSize, mapSize, minRoomSize, maxRoomSize, numOfRooms, numOfFloors);
         mapGen.generate(GenType.BSP);
         mapGen.getFloorList().get(0).printMap();
         byte[][][] logicMap = mapGen.getMap();
-
-        Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
-        return map;
+        return logicMap;
     }
 
-    private Map generateArmory(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
+    public byte[][][] createArmoryLogicMap(int mapSize) {
         byte[][][] logicMap = new byte[mapSize][mapSize][mapSize]; // blocks are added based on logicMap
 
         int armorySizeX = 9;
@@ -140,8 +153,7 @@ public class MapGenerator {
             logicMap[x][1][4] = 1;
 
         }
-
-        Map map = new Map(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
-        return map;
+        return logicMap;
     }
+
 }

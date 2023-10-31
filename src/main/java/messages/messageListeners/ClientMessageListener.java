@@ -19,7 +19,9 @@ import com.jme3.network.MessageListener;
 import client.ClientGameAppState;
 import client.Main;
 import client.PlayerHUD;
+import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.entities.Chest;
@@ -27,8 +29,12 @@ import game.entities.Destructible;
 import game.entities.DestructibleDecoration;
 import game.entities.InteractiveEntity;
 import game.entities.factories.DestructibleDecorationFactory;
+import game.entities.grenades.ClientThrownGrenadeRotateControl;
+import game.entities.grenades.ThrownGrenade;
+import game.entities.grenades.ThrownSmokeGrenade;
 import game.entities.mobs.HumanMob;
 import game.items.Item;
+import game.items.ItemTemplates;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
@@ -38,10 +44,13 @@ import game.items.weapons.Rifle;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import messages.DestructibleDamageReceiveMessage;
+import messages.GrenadePosUpdateMessage;
+import messages.GrenadeThrownMessage;
 import messages.HitscanTrailMessage;
 import messages.InstantEntityPosCorrectionMessage;
 import messages.NewChestMessage;
 import messages.NewDestructibleDecorationMessage;
+import messages.ThrownGrenadeExplodedMessage;
 import messages.items.ChestItemInteractionMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.MobItemInteractionMessage.ItemInteractionType;
@@ -51,6 +60,7 @@ import static messages.items.MobItemInteractionMessage.ItemInteractionType.PICK_
 import static messages.items.MobItemInteractionMessage.ItemInteractionType.UNEQUIP;
 import messages.items.NewBootsMessage;
 import messages.items.NewGlovesMessage;
+import messages.items.NewGrenadeMessage;
 import messages.items.NewHelmetMessage;
 import messages.items.NewItemMessage;
 import messages.items.NewRifleMessage;
@@ -81,12 +91,18 @@ public class ClientMessageListener implements MessageListener<Client> {
             entityReceiveDamage(hmsg);
         } else if (m instanceof SystemHealthUpdateMessage hmsg) {
             updateEntityHealth(hmsg);
+        } else if (m instanceof GrenadePosUpdateMessage gmsg) {
+            updateGrenadePosition(gmsg);
         } else if (m instanceof InstantEntityPosCorrectionMessage cmsg) {
             correctPosition(cmsg);
         } else if (m instanceof HitscanTrailMessage tmsg) {
             handleHitscanTrail(tmsg);
         } else if (m instanceof MobItemInteractionMessage iimsg) {
             handleMobItemInteraction(iimsg);
+        } else if (m instanceof GrenadeThrownMessage gmsg) {
+            addNewThrownGrenade(gmsg);
+        } else if (m instanceof ThrownGrenadeExplodedMessage gemsg) {
+            handleGrenadeExplosion(gemsg);
         } else if (m instanceof NewItemMessage imsg) {
             addNewItem(imsg);
         } else if (m instanceof NewMobMessage nmsg) {
@@ -267,6 +283,9 @@ public class ClientMessageListener implements MessageListener<Client> {
         } else if (imsg instanceof NewRifleMessage rmsg) {
             Item i = ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
             clientApp.registerEntity(i);
+        } else if (imsg instanceof NewGrenadeMessage rmsg) {
+            Item i = ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
+            clientApp.registerEntity(i);
         }
 
     }
@@ -334,9 +353,8 @@ public class ClientMessageListener implements MessageListener<Client> {
                     clientApp.getMobs().remove(d.getId());
                 }
             }
-            }
+        }
         );
-    
 
     }
 
@@ -379,5 +397,43 @@ public class ClientMessageListener implements MessageListener<Client> {
                 ClientGameAppState.getInstance().getGrid().insert(d);
             });
         }
+    }
+
+    private void addNewThrownGrenade(GrenadeThrownMessage gmsg) {
+        enqueueExecution(() -> {
+            Node model = (Node) clientApp.getAssetManager().loadModel(ItemTemplates.SMOKE_GRENADE.getDropPath());
+            clientApp.getDebugNode().attachChild(model);
+            model.setLocalTranslation(gmsg.getPos());
+            model.scale(1f);
+
+            Geometry ge = (Geometry) model.getChild(0);
+            Material originalMaterial = ge.getMaterial();
+            Material newMaterial = new Material(clientApp.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
+            newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+            ge.setMaterial(newMaterial);
+            var rotControl = new ClientThrownGrenadeRotateControl();
+            ge.addControl(rotControl);
+
+            ThrownGrenade g = new ThrownSmokeGrenade(gmsg.getId(), "Thrown Smoke", model);
+            clientApp.getMobs().put(g.getId(), g);
+        });
+    }
+
+    private void updateGrenadePosition(GrenadePosUpdateMessage gmsg) {
+        if (getEntityById(gmsg.getId()) != null) {
+            ((ThrownGrenade) getEntityById(gmsg.getId())).setServerLocation(gmsg.getPos());
+        }
+
+    }
+
+    private void handleGrenadeExplosion(ThrownGrenadeExplodedMessage gemsg) {
+        enqueueExecution(() -> {
+            ThrownGrenade g = (ThrownGrenade) getEntityById(gemsg.getId());
+            g.getNode().setLocalTranslation(gemsg.getPos());
+            g.explodeClient();
+            clientApp.getMobs().remove(gemsg.getId());
+            g.getNode().removeFromParent();
+            
+        });
     }
 }

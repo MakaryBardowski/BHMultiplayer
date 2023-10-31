@@ -6,19 +6,36 @@ package game.items.weapons;
 
 import com.jme3.scene.Node;
 import game.items.ItemTemplates.ItemTemplate;
-import game.entities.mobs.Mob;
-import game.items.ItemTemplates;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
- * @author tomasz potoczko
+ * @author 48793
  */
+
+@Getter
+@Setter
 public abstract class RangedWeapon extends Weapon {
-    public RangedWeapon(int id,float damage, ItemTemplate template,String name,Node node) {
-        super(id,damage,template,name,node);
+
+    protected int ammo;
+    protected int maxAmmo;
+    protected float attackCooldown;
+    protected float currentAttackCooldown = 0;
+    protected FirerateControl firerateControl;
+
+    public RangedWeapon(int id, float damage, ItemTemplate template, String name, Node node, int maxAmmo, float roundsPerSecond) {
+        super(id, damage, template, name, node);
+        this.maxAmmo = maxAmmo;
+        this.ammo = maxAmmo;
+        attackCooldown = (1f / roundsPerSecond);
     }
 
-    public RangedWeapon(int id,float damage, ItemTemplate template,String name,Node node, boolean droppable) {
-        super(id,damage,template,name,node,droppable);
+    public RangedWeapon(int id, float damage, ItemTemplate template, String name, Node node, boolean droppable, int maxAmmo, float roundsPerSecond) {
+        super(id, damage, template, name, node, droppable);
+        this.maxAmmo = maxAmmo;
+        this.ammo = maxAmmo;
+        attackCooldown = (1f / roundsPerSecond);
     }
+
 }

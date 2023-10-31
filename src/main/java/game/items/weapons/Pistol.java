@@ -33,13 +33,14 @@ import com.jme3.texture.Texture;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
 import game.entities.mobs.HumanMob;
+import game.items.Holdable;
 import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewRifleMessage;
 
 /**
  *
- * @author tomasz potoczko
+ * @author 48793
  */
 public class Pistol extends RangedWeapon {
 
@@ -48,26 +49,30 @@ public class Pistol extends RangedWeapon {
     private Node muzzleNode;
     private CameraRecoilControl camRecoil;
     private RecoilControl gunRecoil;
-
     private ParticleEmitter muzzleEmitter;
 
-    public Pistol(int id, float damage, ItemTemplate template, String name, Node node) {
-        super(id, damage, template, name, node);
+    public Pistol(int id, float damage, ItemTemplate template, String name, Node node, int maxAmmo, float roundsPerSecond) {
+        super(id, damage, template, name, node, maxAmmo, roundsPerSecond);
     }
 
-    public Pistol(int id, float damage, ItemTemplate template, String name, Node node, boolean droppable) {
-        super(id, damage, template, name, node, droppable);
+    public Pistol(int id, float damage, ItemTemplate template, String name, Node node, boolean droppable, int maxAmmo, float roundsPerSecond) {
+        super(id, damage, template, name, node, droppable, maxAmmo, roundsPerSecond);
     }
 
     @Override
     public void playerEquip(Player p) {
-        playerUnequip(p);
-        playerHoldRight(p);
+        Holdable unequippedItem = p.getEquippedRightHand();
+        if (unequippedItem != null) {
+            unequippedItem.playerUnequip(p);
+        }
+        playerHoldInRightHand(p);
     }
 
     @Override
     public void playerUnequip(Player p) {
         p.setEquippedRightHand(null);
+        p.getGunNode().removeControl(gunRecoil);
+        p.getMainCameraNode().removeControl(camRecoil);
         p.getGunNode().detachAllChildren();
     }
 
@@ -77,7 +82,7 @@ public class Pistol extends RangedWeapon {
     }
 
     @Override
-    public void playerHoldRight(Player p) {
+    public void playerHoldInRightHand(Player p) {
         p.setEquippedRightHand(this);
 
         if (isEquippedByMe(p)) {
@@ -97,8 +102,10 @@ public class Pistol extends RangedWeapon {
             SkinningControl skinningControl = model.getChild(0).getControl(SkinningControl.class);
             muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
+            firerateControl = new FirerateControl(this);
             gunRecoil = new RecoilControl(0.0f, -.0f, .0f, .00f);
             camRecoil = new CameraRecoilControl(0.3f, -.1f, .1f, .05f);
+            model.addControl(firerateControl);
             p.getGunNode().addControl(gunRecoil);
             p.getMainCameraNode().addControl(camRecoil);
 
@@ -109,20 +116,24 @@ public class Pistol extends RangedWeapon {
 
 //            AnimComposer composer = model.getChild(0).getControl(AnimComposer.class);
 //            composer.setCurrentAction("idle");
-
             muzzleEmitter = setupMuzzleFlashEmitter();
             muzzleNode.attachChild(muzzleEmitter);
         }
     }
 
     @Override
-    public void playerUseRight(Player p) {
-        playerAttack(p);
+    public void playerUseInRightHand(Player p) {
+
+        if (ammo > 0 && currentAttackCooldown >= attackCooldown) {
+            playerAttack(p);
+        }
     }
 
     @Override
     public void playerAttack(Player p) {
         muzzleEmitter.emitParticles(1);
+        currentAttackCooldown = 0;
+//        ammo--;
         hitscan(p);
     }
 
@@ -146,15 +157,11 @@ public class Pistol extends RangedWeapon {
         cs.getDestructibleNode().collideWith(ray, results);
 
         if (results.size() > 0) {
+            CollisionResult closest = results.getClosestCollision();
+            cp = closest.getContactPoint();
 
-            float distanceToFirstTarget = results.getClosestCollision().getDistance();
+            float distanceToFirstTarget = closest.getDistance();
             if (distanceToFirstTarget < distanceToFirstWall) {
-                CollisionResult closest = results.getClosestCollision();
-                cp = closest.getContactPoint();
-
-                int hostedConnectionId = cs.getClient().getId();
-                HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(), cp.clone(), hostedConnectionId);
-                cs.getClient().send(trailMessage);
 
                 Integer hitId = Integer.valueOf(closest.getGeometry().getName());
                 InteractiveEntity mobHit = cs.getMobs().get(hitId);
@@ -162,13 +169,17 @@ public class Pistol extends RangedWeapon {
             }
         }
         createBullet(muzzleNode.getWorldTranslation(), cp);
+
+        int hostedConnectionId = cs.getClient().getId();
+        HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(), cp, hostedConnectionId);
+        cs.getClient().send(trailMessage);
+
         recoilFire();
     }
 
     private void recoilFire() {
         camRecoil.recoilFire();
         gunRecoil.recoilFire();
-
     }
 
     public static void createBullet(Vector3f spawnpoint, Vector3f destination) {
@@ -187,7 +198,7 @@ public class Pistol extends RangedWeapon {
         fire.setMaterial(trailMat);
         fire.setLowLife(0.7f);  // 0.7f
         fire.setHighLife(0.7f); // 0.7f
-        fire.setStartSize(0.02f);
+        fire.setStartSize(0.02f); // 0.02
         fire.setEndSize(0.00f);
         fire.setRotateSpeed(0);
         fire.setParticlesPerSec(30);
@@ -200,6 +211,8 @@ public class Pistol extends RangedWeapon {
         fire.setEndColor(new ColorRGBA(gray, gray, gray, 1));
         fire.getParticleInfluencer().setVelocityVariation(0.4f);
         fire.setParticlesPerSec(0);
+        fire.setQueueBucket(RenderQueue.Bucket.Transparent);
+
         return fire;
     }
 
@@ -267,7 +280,6 @@ public class Pistol extends RangedWeapon {
 
 //        blood.setEndColor(ColorRGBA.White);
 //        blood.setStartColor(ColorRGBA.White);
-
         blood.setEndColor(new ColorRGBA(1f, 1f, 1f, 0.5f));   // red
         blood.setStartColor(new ColorRGBA(1f, 1f, 1f, 0.5f)); // yellow
         blood.setStartSize(0.315f); //1f

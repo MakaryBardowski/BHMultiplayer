@@ -16,7 +16,7 @@ import game.items.ItemTemplates;
 /**
  * @author tomasz potoczko
  */
-public abstract class Weapon extends Item implements Attacks, Holdable, Equippable {
+public abstract class Weapon extends Item implements Attacks, Holdable {
 
     private static final DamageType DEFAULT_DAMAGE_TYPE = DamageType.PHYSICAL;
     protected float damage;

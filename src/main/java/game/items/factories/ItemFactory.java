@@ -11,10 +11,13 @@ import game.items.Item;
 import game.items.ItemTemplates;
 import game.items.ItemTemplates.ItemTemplate;
 import game.items.ItemTemplates.ItemType;
+import static game.items.ItemTemplates.ItemType.PISTOL;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
+import game.items.weapons.Grenade;
+import game.items.weapons.Knife;
 import game.items.weapons.Pistol;
 import game.items.weapons.Rifle;
 
@@ -45,9 +48,11 @@ public class ItemFactory {
                     return createRifle(id, template, droppable);
                 case PISTOL:
                     return createPistol(id, template, droppable);
+                case GRENADE:
+                    return createGrenade(id, template, droppable);
 
-                case AXE:
-                    break;
+                case KNIFE:
+                    return createKnife(id, template, droppable);
                 default:
                     break;
             }
@@ -81,8 +86,31 @@ public class ItemFactory {
 
     private Rifle createRifle(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        Rifle rifle = new Rifle(id, 3.25f, template, "Rifle", dropNode, droppable);
+        int maxAmmo = 5;
+        float roundsPerSecond = 1.1f;
+        Rifle rifle = new Rifle(id, 8.25f, template, "Rifle", dropNode, droppable, maxAmmo, roundsPerSecond);
         return rifle;
+    }
+
+    private Item createPistol(int id, ItemTemplate template, boolean droppable) {
+        Node dropNode = createItemDropNode(template);
+        int maxAmmo = 5;
+        float roundsPerSecond = 4.43f;
+        Pistol pistol = new Pistol(id, 3.3f, template, "Pistol", dropNode, droppable, maxAmmo, roundsPerSecond);
+        return pistol;
+    }
+
+    private Item createGrenade(int id, ItemTemplate template, boolean droppable) {
+        Node dropNode = createItemDropNode(template);
+        Grenade pistol = new Grenade(id, 0f, template, "Smoke Grenade", dropNode, droppable);
+        return pistol;
+    }
+
+    private Item createKnife(int id, ItemTemplate template, boolean droppable) {
+        Node dropNode = createItemDropNode(template);
+        float attacksPerSec = 2;
+        Knife pistol = new Knife(id, 6f, template, "Smoke Grenade", dropNode, droppable,1,attacksPerSec);
+        return pistol;
     }
 
     /**
@@ -100,12 +128,6 @@ public class ItemFactory {
         } else {
             return (Node) assetManager.loadModel(ItemTemplates.RIFLE_MANNLICHER_95.getDropPath());
         }
-    }
-
-    private Item createPistol(int id, ItemTemplate template, boolean droppable) {
-        Node dropNode = createItemDropNode(template);
-        Pistol pistol = new Pistol(id, 1.3f, template, "Pistol", dropNode, droppable);
-        return pistol;
     }
 
 }

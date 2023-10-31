@@ -13,7 +13,7 @@ import com.jme3.network.serializing.Serializable;
  * @author 48793
  */
 @Serializable
-public class PlayerPosUpdateRequest extends MobUpdateMessage {
+public class PlayerPosUpdateRequest extends EntityUpdateMessage {
 
     protected float x;
     protected float y;

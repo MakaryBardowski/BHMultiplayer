@@ -4,6 +4,7 @@
  */
 package messages.messageListeners;
 
+import client.Main;
 import messages.MobRotUpdateMessage;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
@@ -11,21 +12,28 @@ import server.ServerMain;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
+import com.jme3.scene.Node;
 import game.entities.Collidable;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
+import game.entities.grenades.ServerThrownGrenadeControl;
+import game.entities.grenades.ThrownGrenade;
+import game.entities.grenades.ThrownSmokeGrenade;
 import game.entities.mobs.Mob;
 import game.entities.mobs.Player;
 import game.items.Item;
+import game.items.weapons.Grenade;
 import game.map.collision.MovementCollisionUtils;
 import game.map.collision.WorldGrid;
 import java.util.ArrayList;
 import messages.DestructibleDamageReceiveMessage;
+import messages.GrenadeThrownMessage;
 import messages.HitscanTrailMessage;
 import messages.InstantEntityPosCorrectionMessage;
 import messages.PlayerPosUpdateRequest;
 import messages.items.MobItemInteractionMessage;
 import messages.items.MobItemInteractionMessage.ItemInteractionType;
+import static server.ServerMain.removeEntityByIdServer;
 
 /**
  *
@@ -35,11 +43,12 @@ import messages.items.MobItemInteractionMessage.ItemInteractionType;
 public class ServerMessageListener implements MessageListener<HostedConnection> {
 
     private ServerMain serverApp;
+    private static final Main mainApp = Main.getInstance();
 
     public ServerMessageListener() {
     }
 
-    ;
+    
     public ServerMessageListener(ServerMain s) {
         this.serverApp = s;
     }
@@ -90,6 +99,8 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
 
         } else if (msg instanceof MobItemInteractionMessage imsg) {
             handleItemInteraction(imsg);
+        } else if (msg instanceof GrenadeThrownMessage gmsg) {
+            handleGrenadeThrow(gmsg);
         }
     }
 
@@ -146,6 +157,37 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
     public static void handleDestructibleDamageReceive(Destructible d, DestructibleDamageReceiveMessage hmsg, ServerMain serverApp) {
         applyDestructibleDamageAndNotifyClients(d, hmsg, serverApp);
         checkAndManageDestructibleDeath(d, serverApp);
+    }
+
+    private void handleGrenadeThrow(GrenadeThrownMessage gmsg) {
+        int grenadeId = serverApp.getAndIncreaseNextEntityId();
+        ThrownGrenade thrownGrenade = new ThrownSmokeGrenade(grenadeId, "Thrown Smoke Grenade", new Node());
+        Grenade originGrenade = ((Grenade) getEntityById(gmsg.getId()));
+        float speed = originGrenade.getThrowSpeed();
+        Node gnode = thrownGrenade.getNode();
+        Node root = serverApp.getRootNode();
+        var grenadeControl = new ServerThrownGrenadeControl(thrownGrenade, gmsg.getDirection(), speed);
+
+        enqueueExecutionServer(() -> {
+            thrownGrenade.getNode().move(gmsg.getPos());
+            root.attachChild(gnode);
+            gnode.addControl(grenadeControl);
+        });
+
+        removeEntityByIdServer(originGrenade.getId());
+        serverApp.getMobs().put(thrownGrenade.getId(), thrownGrenade);
+
+        GrenadeThrownMessage msg = new GrenadeThrownMessage(thrownGrenade.getId(), gmsg.getPos(), gmsg.getDirection());
+        msg.setReliable(true);
+        serverApp.getServer().broadcast(msg);
+    }
+
+    public static void enqueueExecutionServer(Runnable runnable) {
+        mainApp.enqueue(runnable);
+    }
+
+    private InteractiveEntity getEntityById(int id) {
+        return serverApp.getMobs().get(id);
     }
 
 }

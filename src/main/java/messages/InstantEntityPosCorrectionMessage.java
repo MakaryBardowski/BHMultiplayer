@@ -14,7 +14,7 @@ import game.entities.InteractiveEntity;
  * @author 48793
  */
 @Serializable
-public class InstantEntityPosCorrectionMessage extends MobUpdateMessage {
+public class InstantEntityPosCorrectionMessage extends EntityUpdateMessage {
 
     protected float x;
     protected float y;

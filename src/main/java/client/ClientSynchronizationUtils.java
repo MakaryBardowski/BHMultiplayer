@@ -8,6 +8,7 @@ import game.entities.mobs.Mob;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import game.entities.grenades.ThrownGrenade;
 
 /**
  *
@@ -25,6 +26,12 @@ public class ClientSynchronizationUtils {
         mob.setPosInterpolationValue(mob.getPosInterpolationValue() + (mob.getSpeed() / mob.getNode().getWorldTranslation().distance(mob.getServerLocation())) * tpf);
         Vector3f newPos = mob.getNode().getWorldTranslation().clone().interpolateLocal(mob.getServerLocation(), Math.min(mob.getPosInterpolationValue(), 1));
         mob.getNode().setLocalTranslation(newPos);
+    }
+    
+        public static void interpolateGrenadePosition(ThrownGrenade grenade, float tpf) {
+        grenade.setPosInterpolationValue(grenade.getPosInterpolationValue() + (grenade.getSpeed() / grenade.getNode().getWorldTranslation().distance(grenade.getServerLocation())) * tpf);
+        Vector3f newPos = grenade.getNode().getWorldTranslation().clone().interpolateLocal(grenade.getServerLocation(), Math.min(grenade.getPosInterpolationValue(), 1));
+        grenade.getNode().setLocalTranslation(newPos);
     }
 
     public static void interpolateMobRotation(Mob mob, float tpf) {

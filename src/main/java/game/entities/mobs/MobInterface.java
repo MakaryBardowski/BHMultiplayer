@@ -9,14 +9,14 @@ import game.items.Item;
 import client.ClientGameAppState;
 import com.jme3.math.Vector3f;
 import game.entities.Destructible;
+import game.entities.Movable;
 
 /**
  *
  * @author 48793
  */
-public interface MobInterface {
+public interface MobInterface extends Movable {
 
-    public void move(float tpf, ClientGameAppState cm);
     public boolean wouldNotCollideWithSolidEntitiesAfterMove(Vector3f moveVec);
     
     public void attack();

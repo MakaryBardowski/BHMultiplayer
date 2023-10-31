@@ -8,7 +8,7 @@ package game.items.weapons;
  *
  * @author tomasz potoczko
  */
-public enum DamageType { // according to oracles offical docs, enums should be named using uppercase
+public enum DamageType { 
     PHYSICAL,
     THERMAL,
     CHEMICAL

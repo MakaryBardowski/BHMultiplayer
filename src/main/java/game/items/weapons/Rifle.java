@@ -33,13 +33,14 @@ import com.jme3.texture.Texture;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
 import game.entities.mobs.HumanMob;
+import game.items.Holdable;
 import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewRifleMessage;
 
 /**
  *
- * @author tomasz potoczko
+ * @author 48793
  */
 public class Rifle extends RangedWeapon {
 
@@ -51,25 +52,31 @@ public class Rifle extends RangedWeapon {
 
     private ParticleEmitter muzzleEmitter;
 
-    public Rifle(int id, float damage, ItemTemplate template, String name, Node node) {
-        super(id, damage, template, name, node);
+    public Rifle(int id, float damage, ItemTemplate template, String name, Node node, int maxAmmo, float roundsPerSecond) {
+        super(id, damage, template, name, node, maxAmmo, roundsPerSecond);
     }
 
-    public Rifle(int id, float damage, ItemTemplate template, String name, Node node, boolean droppable) {
-        super(id, damage, template, name, node, droppable);
+    public Rifle(int id, float damage, ItemTemplate template, String name, Node node, boolean droppable, int maxAmmo, float roundsPerSecond) {
+        super(id, damage, template, name, node, droppable, maxAmmo, roundsPerSecond);
     }
 
     @Override
     public void playerEquip(Player p) {
-        playerUnequip(p);
-        playerHoldRight(p);
+        Holdable unequippedItem = p.getEquippedRightHand();
+        if (unequippedItem != null) {
+            unequippedItem.playerUnequip(p);
+        }
+        playerHoldInRightHand(p);
     }
 
     @Override
     public void playerUnequip(Player p) {
         p.setEquippedRightHand(null);
+        p.getGunNode().removeControl(gunRecoil);
+        p.getMainCameraNode().removeControl(camRecoil);
         p.getGunNode().detachAllChildren();
     }
+
 
     @Override
     public void attack(Mob m) {
@@ -77,7 +84,7 @@ public class Rifle extends RangedWeapon {
     }
 
     @Override
-    public void playerHoldRight(Player p) {
+    public void playerHoldInRightHand(Player p) {
         p.setEquippedRightHand(this);
 
         if (isEquippedByMe(p)) {
@@ -96,8 +103,11 @@ public class Rifle extends RangedWeapon {
             SkinningControl skinningControl = model.getChild(0).getControl(SkinningControl.class);
             muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
+            firerateControl = new FirerateControl(this);
             gunRecoil = new RecoilControl(0.2f, -.0f, .0f, .00f);
             camRecoil = new CameraRecoilControl(2f, -.3f, .3f, .1f);
+
+            model.addControl(firerateControl);
             p.getGunNode().addControl(gunRecoil);
             p.getMainCameraNode().addControl(camRecoil);
 
@@ -115,14 +125,18 @@ public class Rifle extends RangedWeapon {
         }
     }
 
-    @Override
-    public void playerUseRight(Player p) {
-        playerAttack(p);
+  @Override
+    public void playerUseInRightHand(Player p) {
+        if (ammo > 0 && currentAttackCooldown >= attackCooldown) {
+            playerAttack(p);
+        }
     }
 
     @Override
     public void playerAttack(Player p) {
         muzzleEmitter.emitParticles(1);
+        currentAttackCooldown = 0;
+//        ammo--;
         hitscan(p);
     }
 
@@ -146,15 +160,11 @@ public class Rifle extends RangedWeapon {
         cs.getDestructibleNode().collideWith(ray, results);
 
         if (results.size() > 0) {
+            CollisionResult closest = results.getClosestCollision();
+            cp = closest.getContactPoint();
 
-            float distanceToFirstTarget = results.getClosestCollision().getDistance();
+            float distanceToFirstTarget = closest.getDistance();
             if (distanceToFirstTarget < distanceToFirstWall) {
-                CollisionResult closest = results.getClosestCollision();
-                cp = closest.getContactPoint();
-
-                int hostedConnectionId = cs.getClient().getId();
-                HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(), cp.clone(), hostedConnectionId);
-                cs.getClient().send(trailMessage);
 
                 Integer hitId = Integer.valueOf(closest.getGeometry().getName());
                 InteractiveEntity mobHit = cs.getMobs().get(hitId);
@@ -162,6 +172,11 @@ public class Rifle extends RangedWeapon {
             }
         }
         createBullet(muzzleNode.getWorldTranslation(), cp);
+
+        int hostedConnectionId = cs.getClient().getId();
+        HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(), cp, hostedConnectionId);
+        cs.getClient().send(trailMessage);
+
         recoilFire();
     }
 
@@ -200,6 +215,8 @@ public class Rifle extends RangedWeapon {
         fire.setEndColor(new ColorRGBA(gray, gray, gray, 1));
         fire.getParticleInfluencer().setVelocityVariation(0.4f);
         fire.setParticlesPerSec(0);
+        fire.setQueueBucket(RenderQueue.Bucket.Transparent);
+
         return fire;
     }
 

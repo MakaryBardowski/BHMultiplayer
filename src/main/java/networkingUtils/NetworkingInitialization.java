@@ -6,7 +6,7 @@ package networkingUtils;
 
 import messages.messageListeners.ServerMessageListener;
 import messages.SystemHealthUpdateMessage;
-import messages.MobUpdateMessage;
+import messages.EntityUpdateMessage;
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
 import messages.NewMobMessage;
@@ -16,15 +16,19 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
 import messages.DestructibleDamageReceiveMessage;
+import messages.GrenadePosUpdateMessage;
+import messages.GrenadeThrownMessage;
 import messages.HitscanTrailMessage;
 import messages.NewChestMessage;
 import messages.PlayerPosUpdateRequest;
 import messages.InstantEntityPosCorrectionMessage;
 import messages.NewDestructibleDecorationMessage;
+import messages.ThrownGrenadeExplodedMessage;
 import messages.items.ChestItemInteractionMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewBootsMessage;
 import messages.items.NewGlovesMessage;
+import messages.items.NewGrenadeMessage;
 import messages.items.NewHelmetMessage;
 import messages.items.NewItemMessage;
 import messages.items.NewRifleMessage;
@@ -40,7 +44,7 @@ public class NetworkingInitialization {
     public static final int PORT = 6000;
 
     public static void initializeSerializables() {
-        Serializer.registerClass(MobUpdateMessage.class);
+        Serializer.registerClass(EntityUpdateMessage.class);
         Serializer.registerClass(MobPosUpdateMessage.class);
         Serializer.registerClass(MobRotUpdateMessage.class);
         Serializer.registerClass(SystemHealthUpdateMessage.class);
@@ -50,6 +54,7 @@ public class NetworkingInitialization {
         Serializer.registerClass(ServerMessageListener.class);
         Serializer.registerClass(NewChestMessage.class);
         Serializer.registerClass(DestructibleDamageReceiveMessage.class);
+        Serializer.registerClass(GrenadePosUpdateMessage.class);
 
         Serializer.registerClass(NewItemMessage.class);
         Serializer.registerClass(NewHelmetMessage.class);
@@ -57,6 +62,8 @@ public class NetworkingInitialization {
         Serializer.registerClass(NewBootsMessage.class);
         Serializer.registerClass(NewGlovesMessage.class);
         Serializer.registerClass(NewRifleMessage.class);
+        Serializer.registerClass(NewGrenadeMessage.class);
+        Serializer.registerClass(GrenadeThrownMessage.class);
 
         Serializer.registerClass(MobItemInteractionMessage.class);
         Serializer.registerClass(ChestItemInteractionMessage.class);
@@ -65,6 +72,7 @@ public class NetworkingInitialization {
         Serializer.registerClass(PlayerPosUpdateRequest.class);
         Serializer.registerClass(InstantEntityPosCorrectionMessage.class);
         Serializer.registerClass(NewDestructibleDecorationMessage.class);
+        Serializer.registerClass(ThrownGrenadeExplodedMessage.class);
 
     }
 

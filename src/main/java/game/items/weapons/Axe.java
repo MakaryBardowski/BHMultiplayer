@@ -41,7 +41,7 @@ public class Axe extends MeleeWeapon {
 
     @Override
     public void playerEquip(Player p) {
-        playerHoldRight(p);
+        playerHoldInRightHand(p);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class Axe extends MeleeWeapon {
     }
 
     @Override
-    public void playerHoldRight(Player p) {
+    public void playerHoldInRightHand(Player p) {
         p.setEquippedRightHand(this);
         AssetManager assetManager = Main.getInstance().getAssetManager();
         Node model = (Node) assetManager.loadModel(template.getFpPath());
@@ -78,7 +78,7 @@ public class Axe extends MeleeWeapon {
     }
 
     @Override
-    public void playerUseRight(Player p) {
+    public void playerUseInRightHand(Player p) {
         playerAttack(p);
     }
 

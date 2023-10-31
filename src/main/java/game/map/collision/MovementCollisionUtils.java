@@ -6,6 +6,7 @@ package game.map.collision;
 
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import game.entities.Collidable;
 import game.entities.mobs.Mob;
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class MovementCollisionUtils {
 
     }
 
-    private static Vector3f calculateNewPosInLogicMap(Node node, Vector3f UMC, int blockSize) {
+    public static Vector3f calculateNewPosInLogicMap(Spatial node, Vector3f UMC, int blockSize) {
         return new Vector3f((float) Math.floor(node.getWorldTranslation().add(UMC).getX() / blockSize),
                 (float) Math.floor(node.getWorldTranslation().add(UMC).getY() / blockSize),
                 (float) Math.floor(node.getWorldTranslation().add(UMC).getZ() / blockSize));

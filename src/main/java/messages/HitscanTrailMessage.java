@@ -15,7 +15,7 @@ import lombok.Getter;
  * @author 48793
  */
 @Serializable
-public class HitscanTrailMessage extends MobUpdateMessage {
+public class HitscanTrailMessage extends EntityUpdateMessage {
     @Getter
     protected int clientId;
     protected float targetX;

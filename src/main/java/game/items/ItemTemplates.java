@@ -25,7 +25,7 @@ public class ItemTemplates {
     public static final ItemTemplate VEST_TRENCH = new ItemTemplate(ITEMS_PATH + "TrenchSet/officersCoat.j3o", ICON_PATH + "equipmentTrenchCoat.png", ITEMS_PATH + "TrenchSet/officersCoatDrop.j3o", new DropOffsetData(new Vector3f(0, 0.15f, 0), new Vector3f(-90 * FastMath.DEG_TO_RAD, 0, 0 * FastMath.DEG_TO_RAD), 0.85f), ItemType.VEST, 1);
     public static final ItemTemplate BOOTS_TRENCH = new ItemTemplate(ITEMS_PATH + "TrenchSet/officersLeg?.j3o", ICON_PATH + "equipmentTrenchShoes.png", ITEMS_PATH + "TrenchSet/officersBootsDrop.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 0.75f), ItemType.BOOTS, 2);
     public static final ItemTemplate GLOVES_TRENCH = new ItemTemplate(ITEMS_PATH + "TrenchSet/officersHand?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1), ItemType.GLOVES, 3);
-    public static final ItemTemplate AXE = new ItemTemplate(ITEMS_PATH + "Axe/axe.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1), ItemType.AXE, 4);
+    public static final ItemTemplate KNIFE = new ItemTemplate(ITEMS_PATH + "trenchKnife/trenchKnife.j3o", RIFLE_MANNLICHER_95.iconPath, RIFLE_MANNLICHER_95.dropPath, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1), ItemType.KNIFE, 4);
 
     //bare    
     public static final ItemTemplate HEAD_1 = new ItemTemplate(ITEMS_PATH + "TrenchSet/head1.j3o", null, null, null, ItemType.HELMET, 5);
@@ -33,19 +33,21 @@ public class ItemTemplates {
     public static final ItemTemplate LEG_1 = new ItemTemplate(ITEMS_PATH + "Bare/leg?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 0.75f), ItemType.BOOTS, 7);
     public static final ItemTemplate HAND_1 = new ItemTemplate(ITEMS_PATH + "Bare/hand?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 0.75f), ItemType.GLOVES, 8);
     public static final ItemTemplate PISTOL_C96 = new ItemTemplate(ITEMS_PATH + "C96/c96.j3o", ICON_PATH + "equipmentC96.png", ITEMS_PATH + "C96/c96drop.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f), ItemType.PISTOL, 9);
+    public static final ItemTemplate SMOKE_GRENADE = new ItemTemplate(ITEMS_PATH + "Throwable/smokeGrenade.j3o", ICON_PATH + "equipmentC96.png", ITEMS_PATH + "Throwable/smokeGrenadeDrop.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.1f), ItemType.GRENADE, 10);
 
     static {
         templates.add(RIFLE_MANNLICHER_95.getTemplateIndex(), RIFLE_MANNLICHER_95);
         templates.add(VEST_TRENCH.getTemplateIndex(), VEST_TRENCH);
         templates.add(BOOTS_TRENCH.getTemplateIndex(), BOOTS_TRENCH);
         templates.add(GLOVES_TRENCH.getTemplateIndex(), GLOVES_TRENCH);
-        templates.add(AXE.getTemplateIndex(), AXE);
+        templates.add(KNIFE.getTemplateIndex(), KNIFE);
 
         templates.add(HEAD_1.getTemplateIndex(), HEAD_1);
         templates.add(TORSO_1.getTemplateIndex(), TORSO_1);
         templates.add(LEG_1.getTemplateIndex(), LEG_1);
         templates.add(HAND_1.getTemplateIndex(), HAND_1);
         templates.add(PISTOL_C96.getTemplateIndex(), PISTOL_C96);
+        templates.add(SMOKE_GRENADE.getTemplateIndex(), SMOKE_GRENADE);
 
     }
 
@@ -72,7 +74,7 @@ public class ItemTemplates {
     }
 
     public enum ItemType {
-        HELMET, VEST, GLOVES, BOOTS, RIFLE, PISTOL, AXE
+        HELMET, VEST, GLOVES, BOOTS, RIFLE, PISTOL, KNIFE, GRENADE
     }
 
 }

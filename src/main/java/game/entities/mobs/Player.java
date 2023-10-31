@@ -21,6 +21,8 @@ import game.entities.InteractiveEntity;
 import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
 import game.map.collision.WorldGrid;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 import messages.PlayerPosUpdateRequest;
 
 /**
@@ -30,7 +32,10 @@ import messages.PlayerPosUpdateRequest;
 public class Player extends HumanMob {
 
     private static final int HOTBAR_SIZE = 10;
-    private boolean forward, backward, right, left;
+    
+    @Getter
+    @Setter
+    private boolean forward, backward, right, left, holdsTrigger;
 
     // camera
     private CameraNode mainCameraNode;
@@ -68,7 +73,6 @@ public class Player extends HumanMob {
         super(id, node, name, skinningControl);
         this.mainCamera = mainCamera;
         hotbar = new Item[HOTBAR_SIZE];
-//        forward = true;
     }
 
     @Override
@@ -79,38 +83,6 @@ public class Player extends HumanMob {
 
     public Item[] getHotbar() {
         return hotbar;
-    }
-
-    public boolean isForward() {
-        return forward;
-    }
-
-    public void setForward(boolean forward) {
-        this.forward = forward;
-    }
-
-    public boolean isBackward() {
-        return backward;
-    }
-
-    public void setBackward(boolean backward) {
-        this.backward = backward;
-    }
-
-    public boolean isRight() {
-        return right;
-    }
-
-    public void setRight(boolean right) {
-        this.right = right;
-    }
-
-    public boolean isLeft() {
-        return left;
-    }
-
-    public void setLeft(boolean left) {
-        this.left = left;
     }
 
     public Camera getMainCamera() {

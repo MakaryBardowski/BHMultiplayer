@@ -13,7 +13,7 @@ import com.jme3.network.serializing.Serializable;
  * @author 48793
  */
 @Serializable
-public class MobRotUpdateMessage extends MobUpdateMessage {
+public class MobRotUpdateMessage extends EntityUpdateMessage {
 
     private float w;
     private float x;

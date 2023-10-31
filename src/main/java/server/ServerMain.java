@@ -1,6 +1,5 @@
 package server;
 
-import client.ClientGameAppState;
 import com.jme3.app.Application;
 import game.entities.mobs.Mob;
 import game.entities.factories.PlayerFactory;
@@ -37,6 +36,7 @@ import game.entities.DestructibleDecoration;
 import game.entities.InteractiveEntity;
 import game.entities.StatusEffectContainer;
 import game.entities.factories.DestructibleDecorationFactory;
+import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.HumanMob;
 import game.items.Item;
 import game.items.ItemTemplates;
@@ -46,8 +46,11 @@ import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.items.factories.ItemFactory;
+import game.items.weapons.Grenade;
+import game.items.weapons.Knife;
 import game.items.weapons.Pistol;
 import game.items.weapons.Rifle;
+import game.map.MapGenerator;
 import game.map.collision.WorldGrid;
 import java.io.IOException;
 import java.util.HashMap;
@@ -57,39 +60,50 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
+import messages.GrenadePosUpdateMessage;
 import messages.items.ChestItemInteractionMessage;
 import static messages.items.ChestItemInteractionMessage.ChestItemInteractionType.INSERT;
 import messages.items.MobItemInteractionMessage;
 import messages.items.MobItemInteractionMessage.ItemInteractionType;
 import messages.items.SetDefaultItemMessage;
 
-/**
- * This is the Main Class of your Game. You should only do initialization here.
- * Move your Logic into AppStates or Controls
- *
- * @author normenhansen
- */
+
 public class ServerMain extends AbstractAppState implements ConnectionListener, MessageListener<HostedConnection> {
 
     @Getter
-    private static ServerMain instance;
-
-    private static final byte MAX_PLAYERS = 4;
-    private static final String SERVER_IP = "localhost";
     private Server server;
+
+    @Getter
+    private static ServerMain instance;
+    private static final byte MAX_PLAYERS = 4;
+    private final float TIME_PER_TICK = 0.0156f; 
+    
+    @Getter
     private final ConcurrentHashMap<Integer, InteractiveEntity> mobs = new ConcurrentHashMap<>();
     private float tickTimer;
-    private final float TIME_PER_TICK = 0.033f;
+
     private int currentMaxId = 0;
-    private AssetManager assetManager;
-    private RenderManager renderManager;
-    private Node rootNode;
+    private final AssetManager assetManager;
+    private final RenderManager renderManager;
+    private final Node rootNode;
 
     @Getter
     private WorldGrid grid;
 
     @Getter
-    private HashMap<Integer, HostedConnection> connectionsById = new HashMap<>(MAX_PLAYERS);
+    private final HashMap<Integer, HostedConnection> connectionsById = new HashMap<>(MAX_PLAYERS);
+
+    @Getter
+    private final int BLOCK_SIZE = 4;
+
+    @Getter
+    private final int COLLISION_GRID_CELL_SIZE = 16;
+
+    @Getter
+    private final int MAP_SIZE = 39;
+
+    @Getter
+    private byte[][][] map;
 
     public ServerMain(AssetManager assetManager, RenderManager renderManager) {
         this.assetManager = assetManager;
@@ -100,13 +114,15 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
-        startServer();
+        createMap();
         initializeCollisionGrid();
+        startServer();
         pupulateMap();
     }
 
     @Override
     public void update(float tpf) {
+        rootNode.updateLogicalState(tpf);
         tickTimer += tpf;
 
         if (tickTimer >= TIME_PER_TICK) {
@@ -122,10 +138,11 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
                         server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
                         server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
                     }
+                } else if (i.getValue() instanceof ThrownGrenade x) {
+                    server.broadcast(new GrenadePosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
                 }
             }
             );
-
         }
 
     }
@@ -205,14 +222,6 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
 
     @Override
     public void messageReceived(HostedConnection s, Message msg) {
-    }
-
-    public Server getServer() {
-        return server;
-    }
-
-    public ConcurrentHashMap<Integer, InteractiveEntity> getMobs() {
-        return mobs;
     }
 
     private Item registerItemAndNotifyTCP(ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
@@ -315,17 +324,28 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
         Gloves playerGloves = (Gloves) registerItemAndNotifyTCP(ItemTemplates.HAND_1, false, Filters.notIn(hc));
         Boots playerBoots = (Boots) registerItemAndNotifyTCP(ItemTemplates.LEG_1, false, Filters.notIn(hc));
         Item playerRifle;
-        if (new Random().nextInt(2) == 0) {
+
+        int random = new Random().nextInt(4);
+//        int random = 1;
+        if (random == 0) {
             playerRifle = (Rifle) registerItemAndNotifyTCP(ItemTemplates.RIFLE_MANNLICHER_95, true, Filters.notIn(hc));
-        } else {
+        } else if (random == 1) {
             playerRifle = (Pistol) registerItemAndNotifyTCP(ItemTemplates.PISTOL_C96, true, Filters.notIn(hc));
 
+        } else if (random == 2) {
+            playerRifle = (Grenade) registerItemAndNotifyTCP(ItemTemplates.SMOKE_GRENADE, true, Filters.notIn(hc));
+        } else {
+            playerRifle = (Knife) registerItemAndNotifyTCP(ItemTemplates.KNIFE, true, Filters.notIn(hc));
         }
+        Item playerGrenade = (Grenade) registerItemAndNotifyTCP(ItemTemplates.SMOKE_GRENADE, true, Filters.notIn(hc));
+        playerRifle = (Knife) registerItemAndNotifyTCP(ItemTemplates.KNIFE, true, Filters.notIn(hc));
 
         Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide();
 
         player.addToEquipment(playerRifle);
         player.equipServer(playerRifle);
+
+        player.addToEquipment(playerGrenade);
 
         player.equipServer(playerHead);
         player.setDefaultHelmet(playerHead);
@@ -376,7 +396,28 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     }
 
     private void initializeCollisionGrid() {
-        grid = new WorldGrid(39, 4, 16);
+        grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
 
     }
+
+    private void createMap() {
+        map = new MapGenerator().createBossLogicMap(MAP_SIZE);
+    }
+
+    public int getAndIncreaseNextEntityId() {
+        return currentMaxId++;
+    }
+
+    public int getNextEntityId() {
+        return currentMaxId;
+    }
+
+    public Node getRootNode() {
+        return rootNode;
+    }
+
+    public static void removeEntityByIdServer(int id) {
+        instance.getMobs().remove(id);
+    }
+
 }

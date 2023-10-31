@@ -1,5 +1,6 @@
 package client;
 
+import static client.ClientSynchronizationUtils.interpolateGrenadePosition;
 import game.cameraAndInput.PlayerCameraControlAppState;
 import game.map.Map;
 import game.map.MapGenerator;
@@ -22,6 +23,7 @@ import networkingUtils.NetworkingInitialization;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.RootNodeAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
@@ -35,7 +37,9 @@ import com.jme3.ui.Picture;
 import de.lessvoid.nifty.Nifty;
 import game.entities.Collidable;
 import game.entities.InteractiveEntity;
+import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.HumanMob;
+import game.items.weapons.Grenade;
 import game.map.collision.WorldGrid;
 import java.io.IOException;
 import java.util.Arrays;
@@ -135,7 +139,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Getter
     private String serverIp;
-    
+
     @Getter
     private boolean debug;
 
@@ -151,7 +155,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {        // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
-              Picture crosshair = new Picture("crosshair");
+        Picture crosshair = new Picture("crosshair");
         crosshair.setImage(assetManager, "Textures/GUI/crosshair.png", true);
         crosshair.setWidth(applicationSettings.getHeight() * 0.04f);
         crosshair.setHeight(applicationSettings.getHeight() * 0.04f); //0.04f
@@ -175,7 +179,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         } catch (IOException ex) {
             Logger.getLogger(ClientGameAppState.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
 
         client.addMessageListener(new ClientMessageListener(this));
         app.getViewPort().setBackgroundColor(ColorRGBA.Cyan);
@@ -189,7 +192,11 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         al.setColor(ColorRGBA.White.mult(0.7f));
         worldNode.addLight(al);
 
+        
+
     }
+    
+    
 
     @Override
     public void update(float tpf) {
@@ -197,6 +204,10 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         if (player != null) {
             player.move(tpf, this);
             player.updateTemporaryEffectsClient();
+            
+            if(player.isHoldsTrigger() && player.getEquippedRightHand() != null){
+            player.getEquippedRightHand().playerUseInRightHand(player);
+            }
 
         }
 
@@ -209,6 +220,10 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
                     grid.insert(m);
                 }
                 interpolateMobRotation(m, tpf);
+            } else if (x instanceof ThrownGrenade g) {
+                if (!g.getNode().getWorldTranslation().equals(g.getServerLocation())) {
+                    interpolateGrenadePosition(g, tpf);
+                }
             }
         }
         );
@@ -267,6 +282,10 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     public <T extends InteractiveEntity> T registerEntity(T entity) {
         this.mobs.put(entity.getId(), entity);
         return entity;
+    }
+    
+    public static void removeEntityByIdClient(int id){
+        instance.getMobs().remove(id);
     }
 
 }
