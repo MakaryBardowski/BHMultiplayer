@@ -23,6 +23,7 @@ import messages.GrenadeThrownMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewGrenadeMessage;
 import static client.ClientGameAppState.removeEntityByIdClient;
+import de.lessvoid.nifty.controls.label.LabelControl;
 import game.items.Holdable;
 
 /**
@@ -77,6 +78,7 @@ public class Grenade extends ThrowableWeapon {
         p.setEquippedRightHand(this);
 
         if (isEquippedByMe(p)) {
+            ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText("");
 
             AssetManager assetManager = Main.getInstance().getAssetManager();
             Node model = (Node) assetManager.loadModel(template.getFpPath());
@@ -147,5 +149,11 @@ public class Grenade extends ThrowableWeapon {
     private boolean isEquippedByMe(Player p) {
         return p == ClientGameAppState.getInstance().getPlayer();
     }
-
+        @Override
+    public String getDescription() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("-Throwable\n");
+        builder.append("-Creates smoke screen");
+        return builder.toString();
+    }
 }

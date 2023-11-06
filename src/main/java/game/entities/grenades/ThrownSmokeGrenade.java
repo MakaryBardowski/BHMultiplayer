@@ -138,6 +138,7 @@ public class ThrownSmokeGrenade extends ThrownGrenade {
         vvt.setValue(new Vector3f(smokeSpeed, 0.2f, smokeSpeed));
         vi.setLinear(vvt);
         SizeInfluencer si = new SizeInfluencer();
+        si.setSizeOverTime(new ValueType(1.25f));
 
         Emitter emitter = new Emitter("test", mat, NUM_SMOKE_PARTICLES, si, vi, ci);
 //        emitter.setStartColor(new ColorValueType(ColorRGBA.Black.clone().setAlpha(0.5f)));
@@ -175,6 +176,7 @@ public class ThrownSmokeGrenade extends ThrownGrenade {
         gi.setGravity(0, -2, 0);
 
         SizeInfluencer si = new SizeInfluencer();
+        si.setSizeOverTime(new ValueType(1.25f));
         Emitter emitter = new Emitter("test", mat, NUM_SMOKE_PARTICLES, si, vi, ci, gi);
 //        emitter.setStartColor(new ColorValueType(ColorRGBA.Black.clone().setAlpha(0.5f)));
         emitter.setLifeMin(new ValueType(smokeLifetime));

@@ -20,35 +20,38 @@ public class ParticleUtils {
 
     public static void spawnGorePhysicalParticleShaded(Node particleNode, Vector3f initialPos) {
         setMaterialForShadedParticles(particleNode);
-        attachParticleNode(particleNode,ClientGameAppState.getInstance().getDebugNode());
+        attachParticleNode(particleNode, ClientGameAppState.getInstance().getDebugNode());
         moveParticleToSpawnpoint(particleNode, initialPos);
         float finalY = 4f;
         GoreParticle strategy = createGoreParticleStrategy(particleNode, generateRandomVelocity(), generateRandomRotationalVelocity(), finalY);
         createParticle(particleNode, strategy);
     }
 
-    public static void spawnItemPhysicalParticleShaded(Node particleNode, Vector3f initialPos,Item i) {
+    public static void spawnItemPhysicalParticleShaded(Node particleNode, Vector3f initialPos, Item i) {
         setMaterialForShadedParticles(particleNode);
-        attachParticleNode(particleNode,ClientGameAppState.getInstance().getPickableNode());
+        attachParticleNode(particleNode, ClientGameAppState.getInstance().getPickableNode());
         moveParticleToSpawnpoint(particleNode, initialPos);
         float finalY = 4f;
-        DroppedItem strategy = createDroppedItemParticleStrategy(particleNode, generateRandomVelocity(), generateRandomRotationalVelocity(), finalY,i);
+        DroppedItem strategy = createDroppedItemParticleStrategy(particleNode, generateRandomVelocity(), generateRandomRotationalVelocity(), finalY, i);
         createParticle(particleNode, strategy);
     }
 
     private static void setMaterialForShadedParticles(Node particleNode) {
         for (Spatial c : particleNode.getChildren()) {
-            if(c != null){
-            if (c instanceof Geometry g) {
-                Material originalMaterial = g.getMaterial();
-                Material newMaterial = new Material(Main.getInstance().getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
-                newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
-                // newMaterial.setBoolean("UseInstancing", true);
-                g.setMaterial(newMaterial);
-            }else if(c instanceof Node n){
-            setMaterialForShadedParticles(n);
-            }
-            
+            if (c != null) {
+                if (c instanceof Geometry g) {
+                    Material originalMaterial = g.getMaterial();
+
+                    if (originalMaterial.getTextureParam("BaseColorMap") != null) {
+                        Material newMaterial = new Material(Main.getInstance().getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
+                        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+                        // newMaterial.setBoolean("UseInstancing", true);
+                        g.setMaterial(newMaterial);
+                    }
+                } else if (c instanceof Node n) {
+                    setMaterialForShadedParticles(n);
+                }
+
             }
         }
     }
@@ -85,11 +88,11 @@ public class ParticleUtils {
         return new GoreParticle(particleNode, velocity, rotVelocity, finalY);
     }
 
-    private static DroppedItem createDroppedItemParticleStrategy(Node particleNode, Vector3f velocity, Vector3f rotVelocity, float finalY,Item i) {
-        return new DroppedItem(particleNode, velocity, rotVelocity, finalY,i);
+    private static DroppedItem createDroppedItemParticleStrategy(Node particleNode, Vector3f velocity, Vector3f rotVelocity, float finalY, Item i) {
+        return new DroppedItem(particleNode, velocity, rotVelocity, finalY, i);
     }
 
-    private static void attachParticleNode(Node particleNode,Node parentNode) {
+    private static void attachParticleNode(Node particleNode, Node parentNode) {
         parentNode.attachChild(particleNode);
     }
 

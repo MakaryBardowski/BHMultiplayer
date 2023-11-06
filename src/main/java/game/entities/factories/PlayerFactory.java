@@ -22,7 +22,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.entities.DestructibleUtils;
 import game.items.factories.ItemFactory;
-import game.items.weapons.Axe;
 import game.items.weapons.Rifle;
 import server.ServerMain;
 
@@ -106,6 +105,7 @@ public class PlayerFactory extends MobFactory {
         ViewPort view2 = renderManager.createMainView("View of firstPersonCamera", firstPersonCamera);
         view2.setClearFlags(false, true, true);
         view2.attachScene(p.getGunNode());
+        p.setGunViewPort(view2);
         firstPersonCamera.setFrustumPerspective(45f, (float) firstPersonCamera.getWidth() / firstPersonCamera.getHeight(), 0.01f, 1000f);
         p.getRotationNode().attachChild(gunCameraNode);
         gunCameraNode.attachChild(p.getGunNode());

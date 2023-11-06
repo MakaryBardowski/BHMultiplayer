@@ -30,10 +30,16 @@ import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
+import de.lessvoid.nifty.controls.label.LabelControl;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
 import game.entities.mobs.HumanMob;
+import game.items.AmmoPack;
 import game.items.Holdable;
+import game.items.Item;
+import game.items.ItemTemplates;
+import static game.items.weapons.RangedWeapon.AMMO_ATTRIBUTE;
+import messages.EntitySetIntegerAttributeMessage;
 import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewRifleMessage;
@@ -77,7 +83,6 @@ public class Rifle extends RangedWeapon {
         p.getGunNode().detachAllChildren();
     }
 
-
     @Override
     public void attack(Mob m) {
 
@@ -88,6 +93,7 @@ public class Rifle extends RangedWeapon {
         p.setEquippedRightHand(this);
 
         if (isEquippedByMe(p)) {
+            ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText((int) getAmmo() + "/" + (int) getMaxAmmo());
 
             AssetManager assetManager = Main.getInstance().getAssetManager();
             Node model = (Node) assetManager.loadModel(template.getFpPath());
@@ -125,21 +131,22 @@ public class Rifle extends RangedWeapon {
         }
     }
 
-  @Override
+    @Override
     public void playerUseInRightHand(Player p) {
-        if (ammo > 0 && currentAttackCooldown >= attackCooldown) {
+        if (getAmmo() > 0 && currentAttackCooldown >= attackCooldown) {
             playerAttack(p);
         }
     }
 
-    @Override
+  @Override
     public void playerAttack(Player p) {
         muzzleEmitter.emitParticles(1);
         currentAttackCooldown = 0;
-//        ammo--;
+        int newAmmo = getAmmo()-1;
+        setAmmo(newAmmo);
+        ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText((int) newAmmo + "/" + (int) getMaxAmmo());
         hitscan(p);
     }
-
     private void hitscan(Player p) {
         var cs = ClientGameAppState.getInstance();
         CollisionResults results = new CollisionResults();
@@ -294,5 +301,53 @@ public class Rifle extends RangedWeapon {
 //        blood.getParticleInfluencer().setVelocityVariation(0f);
         blood.setParticlesPerSec(0);
         return blood;
+    }
+
+     @Override
+    public void reload(Mob wielder) {
+        int ammoToFullClip = getMaxAmmo() - getAmmo();
+        int ammoFromPack = 0;
+        int localAmmo = getAmmo();
+        int maxAmmo = getMaxAmmo();
+        
+        for (int i = 0; i < wielder.getEquipment().length; i++) {
+            Item item = wielder.getEquipment()[i];
+            if (item instanceof AmmoPack pack && pack.getTemplate().getType().equals(ItemTemplates.ItemType.RIFLE_AMMO)) {
+                int initialPackAmmo = pack.getAmmo();
+                ammoFromPack = Math.min(ammoToFullClip, initialPackAmmo);
+                
+                if (ammoFromPack > 0) {
+                    var packMsg = new EntitySetIntegerAttributeMessage(pack, AmmoPack.AMMO_ATTRIBUTE, initialPackAmmo-ammoFromPack);
+                    packMsg.setReliable(true);
+                    ClientGameAppState.getInstance().getClient().send(packMsg);
+
+                    localAmmo +=  ammoFromPack;
+                    ammoToFullClip = maxAmmo - localAmmo;
+                }
+            }
+        }
+        
+        var msg = new EntitySetIntegerAttributeMessage(this, AMMO_ATTRIBUTE, localAmmo);
+        msg.setReliable(true);
+        ClientGameAppState.getInstance().getClient().send(msg);
+
+    }
+    
+        @Override
+    public String getDescription() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("-Worn\n");
+        builder.append("-Damage [");
+        builder.append(damage);
+        builder.append("]\n");
+        builder.append("-Fire rate [");
+        builder.append(attacksPerSecond);
+        builder.append("]\n");
+        builder.append("-Ammo [");
+        builder.append(getAmmo());
+        builder.append("/");
+        builder.append(getMaxAmmo());
+        builder.append("]");
+        return builder.toString();
     }
 }

@@ -8,11 +8,26 @@ package client;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.audio.AudioRenderer;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
+import com.jme3.input.InputManager;
+import com.jme3.material.Material;
+import com.jme3.material.RenderState;
 import com.jme3.math.Ray;
 import com.jme3.niftygui.NiftyJmeDisplay;
+import com.jme3.renderer.Camera;
+import com.jme3.renderer.ViewPort;
+import com.jme3.renderer.queue.RenderQueue;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.control.BillboardControl;
+import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Quad;
+import com.jme3.texture.FrameBuffer;
+import com.jme3.texture.Image.Format;
+import com.jme3.texture.Texture;
+import com.jme3.texture.Texture2D;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.ElementBuilder;
 import de.lessvoid.nifty.builder.HoverEffectBuilder;
@@ -22,8 +37,15 @@ import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
+import de.lessvoid.nifty.controls.textfield.TextFieldControl;
+import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
+import de.lessvoid.nifty.tools.Color;
 import game.entities.Destructible;
+import game.entities.InteractiveEntity;
+import game.items.Item;
+import java.util.Random;
 
 /**
  *
@@ -45,6 +67,19 @@ public class PlayerHUD extends BaseAppState {
     private float percentMobHealthbarLength = 0.33f;
     private float percentMobHealthbarHeight = 0.01f;
     private float playerHealthbarWidth = 0.15f;
+
+    // item drop tooltip
+    public static Node itemDropTooltipNode = new Node();
+    private Geometry itemDropTooltipGeom;
+    private Material itemDropTooltipMaterial;
+    private NiftyJmeDisplay niftyDisplay;
+    private ViewPort niftyView;
+    private Nifty tooltipNifty;
+    private final int texSize = 128;
+    private final int texW = (int) (texSize * 2.5f);
+    private final int texH = texSize;
+    private final FrameBuffer fb = new FrameBuffer(texW, texH, 0);
+    private final Texture2D niftytex = new Texture2D(texW, texH, Format.RGB8);
 
     public PlayerHUD(ClientGameAppState gs) {
         this.gs = gs;
@@ -175,7 +210,7 @@ public class PlayerHUD extends BaseAppState {
                         panel(new PanelBuilder("ammo") {
                             {
                                 childLayoutHorizontal(); // panel properties, add more...
-                                paddingLeft("3.1%"); // 3.1%
+                                marginLeft("70%"); // 3.1%
                                 paddingTop("90%");
 
                                 // GUI elements
@@ -450,6 +485,8 @@ public class PlayerHUD extends BaseAppState {
         }.build(nifty));
         // </screen>
 
+        initializeDropTooltip();
+
         nifty.gotoScreen("Screen_ID"); // start the screen   
         gs.getFlyCam().setDragToRotate(false);
     }
@@ -461,13 +498,13 @@ public class PlayerHUD extends BaseAppState {
     @Override
     public void update(float tpf) {
         nifty.getCurrentScreen().findElementById("hp_bar").setWidth((int) ((gs.getPlayer().getHealth() / gs.getPlayer().getMaxHealth()) * (playerHealthbarWidth * nifty.getRenderEngine().getNativeWidth())));
-        checkTargetedEntity(gs, gs.getDestructibleNode());
+        checkTargetedEntity(gs, gs.getPickableNode());
 
-//        System.out.println(                    nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).getText() );
+//        System.out.println(                    tooltipNifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).getText() );
         if (gs.getPlayer().getCurrentTarget() != null) {
             float length = ((gs.getPlayer().getCurrentTarget().getHealth() / gs.getPlayer().getCurrentTarget().getMaxHealth()) * (percentMobHealthbarLength * nifty.getRenderEngine().getNativeWidth()));
             nifty.getCurrentScreen().findElementById("hp_bar_target").setWidth((int) (length));
-//            nifty.getCurrentScreen().findControl("hp_bar_target", LabelControl.class).setText(Float.toString(gs.getPlayer().getCurrentTarget().getHealth()));
+//            tooltipNifty.getCurrentScreen().findControl("hp_bar_target", LabelControl.class).setText(Float.toString(gs.getPlayer().getCurrentTarget().getHealth()));
             if (nifty.getCurrentScreen().findElementById("hp_bar_target_yellow").getWidth() > nifty.getCurrentScreen().findElementById("hp_bar_target").getWidth()) {
                 nifty.getCurrentScreen().findElementById("hp_bar_target_yellow").setWidth((int) (nifty.getCurrentScreen().findElementById("hp_bar_target_yellow").getWidth() - 300 * tpf));
             }
@@ -500,19 +537,35 @@ public class PlayerHUD extends BaseAppState {
                 CollisionResult closest = results.getClosestCollision();
                 String hit = closest.getGeometry().getName();
 
-                Destructible enemyHit = (Destructible) gs.getMobs().get(Integer.valueOf(hit));
+                if (hit.equals("item tooltip")) {
+                    return;
+                }
 
-                if (enemyHit != null) {
-                    boolean switched = gs.getPlayer().getCurrentTarget() != enemyHit;
-                    gs.getPlayer().setCurrentTarget(enemyHit);
+                InteractiveEntity entityHit = gs.getMobs().get(Integer.valueOf(hit));
+                if (entityHit instanceof Destructible enemyHit) {
+                    if (enemyHit != null) {
+                        boolean switched = gs.getPlayer().getCurrentTarget() != enemyHit;
+                        gs.getPlayer().setCurrentTarget(enemyHit);
+                        if (switched) {
+                            updateTargetHealthbar();
+                        }
+
+                    }
+                } else if (entityHit instanceof Item itemHit) {
+                    boolean switched = gs.getPlayer().getLastTargetedItem() != itemHit;
+                    gs.getPlayer().setLastTargetedItem(itemHit);
                     if (switched) {
-                        updateTargetHealthbar();
+                        tooltipNifty.resolutionChanged();
+                        updateItemDropTooltipMaterial(itemHit);
                     }
 
                 }
             }
-        }
 
+        } else if (gs.getPlayer().getLastTargetedItem() != null) {
+            gs.getPlayer().setLastTargetedItem(null);
+            itemDropTooltipNode.removeFromParent();
+        }
     }
 
     public Nifty getNifty() {
@@ -529,13 +582,81 @@ public class PlayerHUD extends BaseAppState {
 
     public void setClient(ClientGameAppState gs) {
         this.gs = gs;
+
     }
 
     private void updateTargetHealthbar() {
-        nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).setText(gs.getPlayer().getCurrentTarget().getName());
+        nifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class
+        ).setText(gs.getPlayer().getCurrentTarget().getName());
         nifty.getCurrentScreen().findElementById("hp_bar_target_yellow").setWidth((int) ((gs.getPlayer().getCurrentTarget().getHealth() / gs.getPlayer().getCurrentTarget().getMaxHealth()) * (percentMobHealthbarLength * nifty.getRenderEngine().getNativeWidth())));
         nifty.getCurrentScreen().findElementById("hp_bar_target_gray").setVisible(true);
         nifty.getCurrentScreen().findElementById("hp_bar_target_label").setVisible(true);
+    }
+
+    private void initializeDropTooltip() {
+
+        var cs = ClientGameAppState.getInstance();
+        itemDropTooltipGeom = new Geometry("item tooltip", new Quad(2.5f, 1.f));
+        itemDropTooltipNode.attachChild(itemDropTooltipGeom);
+        itemDropTooltipGeom.center();
+        itemDropTooltipGeom.move(0, 1f, -0.1f);
+        itemDropTooltipNode.setQueueBucket(RenderQueue.Bucket.Transparent);
+        BillboardControl billboard = new BillboardControl();
+        billboard.setAlignment(BillboardControl.Alignment.AxialY);
+        itemDropTooltipNode.addControl(billboard);
+
+        var assetManager = cs.getAssetManager();
+        var renderManager = cs.getRenderManager();
+        InputManager inputManager = null;
+        AudioRenderer audioRenderer = null;
+
+        itemDropTooltipMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        itemDropTooltipMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+        itemDropTooltipGeom.setMaterial(itemDropTooltipMaterial);
+
+        niftyView = renderManager.createPreView("NiftyView", new Camera(texW, texH));
+        niftyView.setClearFlags(true, true, true);
+
+        niftyDisplay = NiftyJmeDisplay.newNiftyJmeDisplay(
+                assetManager, inputManager, audioRenderer, niftyView);
+
+        tooltipNifty = niftyDisplay.getNifty();
+        tooltipNifty.fromXml("Interface/ItemDropTooltip.xml", "tooltipScreen");
+        fb.setDepthBuffer(Format.Depth);
+        niftyView.setOutputFrameBuffer(fb);
+
+    }
+
+    private void updateItemDropTooltipMaterial(Item itemHit) {
+        itemHit.getDroppedItemNode().attachChild(itemDropTooltipNode);
+
+        Element textElement = tooltipNifty.getCurrentScreen().findElementByName("itemName");
+
+        TextRenderer textRenderer = textElement.getRenderer(TextRenderer.class
+        );
+        textRenderer.setText(itemHit.getTemplate().getName()); // Set the text to something
+
+        textElement = tooltipNifty.getCurrentScreen().findElementByName("itemDescription");
+
+        textRenderer
+                = textElement.getRenderer(TextRenderer.class
+                );
+        textRenderer.setText(itemHit.getDescription()); // Set the text to something
+
+        niftyView.removeProcessor(niftyDisplay);
+        niftyView.addProcessor(niftyDisplay);
+
+        fb.resetObject();
+        fb.setColorTexture(niftytex);
+
+        FrameBuffer.FrameBufferTextureTarget buffTar = FrameBuffer.FrameBufferTarget.newTarget((Texture) niftytex);
+        Texture texture = buffTar.getTexture();
+        texture.getImage().setFormat(Format.RGBA8);
+        fb.addColorTarget(buffTar);
+
+        niftytex.setMagFilter(Texture.MagFilter.Nearest);
+        itemDropTooltipMaterial.setTexture("ColorMap", niftytex);
+
     }
 
 }

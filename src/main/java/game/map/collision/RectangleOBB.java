@@ -3,7 +3,6 @@ package game.map.collision;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
-
 /**
  *
  * @author 48793
@@ -41,6 +40,10 @@ public class RectangleOBB extends CollisionShape {
     }
 
     private boolean wouldCollideAtPositionOBB(RectangleOBB obb, Vector3f newPos) {
+        if (obb.position.getY() + obb.height < position.getY() - height
+                || obb.position.getY() - obb.height > position.getY() + height) {
+            return false;
+        }
         Vector3f actualPos = position.clone();
 
         position.set(newPos);

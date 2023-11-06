@@ -33,6 +33,7 @@ import game.entities.grenades.ClientThrownGrenadeRotateControl;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.grenades.ThrownSmokeGrenade;
 import game.entities.mobs.HumanMob;
+import game.items.AmmoPack;
 import game.items.Item;
 import game.items.ItemTemplates;
 import game.items.armor.Boots;
@@ -51,6 +52,7 @@ import messages.InstantEntityPosCorrectionMessage;
 import messages.NewChestMessage;
 import messages.NewDestructibleDecorationMessage;
 import messages.ThrownGrenadeExplodedMessage;
+import messages.TwoWayMessage;
 import messages.items.ChestItemInteractionMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.MobItemInteractionMessage.ItemInteractionType;
@@ -58,6 +60,7 @@ import static messages.items.MobItemInteractionMessage.ItemInteractionType.DROP;
 import static messages.items.MobItemInteractionMessage.ItemInteractionType.EQUIP;
 import static messages.items.MobItemInteractionMessage.ItemInteractionType.PICK_UP;
 import static messages.items.MobItemInteractionMessage.ItemInteractionType.UNEQUIP;
+import messages.items.NewAmmoPackMessage;
 import messages.items.NewBootsMessage;
 import messages.items.NewGlovesMessage;
 import messages.items.NewGrenadeMessage;
@@ -83,7 +86,9 @@ public class ClientMessageListener implements MessageListener<Client> {
 
     @Override
     public void messageReceived(Client s, Message m) {
-        if (m instanceof MobRotUpdateMessage nmsg) {
+        if (m instanceof TwoWayMessage tm) {
+            tm.handleClient(clientApp);
+        } else if (m instanceof MobRotUpdateMessage nmsg) {
             updateMobRotation(nmsg);
         } else if (m instanceof MobPosUpdateMessage nmsg) {
             updateMobPosition(nmsg);
@@ -282,9 +287,14 @@ public class ClientMessageListener implements MessageListener<Client> {
             clientApp.registerEntity(i);
         } else if (imsg instanceof NewRifleMessage rmsg) {
             Item i = ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
+
             clientApp.registerEntity(i);
         } else if (imsg instanceof NewGrenadeMessage rmsg) {
             Item i = ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
+            clientApp.registerEntity(i);
+        } else if (imsg instanceof NewAmmoPackMessage rmsg) {
+            AmmoPack i = (AmmoPack) ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
+            i.setAmmo(rmsg.getAmmo());
             clientApp.registerEntity(i);
         }
 
@@ -317,8 +327,10 @@ public class ClientMessageListener implements MessageListener<Client> {
                 switch (iimsg.getInteractionType()) {
                     case EQUIP:
                         Item equipped = getItemById(iimsg.getItemId());
+                        if (equipped == null) {
+                            throw new NullPointerException("THE item with ID = " + iimsg.getItemId() + " doesnt exist!");
+                        }
                         getMobById(iimsg.getMobId()).equip(equipped);
-                        System.out.println("player " + getMobById(iimsg.getMobId()) + " equips " + equipped + " (item id = " + iimsg.getItemId() + ")");
                         break;
                     case UNEQUIP:
                         Item unequipped = getItemById(iimsg.getItemId());
@@ -433,7 +445,7 @@ public class ClientMessageListener implements MessageListener<Client> {
             g.explodeClient();
             clientApp.getMobs().remove(gemsg.getId());
             g.getNode().removeFromParent();
-            
+
         });
     }
 }

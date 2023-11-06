@@ -15,6 +15,10 @@ import com.jme3.system.JmeContext;
 import de.lessvoid.nifty.Nifty;
 import java.util.Random;
 import com.jme3.niftygui.NiftyJmeDisplay;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 import networkingUtils.NetworkingInitialization;
 import server.ServerMain;
 
@@ -33,38 +37,61 @@ public class Main extends SimpleApplication {
     private static final boolean fullscreen = true;
 //    private static final short STARTING_RESOLUTION_WIDTH = 1000;
 //    private static final short STARTING_RESOLUTION_HEIGHT = 800;
+//    private static final boolean fullscreen = false;
 
     public static void main(String[] args) {
         Main app = new Main();
         setupSettings(app);
+
         app.start();
 
     }
 
     @Override
     public void simpleInitApp() {
+        flyCam.setMoveSpeed(30);
         speed = 1f;
         instance = this;
         NetworkingInitialization.initializeSerializables();
 
         DetailedProfilerState dps = new DetailedProfilerState();
-//        stateManager.attach(dps);
+        stateManager.attach(dps);
 
         ScreenshotAppState screenShotState = new ScreenshotAppState();
         stateManager.attach(screenShotState);
 
         MainMenuAppState mms = new MainMenuAppState(assetManager, inputManager, audioRenderer, guiViewPort);
         stateManager.attach(mms);
-
     }
 
     @Override
-    public void simpleUpdate(float tpf) {
+    public void gainFocus() {
+        if (ClientGameAppState.getInstance() != null && ClientGameAppState.getInstance().getPlayer() != null) {
+            PlayerHUD.itemDropTooltipNode.removeFromParent();
+            ClientGameAppState.getInstance().getPlayer().setLastTargetedItem(null);
+        }
+        super.gainFocus();
+    }
+
+    @Override
+    public void loseFocus() {
+        if (ClientGameAppState.getInstance() != null && ClientGameAppState.getInstance().getPlayer() != null) {
+            PlayerHUD.itemDropTooltipNode.removeFromParent();
+            ClientGameAppState.getInstance().getPlayer().setLastTargetedItem(null);
+        }
+        super.loseFocus();
+    }
+
+    @Override
+    public void simpleUpdate(float tpf
+    ) {
+
         //TODO: add update code
     }
 
     @Override
-    public void simpleRender(RenderManager rm) {
+    public void simpleRender(RenderManager rm
+    ) {
         //TODO: add render code
     }
 
@@ -82,7 +109,7 @@ public class Main extends SimpleApplication {
         settings1.setFullscreen(fullscreen);
         settings1.setVSync(true);
         settings1.setFrameRate(2000);
-
+        settings1.setRenderer(AppSettings.LWJGL_OPENGL45);
 //                settings1.setResolution(800, 800);
 //        app.setDisplayFps(false);
 //        app.setDisplayStatView(false);

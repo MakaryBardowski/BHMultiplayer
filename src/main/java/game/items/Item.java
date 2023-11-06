@@ -8,6 +8,8 @@ import client.ClientGameAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import static debugging.DebugUtils.createUnshadedBoxNode;
 import game.effects.ParticleUtils;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.InteractiveEntity;
@@ -43,8 +45,13 @@ public abstract class Item extends InteractiveEntity {
         if (!droppable) {
             return;
         }
-        Node parentNode = new Node();
+        Node parentNode = createUnshadedBoxNode();
+        var invisibleHitbox = parentNode.getChild("Box");
+        invisibleHitbox.scale(2);
+        invisibleHitbox.setCullHint(Spatial.CullHint.Always);
+        setupModelShootability(parentNode, id);
         setupModelShootability(node, id);
+
         applyInitialDropRotation(node);
         parentNode.attachChild(node);
         parentNode.scale(template.getDropData().getScale());
@@ -73,5 +80,7 @@ public abstract class Item extends InteractiveEntity {
     public void setPositionServer(Vector3f newPos) {
         throw new StackOverflowError("item.setPositionServer not supported");
     }
+
+    public abstract String getDescription();
 
 }

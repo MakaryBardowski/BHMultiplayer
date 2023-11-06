@@ -25,6 +25,7 @@ import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
 import game.entities.InteractiveEntity;
 import game.items.weapons.Grenade;
+import game.items.weapons.MeleeWeapon;
 import game.items.weapons.RangedWeapon;
 import java.util.Arrays;
 
@@ -114,7 +115,7 @@ public class InputController {
                         player.setHoldsTrigger(false);
                     }
                 } else if (!player.isDead() && !player.isViewingEquipment() && player.getEquippedRightHand() != null && name.equals("Attack") && keyPressed) {
-                    if (player.getEquippedRightHand() instanceof RangedWeapon) { // if its a ranged weapon, set holds trigger which makes the auto shoot
+                    if (player.getEquippedRightHand() instanceof RangedWeapon || player.getEquippedRightHand() instanceof MeleeWeapon) { // if its a ranged weapon, set holds trigger which makes the auto shoot
                         player.setHoldsTrigger(true);
                     }
                 }
@@ -142,9 +143,12 @@ public class InputController {
                         "E") && !gs.getPlayer().isDead() && !keyPressed) {
                     interact();
                 }
-//                if (name.equals("R") && !gs.getPlayer().isDead() && !keyPressed) {
-//                    gs.getPlayer().getEquippedRightHand().reload(gs.getPlayer(), gs);
-//                }
+                if (name.equals("R") && !gs.getPlayer().isDead() && !keyPressed) {
+                    var equipped = gs.getPlayer().getEquippedRightHand();
+                    if (equipped != null && equipped instanceof RangedWeapon ranged) {
+                        ranged.reload(player);
+                    }
+                }
 
                 if (name.equals(
                         "K") && !keyPressed) {

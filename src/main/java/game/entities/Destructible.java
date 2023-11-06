@@ -15,17 +15,24 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public abstract class Destructible extends Collidable implements Damageable{
+public abstract class Destructible extends Collidable implements Damageable {
+
+    protected static final int HEALTH_ATTRIBUTE = 0;
+    protected static final int MAX_HEALTH_ATTRIBUTE = 1;
 
     protected float health = 12;
     protected float maxHealth = 12;
 
-
-    public Destructible(int id,String name, Node node) {
-        super(id,name, node);
+    public Destructible(int id, String name, Node node) {
+        super(id, name, node);
+        attributes.put(HEALTH_ATTRIBUTE, new FloatAttribute(health));
+        attributes.put(MAX_HEALTH_ATTRIBUTE, new FloatAttribute(maxHealth));
     }
-    
+
     protected abstract void createHitbox();
-    public void onDeathServer(){};
+
+    public void onDeathServer() {
+    }
+;
 
 }

@@ -38,6 +38,7 @@ import game.entities.StatusEffectContainer;
 import game.entities.factories.DestructibleDecorationFactory;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.HumanMob;
+import game.items.AmmoPack;
 import game.items.Item;
 import game.items.ItemTemplates;
 import game.items.ItemTemplates.ItemTemplate;
@@ -53,6 +54,7 @@ import game.items.weapons.Rifle;
 import game.map.MapGenerator;
 import game.map.collision.WorldGrid;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -67,7 +69,6 @@ import messages.items.MobItemInteractionMessage;
 import messages.items.MobItemInteractionMessage.ItemInteractionType;
 import messages.items.SetDefaultItemMessage;
 
-
 public class ServerMain extends AbstractAppState implements ConnectionListener, MessageListener<HostedConnection> {
 
     @Getter
@@ -76,8 +77,8 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     @Getter
     private static ServerMain instance;
     private static final byte MAX_PLAYERS = 4;
-    private final float TIME_PER_TICK = 0.0156f; 
-    
+    private final float TIME_PER_TICK = 0.0156f;
+
     @Getter
     private final ConcurrentHashMap<Integer, InteractiveEntity> mobs = new ConcurrentHashMap<>();
     private float tickTimer;
@@ -133,7 +134,6 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
                     if (d instanceof StatusEffectContainer c) {
                         c.updateTemporaryEffectsServer();
                     }
-
                     if (d instanceof Mob x) {
                         server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
                         server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
@@ -200,7 +200,6 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
                     server.broadcast(Filters.in(hc), msg);
                 }
             }
-
         });
 
         SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation());
@@ -272,6 +271,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
             }
         }
 
+
     }
 
     private void sendMessageTCP(AbstractMessage imsg, Filter<HostedConnection> filter) {
@@ -325,22 +325,21 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
         Boots playerBoots = (Boots) registerItemAndNotifyTCP(ItemTemplates.LEG_1, false, Filters.notIn(hc));
         Item playerRifle;
 
-        int random = new Random().nextInt(4);
-//        int random = 1;
+        int random = new Random().nextInt(3);
         if (random == 0) {
             playerRifle = (Rifle) registerItemAndNotifyTCP(ItemTemplates.RIFLE_MANNLICHER_95, true, Filters.notIn(hc));
         } else if (random == 1) {
             playerRifle = (Pistol) registerItemAndNotifyTCP(ItemTemplates.PISTOL_C96, true, Filters.notIn(hc));
 
-        } else if (random == 2) {
-            playerRifle = (Grenade) registerItemAndNotifyTCP(ItemTemplates.SMOKE_GRENADE, true, Filters.notIn(hc));
         } else {
-            playerRifle = (Knife) registerItemAndNotifyTCP(ItemTemplates.KNIFE, true, Filters.notIn(hc));
+            playerRifle = (Grenade) registerItemAndNotifyTCP(ItemTemplates.SMOKE_GRENADE, true, Filters.notIn(hc));
         }
         Item playerGrenade = (Grenade) registerItemAndNotifyTCP(ItemTemplates.SMOKE_GRENADE, true, Filters.notIn(hc));
-        playerRifle = (Knife) registerItemAndNotifyTCP(ItemTemplates.KNIFE, true, Filters.notIn(hc));
+        Item playerKnife = (Knife) registerItemAndNotifyTCP(ItemTemplates.KNIFE, true, Filters.notIn(hc));
 
         Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide();
+
+        player.addToEquipment(playerKnife);
 
         player.addToEquipment(playerRifle);
         player.equipServer(playerRifle);
@@ -367,17 +366,32 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     public Chest registerRandomChest(Vector3f offset) {
         Chest chest = Chest.createRandomChestServer(currentMaxId++, rootNode, offset, assetManager);
         Random r = new Random();
-        int randomValue = r.nextInt(6);
+        int randomValue = r.nextInt(9);
         if (randomValue < 2) {
             Vest playerVest = (Vest) registerItemLocal(ItemTemplates.VEST_TRENCH, true);
-            playerVest.setArmorValue(0.45f);
+            playerVest.setArmorValue(1.05f+r.nextFloat(0f, 0.25f));
             chest.addToEquipment(playerVest);
         }
         if (randomValue >= 1 && randomValue <= 4) {
             Boots playerBoots = (Boots) registerItemLocal(ItemTemplates.BOOTS_TRENCH, true);
-            playerBoots.setArmorValue(0.25f);
+            playerBoots.setArmorValue(0.65f+r.nextFloat(0f, 0.25f));
             chest.addToEquipment(playerBoots);
         }
+
+        if (randomValue == 5) {
+            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.PISTOL_AMMO_PACK, true);
+            chest.addToEquipment(ammo);
+        } else if (randomValue == 6) {
+            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.RIFLE_AMMO_PACK, true);
+            chest.addToEquipment(ammo);
+        } else  if (randomValue == 7) {
+            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.SMG_AMMO_PACK, true);
+            chest.addToEquipment(ammo);
+        } else if (randomValue == 8) {
+            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.SNIPER_AMMO_PACK, true);
+            chest.addToEquipment(ammo);
+        }
+        
 
         insertIntoCollisionGrid(chest);
 

@@ -16,6 +16,8 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
 import messages.DestructibleDamageReceiveMessage;
+import messages.EntitySetFloatAttributeMessage;
+import messages.EntitySetIntegerAttributeMessage;
 import messages.GrenadePosUpdateMessage;
 import messages.GrenadeThrownMessage;
 import messages.HitscanTrailMessage;
@@ -26,6 +28,7 @@ import messages.NewDestructibleDecorationMessage;
 import messages.ThrownGrenadeExplodedMessage;
 import messages.items.ChestItemInteractionMessage;
 import messages.items.MobItemInteractionMessage;
+import messages.items.NewAmmoPackMessage;
 import messages.items.NewBootsMessage;
 import messages.items.NewGlovesMessage;
 import messages.items.NewGrenadeMessage;
@@ -55,6 +58,8 @@ public class NetworkingInitialization {
         Serializer.registerClass(NewChestMessage.class);
         Serializer.registerClass(DestructibleDamageReceiveMessage.class);
         Serializer.registerClass(GrenadePosUpdateMessage.class);
+        Serializer.registerClass(EntitySetIntegerAttributeMessage.class);
+        Serializer.registerClass(EntitySetFloatAttributeMessage.class);
 
         Serializer.registerClass(NewItemMessage.class);
         Serializer.registerClass(NewHelmetMessage.class);
@@ -63,6 +68,7 @@ public class NetworkingInitialization {
         Serializer.registerClass(NewGlovesMessage.class);
         Serializer.registerClass(NewRifleMessage.class);
         Serializer.registerClass(NewGrenadeMessage.class);
+        Serializer.registerClass(NewAmmoPackMessage.class);
         Serializer.registerClass(GrenadeThrownMessage.class);
 
         Serializer.registerClass(MobItemInteractionMessage.class);

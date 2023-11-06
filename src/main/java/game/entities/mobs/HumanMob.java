@@ -26,6 +26,7 @@ import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.map.collision.RectangleAABB;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import lombok.Getter;
@@ -143,20 +144,21 @@ public class HumanMob extends Mob {
 
     @Override
     public void receiveDamage(float damage) {
-
         health -= calculateDamage(damage);
-        
-        if(this != ClientGameAppState.getInstance().getPlayer()){
+
+        var notMe = this != ClientGameAppState.getInstance().getPlayer();
         ParticleEmitter blood = EmitterPooler.getBlood();
         Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 2, 0);
         blood.setLocalTranslation(bloodPos);
         if (health <= 0) {
-            blood.emitParticles(50);
+            if (notMe) {
+                blood.emitParticles(50);
+            }
             die();
-        } else {
+        } else if (notMe) {
             blood.emitParticles(20);
         }
-        }
+
     }
 
     @Override
@@ -265,7 +267,7 @@ public class HumanMob extends Mob {
     @Override
     public boolean wouldNotCollideWithSolidEntitiesAfterMove(Vector3f moveVec) {
         Vector3f newPos = collisionShape.getPosition().add(moveVec);
-        for (Collidable m : ClientGameAppState.getInstance().getGrid().getNearbyAfterMove(this,moveVec)) {
+        for (Collidable m : ClientGameAppState.getInstance().getGrid().getNearbyAfterMove(this, moveVec)) {
             if (isNotCollisionShapePassable(m) && this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
                 return false;
             }
@@ -273,7 +275,7 @@ public class HumanMob extends Mob {
 
         return true;
     }
-    
+
     protected void checkCollisionWithPassableEntities() {
         Vector3f newPos = collisionShape.getPosition();
         for (Collidable m : ClientGameAppState.getInstance().getGrid().getNearby(this)) {
@@ -287,7 +289,7 @@ public class HumanMob extends Mob {
     @Override
     public void onCollisionClient(Collidable other) {
     }
-    
+
     @Override
     public void onCollisionServer(Collidable other) {
     }

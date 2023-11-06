@@ -22,9 +22,9 @@ import java.util.Random;
  */
 public class FirerateControl extends AbstractControl {
 
-    private RangedWeapon weapon;
+    private Weapon weapon;
 
-    public FirerateControl(RangedWeapon weapon) {
+    public FirerateControl(Weapon weapon) {
         this.weapon = weapon;
     }
 

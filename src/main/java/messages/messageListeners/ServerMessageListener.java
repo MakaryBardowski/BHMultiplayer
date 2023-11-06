@@ -31,6 +31,7 @@ import messages.GrenadeThrownMessage;
 import messages.HitscanTrailMessage;
 import messages.InstantEntityPosCorrectionMessage;
 import messages.PlayerPosUpdateRequest;
+import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.MobItemInteractionMessage.ItemInteractionType;
 import static server.ServerMain.removeEntityByIdServer;
@@ -48,13 +49,16 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
     public ServerMessageListener() {
     }
 
-    
     public ServerMessageListener(ServerMain s) {
         this.serverApp = s;
     }
 
     @Override
     public void messageReceived(HostedConnection s, Message msg) {
+        if (msg instanceof TwoWayMessage tm) {
+            tm.handleServer(serverApp);
+        }
+
         if (msg instanceof MobRotUpdateMessage nmsg) {
             if (mobExists(nmsg.getId())) {
                 serverApp.getMobs().get(nmsg.getId()).getNode().setLocalRotation(nmsg.getRot());
@@ -106,8 +110,20 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
 
     public void handleItemInteraction(MobItemInteractionMessage imsg) {
         if (imsg.getInteractionType() == ItemInteractionType.PICK_UP) {
-//            getMobById(imsg.getMobId()).addToEquipment(getItemById(imsg.getItemId()));
-            serverApp.getServer().broadcast(imsg);
+            var mob = getMobById(imsg.getMobId());
+            var newItem = getItemById(imsg.getItemId());
+            boolean doesntHaveItem = true;
+            for (var item : mob.getEquipment()) {
+                if (item == newItem) {
+                    doesntHaveItem = false;
+                }
+            }
+
+            if (doesntHaveItem) {
+                mob.addToEquipment(newItem);
+                serverApp.getServer().broadcast(imsg);
+            }
+
         } else if (imsg.getInteractionType() == ItemInteractionType.EQUIP) {
             getMobById(imsg.getMobId()).equipServer(getItemById(imsg.getItemId()));
             serverApp.getServer().broadcast(imsg);

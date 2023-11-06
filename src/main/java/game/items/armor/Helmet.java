@@ -78,5 +78,11 @@ public class Helmet extends Armor {
     public void playerServerUnequip(HumanMob m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-
+        @Override
+    public String getDescription() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("-Worn\n");
+        builder.append(armorValue);
+        return builder.toString();
+    }
 }

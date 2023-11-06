@@ -13,6 +13,7 @@ import client.ClientGameAppState;
 import com.jme3.anim.SkinningControl;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
+import com.jme3.renderer.ViewPort;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
 import game.entities.Collidable;
@@ -20,6 +21,7 @@ import game.entities.Destructible;
 import game.entities.InteractiveEntity;
 import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
 import game.map.collision.WorldGrid;
+import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +34,7 @@ import messages.PlayerPosUpdateRequest;
 public class Player extends HumanMob {
 
     private static final int HOTBAR_SIZE = 10;
-    
+
     @Getter
     @Setter
     private boolean forward, backward, right, left, holdsTrigger;
@@ -50,6 +52,14 @@ public class Player extends HumanMob {
     private boolean viewingEquipment;
     private boolean cameraMovementLocked;
     private boolean movementControlLocked;
+
+    @Getter
+    @Setter
+    protected Item lastTargetedItem;
+
+    @Getter
+    @Setter
+    protected ViewPort gunViewPort;
 
     @Override
     public void equip(Item item) {
@@ -78,7 +88,6 @@ public class Player extends HumanMob {
     @Override
     public void receiveDamage(float damage) {
         super.receiveDamage(damage);
-
     }
 
     public Item[] getHotbar() {
@@ -155,7 +164,6 @@ public class Player extends HumanMob {
 
             movementVector.setY(0);
 
-            
             Vector3f UMC = movementVector.clone();
             float wallCollisionRange = 0.75f;
             if (UMC.getX() < 0) {
@@ -197,6 +205,9 @@ public class Player extends HumanMob {
 
     @Override
     public void die() {
+        if (gunViewPort != null) {
+            gunViewPort.detachScene(gunNode);
+        }
         super.die();
         forward = false;
         backward = false;
@@ -232,7 +243,5 @@ public class Player extends HumanMob {
     public void setCameraMovementLocked(boolean cameraMovementLocked) {
         this.cameraMovementLocked = cameraMovementLocked;
     }
-
-
 
 }

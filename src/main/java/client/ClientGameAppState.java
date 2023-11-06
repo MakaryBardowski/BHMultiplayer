@@ -35,6 +35,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import com.jme3.ui.Picture;
 import de.lessvoid.nifty.Nifty;
+import debugging.DebugUtils;
 import game.entities.Collidable;
 import game.entities.InteractiveEntity;
 import game.entities.grenades.ThrownGrenade;
@@ -103,6 +104,9 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     private final AssetManager assetManager;
 
     @Getter
+    private final RenderManager renderManager;
+
+    @Getter
     private final InputManager inputManager;
 
     private final ConcurrentLinkedQueue<AbstractMessage> messageQueue = new ConcurrentLinkedQueue<>();
@@ -147,6 +151,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         instance = this;
         this.app = app;
         this.assetManager = app.getAssetManager();
+        this.renderManager = app.getRenderManager();
         this.inputManager = app.getInputManager();
         this.applicationSettings = app.getAppSettings();
         app.getRootNode().attachChild(rootNode);
@@ -181,7 +186,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         }
 
         client.addMessageListener(new ClientMessageListener(this));
-        app.getViewPort().setBackgroundColor(ColorRGBA.Cyan);
+        app.getViewPort().setBackgroundColor(ColorRGBA.Cyan.clone());
+        app.getViewPort().setClearColor(true);
 
         grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
 
@@ -192,11 +198,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         al.setColor(ColorRGBA.White.mult(0.7f));
         worldNode.addLight(al);
 
-        
-
+//        DebugUtils.drawGrid();
     }
-    
-    
 
     @Override
     public void update(float tpf) {
@@ -204,9 +207,9 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         if (player != null) {
             player.move(tpf, this);
             player.updateTemporaryEffectsClient();
-            
-            if(player.isHoldsTrigger() && player.getEquippedRightHand() != null){
-            player.getEquippedRightHand().playerUseInRightHand(player);
+
+            if (player.isHoldsTrigger() && player.getEquippedRightHand() != null) {
+                player.getEquippedRightHand().playerUseInRightHand(player);
             }
 
         }
@@ -283,8 +286,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         this.mobs.put(entity.getId(), entity);
         return entity;
     }
-    
-    public static void removeEntityByIdClient(int id){
+
+    public static void removeEntityByIdClient(int id) {
         instance.getMobs().remove(id);
     }
 
