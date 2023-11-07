@@ -4,6 +4,7 @@
  */
 package messages.items;
 
+import client.ClientGameAppState;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import game.entities.IntegerAttribute;
@@ -11,6 +12,7 @@ import game.items.Item;
 import game.items.weapons.MeleeWeapon;
 import game.items.weapons.RangedWeapon;
 import lombok.Getter;
+import server.ServerMain;
 
 /**
  *  
@@ -28,5 +30,15 @@ public class NewMeleeWeaponMessage extends NewItemMessage {
     public NewMeleeWeaponMessage(MeleeWeapon item) {
         super(item);
     }
+
+    @Override
+    public void handleServer(ServerMain server) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void handleClient(ClientGameAppState client) {
+            Item i = (Item) ifa.createItem(id, getTemplate(), droppable);
+            client.registerEntity(i);    }
 
 }

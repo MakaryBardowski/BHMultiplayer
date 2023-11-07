@@ -4,11 +4,13 @@
  */
 package messages.items;
 
+import client.ClientGameAppState;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import game.items.Item;
 import game.items.armor.Armor;
 import lombok.Getter;
+import server.ServerMain;
 
 /**
  *
@@ -17,7 +19,7 @@ import lombok.Getter;
  */
 @Serializable
 @Getter
-public class NewArmorMessage extends NewItemMessage {
+public abstract class NewArmorMessage extends NewItemMessage {
 
     protected float armorValue;
 

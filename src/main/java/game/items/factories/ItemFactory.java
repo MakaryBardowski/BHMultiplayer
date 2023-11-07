@@ -50,8 +50,8 @@ public class ItemFactory {
 
     private AssetManager assetManager;
 
-    public ItemFactory(AssetManager assetManager) {
-        this.assetManager = assetManager;
+    public ItemFactory() {
+        this.assetManager = Main.getInstance().getAssetManager();
     }
 
     public Item createItem(int id, ItemTemplate template, boolean droppable) {

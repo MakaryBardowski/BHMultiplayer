@@ -147,6 +147,7 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
                 break;
             }
         }
+
         return item;
     }
 

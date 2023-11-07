@@ -230,7 +230,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     }
 
     public Item registerItemLocal(ItemTemplate template, boolean droppable) {
-        ItemFactory ifa = new ItemFactory(null);
+        ItemFactory ifa = new ItemFactory();
         Item item = ifa.createItem(currentMaxId++, template, droppable);
         return registerEntityLocal(item);
     }

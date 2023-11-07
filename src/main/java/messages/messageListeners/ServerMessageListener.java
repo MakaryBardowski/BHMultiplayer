@@ -12,29 +12,18 @@ import server.ServerMain;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
-import com.jme3.scene.Node;
 import game.entities.Collidable;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
-import game.entities.grenades.ServerThrownGrenadeControl;
-import game.entities.grenades.ThrownGrenade;
-import game.entities.grenades.ThrownSmokeGrenade;
-import game.entities.mobs.Mob;
 import game.entities.mobs.Player;
-import game.items.Item;
-import game.items.weapons.Grenade;
 import game.map.collision.MovementCollisionUtils;
 import game.map.collision.WorldGrid;
 import java.util.ArrayList;
 import messages.DestructibleDamageReceiveMessage;
-import messages.GrenadeThrownMessage;
 import messages.HitscanTrailMessage;
 import messages.InstantEntityPosCorrectionMessage;
 import messages.PlayerPosUpdateRequest;
 import messages.TwoWayMessage;
-import messages.items.MobItemInteractionMessage;
-import messages.items.MobItemInteractionMessage.ItemInteractionType;
-import static server.ServerMain.removeEntityByIdServer;
 
 /**
  *
@@ -101,47 +90,12 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
             HostedConnection hc = serverApp.getServer().getConnection(hmsg.getClientId());
             serverApp.getServer().broadcast(Filters.notIn(hc), hmsg);
 
-        } else if (msg instanceof MobItemInteractionMessage imsg) {
-            handleItemInteraction(imsg);
-        } else if (msg instanceof GrenadeThrownMessage gmsg) {
-            handleGrenadeThrow(gmsg);
-        }
+        } 
     }
 
-    public void handleItemInteraction(MobItemInteractionMessage imsg) {
-        if (imsg.getInteractionType() == ItemInteractionType.PICK_UP) {
-            var mob = getMobById(imsg.getMobId());
-            var newItem = getItemById(imsg.getItemId());
-            boolean doesntHaveItem = true;
-            for (var item : mob.getEquipment()) {
-                if (item == newItem) {
-                    doesntHaveItem = false;
-                }
-            }
 
-            if (doesntHaveItem) {
-                mob.addToEquipment(newItem);
-                serverApp.getServer().broadcast(imsg);
-            }
 
-        } else if (imsg.getInteractionType() == ItemInteractionType.EQUIP) {
-            getMobById(imsg.getMobId()).equipServer(getItemById(imsg.getItemId()));
-            serverApp.getServer().broadcast(imsg);
-        } else if (imsg.getInteractionType() == ItemInteractionType.UNEQUIP) {
-//            getMobById(imsg.getMobId()).unequip(getItemById(imsg.getItemId()));
-            serverApp.getServer().broadcast(imsg);
-        } else if (imsg.getInteractionType() == ItemInteractionType.DROP) {
-
-        }
-    }
-
-    private Mob getMobById(int id) {
-        return ((Mob) serverApp.getMobs().get(id));
-    }
-
-    private Item getItemById(int id) {
-        return ((Item) serverApp.getMobs().get(id));
-    }
+ 
 
     private Destructible getDestructibleById(int id) {
         return ((Destructible) serverApp.getMobs().get(id));
@@ -175,35 +129,12 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
         checkAndManageDestructibleDeath(d, serverApp);
     }
 
-    private void handleGrenadeThrow(GrenadeThrownMessage gmsg) {
-        int grenadeId = serverApp.getAndIncreaseNextEntityId();
-        ThrownGrenade thrownGrenade = new ThrownSmokeGrenade(grenadeId, "Thrown Smoke Grenade", new Node());
-        Grenade originGrenade = ((Grenade) getEntityById(gmsg.getId()));
-        float speed = originGrenade.getThrowSpeed();
-        Node gnode = thrownGrenade.getNode();
-        Node root = serverApp.getRootNode();
-        var grenadeControl = new ServerThrownGrenadeControl(thrownGrenade, gmsg.getDirection(), speed);
 
-        enqueueExecutionServer(() -> {
-            thrownGrenade.getNode().move(gmsg.getPos());
-            root.attachChild(gnode);
-            gnode.addControl(grenadeControl);
-        });
-
-        removeEntityByIdServer(originGrenade.getId());
-        serverApp.getMobs().put(thrownGrenade.getId(), thrownGrenade);
-
-        GrenadeThrownMessage msg = new GrenadeThrownMessage(thrownGrenade.getId(), gmsg.getPos(), gmsg.getDirection());
-        msg.setReliable(true);
-        serverApp.getServer().broadcast(msg);
-    }
 
     public static void enqueueExecutionServer(Runnable runnable) {
         mainApp.enqueue(runnable);
     }
 
-    private InteractiveEntity getEntityById(int id) {
-        return serverApp.getMobs().get(id);
-    }
+
 
 }

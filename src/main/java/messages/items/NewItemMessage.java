@@ -9,7 +9,9 @@ import com.jme3.network.serializing.Serializable;
 import game.items.Item;
 import game.items.ItemTemplates;
 import game.items.ItemTemplates.ItemTemplate;
+import game.items.factories.ItemFactory;
 import lombok.Getter;
+import messages.TwoWayMessage;
 
 /**
  *  
@@ -18,8 +20,8 @@ import lombok.Getter;
  */
 @Serializable
 @Getter
-public class NewItemMessage extends AbstractMessage {
-
+public abstract class NewItemMessage extends TwoWayMessage {
+    public static final ItemFactory ifa = new ItemFactory();
     protected int id;
     protected int templateIndex;
     protected boolean droppable;

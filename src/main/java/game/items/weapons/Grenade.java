@@ -108,7 +108,7 @@ public class Grenade extends ThrowableWeapon {
         var grenadeInitialPosition = cs.getCamera().getLocation();
         var throwDirection = cs.getCamera().getDirection().normalize();
 
-        var gtm = new GrenadeThrownMessage(id, grenadeInitialPosition, throwDirection);
+        var gtm = new GrenadeThrownMessage(p.getId(),id, grenadeInitialPosition, throwDirection);
         gtm.setReliable(true);
 
         cs.getClient().send(gtm);

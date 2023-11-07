@@ -83,7 +83,7 @@ public class ClientMessageListener implements MessageListener<Client> {
 
     public ClientMessageListener(ClientGameAppState c) {
         this.clientApp = c;
-        ifa = new ItemFactory(c.getAssetManager());
+        ifa = new ItemFactory();
     }
 
     @Override
@@ -104,14 +104,8 @@ public class ClientMessageListener implements MessageListener<Client> {
             correctPosition(cmsg);
         } else if (m instanceof HitscanTrailMessage tmsg) {
             handleHitscanTrail(tmsg);
-        } else if (m instanceof MobItemInteractionMessage iimsg) {
-            handleMobItemInteraction(iimsg);
-        } else if (m instanceof GrenadeThrownMessage gmsg) {
-            addNewThrownGrenade(gmsg);
         } else if (m instanceof ThrownGrenadeExplodedMessage gemsg) {
             handleGrenadeExplosion(gemsg);
-        } else if (m instanceof NewItemMessage imsg) {
-            addNewItem(imsg);
         } else if (m instanceof NewMobMessage nmsg) {
             addMob(nmsg);
         } else if (m instanceof SetDefaultItemMessage dmsg) {
@@ -125,7 +119,6 @@ public class ClientMessageListener implements MessageListener<Client> {
         } else if (m instanceof PlayerJoinedMessage nmsg) {
             addNewPlayer(nmsg);
         } else if (m instanceof SetPlayerMessage nmsg) {
-            System.out.println("got my player!");
             addMyPlayer(nmsg);
         }
 
@@ -236,12 +229,12 @@ public class ClientMessageListener implements MessageListener<Client> {
         Main.getInstance().enqueue(runnable);
     }
 
-    private Mob getMobById(int id) {
-        return ((Mob) clientApp.getMobs().get(id));
-    }
-
     private Chest getChestById(int id) {
         return ((Chest) clientApp.getMobs().get(id));
+    }
+
+    private Mob getMobById(int id) {
+        return ((Mob) clientApp.getMobs().get(id));
     }
 
     private Item getItemById(int id) {
@@ -267,44 +260,6 @@ public class ClientMessageListener implements MessageListener<Client> {
         }
     }
 
-    private void addNewItem(NewItemMessage imsg) {
-        if (imsg instanceof NewHelmetMessage nhmsg) {
-            Helmet i = (Helmet) ifa.createItem(nhmsg.getId(), nhmsg.getTemplate(), nhmsg.isDroppable());
-            i.setArmorValue(nhmsg.getArmorValue());
-            clientApp.registerEntity(i);
-
-        } else if (imsg instanceof NewVestMessage nvmsg) {
-            Vest i = (Vest) ifa.createItem(nvmsg.getId(), nvmsg.getTemplate(), nvmsg.isDroppable());
-            i.setArmorValue(nvmsg.getArmorValue());
-            clientApp.registerEntity(i);
-
-        } else if (imsg instanceof NewGlovesMessage ngmsg) {
-            Gloves i = (Gloves) ifa.createItem(ngmsg.getId(), ngmsg.getTemplate(), ngmsg.isDroppable());
-            i.setArmorValue(ngmsg.getArmorValue());
-            clientApp.registerEntity(i);
-
-        } else if (imsg instanceof NewBootsMessage nbmsg) {
-            Boots i = (Boots) ifa.createItem(nbmsg.getId(), nbmsg.getTemplate(), nbmsg.isDroppable());
-            i.setArmorValue(nbmsg.getArmorValue());
-            clientApp.registerEntity(i);
-        } else if (imsg instanceof NewRangedWeaponMessage rmsg) {
-            RangedWeapon i = (RangedWeapon) ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
-            i.setAmmo(rmsg.getAmmo());
-            clientApp.registerEntity(i);
-        } else if (imsg instanceof NewMeleeWeaponMessage rmsg) {
-            Item i = (Item) ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
-            clientApp.registerEntity(i);
-        } else if (imsg instanceof NewGrenadeMessage rmsg) {
-            Item i = ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
-            clientApp.registerEntity(i);
-        } else if (imsg instanceof NewAmmoPackMessage rmsg) {
-            AmmoPack i = (AmmoPack) ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
-            i.setAmmo(rmsg.getAmmo());
-            clientApp.registerEntity(i);
-        }
-
-    }
-
     private void handleChestItemInteraction(ChestItemInteractionMessage cimsg) {
         enqueueExecution(() -> {
             if (null != cimsg.getInteractionType()) {
@@ -319,40 +274,6 @@ public class ClientMessageListener implements MessageListener<Client> {
                         getChestById(cimsg.getChestId()).removeFromEquipment(takenOut);
                         break;
 
-                    default:
-                        break;
-                }
-            }
-        });
-    }
-
-    private void handleMobItemInteraction(MobItemInteractionMessage iimsg) {
-        enqueueExecution(() -> {
-            if (null != iimsg.getInteractionType()) {
-                switch (iimsg.getInteractionType()) {
-                    case EQUIP:
-                        Item equipped = getItemById(iimsg.getItemId());
-                        if (equipped == null) {
-                            throw new NullPointerException("THE item with ID = " + iimsg.getItemId() + " doesnt exist!");
-                        }
-                        getMobById(iimsg.getMobId()).equip(equipped);
-                        break;
-                    case UNEQUIP:
-                        Item unequipped = getItemById(iimsg.getItemId());
-                        getMobById(iimsg.getMobId()).unequip(unequipped);
-                        break;
-                    case PICK_UP:
-                        Item pickedUp = getItemById(iimsg.getItemId());
-
-                        if (pickedUp.getDroppedItemNode() != null) {
-                            pickedUp.getDroppedItemNode().removeFromParent();
-                        }
-
-                        getMobById(iimsg.getMobId()).addToEquipment(pickedUp);
-                        System.out.println(getMobById(iimsg.getMobId()) + " podniosl item " + pickedUp);
-                        break;
-                    case DROP:
-                        break;
                     default:
                         break;
                 }
@@ -414,26 +335,6 @@ public class ClientMessageListener implements MessageListener<Client> {
                 ClientGameAppState.getInstance().getGrid().insert(d);
             });
         }
-    }
-
-    private void addNewThrownGrenade(GrenadeThrownMessage gmsg) {
-        enqueueExecution(() -> {
-            Node model = (Node) clientApp.getAssetManager().loadModel(ItemTemplates.SMOKE_GRENADE.getDropPath());
-            clientApp.getDebugNode().attachChild(model);
-            model.setLocalTranslation(gmsg.getPos());
-            model.scale(1f);
-
-            Geometry ge = (Geometry) model.getChild(0);
-            Material originalMaterial = ge.getMaterial();
-            Material newMaterial = new Material(clientApp.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
-            newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
-            ge.setMaterial(newMaterial);
-            var rotControl = new ClientThrownGrenadeRotateControl();
-            ge.addControl(rotControl);
-
-            ThrownGrenade g = new ThrownSmokeGrenade(gmsg.getId(), "Thrown Smoke", model);
-            clientApp.getMobs().put(g.getId(), g);
-        });
     }
 
     private void updateGrenadePosition(GrenadePosUpdateMessage gmsg) {

@@ -4,12 +4,14 @@
  */
 package messages.items;
 
+import client.ClientGameAppState;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import game.entities.IntegerAttribute;
 import game.items.Item;
 import game.items.weapons.RangedWeapon;
 import lombok.Getter;
+import server.ServerMain;
 
 /**
  *  
@@ -27,6 +29,18 @@ public class NewRangedWeaponMessage extends NewItemMessage {
     public NewRangedWeaponMessage(RangedWeapon item) {
         super(item);
         this.ammo = ((IntegerAttribute)item.getAttributes().get(RangedWeapon.AMMO_ATTRIBUTE)).getValue();
+    }
+
+    @Override
+    public void handleServer(ServerMain server) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void handleClient(ClientGameAppState client) {
+            RangedWeapon i = (RangedWeapon) ifa.createItem(id, getTemplate(), droppable);
+            i.setAmmo(ammo);
+            client.registerEntity(i);
     }
 
 }

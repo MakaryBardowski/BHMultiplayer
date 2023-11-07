@@ -4,10 +4,12 @@
  */
 package messages.items;
 
+import client.ClientGameAppState;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import game.items.Item;
 import lombok.Getter;
+import server.ServerMain;
 
 /**
  *  
@@ -24,6 +26,17 @@ public class NewGrenadeMessage extends NewItemMessage {
 
     public NewGrenadeMessage(Item item) {
         super(item);
+    }
+
+    @Override
+    public void handleServer(ServerMain server) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void handleClient(ClientGameAppState client) {
+            Item i = ifa.createItem(id, getTemplate(), droppable);
+            client.registerEntity(i);
     }
 
 }
