@@ -34,7 +34,8 @@ import messages.items.NewGlovesMessage;
 import messages.items.NewGrenadeMessage;
 import messages.items.NewHelmetMessage;
 import messages.items.NewItemMessage;
-import messages.items.NewRifleMessage;
+import messages.items.NewMeleeWeaponMessage;
+import messages.items.NewRangedWeaponMessage;
 import messages.items.NewVestMessage;
 import messages.items.SetDefaultItemMessage;
 
@@ -66,11 +67,11 @@ public class NetworkingInitialization {
         Serializer.registerClass(NewVestMessage.class);
         Serializer.registerClass(NewBootsMessage.class);
         Serializer.registerClass(NewGlovesMessage.class);
-        Serializer.registerClass(NewRifleMessage.class);
+        Serializer.registerClass(NewRangedWeaponMessage.class);
         Serializer.registerClass(NewGrenadeMessage.class);
         Serializer.registerClass(NewAmmoPackMessage.class);
         Serializer.registerClass(GrenadeThrownMessage.class);
-
+        Serializer.registerClass(NewMeleeWeaponMessage.class);
         Serializer.registerClass(MobItemInteractionMessage.class);
         Serializer.registerClass(ChestItemInteractionMessage.class);
         Serializer.registerClass(HitscanTrailMessage.class);

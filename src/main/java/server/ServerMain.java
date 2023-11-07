@@ -78,7 +78,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     private static ServerMain instance;
     private static final byte MAX_PLAYERS = 4;
     private final float TIME_PER_TICK = 0.0156f;
-
+    
     @Getter
     private final ConcurrentHashMap<Integer, InteractiveEntity> mobs = new ConcurrentHashMap<>();
     private float tickTimer;

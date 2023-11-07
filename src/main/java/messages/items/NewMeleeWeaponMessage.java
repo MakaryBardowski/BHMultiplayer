@@ -6,7 +6,10 @@ package messages.items;
 
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
+import game.entities.IntegerAttribute;
 import game.items.Item;
+import game.items.weapons.MeleeWeapon;
+import game.items.weapons.RangedWeapon;
 import lombok.Getter;
 
 /**
@@ -16,13 +19,13 @@ import lombok.Getter;
  */
 @Serializable
 @Getter
-public class NewRifleMessage extends NewItemMessage {
+public class NewMeleeWeaponMessage extends NewItemMessage {
+    private int ammo;
 
-
-    public NewRifleMessage() {
+    public NewMeleeWeaponMessage() {
     }
 
-    public NewRifleMessage(Item item) {
+    public NewMeleeWeaponMessage(MeleeWeapon item) {
         super(item);
     }
 

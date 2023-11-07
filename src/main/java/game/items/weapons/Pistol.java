@@ -38,10 +38,11 @@ import game.items.AmmoPack;
 import game.items.Holdable;
 import game.items.Item;
 import game.items.ItemTemplates.ItemType;
+import messages.EntitySetFloatAttributeMessage;
 import messages.EntitySetIntegerAttributeMessage;
 import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
-import messages.items.NewRifleMessage;
+import messages.items.NewRangedWeaponMessage;
 
 /**
  *
@@ -66,6 +67,10 @@ public class Pistol extends RangedWeapon {
 
     @Override
     public void playerEquip(Player p) {
+        var packMsg = new EntitySetFloatAttributeMessage(p, Mob.SPEED_ATTRIBUTE, 169);
+        packMsg.setReliable(true);
+        ClientGameAppState.getInstance().getClient().send(packMsg);
+
         Holdable unequippedItem = p.getEquippedRightHand();
         if (unequippedItem != null) {
             unequippedItem.playerUnequip(p);
@@ -140,7 +145,10 @@ public class Pistol extends RangedWeapon {
         muzzleEmitter.emitParticles(1);
         currentAttackCooldown = 0;
         int newAmmo = getAmmo() - 1;
-        setAmmo(newAmmo);
+
+        var msg = new EntitySetIntegerAttributeMessage(this, AMMO_ATTRIBUTE, newAmmo );
+        ClientGameAppState.getInstance().getClient().send(msg);
+
         ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText((int) newAmmo + "/" + (int) getMaxAmmo());
         hitscan(p);
     }
@@ -248,7 +256,7 @@ public class Pistol extends RangedWeapon {
 
     @Override
     public AbstractMessage createNewEntityMessage() {
-        NewRifleMessage msg = new NewRifleMessage(this);
+        NewRangedWeaponMessage msg = new NewRangedWeaponMessage(this);
         msg.setReliable(true);
         return msg;
     }
@@ -306,24 +314,24 @@ public class Pistol extends RangedWeapon {
         int ammoFromPack = 0;
         int localAmmo = getAmmo();
         int maxAmmo = getMaxAmmo();
-        
+
         for (int i = 0; i < wielder.getEquipment().length; i++) {
             Item item = wielder.getEquipment()[i];
             if (item instanceof AmmoPack pack && pack.getTemplate().getType().equals(ItemType.PISTOL_AMMO)) {
                 int initialPackAmmo = pack.getAmmo();
                 ammoFromPack = Math.min(ammoToFullClip, initialPackAmmo);
-                
+
                 if (ammoFromPack > 0) {
-                    var packMsg = new EntitySetIntegerAttributeMessage(pack, AmmoPack.AMMO_ATTRIBUTE, initialPackAmmo-ammoFromPack);
+                    var packMsg = new EntitySetIntegerAttributeMessage(pack, AmmoPack.AMMO_ATTRIBUTE, initialPackAmmo - ammoFromPack);
                     packMsg.setReliable(true);
                     ClientGameAppState.getInstance().getClient().send(packMsg);
 
-                    localAmmo +=  ammoFromPack;
+                    localAmmo += ammoFromPack;
                     ammoToFullClip = maxAmmo - localAmmo;
                 }
             }
         }
-        
+
         var msg = new EntitySetIntegerAttributeMessage(this, AMMO_ATTRIBUTE, localAmmo);
         msg.setReliable(true);
         ClientGameAppState.getInstance().getClient().send(msg);

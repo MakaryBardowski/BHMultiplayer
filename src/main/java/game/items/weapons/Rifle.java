@@ -42,7 +42,7 @@ import static game.items.weapons.RangedWeapon.AMMO_ATTRIBUTE;
 import messages.EntitySetIntegerAttributeMessage;
 import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
-import messages.items.NewRifleMessage;
+import messages.items.NewRangedWeaponMessage;
 
 /**
  *
@@ -138,12 +138,15 @@ public class Rifle extends RangedWeapon {
         }
     }
 
-  @Override
+    @Override
     public void playerAttack(Player p) {
         muzzleEmitter.emitParticles(1);
         currentAttackCooldown = 0;
-        int newAmmo = getAmmo()-1;
-        setAmmo(newAmmo);
+        int newAmmo = getAmmo() - 1;
+
+        var msg = new EntitySetIntegerAttributeMessage(this, AMMO_ATTRIBUTE, newAmmo );
+        ClientGameAppState.getInstance().getClient().send(msg);
+
         ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText((int) newAmmo + "/" + (int) getMaxAmmo());
         hitscan(p);
     }
@@ -251,7 +254,7 @@ public class Rifle extends RangedWeapon {
 
     @Override
     public AbstractMessage createNewEntityMessage() {
-        NewRifleMessage msg = new NewRifleMessage(this);
+        NewRangedWeaponMessage msg = new NewRangedWeaponMessage(this);
         msg.setReliable(true);
         return msg;
     }

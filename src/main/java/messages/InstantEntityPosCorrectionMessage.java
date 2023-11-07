@@ -35,9 +35,6 @@ public class InstantEntityPosCorrectionMessage extends EntityUpdateMessage {
     }
     
 
-    @Override
-    public String toString() {
-        return "MobUpdatePosRotMessage{ id="+id + " x=" + x + ", y=" + y + ", z=" + z +'}';
-    }
+
 
 }

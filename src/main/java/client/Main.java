@@ -55,7 +55,7 @@ public class Main extends SimpleApplication {
         NetworkingInitialization.initializeSerializables();
 
         DetailedProfilerState dps = new DetailedProfilerState();
-        stateManager.attach(dps);
+//        stateManager.attach(dps);
 
         ScreenshotAppState screenShotState = new ScreenshotAppState();
         stateManager.attach(screenShotState);

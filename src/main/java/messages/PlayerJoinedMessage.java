@@ -15,11 +15,10 @@ import com.jme3.network.serializing.Serializable;
  */
 @Serializable
 public class PlayerJoinedMessage extends AbstractMessage {
-
     private int id;
-private float x;
-private float y;
-private float z;
+    private float x;
+    private float y;
+    private float z;
 
     public PlayerJoinedMessage() {
     }
@@ -31,12 +30,12 @@ private float z;
         this.z = pos.getZ();
     }
 
-    public int getId(){
-    return id;
+    public int getId() {
+        return id;
     }
 
-    public Vector3f getPos(){
-    return new Vector3f(x,y,z);
+    public Vector3f getPos() {
+        return new Vector3f(x, y, z);
     }
 
 }

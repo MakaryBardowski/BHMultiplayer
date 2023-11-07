@@ -41,6 +41,7 @@ import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.items.factories.ItemFactory;
+import game.items.weapons.RangedWeapon;
 import game.items.weapons.Rifle;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
@@ -66,7 +67,8 @@ import messages.items.NewGlovesMessage;
 import messages.items.NewGrenadeMessage;
 import messages.items.NewHelmetMessage;
 import messages.items.NewItemMessage;
-import messages.items.NewRifleMessage;
+import messages.items.NewMeleeWeaponMessage;
+import messages.items.NewRangedWeaponMessage;
 import messages.items.NewVestMessage;
 import messages.items.SetDefaultItemMessage;
 
@@ -285,9 +287,12 @@ public class ClientMessageListener implements MessageListener<Client> {
             Boots i = (Boots) ifa.createItem(nbmsg.getId(), nbmsg.getTemplate(), nbmsg.isDroppable());
             i.setArmorValue(nbmsg.getArmorValue());
             clientApp.registerEntity(i);
-        } else if (imsg instanceof NewRifleMessage rmsg) {
-            Item i = ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
-
+        } else if (imsg instanceof NewRangedWeaponMessage rmsg) {
+            RangedWeapon i = (RangedWeapon) ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
+            i.setAmmo(rmsg.getAmmo());
+            clientApp.registerEntity(i);
+        } else if (imsg instanceof NewMeleeWeaponMessage rmsg) {
+            Item i = (Item) ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());
             clientApp.registerEntity(i);
         } else if (imsg instanceof NewGrenadeMessage rmsg) {
             Item i = ifa.createItem(rmsg.getId(), rmsg.getTemplate(), rmsg.isDroppable());

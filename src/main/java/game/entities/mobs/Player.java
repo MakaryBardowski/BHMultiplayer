@@ -18,6 +18,7 @@ import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
 import game.entities.Collidable;
 import game.entities.Destructible;
+import game.entities.FloatAttribute;
 import game.entities.InteractiveEntity;
 import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
 import game.map.collision.WorldGrid;
@@ -32,6 +33,9 @@ import messages.PlayerPosUpdateRequest;
  * @author 48793
  */
 public class Player extends HumanMob {
+
+    public static final float IDENTIFY_RANGE = 8;
+    public static final float PICKUP_RANGE = 8;
 
     private static final int HOTBAR_SIZE = 10;
 
@@ -128,6 +132,7 @@ public class Player extends HumanMob {
 
     @Override
     public void move(float tpf, ClientGameAppState cm) {
+        
         MobRotUpdateMessage rotu = new MobRotUpdateMessage(id, node.getLocalRotation());
         cm.getClient().send(rotu);
 

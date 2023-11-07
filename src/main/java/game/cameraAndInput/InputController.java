@@ -280,10 +280,14 @@ public class InputController {
 
         if (results.size() > 0) {
             CollisionResult closest = results.getClosestCollision();
-            Integer hitId = Integer.valueOf(closest.getGeometry().getName());
-            InteractiveEntity mobHit = (InteractiveEntity) ClientGameAppState.getInstance().getMobs().get(hitId);
-            mobHit.onInteract();
-            System.out.println("hit ! " + mobHit);
+            String hitName = closest.getGeometry().getName();
+            if (hitName.matches("-?\\d+")) {
+                Integer hitId = Integer.valueOf(hitName);
+                InteractiveEntity mobHit = (InteractiveEntity) ClientGameAppState.getInstance().getMobs().get(hitId);
+                if (mobHit.getNode().getWorldTranslation().distance(p.getNode().getWorldTranslation()) <= Player.PICKUP_RANGE) {
+                    mobHit.onInteract();
+                }
+            }
         }
     }
 

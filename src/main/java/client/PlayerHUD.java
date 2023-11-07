@@ -44,6 +44,7 @@ import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.tools.Color;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
+import game.entities.mobs.Player;
 import game.items.Item;
 import java.util.Random;
 
@@ -551,7 +552,7 @@ public class PlayerHUD extends BaseAppState {
                         }
 
                     }
-                } else if (entityHit instanceof Item itemHit) {
+                } else if (entityHit instanceof Item itemHit && distanceToFirstTarget <= Player.IDENTIFY_RANGE) {
                     boolean switched = gs.getPlayer().getLastTargetedItem() != itemHit;
                     gs.getPlayer().setLastTargetedItem(itemHit);
                     if (switched) {
@@ -612,6 +613,8 @@ public class PlayerHUD extends BaseAppState {
 
         itemDropTooltipMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         itemDropTooltipMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+        itemDropTooltipMaterial.getAdditionalRenderState().setDepthTest(false);
+
         itemDropTooltipGeom.setMaterial(itemDropTooltipMaterial);
 
         niftyView = renderManager.createPreView("NiftyView", new Camera(texW, texH));

@@ -47,7 +47,8 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
-import messages.items.NewRifleMessage;
+import messages.items.NewMeleeWeaponMessage;
+import messages.items.NewRangedWeaponMessage;
 
 /**
  *
@@ -204,7 +205,7 @@ public class Knife extends MeleeWeapon {
 
     @Override
     public AbstractMessage createNewEntityMessage() {
-        NewRifleMessage msg = new NewRifleMessage(this);
+        NewMeleeWeaponMessage msg = new NewMeleeWeaponMessage(this);
         msg.setReliable(true);
         return msg;
     }
