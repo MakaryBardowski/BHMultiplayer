@@ -66,18 +66,4 @@ public class MainMenuController implements ScreenController {
         instance.getStateManager().detach(m);
     }
 
-//    public static void playerEquipItem(String strIndex) {
-//        int i = Integer.parseInt(strIndex);
-//        Item item = gs.getPlayer().getEquipment()[i];
-//        gs.getPlayer().equip(item);
-//        sendEquipMessageToServer(item);
-//
-//    }
-//        
-//    private static void sendEquipMessageToServer(Item item){
-//            if (item != null) {
-//            MobItemInteractionMessage imsg = new MobItemInteractionMessage(item, gs.getPlayer(), ItemInteractionType.EQUIP);
-//            gs.getClient().send(imsg);
-//        }
-//    }
 }

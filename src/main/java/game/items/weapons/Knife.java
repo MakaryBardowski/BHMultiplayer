@@ -4,51 +4,33 @@
  */
 package game.items.weapons;
 
-import game.effects.GradientParticleEmitter;
-import game.effects.GradientParticleMesh;
+import FirstPersonHands.FirstPersonHandAnimation;
 import game.items.ItemTemplates.ItemTemplate;
 import game.entities.mobs.Mob;
 import game.entities.mobs.Player;
-import projectiles.controls.BulletTracerControl;
 import client.ClientGameAppState;
 import client.Main;
-import java.lang.System;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.tween.Tween;
 import com.jme3.anim.tween.Tweens;
 import com.jme3.anim.tween.action.Action;
 import com.jme3.anim.tween.action.ClipAction;
 import com.jme3.asset.AssetManager;
-import com.jme3.collision.CollisionResult;
-import com.jme3.collision.CollisionResults;
 import com.jme3.material.Material;
-import com.jme3.material.RenderState;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
-import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.texture.Texture;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import game.entities.Collidable;
 import game.entities.Destructible;
-import game.entities.InteractiveEntity;
 import game.entities.mobs.HumanMob;
 import game.items.Holdable;
-import game.map.collision.CollisionDebugUtils;
 import game.map.collision.RectangleOBB;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.PriorityQueue;
-import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewMeleeWeaponMessage;
-import messages.items.NewRangedWeaponMessage;
 
 /**
  *
@@ -76,7 +58,7 @@ public class Knife extends MeleeWeapon {
     @Override
     public void playerUnequip(Player p) {
         p.setEquippedRightHand(null);
-        p.getGunNode().detachAllChildren();
+        p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
     }
 
     @Override
@@ -84,14 +66,12 @@ public class Knife extends MeleeWeapon {
         p.setEquippedRightHand(this);
 
         if (isEquippedByMe(p)) {
+
             ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText("");
 
             AssetManager assetManager = Main.getInstance().getAssetManager();
             Node model = (Node) assetManager.loadModel(template.getFpPath());
-
-            model.move(-.67f, -.75f, 2.6f);
-//        model.setLocalRotation((new Quaternion()).fromAngleAxis(-FastMath.PI / 1, new Vector3f(-.0f, .0f, 0)));
-            model.rotate(0, 1.5f * FastMath.DEG_TO_RAD, 0);
+            model.move(0, 0.3f, -0.05f);
             Geometry ge = (Geometry) ((Node) model.getChild(0)).getChild(0);
 
             Material originalMaterial = ge.getMaterial();
@@ -105,12 +85,13 @@ public class Knife extends MeleeWeapon {
             slashControl = new SlashControl(this, p);
             model.addControl(slashControl);
 
-            p.getGunNode().attachChild(model);
-            p.getFirstPersonCameraNode().attachChild(p.getGunNode());
-            model.move(new Vector3f(0.43199998f, 0.46799996f, -1.6199999f));
+            p.getFirstPersonHands().attachToHandR(model);
+            model.scale(3.3f);
 
-            composer = model.getChild(0).getControl(AnimComposer.class);
-            composer.setCurrentAction("idle");
+            composer = p.getFirstPersonHands().getHandsComposer();
+
+            p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimation.HOLD_KNIFE);
+
         }
     }
 
@@ -123,21 +104,21 @@ public class Knife extends MeleeWeapon {
 
     @Override
     public void playerAttack(Player p) {
-        Action toIdle = composer.action("toIdle");
-        Tween idle = Tweens.callMethod(composer, "setCurrentAction", "idle");
-        composer.actionSequence("toIdle-idle", toIdle, idle);
+        Action toIdle = composer.action("KnifeAttackToHold");
+        Tween idle = Tweens.callMethod(composer, "setCurrentAction", "HoldKnife");
+        composer.actionSequence("SwingToHold", toIdle, idle);
 
-        Action walk = composer.action("attack1");
-        Tween doneTween = Tweens.callMethod(composer, "setCurrentAction", "toIdle-idle");
-        Action walkOnce = composer.actionSequence("WalkOnce", walk, doneTween);
+        Action attack = composer.action("KnifeAttack");
+        Tween attackToIdle = Tweens.callMethod(composer, "setCurrentAction", "SwingToHold");
+        composer.actionSequence("fullSwing", attack, attackToIdle);
 
-        ((ClipAction) composer.action("attack1")).setTransitionLength(0);
-        composer.setCurrentAction("WalkOnce");
+        ((ClipAction) composer.action("KnifeAttack")).setTransitionLength(0);
+        composer.setCurrentAction("fullSwing");
         composer.getCurrentAction().setSpeed(1.25f);
 
         currentAttackCooldown = 0;
 
-        var slashDelay = 0.17f / attacksPerSecond;
+        var slashDelay = 0.17f / getAttacksPerSecond();
         slashControl.setSlashDelay(slashDelay);
     }
 
@@ -186,7 +167,7 @@ public class Knife extends MeleeWeapon {
         if (!hit.isEmpty()) {
             composer.getCurrentAction().setSpeed(0.02f);
             slashControl.setSlowMaxTime(0.05f);
-            hit.get(0).onShot(p, damage);
+            hit.get(0).onShot(p, getDamage());
         }
     }
 
@@ -233,12 +214,13 @@ public class Knife extends MeleeWeapon {
     public void attack(Mob m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-        @Override
+
+    @Override
     public String getDescription() {
         StringBuilder builder = new StringBuilder();
         builder.append("-Worn\n");
         builder.append("-Damage [");
-        builder.append(damage);
+        builder.append(getDamage());
         builder.append("]");
         return builder.toString();
     }

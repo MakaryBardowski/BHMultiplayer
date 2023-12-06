@@ -22,10 +22,10 @@ public class TimedSlowEffect extends TemporaryEffect {
     public TimedSlowEffect(String name, EffectProcType procType, int maxTicks, Mob target,float slowStrength) {
         super(name, procType, maxTicks);
         this.target = target;
-        speedBefore = target.getSpeed();
+        speedBefore = target.getCachedSpeed();
         unique = true;
         source = EffectSource.SLOW;
-        target.setSpeed(calculateSpeedAfterSlow(slowStrength));
+        target.setCachedSpeed(calculateSpeedAfterSlow(slowStrength));
         
     }
 
@@ -39,14 +39,14 @@ public class TimedSlowEffect extends TemporaryEffect {
         ticks++;
         if (ticks > maxTicks) {
             boolean readyToRemove = true;
-            target.setSpeed(speedBefore);
+            target.setCachedSpeed(speedBefore);
             return readyToRemove;
         }
         return false;
     }
     
     private float calculateSpeedAfterSlow(float slowStrength){
-    return target.getSpeed()-( target.getSpeed() * 0.01f*slowStrength);
+    return target.getCachedSpeed()-( target.getCachedSpeed() * 0.01f*slowStrength);
     }
 
 }

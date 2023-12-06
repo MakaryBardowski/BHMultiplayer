@@ -37,16 +37,17 @@ public class EntitySetFloatAttributeMessage extends TwoWayMessage {
 
     @Override
     public void handleServer(ServerMain server) {
-        ((FloatAttribute) server.getMobs().get(entityId)
-                .getAttributes().get(attributeId)).setValue(attributeValue);
-        server.getServer().broadcast(this);
-
+        var entity = server.getMobs().get(entityId);
+        entity.setFloatAttributeAndNotifyClients(attributeId, attributeValue);
     }
 
     @Override
     public void handleClient(ClientGameAppState client) {
-        ((FloatAttribute) client.getMobs().get(entityId)
-                .getAttributes().get(attributeId)).setValue(attributeValue);
+        var entity = client.getMobs().get(entityId);
+        entity.setFloatAttribute(attributeId, attributeValue);
+
+        entity.attributeChangedNotification(attributeId,new FloatAttribute(attributeValue));
+
     }
 
 }

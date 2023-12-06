@@ -9,6 +9,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import java.util.Random;
 
@@ -19,21 +20,24 @@ import java.util.Random;
 public class RecoilControl extends AbstractControl {
     protected Random random = new Random();
     protected static final float RECOIL_SPEED = 0.016f;
-    protected float upRecoil = -.6f;
-    protected float recoilY = .3f;
-    protected float recoilZ = .1f;
-    int snap = 20;
-    float kickback;
-    Quaternion currentRotationRecoil = new Quaternion(0, 0, 0, 1);
-    Quaternion targetRotationRecoil = new Quaternion(0, 0, 0, 1);
-    Vector3f currentVectorRecoil = new Vector3f(0, 0, 0);
-    Vector3f targetVectorRecoil = new Vector3f(0, 0, 0);
-
-    public RecoilControl(float kickback, float recoilX, float recoilY, float recoilZ) {
+    protected float recoilX = 0f;
+    protected float recoilY = 0f;
+    protected float recoilZ = 0f;
+    protected int snap; // 30 feels strong
+    protected float kickback;
+    
+    protected Quaternion currentRotationRecoil = new Quaternion(0, 0, 0, 1);
+    protected Quaternion targetRotationRecoil = new Quaternion(0, 0, 0, 1);
+    protected Vector3f currentVectorRecoil = new Vector3f(0, 0, 0);
+    protected Vector3f targetVectorRecoil = new Vector3f(0, 0, 0);
+    
+    
+    public RecoilControl(float kickback, float recoilX, float recoilY, float recoilZ,int  snap) {
         this.kickback = kickback;
-        this.upRecoil = recoilX;
+        this.recoilX = recoilX;
         this.recoilY = recoilY;
         this.recoilZ = recoilZ;
+        this.snap = snap;
     }
 
     // better recoil for any type of weapon
@@ -49,20 +53,20 @@ public class RecoilControl extends AbstractControl {
     }
 
     public void recoilFire() {
-        targetRotationRecoil = targetRotationRecoil.add((new Quaternion()).fromAngleAxis(FastMath.PI / (6 - kickback), new Vector3f(upRecoil, getRandomNumber(-recoilY, recoilY), getRandomNumber(-recoilZ, recoilZ))));
-        targetVectorRecoil = targetVectorRecoil.subtract(targetRotationRecoil.getRotationColumn(2).subtract(0, 0, 0.4f));
+        targetRotationRecoil = targetRotationRecoil.add((new Quaternion()).fromAngleAxis(FastMath.PI / (6 - kickback), new Vector3f(recoilX, getRandomNumber(-recoilY, recoilY), getRandomNumber(-recoilZ, recoilZ))));
+        targetVectorRecoil = targetVectorRecoil.subtract(targetRotationRecoil.getRotationColumn(2).subtract(0, 0, -.4f));
     }
 
     public float getRandomNumber(float min, float max) {
         return (float) ((Math.random() * (max - min)) + min);
     }
 
-    public float getUpRecoil() {
-        return upRecoil;
+    public float getRecoilX() {
+        return recoilX;
     }
 
-    public void setUpRecoil(float upRecoil) {
-        this.upRecoil = upRecoil;
+    public void setRecoilX(float recoilX) {
+        this.recoilX = recoilX;
     }
 
     public float getRecoilY() {
@@ -123,4 +127,6 @@ public class RecoilControl extends AbstractControl {
         //
     }
 
+
+    
 }

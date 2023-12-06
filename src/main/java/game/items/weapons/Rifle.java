@@ -4,6 +4,7 @@
  */
 package game.items.weapons;
 
+import FirstPersonHands.FirstPersonHandAnimation;
 import game.effects.GradientParticleEmitter;
 import game.effects.GradientParticleMesh;
 import game.items.ItemTemplates.ItemTemplate;
@@ -39,6 +40,7 @@ import game.items.Holdable;
 import game.items.Item;
 import game.items.ItemTemplates;
 import static game.items.weapons.RangedWeapon.AMMO_ATTRIBUTE;
+import messages.EntitySetFloatAttributeMessage;
 import messages.EntitySetIntegerAttributeMessage;
 import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
@@ -80,7 +82,7 @@ public class Rifle extends RangedWeapon {
         p.setEquippedRightHand(null);
         p.getGunNode().removeControl(gunRecoil);
         p.getMainCameraNode().removeControl(camRecoil);
-        p.getGunNode().detachAllChildren();
+        p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
     }
 
     @Override
@@ -93,13 +95,14 @@ public class Rifle extends RangedWeapon {
         p.setEquippedRightHand(this);
 
         if (isEquippedByMe(p)) {
+
             ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText((int) getAmmo() + "/" + (int) getMaxAmmo());
 
             AssetManager assetManager = Main.getInstance().getAssetManager();
             Node model = (Node) assetManager.loadModel(template.getFpPath());
             model.move(-.52f, -.65f, 2.3f);
 //        model.setLocalRotation((new Quaternion()).fromAngleAxis(-FastMath.PI / 1, new Vector3f(-.0f, .0f, 0)));
-            model.rotate(0, 1.5f * FastMath.DEG_TO_RAD, 0);
+//            model.rotate(0, 1.5f * FastMath.DEG_TO_RAD, 0);
             Geometry ge = (Geometry) ((Node) model.getChild(0)).getChild(0);
             Material originalMaterial = ge.getMaterial();
             Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
@@ -110,23 +113,25 @@ public class Rifle extends RangedWeapon {
             muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
             firerateControl = new FirerateControl(this);
-            gunRecoil = new RecoilControl(0.2f, -.0f, .0f, .00f);
-            camRecoil = new CameraRecoilControl(2f, -.3f, .3f, .1f);
+            gunRecoil = new RecoilControl(.2f, -0.1f, .0f, .00f, 30);
+            camRecoil = new CameraRecoilControl(0.3f, -.05f, .1f, .05f, 20, 0.5f);
 
             model.addControl(firerateControl);
-            p.getGunNode().addControl(gunRecoil);
+            p.getFirstPersonHands().getHandsNode().addControl(gunRecoil);
             p.getMainCameraNode().addControl(camRecoil);
 
-            p.getGunNode().attachChild(model);
-            model.scale(1.1f);
-            p.getFirstPersonCameraNode().attachChild(p.getGunNode());
-            model.move(new Vector3f(0.43199998f, 0.46799996f, -1.6199999f));
+            p.getFirstPersonHands().attachToHandR(model);
+            model.scale(4.2f);
+
+            model.move(new Vector3f(0.7f, 0.8f, -1.6199999f));
 
             AnimComposer composer = model.getChild(0).getControl(AnimComposer.class);
             composer.setCurrentAction("idle");
 
             muzzleEmitter = setupMuzzleFlashEmitter();
             muzzleNode.attachChild(muzzleEmitter);
+
+            p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimation.HOLD_RIFLE);
 
         }
     }
@@ -144,43 +149,16 @@ public class Rifle extends RangedWeapon {
         currentAttackCooldown = 0;
         int newAmmo = getAmmo() - 1;
 
-        var msg = new EntitySetIntegerAttributeMessage(this, AMMO_ATTRIBUTE, newAmmo );
+        var msg = new EntitySetIntegerAttributeMessage(this, AMMO_ATTRIBUTE, newAmmo);
         ClientGameAppState.getInstance().getClient().send(msg);
 
         ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText((int) newAmmo + "/" + (int) getMaxAmmo());
-        hitscan(p);
+        shoot(p);
     }
-    private void hitscan(Player p) {
+
+    private void shoot(Player p) {
+        var cp = hitscan(p);
         var cs = ClientGameAppState.getInstance();
-        CollisionResults results = new CollisionResults();
-        Vector3f shotDirection = p.getMainCamera().getDirection();
-        Vector3f shotOrigin = p.getMainCamera().getLocation();
-        Ray ray = new Ray(shotOrigin, shotDirection);
-        float distanceToFirstWall = Float.MAX_VALUE;
-
-        Vector3f cp = null;
-
-        if (cs.getMapNode().collideWith(ray, results) > 0) {
-            distanceToFirstWall = results.getClosestCollision().getDistance();
-            cp = results.getClosestCollision().getContactPoint();
-
-        }
-
-        results = new CollisionResults();
-        cs.getDestructibleNode().collideWith(ray, results);
-
-        if (results.size() > 0) {
-            CollisionResult closest = results.getClosestCollision();
-            cp = closest.getContactPoint();
-
-            float distanceToFirstTarget = closest.getDistance();
-            if (distanceToFirstTarget < distanceToFirstWall) {
-
-                Integer hitId = Integer.valueOf(closest.getGeometry().getName());
-                InteractiveEntity mobHit = cs.getMobs().get(hitId);
-                mobHit.onShot(p, damage);
-            }
-        }
         createBullet(muzzleNode.getWorldTranslation(), cp);
 
         int hostedConnectionId = cs.getClient().getId();
@@ -306,45 +284,45 @@ public class Rifle extends RangedWeapon {
         return blood;
     }
 
-     @Override
+    @Override
     public void reload(Mob wielder) {
         int ammoToFullClip = getMaxAmmo() - getAmmo();
         int ammoFromPack = 0;
         int localAmmo = getAmmo();
         int maxAmmo = getMaxAmmo();
-        
+
         for (int i = 0; i < wielder.getEquipment().length; i++) {
             Item item = wielder.getEquipment()[i];
             if (item instanceof AmmoPack pack && pack.getTemplate().getType().equals(ItemTemplates.ItemType.RIFLE_AMMO)) {
                 int initialPackAmmo = pack.getAmmo();
                 ammoFromPack = Math.min(ammoToFullClip, initialPackAmmo);
-                
+
                 if (ammoFromPack > 0) {
-                    var packMsg = new EntitySetIntegerAttributeMessage(pack, AmmoPack.AMMO_ATTRIBUTE, initialPackAmmo-ammoFromPack);
+                    var packMsg = new EntitySetIntegerAttributeMessage(pack, AmmoPack.AMMO_ATTRIBUTE, initialPackAmmo - ammoFromPack);
                     packMsg.setReliable(true);
                     ClientGameAppState.getInstance().getClient().send(packMsg);
 
-                    localAmmo +=  ammoFromPack;
+                    localAmmo += ammoFromPack;
                     ammoToFullClip = maxAmmo - localAmmo;
                 }
             }
         }
-        
+
         var msg = new EntitySetIntegerAttributeMessage(this, AMMO_ATTRIBUTE, localAmmo);
         msg.setReliable(true);
         ClientGameAppState.getInstance().getClient().send(msg);
 
     }
-    
-        @Override
+
+    @Override
     public String getDescription() {
         StringBuilder builder = new StringBuilder();
         builder.append("-Worn\n");
         builder.append("-Damage [");
-        builder.append(damage);
+        builder.append(getDamage());
         builder.append("]\n");
         builder.append("-Fire rate [");
-        builder.append(attacksPerSecond);
+        builder.append(getAttacksPerSecond());
         builder.append("]\n");
         builder.append("-Ammo [");
         builder.append(getAmmo());
@@ -352,5 +330,11 @@ public class Rifle extends RangedWeapon {
         builder.append(getMaxAmmo());
         builder.append("]");
         return builder.toString();
+    }
+
+    @Override
+    public float calculateDamage(float distance) {
+        float damageDropoff = 0.75f;
+        return getDamage() * (float) (Math.pow(damageDropoff, distance / 20));
     }
 }

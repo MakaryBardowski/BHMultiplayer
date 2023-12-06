@@ -49,7 +49,9 @@ import game.items.armor.Vest;
 import game.items.factories.ItemFactory;
 import game.items.weapons.Grenade;
 import game.items.weapons.Knife;
+import game.items.weapons.LightMachineGun;
 import game.items.weapons.Pistol;
+import game.items.weapons.RangedWeapon;
 import game.items.weapons.Rifle;
 import game.map.MapGenerator;
 import game.map.collision.WorldGrid;
@@ -78,7 +80,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     private static ServerMain instance;
     private static final byte MAX_PLAYERS = 4;
     private final float TIME_PER_TICK = 0.0156f;
-    
+
     @Getter
     private final ConcurrentHashMap<Integer, InteractiveEntity> mobs = new ConcurrentHashMap<>();
     private float tickTimer;
@@ -271,7 +273,6 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
             }
         }
 
-
     }
 
     private void sendMessageTCP(AbstractMessage imsg, Filter<HostedConnection> filter) {
@@ -327,12 +328,20 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
 
         int random = new Random().nextInt(3);
         if (random == 0) {
+//            playerRifle = (Pistol) registerItemAndNotifyTCP(ItemTemplates.PISTOL_C96, true, Filters.notIn(hc));
+
             playerRifle = (Rifle) registerItemAndNotifyTCP(ItemTemplates.RIFLE_MANNLICHER_95, true, Filters.notIn(hc));
         } else if (random == 1) {
+//                        playerRifle = (Rifle) registerItemAndNotifyTCP(ItemTemplates.RIFLE_MANNLICHER_95, true, Filters.notIn(hc));
+
             playerRifle = (Pistol) registerItemAndNotifyTCP(ItemTemplates.PISTOL_C96, true, Filters.notIn(hc));
 
         } else {
-            playerRifle = (Grenade) registerItemAndNotifyTCP(ItemTemplates.SMOKE_GRENADE, true, Filters.notIn(hc));
+//                                    playerRifle = (Rifle) registerItemAndNotifyTCP(ItemTemplates.RIFLE_MANNLICHER_95, true, Filters.notIn(hc));
+
+            playerRifle = (Pistol) registerItemAndNotifyTCP(ItemTemplates.PISTOL_C96, true, Filters.notIn(hc));
+
+//            playerRifle = (Grenade) registerItemAndNotifyTCP(ItemTemplates.SMOKE_GRENADE, true, Filters.notIn(hc));
         }
         Item playerGrenade = (Grenade) registerItemAndNotifyTCP(ItemTemplates.SMOKE_GRENADE, true, Filters.notIn(hc));
         Item playerKnife = (Knife) registerItemAndNotifyTCP(ItemTemplates.KNIFE, true, Filters.notIn(hc));
@@ -366,15 +375,15 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     public Chest registerRandomChest(Vector3f offset) {
         Chest chest = Chest.createRandomChestServer(currentMaxId++, rootNode, offset, assetManager);
         Random r = new Random();
-        int randomValue = r.nextInt(9);
+        int randomValue = r.nextInt(12);
         if (randomValue < 2) {
             Vest playerVest = (Vest) registerItemLocal(ItemTemplates.VEST_TRENCH, true);
-            playerVest.setArmorValue(1.05f+r.nextFloat(0f, 0.25f));
+            playerVest.setArmorValue(1.05f + r.nextFloat(0f, 0.25f));
             chest.addToEquipment(playerVest);
         }
         if (randomValue >= 1 && randomValue <= 4) {
             Boots playerBoots = (Boots) registerItemLocal(ItemTemplates.BOOTS_TRENCH, true);
-            playerBoots.setArmorValue(0.65f+r.nextFloat(0f, 0.25f));
+            playerBoots.setArmorValue(0.65f + r.nextFloat(0f, 0.25f));
             chest.addToEquipment(playerBoots);
         }
 
@@ -384,14 +393,26 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
         } else if (randomValue == 6) {
             AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.RIFLE_AMMO_PACK, true);
             chest.addToEquipment(ammo);
-        } else  if (randomValue == 7) {
-            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.SMG_AMMO_PACK, true);
+        } else if (randomValue == 7) {
+//            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.SMG_AMMO_PACK, true);
+            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.LMG_AMMO_PACK, true);
+
             chest.addToEquipment(ammo);
         } else if (randomValue == 8) {
-            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.SNIPER_AMMO_PACK, true);
+            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.LMG_AMMO_PACK, true);
             chest.addToEquipment(ammo);
         }
-        
+        randomValue = 11;
+        if (randomValue == 11) {
+            var lmg = registerItemLocal(ItemTemplates.LMG_HOTCHKISS, true);
+            chest.addToEquipment(lmg);
+        }
+
+        if (randomValue == 11) {
+            var helmet = registerItemLocal(ItemTemplates.TRENCH_HELMET, true);
+
+            chest.addToEquipment(helmet);
+        }
 
         insertIntoCollisionGrid(chest);
 

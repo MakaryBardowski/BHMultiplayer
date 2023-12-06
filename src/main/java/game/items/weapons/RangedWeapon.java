@@ -5,10 +5,17 @@
 package game.items.weapons;
 
 import client.ClientGameAppState;
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
+import com.jme3.math.Ray;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import de.lessvoid.nifty.controls.label.LabelControl;
+import game.entities.Attribute;
 import game.entities.IntegerAttribute;
+import game.entities.InteractiveEntity;
 import game.entities.mobs.Mob;
+import game.entities.mobs.Player;
 import game.items.ItemTemplates.ItemTemplate;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,11 +56,50 @@ public abstract class RangedWeapon extends Weapon {
     }
 
     @Override
-    public void attributeChangedNotification(int attributeId) {
-        String text = (int) getAmmo() + "/" + (int) getMaxAmmo();
-        ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText(text);
+    public void attributeChangedNotification(int attributeId, Attribute copyOfNewAttribute) {
+        super.attributeChangedNotification(attributeId, copyOfNewAttribute); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+        if (attributeId == AMMO_ATTRIBUTE || attributeId == MAX_AMMO_ATTRIBUTE) {
+            String text = (int) getAmmo() + "/" + (int) getMaxAmmo();
+            ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText(text);
+        }
     }
+
+    public abstract float calculateDamage(float distance);
 
     public abstract void reload(Mob wielder);
 
+    
+    protected Vector3f hitscan(Player p) {
+        var cs = ClientGameAppState.getInstance();
+        CollisionResults results = new CollisionResults();
+        Vector3f shotDirection = p.getMainCamera().getDirection();
+        Vector3f shotOrigin = p.getMainCamera().getLocation();
+        Ray ray = new Ray(shotOrigin, shotDirection);
+        float distanceToFirstWall = Float.MAX_VALUE;
+
+        Vector3f cp = null;
+
+        if (cs.getMapNode().collideWith(ray, results) > 0) {
+            distanceToFirstWall = results.getClosestCollision().getDistance();
+            cp = results.getClosestCollision().getContactPoint();
+
+        }
+
+        results = new CollisionResults();
+        cs.getDestructibleNode().collideWith(ray, results);
+
+        if (results.size() > 0) {
+            CollisionResult closest = results.getClosestCollision();
+            cp = closest.getContactPoint();
+
+            float distanceToFirstTarget = closest.getDistance();
+            if (distanceToFirstTarget < distanceToFirstWall) {
+
+                Integer hitId = Integer.valueOf(closest.getGeometry().getName());
+                InteractiveEntity mobHit = cs.getMobs().get(hitId);
+                mobHit.onShot(p, calculateDamage(distanceToFirstTarget));
+            }
+        }
+        return cp;
+    }
 }

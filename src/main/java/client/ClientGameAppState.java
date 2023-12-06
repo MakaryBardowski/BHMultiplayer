@@ -11,6 +11,7 @@ import game.entities.mobs.Player;
 import messages.messageListeners.ClientMessageListener;
 import static client.ClientSynchronizationUtils.interpolateMobPosition;
 import static client.ClientSynchronizationUtils.interpolateMobRotation;
+import com.jme3.anim.SkinningControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.network.AbstractMessage;
@@ -30,9 +31,12 @@ import com.jme3.input.InputManager;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.light.AmbientLight;
+import com.jme3.material.Material;
 import com.jme3.network.ClientStateListener;
 import com.jme3.renderer.Camera;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.debug.custom.ArmatureDebugger;
 import com.jme3.ui.Picture;
 import de.lessvoid.nifty.Nifty;
 import debugging.DebugUtils;
@@ -40,6 +44,7 @@ import game.entities.Collidable;
 import game.entities.InteractiveEntity;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.HumanMob;
+import game.items.ItemTemplates;
 import game.items.weapons.Grenade;
 import game.map.collision.WorldGrid;
 import java.io.IOException;
@@ -199,6 +204,10 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         worldNode.addLight(al);
 
 //        DebugUtils.drawGrid();
+
+
+   
+
     }
 
     @Override

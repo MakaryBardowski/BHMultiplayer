@@ -35,7 +35,8 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
     protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
 
     //mob stats
-    protected float speed = DEFAULT_SPEED;
+    protected float cachedSpeed = DEFAULT_SPEED; // speed is very frequently accessed
+    // so it has to be cached whenever it is changed
 
     //mob ai variables
     protected Destructible currentTarget;
@@ -61,7 +62,7 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
         super(id, name, node);
         this.serverLocation = node.getWorldTranslation();
         this.serverRotation = node.getLocalRotation();
-        attributes.put(SPEED_ATTRIBUTE, new FloatAttribute(speed));
+        attributes.put(SPEED_ATTRIBUTE, new FloatAttribute(cachedSpeed));
     }
 
     public boolean doesNotCollideWithEntitiesAtPositionServer(Vector3f newPos, WorldGrid grid, ArrayList<Collidable> solidCollidables) {
@@ -81,12 +82,12 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
         }
     }
 
-    public float getSpeed() {
-        return speed;
+    public float getCachedSpeed() {
+        return cachedSpeed;
     }
 
-    public void setSpeed(float speed) {
-        this.speed = speed;
+    public void setCachedSpeed(float cachedSpeed) {
+        this.cachedSpeed = cachedSpeed;
     }
 
     public boolean isDead() {
@@ -150,5 +151,7 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 
         return item;
     }
+    
+    
 
 }

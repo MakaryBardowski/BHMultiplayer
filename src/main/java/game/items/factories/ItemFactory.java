@@ -4,31 +4,14 @@
  */
 package game.items.factories;
 
-import client.ClientGameAppState;
 import client.Main;
 import com.jme3.asset.AssetManager;
-import com.jme3.font.BitmapFont;
-import com.jme3.font.BitmapText;
-import com.jme3.font.Rectangle;
-import com.jme3.material.Material;
-import com.jme3.material.RenderState;
-import com.jme3.math.ColorRGBA;
-import com.jme3.renderer.Camera;
-import com.jme3.renderer.ViewPort;
-import com.jme3.renderer.queue.RenderQueue;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.control.BillboardControl;
-import com.jme3.scene.shape.Quad;
-import com.jme3.texture.FrameBuffer;
-import com.jme3.texture.Image;
-import com.jme3.texture.Texture;
-import com.jme3.texture.Texture2D;
 import game.items.AmmoPack;
 import game.items.Item;
 import game.items.ItemTemplates;
+import game.items.ItemTemplates.HelmetTemplate;
 import game.items.ItemTemplates.ItemTemplate;
-import game.items.ItemTemplates.ItemType;
 import static game.items.ItemTemplates.ItemType.PISTOL;
 import static game.items.ItemTemplates.ItemType.PISTOL_AMMO;
 import static game.items.ItemTemplates.ItemType.SMG_AMMO;
@@ -38,9 +21,9 @@ import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.items.weapons.Grenade;
 import game.items.weapons.Knife;
+import game.items.weapons.LightMachineGun;
 import game.items.weapons.Pistol;
 import game.items.weapons.Rifle;
-import org.w3c.dom.Text;
 
 /**
  *
@@ -69,6 +52,8 @@ public class ItemFactory {
                     return createRifle(id, template, droppable);
                 case PISTOL:
                     return createPistol(id, template, droppable);
+                case LMG:
+                    return createLmg(id, template, droppable);
                 case GRENADE:
                     return createGrenade(id, template, droppable);
                 case KNIFE:
@@ -80,8 +65,8 @@ public class ItemFactory {
                     return createRifleAmmoPack(id, template, droppable);
                 case SMG_AMMO:
                     return createSmgAmmoPack(id, template, droppable);
-                case SNIPER_AMMO:
-                    return createSniperAmmoPack(id, template, droppable);
+                case LMG_AMMO:
+                    return createLmgAmmoPack(id, template, droppable);
                 case SHOTGUN_AMMO:
                     return createShotgunAmmoPack(id, template, droppable);
                 default:
@@ -93,7 +78,7 @@ public class ItemFactory {
 
     private Helmet createHelmet(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        Helmet helmet = new Helmet(id, template, "Helmet", dropNode, droppable);
+        Helmet helmet = new Helmet(id, (HelmetTemplate) template, "Helmet", dropNode, droppable);
         return helmet;
     }
 
@@ -117,15 +102,23 @@ public class ItemFactory {
 
     private Rifle createRifle(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        int maxAmmo = 5;
-        float roundsPerSecond = 1.1f;
-        Rifle rifle = new Rifle(id, 8.25f, template, "Rifle", dropNode, droppable, maxAmmo, roundsPerSecond);
+        int maxAmmo = 150;
+        float roundsPerSecond = 2.1f;
+        Rifle rifle = new Rifle(id, 4.25f, template, "Rifle", dropNode, droppable, maxAmmo, roundsPerSecond);
+        return rifle;
+    }
+
+    private LightMachineGun createLmg(int id, ItemTemplate template, boolean droppable) {
+        Node dropNode = createItemDropNode(template);
+        int maxAmmo = 450;
+        float roundsPerSecond = 10f;
+        LightMachineGun rifle = new LightMachineGun(id, 2.5f, template, "Lmg", dropNode, droppable, maxAmmo, roundsPerSecond);
         return rifle;
     }
 
     private Item createPistol(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        int maxAmmo = 7;
+        int maxAmmo = 70;
         float roundsPerSecond = 4.43f;
         Pistol pistol = new Pistol(id, 2.95f, template, "Pistol", dropNode, droppable, maxAmmo, roundsPerSecond);
         return pistol;
@@ -168,10 +161,10 @@ public class ItemFactory {
         return ammoPack;
     }
 
-    private Item createSniperAmmoPack(int id, ItemTemplate template, boolean droppable) {
+    private Item createLmgAmmoPack(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        short ammo = 7;
-        short maxAmmo = 7;
+        short ammo = 45;
+        short maxAmmo = 45;
         AmmoPack ammoPack = new AmmoPack(id, template, "Ammo Pack", dropNode, droppable, ammo, maxAmmo);
         return ammoPack;
     }

@@ -4,11 +4,6 @@
  */
 package game.entities.factories;
 
-import client.ClientGameAppState;
-import game.items.armor.Boots;
-import game.items.armor.Helmet;
-import game.items.ItemTemplates;
-import game.items.armor.Vest;
 import game.entities.mobs.Player;
 import client.Main;
 import com.jme3.anim.SkinningControl;
@@ -21,9 +16,6 @@ import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.entities.DestructibleUtils;
-import game.items.factories.ItemFactory;
-import game.items.weapons.Rifle;
-import server.ServerMain;
 
 /**
  *
@@ -74,6 +66,7 @@ public class PlayerFactory extends MobFactory {
         Node playerNode = loadPlayerModel();
         String name = "Player_" + id;
         SkinningControl skinningControl = getSkinningControl(playerNode);
+
         return new Player(id, playerNode, name, mainCamera, skinningControl);
     }
 
@@ -106,9 +99,10 @@ public class PlayerFactory extends MobFactory {
         view2.setClearFlags(false, true, true);
         view2.attachScene(p.getGunNode());
         p.setGunViewPort(view2);
-        firstPersonCamera.setFrustumPerspective(45f, (float) firstPersonCamera.getWidth() / firstPersonCamera.getHeight(), 0.01f, 1000f);
+        firstPersonCamera.setFrustumPerspective(45f, (float) firstPersonCamera.getWidth() / firstPersonCamera.getHeight(), 0.01f, 300f);
         p.getRotationNode().attachChild(gunCameraNode);
         gunCameraNode.attachChild(p.getGunNode());
+                
         gunCameraNode.setCullHint(Spatial.CullHint.Never);
         p.setFirstPersonCameraNode(gunCameraNode);
     }

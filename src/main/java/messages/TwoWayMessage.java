@@ -61,6 +61,8 @@ public abstract class TwoWayMessage extends AbstractMessage {
     protected void removeItemFromMobEquipmentClient(int mobId, int itemId) {
         var mob = getMobByIdClient(mobId);
         var item = getItemByIdClient(itemId);
+        if(item == null)
+            return;
         var mobEquipment = mob.getEquipment();
         for (int i = 0; i < mobEquipment.length; i++) {
             if (mobEquipment[i] != null && mobEquipment[i].getId() == item.getId()) {

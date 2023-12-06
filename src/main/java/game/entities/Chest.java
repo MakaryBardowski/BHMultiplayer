@@ -33,7 +33,7 @@ import server.ServerMain;
 public class Chest extends Destructible {
 
     @Getter
-    private final Item[] equipment = new Item[3];
+    private final Item[] equipment = new Item[9];
     private boolean locked;
     private static final String WOODEN_CRATE = "Models/Chests/crate.j3o";
 

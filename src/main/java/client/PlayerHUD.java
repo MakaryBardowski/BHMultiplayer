@@ -35,6 +35,8 @@ import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
+import de.lessvoid.nifty.controls.dragndrop.builder.DraggableBuilder;
+import de.lessvoid.nifty.controls.dragndrop.builder.DroppableBuilder;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
 import de.lessvoid.nifty.controls.textfield.TextFieldControl;
@@ -379,32 +381,16 @@ public class PlayerHUD extends BaseAppState {
                             for (int slotNumber = 0; slotNumber < gs.getPlayer().getEquipment().length / ROWS; slotNumber++) {
                                 final int i = slotNumber;
 //                                cnt = slotNumber;
+
                                 image(new ImageBuilder("slot" + equipmentSlotAdded) {
                                     {
                                         visible(false);
                                         filename("Textures/GUI/equipmentSlotEmpty.png");
-//                        alignCenter();
-//                        valignCenter();
-//                                    height("8%");
-//                                    width("8%");
-
                                         height(nifty.getRenderEngine().getNativeHeight() * 0.08 + "px");
                                         width(nifty.getRenderEngine().getNativeHeight() * 0.08 + "px");
                                         visibleToMouse(true);
-                                        interactOnClick("playerEquipItem(" + equipmentSlotAdded++ + ")");
-//                        interactOnMouseOver("getItemInfo("+i+")");
-
-//onHoverEffect(new HoverEffectBuilder("changeMouseCursor") {{
-//      }});
-//                                    onEndHoverEffect(new HoverEffectBuilder("border") {
-//                                        {
-//                                            effectParameter("hoverHeight", "100%");
-//                                            effectParameter("hoverWidth", "100%");
-//                                            effectParameter("color", "#ffff");
-//                                            effectParameter("border", "2px");
-//                                            effectParameter("onStartEffect", "hideTooltip()");
-//                                        }
-//                                    });
+//                                        interactOnClick("playerEquipItem(" + equipmentSlotAdded++ + ")");
+                                        interactOnRelease("playerEquipItem(" + equipmentSlotAdded++ + ")");
                                         onStartHoverEffect(new HoverEffectBuilder("border") {
                                             {
                                                 effectParameter("hoverHeight", "100%");

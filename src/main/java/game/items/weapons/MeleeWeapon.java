@@ -13,7 +13,7 @@ import game.entities.mobs.Player;
 
 /**
  *
- * @author tomasz potoczko
+ * @author 48793
  */
 public abstract class MeleeWeapon extends Weapon {
 

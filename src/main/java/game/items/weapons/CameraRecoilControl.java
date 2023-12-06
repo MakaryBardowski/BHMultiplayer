@@ -16,16 +16,20 @@ import java.util.Random;
  */
 public class CameraRecoilControl extends RecoilControl {
 
-    private Vector3f currentRotation;
-    private Vector3f targetRotation;
-
-    private float snappiness;
-    private float returnSpeed;
     private float xperlin = 6;
     private float yperlin = 6;
-
+    private float shakeStrength;
     public CameraRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ) {
-        super(kickback, recoilX, recoilY, recoilZ);
+        super(kickback, recoilX, recoilY, recoilZ, 20);
+    }
+
+    public CameraRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, int snap) {
+        super(kickback, recoilX, recoilY, recoilZ, snap);
+    }
+
+    public CameraRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, int snap,float shakeStrength) {
+        super(kickback, recoilX, recoilY, recoilZ, snap);
+        this.shakeStrength = shakeStrength;
     }
 
     @Override
@@ -44,7 +48,7 @@ public class CameraRecoilControl extends RecoilControl {
     @Override
     public void recoilFire() {
 
-        upRecoil = FastMath.PI / (40 + random.nextFloat(10));
+        recoilX = FastMath.PI / (40 + random.nextFloat(10));
 
         recoilY = (float) ImprovedNoise.noise(xperlin, yperlin);
         recoilZ = (float) ImprovedNoise.noise(xperlin, yperlin);
@@ -53,16 +57,15 @@ public class CameraRecoilControl extends RecoilControl {
         yperlin = random.nextFloat(-1, 1) * 30;
 
         float scale = 0.05f;
-        recoilY = recoilY * scale; // left right
+        recoilY = recoilY * scale * shakeStrength; // left right
+        recoilX = recoilX * shakeStrength;
 //        recoilZ = recoilZ * 0.005f; // rotates head 
 
-
-
-//        targetRotationRecoil.addLocal((new Quaternion()).fromAngleAxis(FastMath.PI / (20-kickback), new Vector3f(upRecoil*4, getRandomNumber(-recoilY, recoilY), getRandomNumber(-recoilZ, recoilZ))));
+//        targetRotationRecoil.addLocal((new Quaternion()).fromAngleAxis(FastMath.PI / (20-kickback), new Vector3f(recoilX*4, getRandomNumber(-recoilY, recoilY), getRandomNumber(-recoilZ, recoilZ))));
         targetRotationRecoil.addLocal(
                 (new Quaternion()).fromAngleAxis(
-                        -upRecoil,
-                        new Vector3f(upRecoil,
+                        -recoilX,
+                        new Vector3f(recoilX,
                                 recoilY,
                                 0
                         )));
@@ -77,6 +80,6 @@ public class CameraRecoilControl extends RecoilControl {
 //    }
 ///    @Override
 ////    public void recoilFire(){
-////        targetRotationRecoil.addLocal((new Quaternion()).fromAngleAxis(FastMath.PI / (20-kickback), new Vector3f(upRecoil*4, getRandomNumber(-recoilY, recoilY), getRandomNumber(-recoilZ, recoilZ))));
+////        targetRotationRecoil.addLocal((new Quaternion()).fromAngleAxis(FastMath.PI / (20-kickback), new Vector3f(recoilX*4, getRandomNumber(-recoilY, recoilY), getRandomNumber(-recoilZ, recoilZ))));
 ////    }
 }

@@ -5,6 +5,7 @@
 package game.items.weapons;
 
 import com.jme3.scene.Node;
+import game.entities.Attribute;
 import game.entities.FloatAttribute;
 import game.items.Equippable;
 import game.items.Holdable;
@@ -26,7 +27,6 @@ public abstract class Weapon extends Item implements Attacks, Holdable {
 
     private static final DamageType DEFAULT_DAMAGE_TYPE = DamageType.PHYSICAL;
 
-    protected float attacksPerSecond;
 
     @Getter
     @Setter
@@ -35,8 +35,6 @@ public abstract class Weapon extends Item implements Attacks, Holdable {
     @Getter
     @Setter
     protected float currentAttackCooldown = 0;
-    protected float damage;
-    protected float range;
     protected DamageType damageType;
 
     @Getter
@@ -45,8 +43,6 @@ public abstract class Weapon extends Item implements Attacks, Holdable {
 
     public Weapon(int id, float damage, ItemTemplates.ItemTemplate template, String name, Node node, float attacksPerSecond) {
         super(id, template, name, node);
-        this.damage = damage;
-        this.attacksPerSecond = attacksPerSecond;
         attackCooldown = (1f / attacksPerSecond);
         damageType = DEFAULT_DAMAGE_TYPE;
         
@@ -56,8 +52,6 @@ public abstract class Weapon extends Item implements Attacks, Holdable {
 
     public Weapon(int id, float damage, ItemTemplates.ItemTemplate template, String name, Node node, boolean droppable, float attacksPerSecond) {
         super(id, template, name, node, droppable);
-        this.damage = damage;
-        this.attacksPerSecond = attacksPerSecond;
         attackCooldown = (1f / attacksPerSecond);
         damageType = DEFAULT_DAMAGE_TYPE;
         
@@ -65,28 +59,31 @@ public abstract class Weapon extends Item implements Attacks, Holdable {
         attributes.put(ATTACKS_PER_SEC_ATTRIBUTE, new FloatAttribute(attacksPerSecond));
     }
 
-    public void setDamage(float damage) {
-        this.damage = damage;
-    }
-
-    public void setRange(float range) {
-        this.range = range;
-    }
 
     public void setDamageType(DamageType damageType) {
         this.damageType = damageType;
     }
 
-    public float getRange() {
-        return range;
-    }
-
     public DamageType getDamageType() {
         return damageType;
     }
+    
+    public float getAttacksPerSecond(){
+    return getFloatAttribute(ATTACKS_PER_SEC_ATTRIBUTE).getValue();
+    }
 
     public float getDamage() {
-        return damage;
+        return getFloatAttribute(DAMAGE_ATTRIBUTE).getValue();
     }
+
+    @Override
+    public void attributeChangedNotification(int attributeId, Attribute copyOfAttribute) {
+        super.attributeChangedNotification(attributeId, copyOfAttribute); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+        if(attributeId == ATTACKS_PER_SEC_ATTRIBUTE){
+                attackCooldown = (1f / ((FloatAttribute)copyOfAttribute).getValue() );
+        }
+    }
+    
+    
 
 }

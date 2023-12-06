@@ -4,6 +4,7 @@
  */
 package game.items.weapons;
 
+import FirstPersonHands.FirstPersonHandAnimation;
 import game.effects.GradientParticleEmitter;
 import game.effects.GradientParticleMesh;
 import game.items.ItemTemplates.ItemTemplate;
@@ -37,6 +38,7 @@ import game.entities.mobs.HumanMob;
 import game.items.AmmoPack;
 import game.items.Holdable;
 import game.items.Item;
+import game.items.ItemTemplates;
 import game.items.ItemTemplates.ItemType;
 import messages.EntitySetFloatAttributeMessage;
 import messages.EntitySetIntegerAttributeMessage;
@@ -67,10 +69,6 @@ public class Pistol extends RangedWeapon {
 
     @Override
     public void playerEquip(Player p) {
-        var packMsg = new EntitySetFloatAttributeMessage(p, Mob.SPEED_ATTRIBUTE, 169);
-        packMsg.setReliable(true);
-        ClientGameAppState.getInstance().getClient().send(packMsg);
-
         Holdable unequippedItem = p.getEquippedRightHand();
         if (unequippedItem != null) {
             unequippedItem.playerUnequip(p);
@@ -83,7 +81,7 @@ public class Pistol extends RangedWeapon {
         p.setEquippedRightHand(null);
         p.getGunNode().removeControl(gunRecoil);
         p.getMainCameraNode().removeControl(camRecoil);
-        p.getGunNode().detachAllChildren();
+        p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
     }
 
     @Override
@@ -101,40 +99,41 @@ public class Pistol extends RangedWeapon {
             AssetManager assetManager = Main.getInstance().getAssetManager();
             Node model = (Node) assetManager.loadModel(template.getFpPath());
 
-            model.move(-.67f, -.75f, 2.3f);
-//        model.setLocalRotation((new Quaternion()).fromAngleAxis(-FastMath.PI / 1, new Vector3f(-.0f, .0f, 0)));
-            model.rotate(0, 1.5f * FastMath.DEG_TO_RAD, 0);
             Geometry ge = (Geometry) ((Node) model.getChild(0)).getChild(0);
             Material originalMaterial = ge.getMaterial();
             Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
             newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
             ge.setMaterial(newMaterial);
-
+            
             SkinningControl skinningControl = model.getChild(0).getControl(SkinningControl.class);
             muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
             firerateControl = new FirerateControl(this);
-            gunRecoil = new RecoilControl(0.0f, -.0f, .0f, .00f);
-            camRecoil = new CameraRecoilControl(0.3f, -.1f, .1f, .05f);
+            gunRecoil = new RecoilControl(.2f, -0.3f, .0f, .00f, 20);
+            camRecoil = new CameraRecoilControl(0.3f, -.05f, .1f, .05f,20,0.5f);
+            
+            
             model.addControl(firerateControl);
-            p.getGunNode().addControl(gunRecoil);
+            p.getFirstPersonHands().getHandsNode().addControl(gunRecoil);
             p.getMainCameraNode().addControl(camRecoil);
 
-            p.getGunNode().attachChild(model);
-//            model.scale(2f);
-            p.getFirstPersonCameraNode().attachChild(p.getGunNode());
-            model.move(new Vector3f(0.43199998f, 0.46799996f, -1.6199999f));
+            model.setLocalScale(3.5f);
+            model.move(0.04f, 0.055f, -0.115f);
+            p.getFirstPersonHands().attachToHandR(model);
 
-//            AnimComposer composer = model.getChild(0).getControl(AnimComposer.class);
-//            composer.setCurrentAction("idle");
+            
             muzzleEmitter = setupMuzzleFlashEmitter();
             muzzleNode.attachChild(muzzleEmitter);
+            
+            
+            p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimation.HOLD_PISTOL);
         }
     }
 
     @Override
     public void playerUseInRightHand(Player p) {
-
+        System.out.println("use");
+        System.out.println("currentattac " + currentAttackCooldown);
         if (getAmmo() > 0 && currentAttackCooldown >= attackCooldown) {
             playerAttack(p);
         }
@@ -146,44 +145,17 @@ public class Pistol extends RangedWeapon {
         currentAttackCooldown = 0;
         int newAmmo = getAmmo() - 1;
 
-        var msg = new EntitySetIntegerAttributeMessage(this, AMMO_ATTRIBUTE, newAmmo );
+        var msg = new EntitySetIntegerAttributeMessage(this, AMMO_ATTRIBUTE, newAmmo);
         ClientGameAppState.getInstance().getClient().send(msg);
 
         ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText((int) newAmmo + "/" + (int) getMaxAmmo());
-        hitscan(p);
+        shoot(p);
     }
 
-    private void hitscan(Player p) {
+    private void shoot(Player p) {
+        System.out.println("shoot!");
+        var cp = hitscan(p);
         var cs = ClientGameAppState.getInstance();
-        CollisionResults results = new CollisionResults();
-        Vector3f shotDirection = p.getMainCamera().getDirection();
-        Vector3f shotOrigin = p.getMainCamera().getLocation();
-        Ray ray = new Ray(shotOrigin, shotDirection);
-        float distanceToFirstWall = Float.MAX_VALUE;
-
-        Vector3f cp = null;
-
-        if (cs.getMapNode().collideWith(ray, results) > 0) {
-            distanceToFirstWall = results.getClosestCollision().getDistance();
-            cp = results.getClosestCollision().getContactPoint();
-
-        }
-
-        results = new CollisionResults();
-        cs.getDestructibleNode().collideWith(ray, results);
-
-        if (results.size() > 0) {
-            CollisionResult closest = results.getClosestCollision();
-            cp = closest.getContactPoint();
-
-            float distanceToFirstTarget = closest.getDistance();
-            if (distanceToFirstTarget < distanceToFirstWall) {
-
-                Integer hitId = Integer.valueOf(closest.getGeometry().getName());
-                InteractiveEntity mobHit = cs.getMobs().get(hitId);
-                mobHit.onShot(p, damage);
-            }
-        }
         createBullet(muzzleNode.getWorldTranslation(), cp);
 
         int hostedConnectionId = cs.getClient().getId();
@@ -298,8 +270,8 @@ public class Pistol extends RangedWeapon {
 //        blood.setStartColor(ColorRGBA.White);
         blood.setEndColor(new ColorRGBA(1f, 1f, 1f, 0.5f));   // red
         blood.setStartColor(new ColorRGBA(1f, 1f, 1f, 0.5f)); // yellow
-        blood.setStartSize(0.315f); //1f
-        blood.setEndSize(0.2f); //1.1f
+        blood.setStartSize(0.215f); //1f
+        blood.setEndSize(0.1f); //1.1f
         blood.setGravity(0, 0, 0);
         blood.setLowLife(0.03f);
         blood.setHighLife(0.05f);
@@ -343,10 +315,10 @@ public class Pistol extends RangedWeapon {
         StringBuilder builder = new StringBuilder();
         builder.append("-Worn\n");
         builder.append("-Damage [");
-        builder.append(damage);
+        builder.append(getDamage());
         builder.append("]\n");
         builder.append("-Fire rate [");
-        builder.append(attacksPerSecond);
+        builder.append(getAttacksPerSecond());
         builder.append("]\n");
         builder.append("-Ammo [");
         builder.append(getAmmo());
@@ -354,5 +326,11 @@ public class Pistol extends RangedWeapon {
         builder.append(getMaxAmmo());
         builder.append("]");
         return builder.toString();
+    }
+
+    @Override
+    public float calculateDamage(float distance) {
+        float damageDropoff = 0.75f;
+        return getDamage() * (float) (Math.pow(damageDropoff, distance / 20));
     }
 }

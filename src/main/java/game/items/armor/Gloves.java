@@ -36,6 +36,9 @@ public class Gloves extends Armor {
     @Override
     public void playerEquip(Player m) {
         m.setGloves(this);
+        
+        m.getFirstPersonHands().setFpHands(this);
+        
         Node r = m.getSkinningControl().getAttachmentsNode("HandR");
         Node l = m.getSkinningControl().getAttachmentsNode("HandL");
         r.detachAllChildren();

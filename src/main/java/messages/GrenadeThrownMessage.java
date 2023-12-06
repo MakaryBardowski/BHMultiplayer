@@ -94,9 +94,9 @@ public class GrenadeThrownMessage extends TwoWayMessage {
         removeEntityByIdServer(originGrenade.getId());
         server.getMobs().put(thrownGrenade.getId(), thrownGrenade);
 
-            MobItemInteractionMessage imsg = new MobItemInteractionMessage(originGrenade.getId(), throwingMobId, MobItemInteractionMessage.ItemInteractionType.DESTROY);
-            imsg.setReliable(true);
-            server.getServer().broadcast(imsg);
+        MobItemInteractionMessage imsg = new MobItemInteractionMessage(originGrenade.getId(), throwingMobId, MobItemInteractionMessage.ItemInteractionType.DESTROY);
+        imsg.setReliable(true);
+        server.getServer().broadcast(imsg);
 
         GrenadeThrownMessage msg = new GrenadeThrownMessage(throwingMobId, thrownGrenade.getId(), getPos(), getDirection());
         msg.setReliable(true);

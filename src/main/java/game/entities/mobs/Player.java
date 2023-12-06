@@ -7,7 +7,6 @@ package game.entities.mobs;
 import game.items.Equippable;
 import game.items.Item;
 
-import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
 import client.ClientGameAppState;
 import com.jme3.anim.SkinningControl;
@@ -16,14 +15,11 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
-import game.entities.Collidable;
-import game.entities.Destructible;
+import game.entities.Attribute;
 import game.entities.FloatAttribute;
-import game.entities.InteractiveEntity;
+import FirstPersonHands.FirstPersonHands;
 import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
 import game.map.collision.WorldGrid;
-import java.util.Arrays;
-import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import messages.PlayerPosUpdateRequest;
@@ -64,7 +60,12 @@ public class Player extends HumanMob {
     @Getter
     @Setter
     protected ViewPort gunViewPort;
-
+    
+    @Getter
+    @Setter
+    protected FirstPersonHands firstPersonHands; 
+    
+    
     @Override
     public void equip(Item item) {
         if (item instanceof Equippable equippableItem) {
@@ -86,6 +87,7 @@ public class Player extends HumanMob {
     public Player(int id, Node node, String name, Camera mainCamera, SkinningControl skinningControl) {
         super(id, node, name, skinningControl);
         this.mainCamera = mainCamera;
+        firstPersonHands = new FirstPersonHands(this);
         hotbar = new Item[HOTBAR_SIZE];
     }
 
@@ -144,26 +146,24 @@ public class Player extends HumanMob {
 
             if (forward) {
 
-                Vector3f moveVec = getNode().getLocalRotation().getRotationColumn(2).mult(speed * tpf).clone();
-
+                Vector3f moveVec = getNode().getLocalRotation().getRotationColumn(2).mult(cachedSpeed * tpf).clone();
                 movementVector.addLocal(moveVec);
 
             }
             if (backward) {
 
-                Vector3f moveVec = getNode().getLocalRotation().getRotationColumn(2).mult(speed * tpf).clone().negateLocal();
-
+                Vector3f moveVec = getNode().getLocalRotation().getRotationColumn(2).mult(cachedSpeed * tpf).clone().negateLocal();
                 movementVector.addLocal(moveVec);
 
             }
             if (left) {
 
-                Vector3f moveVec = cm.getCamera().getLeft().mult(speed * tpf);
+                Vector3f moveVec = cm.getCamera().getLeft().mult(cachedSpeed * tpf);
                 movementVector.addLocal(moveVec);
             }
             if (right) {
 
-                Vector3f moveVec = cm.getCamera().getLeft().negateLocal().mult(speed * tpf);
+                Vector3f moveVec = cm.getCamera().getLeft().negateLocal().mult(cachedSpeed * tpf);
                 movementVector.addLocal(moveVec);
             }
 
@@ -194,10 +194,9 @@ public class Player extends HumanMob {
             }
             if (canMoveOnAxisX && wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(movementVector.getX(), 0, 0))) {
                 node.move(movementVector.getX(), 0, 0);
-
+                
             }
-
-            if (node.getWorldTranslation().distance(serverLocation) > speed * tpf) {
+            if (node.getWorldTranslation().distance(serverLocation) > cachedSpeed * tpf) {
                 PlayerPosUpdateRequest posu = new PlayerPosUpdateRequest(id, node.getWorldTranslation());
                 cm.getClient().send(posu);
             }
@@ -248,5 +247,14 @@ public class Player extends HumanMob {
     public void setCameraMovementLocked(boolean cameraMovementLocked) {
         this.cameraMovementLocked = cameraMovementLocked;
     }
+
+    @Override
+    public void attributeChangedNotification(int attributeId,Attribute copy) {
+        if(attributeId == SPEED_ATTRIBUTE){
+        cachedSpeed = ((FloatAttribute) copy).getValue();
+        }
+    }
+    
+    
 
 }
