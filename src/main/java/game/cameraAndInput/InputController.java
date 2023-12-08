@@ -28,6 +28,7 @@ import game.items.weapons.Grenade;
 import game.items.weapons.MeleeWeapon;
 import game.items.weapons.RangedWeapon;
 import java.util.Arrays;
+import messages.MobRotUpdateMessage;
 
 /**
  *
@@ -39,7 +40,8 @@ public class InputController {
     private NiftyImage guiElement;
     private InputManager m;
     private HeadBobControl headBob;
-
+    private static final float ONE_DEGREE = 0.0174f;
+    private static final float NOTIFY_SERVER_THRESHOLD = ONE_DEGREE*2;
     /*
     JME cursor position cannot be altered externally
      */
@@ -50,6 +52,8 @@ public class InputController {
     private float centeredX;
     private float centeredY;
     private Quaternion newRotationQuat;
+    private float currentMaxDeviationX = 0;
+    private float currentMaxDeviationY = 0;
 
     public void createInputListeners(ClientGameAppState gs) {
         m = gs.getInputManager();
@@ -175,7 +179,13 @@ public class InputController {
                         cursorPositionForPlayerRotation.setX(cursorPositionForPlayerRotation.x + deltaX);
                         centeredX = cursorPositionForPlayerRotation.x - 0.5f * gs.getSettings().getWidth();
                         newRotationQuat = new Quaternion();
-                        newRotationQuat.fromAngles(0, -0.005f * centeredX, 0);
+
+                        centeredX = -0.005f * centeredX;
+
+                        newRotationQuat.fromAngles(0, centeredX, 0);
+
+                        currentMaxDeviationX += centeredX;
+
                         player.getNode().setLocalRotation(newRotationQuat);
                     }
                     prevJMEcursorPos.setX(gs.getInputManager().getCursorPosition().x);
@@ -188,12 +198,25 @@ public class InputController {
                         cursorPositionForPlayerRotation.setY(cursorPositionForPlayerRotation.y + deltaY);
                         centeredY = cursorPositionForPlayerRotation.y - 0.5f * gs.getSettings().getWidth();
                         newRotationQuat = new Quaternion();
-                        newRotationQuat.fromAngles(-0.005f * centeredY, 0, 0);
+
+                        centeredY = -0.005f * centeredY; //reusingVariable
+                        newRotationQuat.fromAngles(centeredY, 0, 0);
+
+                        currentMaxDeviationY += centeredY;
+
                         player.getRotationNode().setLocalRotation(newRotationQuat);
+
                     }
                     prevJMEcursorPos.setY(gs.getInputManager().getCursorPosition().y);
 
                 }
+                if (currentMaxDeviationX >= NOTIFY_SERVER_THRESHOLD || currentMaxDeviationX <= -NOTIFY_SERVER_THRESHOLD || currentMaxDeviationY >= NOTIFY_SERVER_THRESHOLD || currentMaxDeviationY <= -NOTIFY_SERVER_THRESHOLD) {
+                    currentMaxDeviationX = 0;
+                    currentMaxDeviationY = 0;
+                    MobRotUpdateMessage rotu = new MobRotUpdateMessage(player.getId(), player.getNode().getLocalRotation().mult(player.getRotationNode().getLocalRotation()));
+                    ClientGameAppState.getInstance().getClient().send(rotu);
+                }
+
             }
 
         };

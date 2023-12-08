@@ -24,9 +24,9 @@ import lombok.Getter;
  * @author 48793
  */
 public class FirstPersonHands {
-    private static final Vector3f rootNodePosition = new Vector3f(0,-0.7f,0);
 
-    
+    private static final Vector3f rootNodePosition = new Vector3f(0, -0.7f, 0);
+
     private final Player player;
 
     @Getter
@@ -36,7 +36,7 @@ public class FirstPersonHands {
     private AnimComposer handsComposer;
 
     private final Node handsRootNode = new Node();
-    
+
     public FirstPersonHands(Player player) {
         this.player = player;
     }
@@ -46,13 +46,14 @@ public class FirstPersonHands {
     }
 
     private void setuoHands() {
-        if(handsRootNode.getParent() != null)
+        if (handsRootNode.getParent() != null) {
             handsRootNode.removeFromParent();
-        
+        }
+
         player.getGunNode().attachChild(handsRootNode);
         handsRootNode.move(rootNodePosition);
         handsRootNode.scale(0.8f);
-            
+
         var assetManager = Main.getInstance().getAssetManager();
 
         Node handR = (Node) assetManager.loadModel("Models/bareHandFP_R/bareHandFP_R.j3o");
@@ -64,7 +65,7 @@ public class FirstPersonHands {
         mat.setColor("Color", ColorRGBA.Green);
         mat.getAdditionalRenderState().setDepthTest(false);
         skeletonDebug.setMaterial(mat);
-        handR.attachChild(skeletonDebug);
+//        handR.attachChild(skeletonDebug);
 
         Geometry armGeom = (Geometry) handR.getChild("bareHandFP");
         Material originalMaterial = armGeom.getMaterial();
@@ -77,24 +78,23 @@ public class FirstPersonHands {
         handsRootNode.attachChild(handR);
 
         handsComposer = handR.getChild(0).getControl(AnimComposer.class);
-//        handsComposer.setCurrentAction("HoldPistolR");
-        handsComposer.setCurrentAction("HoldLMG");
+        setHandsAnim(FirstPersonHandAnimationData.HOLD_PISTOL);
 
 //        handR.move(0,-0.7f,0);
 //        handR.move(-0.75f, -0.7f, 0.5f);
     }
 
-  
     public void attachToHandR(Spatial model) {
         rightHandEquipped.attachChild(model);
     }
-    
-    public void attachToHandL(Spatial model){
-    
+
+    public void attachToHandL(Spatial model) {
+
     }
-    
-    public void setHandsAnim(FirstPersonHandAnimation animData){
-    handsComposer.setCurrentAction(animData.getAnimationName());
-    handsRootNode.setLocalTranslation(rootNodePosition.add(animData.getRootOffset()));
+
+    public void setHandsAnim(FirstPersonHandAnimationData animData) {
+//    handsComposer.setCurrentAction(animData.getAnimationName());
+        handsComposer.setCurrentAction(animData.getAnimationName(), "Default", false);
+        handsRootNode.setLocalTranslation(rootNodePosition.add(animData.getRootOffset()));
     }
 }

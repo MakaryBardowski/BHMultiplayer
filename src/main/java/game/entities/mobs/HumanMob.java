@@ -10,9 +10,14 @@ import game.items.Holdable;
 import game.items.Item;
 import game.map.collision.WorldGrid;
 import client.ClientGameAppState;
+import client.ClientSynchronizationUtils;
 import client.Main;
+import com.jme3.anim.AnimComposer;
+import com.jme3.anim.AnimationMask;
+import com.jme3.anim.ArmatureMask;
 import com.jme3.anim.SkinningControl;
 import com.jme3.effect.ParticleEmitter;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
@@ -25,6 +30,7 @@ import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.map.collision.RectangleAABB;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -70,12 +76,23 @@ public class HumanMob extends Mob {
     @Setter
     protected Gloves defaultGloves;
 
+    @Getter
+    private AnimComposer modelComposer;
+
     private Geometry hitboxDebug;
 
-    public HumanMob(int id, Node node, String name, SkinningControl skinningControl) {
+    public HumanMob(int id, Node node, String name, SkinningControl skinningControl, AnimComposer modelComposer) {
         super(id, node, name);
         this.skinningControl = skinningControl;
-
+        this.modelComposer = modelComposer;
+        
+        var armature = skinningControl.getArmature();
+        ArmatureMask mask = new ArmatureMask();
+        mask.addBones(armature, "LegL");
+        mask.addBones(armature, "LegR");
+        mask.addBones(armature, "Spine");
+        modelComposer.makeLayer("Legs", mask);
+        
         createHitbox();
     }
 
@@ -257,7 +274,6 @@ public class HumanMob extends Mob {
 
     @Override
     public void setPositionServer(Vector3f newPos) {
-//        System.out.println("AHAHAHAHAHAHAHAHAHHAHHAHAHAH "+newPos);
         WorldGrid grid = ServerMain.getInstance().getGrid();
         grid.remove(this);
         node.setLocalTranslation(newPos);
@@ -292,6 +308,34 @@ public class HumanMob extends Mob {
 
     @Override
     public void onCollisionServer(Collidable other) {
+    }
+
+    @Override
+    public void interpolateRotation(float tpf) {
+        setRotInterpolationValue(Math.min(rotInterpolationValue + MOB_ROTATION_RATE * tpf, 1));
+
+        node.getLocalRotation().nlerp(ClientSynchronizationUtils.GetYAxisRotation(serverRotation), rotInterpolationValue);
+        node.setLocalRotation(node.getLocalRotation());
+
+        skinningControl.getArmature().getJoint("HandR").getLocalRotation().slerp(
+                ClientSynchronizationUtils.GetXAxisRotation(getServerRotation()), rotInterpolationValue
+        );
+
+        var rot = skinningControl.getArmature().getJoint("HandR").getLocalRotation();
+        skinningControl.getArmature().getJoint("HandL").setLocalRotation(rot);
+        skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(rot);
+    }
+
+    @Override
+    public void setPosInterpolationValue(float posInterpolationValue) {
+        super.setPosInterpolationValue(posInterpolationValue); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+        if (posInterpolationValue != 1 && modelComposer.getLayer("Legs").getCurrentActionName() != null && !modelComposer.getLayer("Legs").getCurrentActionName().equals("Run")) {
+            modelComposer.setCurrentAction("Run", "Legs");
+            modelComposer.getLayer("Legs").getCurrentAction().setSpeed(2);
+        } else if (posInterpolationValue == 1) {
+            modelComposer.setCurrentAction("Idle","Legs");
+        }
+
     }
 
 }

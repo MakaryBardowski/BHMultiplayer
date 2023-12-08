@@ -4,10 +4,14 @@
  */
 package game.entities.factories;
 
+import client.ClientGameAppState;
 import game.entities.mobs.Player;
 import client.Main;
+import com.jme3.anim.AnimComposer;
 import com.jme3.anim.SkinningControl;
 import com.jme3.asset.AssetManager;
+import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
@@ -15,7 +19,9 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.debug.custom.ArmatureDebugger;
 import game.entities.DestructibleUtils;
+import java.util.Random;
 
 /**
  *
@@ -28,13 +34,15 @@ public class PlayerFactory extends MobFactory {
     private final Camera firstPersonCamera;
     private final RenderManager renderManager;
     private boolean setAsPlayer;
-    private final Vector3f playerSpawnpoint = new Vector3f(10, 4, 10);
+    private Vector3f playerSpawnpoint = new Vector3f(10, 4, 10);
 
     public PlayerFactory(int id, AssetManager assetManager, Node mobNode, RenderManager renderManager) {
         super(id, assetManager, mobNode);
         this.mainCamera = null;
         this.firstPersonCamera = null;
         this.renderManager = renderManager;
+                playerSpawnpoint = new Vector3f( 10+new Random().nextInt(4), 4 ,10+new Random().nextInt(4));
+
     }
 
     public PlayerFactory(int id, Node mobNode, Camera mainCamera, boolean setAsPlayer) {
@@ -43,6 +51,7 @@ public class PlayerFactory extends MobFactory {
         this.firstPersonCamera = mainCamera.clone();
         this.renderManager = Main.getInstance().getRenderManager();
         this.setAsPlayer = setAsPlayer;
+        playerSpawnpoint = new Vector3f( 10+new Random().nextInt(4), 4 ,10+new Random().nextInt(4));
     }
 
     @Override
@@ -52,7 +61,7 @@ public class PlayerFactory extends MobFactory {
         if (setAsPlayer) {
             setupFirstPersonCamera(p);
         }
-        return p;
+         return p;
     }
 
     @Override
@@ -66,8 +75,8 @@ public class PlayerFactory extends MobFactory {
         Node playerNode = loadPlayerModel();
         String name = "Player_" + id;
         SkinningControl skinningControl = getSkinningControl(playerNode);
-
-        return new Player(id, playerNode, name, mainCamera, skinningControl);
+        AnimComposer composer = getAnimComposer(playerNode);
+        return new Player(id, playerNode, name, mainCamera, skinningControl,composer);
     }
 
     private void setupFirstPersonCamera(Player p) {
@@ -82,6 +91,10 @@ public class PlayerFactory extends MobFactory {
 
     private SkinningControl getSkinningControl(Node node) {
         return node.getChild(0).getControl(SkinningControl.class);
+    }
+
+    private AnimComposer getAnimComposer(Node node) {
+        return node.getChild(0).getControl(AnimComposer.class);
     }
 
     private void setupMainCamera(Player p) {
@@ -102,7 +115,7 @@ public class PlayerFactory extends MobFactory {
         firstPersonCamera.setFrustumPerspective(45f, (float) firstPersonCamera.getWidth() / firstPersonCamera.getHeight(), 0.01f, 300f);
         p.getRotationNode().attachChild(gunCameraNode);
         gunCameraNode.attachChild(p.getGunNode());
-                
+
         gunCameraNode.setCullHint(Spatial.CullHint.Never);
         p.setFirstPersonCameraNode(gunCameraNode);
     }

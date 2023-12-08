@@ -4,7 +4,7 @@
  */
 package game.items.weapons;
 
-import FirstPersonHands.FirstPersonHandAnimation;
+import FirstPersonHands.FirstPersonHandAnimationData;
 import game.items.ItemTemplates.ItemTemplate;
 import game.entities.mobs.Mob;
 import game.entities.mobs.Player;
@@ -90,7 +90,7 @@ public class Knife extends MeleeWeapon {
 
             composer = p.getFirstPersonHands().getHandsComposer();
 
-            p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimation.HOLD_KNIFE);
+            p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimationData.HOLD_KNIFE);
 
         }
     }

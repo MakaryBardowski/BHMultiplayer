@@ -4,7 +4,7 @@
  */
 package game.items.weapons;
 
-import FirstPersonHands.FirstPersonHandAnimation;
+import FirstPersonHands.FirstPersonHandAnimationData;
 import game.effects.GradientParticleEmitter;
 import game.effects.GradientParticleMesh;
 import game.items.ItemTemplates.ItemTemplate;
@@ -113,7 +113,7 @@ public class Rifle extends RangedWeapon {
             muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
             firerateControl = new FirerateControl(this);
-            gunRecoil = new RecoilControl(.2f, -0.1f, .0f, .00f, 30);
+            gunRecoil = new RecoilControl(.2f, -0.1f, .0f, .00f, 30,1);
             camRecoil = new CameraRecoilControl(0.3f, -.05f, .1f, .05f, 20, 0.5f);
 
             model.addControl(firerateControl);
@@ -131,7 +131,7 @@ public class Rifle extends RangedWeapon {
             muzzleEmitter = setupMuzzleFlashEmitter();
             muzzleNode.attachChild(muzzleEmitter);
 
-            p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimation.HOLD_RIFLE);
+            p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimationData.HOLD_RIFLE);
 
         }
     }

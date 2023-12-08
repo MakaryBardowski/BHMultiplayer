@@ -102,7 +102,7 @@ public class ItemFactory {
 
     private Rifle createRifle(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        int maxAmmo = 150;
+        int maxAmmo = 15;
         float roundsPerSecond = 2.1f;
         Rifle rifle = new Rifle(id, 4.25f, template, "Rifle", dropNode, droppable, maxAmmo, roundsPerSecond);
         return rifle;
@@ -110,7 +110,7 @@ public class ItemFactory {
 
     private LightMachineGun createLmg(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        int maxAmmo = 450;
+        int maxAmmo = 150;
         float roundsPerSecond = 10f;
         LightMachineGun rifle = new LightMachineGun(id, 2.5f, template, "Lmg", dropNode, droppable, maxAmmo, roundsPerSecond);
         return rifle;
@@ -118,7 +118,7 @@ public class ItemFactory {
 
     private Item createPistol(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        int maxAmmo = 70;
+        int maxAmmo = 10;
         float roundsPerSecond = 4.43f;
         Pistol pistol = new Pistol(id, 2.95f, template, "Pistol", dropNode, droppable, maxAmmo, roundsPerSecond);
         return pistol;

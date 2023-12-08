@@ -10,7 +10,6 @@ import game.entities.factories.PlayerFactory;
 import game.entities.mobs.Player;
 import messages.messageListeners.ClientMessageListener;
 import static client.ClientSynchronizationUtils.interpolateMobPosition;
-import static client.ClientSynchronizationUtils.interpolateMobRotation;
 import com.jme3.anim.SkinningControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
@@ -231,7 +230,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
                     interpolateMobPosition(m, tpf);
                     grid.insert(m);
                 }
-                interpolateMobRotation(m, tpf);
+                m.interpolateRotation(tpf);
             } else if (x instanceof ThrownGrenade g) {
                 if (!g.getNode().getWorldTranslation().equals(g.getServerLocation())) {
                     interpolateGrenadePosition(g, tpf);

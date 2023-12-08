@@ -30,15 +30,22 @@ public class RecoilControl extends AbstractControl {
     protected Quaternion targetRotationRecoil = new Quaternion(0, 0, 0, 1);
     protected Vector3f currentVectorRecoil = new Vector3f(0, 0, 0);
     protected Vector3f targetVectorRecoil = new Vector3f(0, 0, 0);
-    
+    protected float backRecoil;
     
     public RecoilControl(float kickback, float recoilX, float recoilY, float recoilZ,int  snap) {
+        this(kickback,recoilX,recoilY,recoilZ,snap,0);
+    }
+    
+        public RecoilControl(float kickback, float recoilX, float recoilY, float recoilZ,int  snap, float backRecoil) {
         this.kickback = kickback;
         this.recoilX = recoilX;
         this.recoilY = recoilY;
         this.recoilZ = recoilZ;
         this.snap = snap;
+        this.backRecoil = backRecoil;
     }
+    
+    
 
     // better recoil for any type of weapon
     public void recoilUpdate() {
@@ -54,7 +61,7 @@ public class RecoilControl extends AbstractControl {
 
     public void recoilFire() {
         targetRotationRecoil = targetRotationRecoil.add((new Quaternion()).fromAngleAxis(FastMath.PI / (6 - kickback), new Vector3f(recoilX, getRandomNumber(-recoilY, recoilY), getRandomNumber(-recoilZ, recoilZ))));
-        targetVectorRecoil = targetVectorRecoil.subtract(targetRotationRecoil.getRotationColumn(2).subtract(0, 0, -.4f));
+        targetVectorRecoil = targetVectorRecoil.subtract(targetRotationRecoil.getRotationColumn(2).subtract(0, 0, -backRecoil));
     }
 
     public float getRandomNumber(float min, float max) {

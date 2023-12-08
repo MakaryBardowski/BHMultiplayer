@@ -18,6 +18,7 @@ import com.jme3.scene.Node;
 import game.entities.Attribute;
 import game.entities.FloatAttribute;
 import FirstPersonHands.FirstPersonHands;
+import com.jme3.anim.AnimComposer;
 import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
 import game.map.collision.WorldGrid;
 import lombok.Getter;
@@ -37,7 +38,7 @@ public class Player extends HumanMob {
 
     @Getter
     @Setter
-    private boolean forward, backward, right, left, holdsTrigger;
+    private boolean forward = true, backward, right, left, holdsTrigger;
 
     // camera
     private CameraNode mainCameraNode;
@@ -84,8 +85,8 @@ public class Player extends HumanMob {
         return gunNode;
     }
 
-    public Player(int id, Node node, String name, Camera mainCamera, SkinningControl skinningControl) {
-        super(id, node, name, skinningControl);
+    public Player(int id, Node node, String name, Camera mainCamera, SkinningControl skinningControl,AnimComposer composer) {
+        super(id, node, name, skinningControl,composer);
         this.mainCamera = mainCamera;
         firstPersonHands = new FirstPersonHands(this);
         hotbar = new Item[HOTBAR_SIZE];
@@ -134,9 +135,6 @@ public class Player extends HumanMob {
 
     @Override
     public void move(float tpf, ClientGameAppState cm) {
-        
-        MobRotUpdateMessage rotu = new MobRotUpdateMessage(id, node.getLocalRotation());
-        cm.getClient().send(rotu);
 
         if (forward || backward || left || right) {
             Vector3f movementVector = new Vector3f(0, 0, 0);
@@ -205,6 +203,7 @@ public class Player extends HumanMob {
 
             collisionGrid.insert(this);
         }
+
     }
 
     @Override

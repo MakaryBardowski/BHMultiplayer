@@ -4,6 +4,7 @@
  */
 package game.items.weapons;
 
+import FirstPersonHands.FirstPersonHandAnimationData;
 import client.ClientGameAppState;
 import client.Main;
 import com.jme3.anim.SkinningControl;
@@ -23,6 +24,10 @@ import messages.GrenadeThrownMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewGrenadeMessage;
 import static client.ClientGameAppState.removeEntityByIdClient;
+import com.jme3.anim.tween.Tween;
+import com.jme3.anim.tween.Tweens;
+import com.jme3.anim.tween.action.Action;
+import com.jme3.anim.tween.action.ClipAction;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import game.items.Holdable;
 
@@ -83,32 +88,50 @@ public class Grenade extends ThrowableWeapon {
             AssetManager assetManager = Main.getInstance().getAssetManager();
             Node model = (Node) assetManager.loadModel(template.getFpPath());
 
-            model.move(-.67f, -.7f, 2.3f);
-//        model.setLocalRotation((new Quaternion()).fromAngleAxis(-FastMath.PI / 1, new Vector3f(-.0f, .0f, 0)));
-            model.rotate(0, 1.5f * FastMath.DEG_TO_RAD, 0);
             Geometry ge = (Geometry) model.getChild(0);
             Material originalMaterial = ge.getMaterial();
             Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
             newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
             ge.setMaterial(newMaterial);
 
-            p.getGunNode().attachChild(model);
-            model.scale(0.75f);
-            p.getFirstPersonCameraNode().attachChild(p.getGunNode());
-            model.move(new Vector3f(0.43199998f, 0.46799996f, -1.6199999f));
+            p.getFirstPersonHands().attachToHandR(model);
+            model.scale(2.f);
+            model.move(0.1f, 0.2f, -0.4f);
+//            model.move(new Vector3f(0.43199998f, 0.46799996f, -1.6199999f));
 
+            ((ClipAction) p.getFirstPersonHands().getHandsComposer().action("ThrowGrenade")).setTransitionLength(0);
+
+            p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimationData.HOLD_GRENADE);
+
+            p.getFirstPersonHands().getHandsComposer().setGlobalSpeed(1f);
         }
     }
 
     @Override
     public void playerUseInRightHand(Player p) {
-                System.out.println("holds trigger " +p.isHoldsTrigger());
+        var composer = p.getFirstPersonHands().getHandsComposer();
+        
+        Action toIdle = composer.action("KnifeAttackToHold");
+        Tween idle = Tweens.callMethod(composer, "setCurrentAction", "HoldKnife");
+        composer.actionSequence("ThrowToHold", toIdle, idle);
 
+        Action attack = composer.action("ThrowGrenade");
+        Tween attackToIdle = Tweens.callMethod(composer, "setCurrentAction", "ThrowToHold");
+        composer.actionSequence("fullSwing", attack, attackToIdle);
+
+        ((ClipAction) composer.action("ThrowGrenade")).setTransitionLength(0);
+        composer.setCurrentAction("fullSwing");
+        composer.getCurrentAction().setSpeed(1);
+        throwGrenade(p);
+    }
+
+    private void throwGrenade(Player p) {
+        
         var cs = ClientGameAppState.getInstance();
         var grenadeInitialPosition = cs.getCamera().getLocation();
         var throwDirection = cs.getCamera().getDirection().normalize();
 
-        var gtm = new GrenadeThrownMessage(p.getId(),id, grenadeInitialPosition, throwDirection);
+        var gtm = new GrenadeThrownMessage(p.getId(), id, grenadeInitialPosition, throwDirection);
         gtm.setReliable(true);
 
         cs.getClient().send(gtm);
@@ -116,7 +139,6 @@ public class Grenade extends ThrowableWeapon {
         p.removeFromEquipment(this);
         p.unequip(this);
         removeEntityByIdClient(id);
-        
 
     }
 
@@ -133,7 +155,7 @@ public class Grenade extends ThrowableWeapon {
     @Override
     public void playerUnequip(Player p) {
         p.setEquippedRightHand(null);
-        p.getGunNode().detachAllChildren();
+        p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
     }
 
     @Override
@@ -149,7 +171,8 @@ public class Grenade extends ThrowableWeapon {
     private boolean isEquippedByMe(Player p) {
         return p == ClientGameAppState.getInstance().getPlayer();
     }
-        @Override
+
+    @Override
     public String getDescription() {
         StringBuilder builder = new StringBuilder();
         builder.append("-Throwable\n");

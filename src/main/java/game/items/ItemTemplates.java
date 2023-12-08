@@ -41,7 +41,7 @@ public class ItemTemplates {
     public static final ItemTemplate LMG_AMMO_PACK = new ItemTemplate("LMG Ammo Pack [Ammo]", null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/lmgAmmoPack.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1.1f), ItemType.LMG_AMMO, 14);
     public static final ItemTemplate SHOTGUN_AMMO_PACK = new ItemTemplate("Shotgun Ammo Pack [Ammo]", null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/pistolAmmoPack.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1.1f), ItemType.SHOTGUN_AMMO, 15);
     public static final ItemTemplate LMG_HOTCHKISS = new ItemTemplate("Hotchkiss [LMG]", ITEMS_PATH + "Hotchkiss/hotchkissFp.j3o", ICON_PATH + "equipmentHotchkiss.png", ITEMS_PATH + "Hotchkiss/hotchkissDrop.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 0.8f), ItemType.LMG, 16);
-    public static final ItemTemplate TRENCH_HELMET = new HelmetTemplate("Trench Helmet", "Models/trenchHelmet/trenchHelmet.j3o", ICON_PATH + "equipmentSmokeGrenade.png", "Models/trenchHelmet/trenchHelmet.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 0.8f), ItemType.HELMET, 17,false);
+    public static final ItemTemplate TRENCH_HELMET = new HelmetTemplate("Trench Helmet", ITEMS_PATH+"TrenchSet/trenchHelmet.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH+"TrenchSet/trenchHelmet.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 0.8f), ItemType.HELMET, 17,false);
 
     static {
         templates.add(RIFLE_MANNLICHER_95.getTemplateIndex(), RIFLE_MANNLICHER_95);

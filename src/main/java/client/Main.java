@@ -34,10 +34,10 @@ public class Main extends SimpleApplication {
 
     private static final short STARTING_RESOLUTION_WIDTH = 1920;
     private static final short STARTING_RESOLUTION_HEIGHT = 1080;
-    private static final boolean fullscreen = true;
+    private static final boolean FULLSCREEN = false;
 //    private static final short STARTING_RESOLUTION_WIDTH = 1000;
 //    private static final short STARTING_RESOLUTION_HEIGHT = 800;
-//    private static final boolean fullscreen = false;
+//    private static final boolean FULLSCREEN = false;
 
     public static void main(String[] args) {
         Main app = new Main();
@@ -106,22 +106,19 @@ public class Main extends SimpleApplication {
     private static void setupSettings(SimpleApplication app) {
         AppSettings settings1 = new AppSettings(true);
         settings1.setResolution(STARTING_RESOLUTION_WIDTH, STARTING_RESOLUTION_HEIGHT);
-        settings1.setFullscreen(fullscreen);
+        settings1.setFullscreen(FULLSCREEN);
         settings1.setVSync(true);
         settings1.setFrameRate(2000);
         settings1.setRenderer(AppSettings.LWJGL_OPENGL45);
-//                settings1.setResolution(800, 800);
+                settings1.setResolution(800, 800);
 //        app.setDisplayFps(false);
 //        app.setDisplayStatView(false);
-//        settings1.setCenterWindow(false);
-//asd
-//        if (new Random().nextInt(2) == 0) {
-//            settings1.setWindowXPosition(0);
-//        } else {
+        settings1.setCenterWindow(false);
+
+        
 //            settings1.setWindowXPosition(1000);
-//        }
-//        
-        settings1.setTitle("BH");
+
+       settings1.setTitle("BH");
         app.setPauseOnLostFocus(false);
         app.setSettings(settings1);
 

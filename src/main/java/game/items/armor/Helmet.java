@@ -31,7 +31,6 @@ public class Helmet extends Armor {
 
     private static final float HELMET_SCALE_ZBUFFER_FIGHTING = 1.02f;
 
-
     public Helmet(int id, HelmetTemplate template, String name, Node node) {
         super(id, template, name, node);
     }
@@ -42,33 +41,32 @@ public class Helmet extends Armor {
 
     @Override
     public void playerEquip(Player m) {
-        
-                Node bb = m.getSkinningControl().getAttachmentsNode("BackpackBone");
-        Node ba = (Node) Main.getInstance().getAssetManager().loadModel("Models/backpack/backpack.j3o");
-bb.attachChild(ba);
-                setupModelLight(ba);
-        setupModelShootability(ba, m.getId());
-        ba.move(0,0.3f,0);
 
-        
+        Node bb = m.getSkinningControl().getAttachmentsNode("BackpackBone");
+        Node ba = (Node) Main.getInstance().getAssetManager().loadModel("Models/backpack/backpack.j3o");
+        bb.attachChild(ba);
+        setupModelLight(ba);
+        setupModelShootability(ba, m.getId());
+        ba.move(0, 0.3f, 0);
+
         var helmetTemplate = (HelmetTemplate) template;
         m.setHelmet(this);
         Node n = m.getSkinningControl().getAttachmentsNode("Head");
         n.detachAllChildren();
 
 //        m.getSkinningControl().getArmature().getJoint("Head").setLocalRotation(new Quaternion(1,0.6f,new Random().nextFloat(),1f));
-        
         Node helmet = (Node) Main.getInstance().getAssetManager().loadModel(helmetTemplate.getFpPath());
         setupModelLight(helmet);
         n.attachChild(helmet);
         setupModelShootability(helmet, m.getId());
+        
         if (!helmetTemplate.isReplacesHead()) {
             helmet.setLocalScale(HELMET_SCALE_ZBUFFER_FIGHTING);
             Node head = (Node) Main.getInstance().getAssetManager().loadModel(m.getDefaultHelmet().getTemplate().getFpPath());
             setupModelLight(head);
             n.attachChild(head);
             setupModelShootability(head, m.getId());
-            ((Geometry) head.getChild(0)).getMaterial().getAdditionalRenderState().setPolyOffset(5,5);
+            ((Geometry) head.getChild(0)).getMaterial().getAdditionalRenderState().setPolyOffset(5, 5);
         }
     }
 

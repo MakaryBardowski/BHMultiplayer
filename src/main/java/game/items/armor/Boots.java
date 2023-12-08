@@ -10,6 +10,7 @@ import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.entities.mobs.Player;
 import client.Main;
 import com.jme3.math.FastMath;
+import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
@@ -24,15 +25,17 @@ import messages.items.NewBootsMessage;
  */
 public class Boots extends Armor {
 
-    public Boots(int id, ItemTemplates.ItemTemplate template,String name,Node node) {
-        super(id,template,name,node);
+    public Boots(int id, ItemTemplates.ItemTemplate template, String name, Node node) {
+        super(id, template, name, node);
     }
 
-    public Boots(int id, ItemTemplates.ItemTemplate template,String name,Node node, boolean droppable) {
-        super(id,template,name,node,droppable);
+    public Boots(int id, ItemTemplates.ItemTemplate template, String name, Node node, boolean droppable) {
+        super(id, template, name, node, droppable);
     }
+
     @Override
     public void playerEquip(Player m) {
+        var verticalOffset = 0.44f;
         m.setBoots(this);
         Node r = m.getSkinningControl().getAttachmentsNode("LegR");
         Node l = m.getSkinningControl().getAttachmentsNode("LegL");
@@ -42,11 +45,16 @@ public class Boots extends Armor {
         Node bootR = (Node) Main.getInstance().getAssetManager().loadModel(template.getFpPath().replace("?", "R"));
         setupModelLight(bootR);
         setupModelShootability(bootR, m.getId());
+
+        bootR.move(0, verticalOffset, 0);
+
         r.attachChild(bootR);
 
         Node bootL = (Node) Main.getInstance().getAssetManager().loadModel(template.getFpPath().replace("?", "L"));
         setupModelLight(bootL);
         setupModelShootability(bootL, m.getId());
+        bootL.move(0, verticalOffset, 0);
+
         l.attachChild(bootL);
         bootR.rotate(0, -FastMath.DEG_TO_RAD * 90, 0);
         bootL.rotate(0, -FastMath.DEG_TO_RAD * 90, 0);
@@ -74,7 +82,7 @@ public class Boots extends Armor {
     public AbstractMessage createNewEntityMessage() {
         NewBootsMessage msg = new NewBootsMessage(this);
         msg.setReliable(true);
-        return msg;    
+        return msg;
     }
 
     @Override
@@ -86,8 +94,8 @@ public class Boots extends Armor {
     public void playerServerUnequip(HumanMob m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
-        @Override
+
+    @Override
     public String getDescription() {
         StringBuilder builder = new StringBuilder();
         builder.append("-Worn\n");

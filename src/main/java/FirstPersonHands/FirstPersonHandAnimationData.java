@@ -13,11 +13,12 @@ import lombok.Getter;
  * @author 48793
  */
 @AllArgsConstructor
-public enum FirstPersonHandAnimation {
+public enum FirstPersonHandAnimationData {
     HOLD_PISTOL("HoldPistolR", new Vector3f(0, 0, 0)),
     HOLD_LMG("HoldLMG", new Vector3f(0, -0.3f, 1)),
     HOLD_RIFLE("HoldRifle", new Vector3f(0, 0.0f, 1)),
-    HOLD_KNIFE("HoldKnife", new Vector3f(0, 0.0f, 0.5f));
+    HOLD_KNIFE("HoldKnife", new Vector3f(0, 0.0f, 0.5f)),
+    HOLD_GRENADE("HoldGrenade", new Vector3f(0, 0.0f, 0.7f));
 
     @Getter
     private final String animationName;

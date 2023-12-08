@@ -26,9 +26,11 @@ import lombok.Setter;
  * @author 48793
  */
 public abstract class Mob extends StatusEffectContainer implements CollidableInterface, MobInterface {
-    
+
+    protected static final float MOB_ROTATION_RATE = 6f;
+
     public static final int SPEED_ATTRIBUTE = 2;
-    
+
     private static final float DEFAULT_SPEED = 13.25f; //10, 13.25f for knife
     protected static final int EQUIPMENT_SIZE = 18;
 
@@ -107,14 +109,17 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
     }
 
     public void setServerLocation(Vector3f serverLocation) {
+
         this.serverLocation = serverLocation;
-        this.posInterpolationValue = 0;
+        posInterpolationValue = 0;
     }
 
     public void setServerRotation(Quaternion serverRotation) {
         this.serverRotation = serverRotation;
         this.rotInterpolationValue = 0;
     }
+
+    public abstract void interpolateRotation(float tpf);
 
     protected void dropEquipment() {
         Random r = new Random();
@@ -151,7 +156,5 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 
         return item;
     }
-    
-    
 
 }

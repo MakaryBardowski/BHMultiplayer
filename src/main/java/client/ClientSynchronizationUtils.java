@@ -16,16 +16,17 @@ import game.entities.grenades.ThrownGrenade;
  */
 public class ClientSynchronizationUtils {
 
-    private static final float MOB_ROTATION_RATE = 6;
-
-
     /* metoda interpoluj¹ca pozycjê moba (zeby nie teleportowal sie tam gdzie serwer powie ze jest,
     tylko zeby faktycznie przemieszczal sie tam ze swoja predkoscia
      */
     public static void interpolateMobPosition(Mob mob, float tpf) {
-        mob.setPosInterpolationValue(mob.getPosInterpolationValue() + (mob.getCachedSpeed() / mob.getNode().getWorldTranslation().distance(mob.getServerLocation())) * tpf);
-        Vector3f newPos = mob.getNode().getWorldTranslation().clone().interpolateLocal(mob.getServerLocation(), Math.min(mob.getPosInterpolationValue(), 1));
+
+        mob.setPosInterpolationValue(Math.min(mob.getPosInterpolationValue() + (mob.getCachedSpeed() / mob.getNode().getWorldTranslation().distance(mob.getServerLocation())) * tpf, 1));
+
+        Vector3f newPos = mob.getNode().getWorldTranslation().interpolateLocal(mob.getServerLocation(), mob.getPosInterpolationValue());
+
         mob.getNode().setLocalTranslation(newPos);
+
     }
 
     public static void interpolateGrenadePosition(ThrownGrenade grenade, float tpf) {
@@ -34,10 +35,28 @@ public class ClientSynchronizationUtils {
         grenade.getNode().setLocalTranslation(newPos);
     }
 
-    public static void interpolateMobRotation(Mob mob, float tpf) {
-        mob.setRotInterpolationValue(Math.min(mob.getRotInterpolationValue() + MOB_ROTATION_RATE * tpf, 1));
-        mob.getNode().getLocalRotation().slerp(mob.getServerRotation(), mob.getRotInterpolationValue());
+    public static Quaternion GetXAxisRotation(Quaternion quaternion) {
+        float w = quaternion.getW();
+        float x = quaternion.getX();
 
+        float a = (float) Math.sqrt((w * w) + (x * x));
+        return new Quaternion(x, 0, 0, w / a);
+
+    }
+
+    public static Quaternion GetYAxisRotation(Quaternion quaternion) {
+        float w = quaternion.getW();
+        float y = quaternion.getY();
+        float a = (float) Math.sqrt((w * w) + (y * y));
+        return new Quaternion(0, y, 0, w / a);
+
+    }
+
+    public static Quaternion GetZAxisRotation(Quaternion quaternion) {
+                float w = quaternion.getW();
+        float z = quaternion.getZ();
+        float a = (float) Math.sqrt((w * w) + (z * z));
+        return new Quaternion(0, 0, z, w / a);
     }
 
 }
