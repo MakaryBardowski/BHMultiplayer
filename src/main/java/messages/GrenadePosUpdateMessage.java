@@ -4,9 +4,12 @@
  */
 package messages;
 
+import client.ClientGameAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.serializing.Serializable;
+import game.entities.grenades.ThrownGrenade;
+import server.ServerMain;
 
 /**
  *
@@ -37,6 +40,18 @@ public class GrenadePosUpdateMessage extends EntityUpdateMessage {
     @Override
     public String toString() {
         return "MobUpdatePosRotMessage{ id="+id + " x=" + x + ", y=" + y + ", z=" + z +'}';
+    }
+
+    @Override
+    public void handleServer(ServerMain server) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void handleClient(ClientGameAppState client) {
+        if (getEntityByIdClient(id) != null) {
+            ((ThrownGrenade) getEntityByIdClient(id)).setServerLocation(getPos());
+        }
     }
 
 }

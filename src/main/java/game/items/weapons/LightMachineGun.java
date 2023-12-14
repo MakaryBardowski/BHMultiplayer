@@ -33,6 +33,7 @@ import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import game.entities.Destructible;
+import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.InteractiveEntity;
 import game.entities.mobs.HumanMob;
 import static game.entities.mobs.Mob.SPEED_ATTRIBUTE;
@@ -60,6 +61,7 @@ public class LightMachineGun extends RangedWeapon {
     private RecoilControl gunRecoil;
 
     private ParticleEmitter muzzleEmitter;
+    private int thirdPersonModelParentIndex;
 
     public LightMachineGun(int id, float damage, ItemTemplate template, String name, Node node, int maxAmmo, float roundsPerSecond) {
         super(id, damage, template, name, node, maxAmmo, roundsPerSecond);
@@ -80,10 +82,17 @@ public class LightMachineGun extends RangedWeapon {
 
     @Override
     public void playerUnequip(Player p) {
-        p.setEquippedRightHand(null);
-        p.getGunNode().removeControl(gunRecoil);
-        p.getMainCameraNode().removeControl(camRecoil);
-        p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+        if (p.getEquippedRightHand() == this) {
+
+            p.setEquippedRightHand(null);
+            if (PlayerEqualsMyPlayer(p)) {
+                p.getGunNode().removeControl(gunRecoil);
+                p.getMainCameraNode().removeControl(camRecoil);
+                p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+            }
+            System.out.println("unequipping LMG!");
+            p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
+        }
     }
 
     @Override
@@ -93,12 +102,13 @@ public class LightMachineGun extends RangedWeapon {
 
     @Override
     public void playerHoldInRightHand(Player p) {
+        AssetManager assetManager = Main.getInstance().getAssetManager();
+
         p.setEquippedRightHand(this);
 
-        if (isEquippedByMe(p)) {
+        if (PlayerEqualsMyPlayer(p)) {
             ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText((int) getAmmo() + "/" + (int) getMaxAmmo());
 
-            AssetManager assetManager = Main.getInstance().getAssetManager();
             Node model = (Node) assetManager.loadModel(template.getFpPath());
             model.move(-.52f, -.7f, 2.2f);
 //        model.setLocalRotation((new Quaternion()).fromAngleAxis(-FastMath.PI / 1, new Vector3f(-.0f, .0f, 0)));
@@ -112,9 +122,9 @@ public class LightMachineGun extends RangedWeapon {
             muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
             firerateControl = new FirerateControl(this);
-            gunRecoil = new RecoilControl(-6f, -0.07f, 0.0425f, 0.04f,30,0.4f);
+            gunRecoil = new RecoilControl(-6f, -0.07f, 0.0425f, 0.04f, 30, 0.4f);
 
-            camRecoil = new CameraRecoilControl(0.3f, -.05f, .1f, .05f,30,0.3f);
+            camRecoil = new CameraRecoilControl(0.3f, -.05f, .1f, .05f, 30, 0.3f);
 
             model.addControl(firerateControl);
             p.getFirstPersonHands().getHandsNode().addControl(gunRecoil);
@@ -134,6 +144,23 @@ public class LightMachineGun extends RangedWeapon {
             p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimationData.HOLD_LMG);
 
         }
+
+        Node model = (Node) assetManager.loadModel(template.getDropPath());
+        model.move(0, -0.43f, 0.52f);
+        Geometry ge = (Geometry) (model.getChild(0));
+        Material originalMaterial = ge.getMaterial();
+        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+        ge.setMaterial(newMaterial);
+        float length = 0.75f;
+        float width = 0.75f;
+        float height = 0.75f;
+        model.scale(length, width, height);
+        p.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
+        setupModelShootability(model, p.getId());
+        thirdPersonModelParentIndex = p.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
+        System.out.println("name " + p.getName());
+        System.out.println(" EQUIPPED A LMG! (pos = " + model.getWorldTranslation());
     }
 
     @Override
@@ -237,7 +264,7 @@ public class LightMachineGun extends RangedWeapon {
         return msg;
     }
 
-    private boolean isEquippedByMe(Player p) {
+    private boolean PlayerEqualsMyPlayer(Player p) {
         return p == ClientGameAppState.getInstance().getPlayer();
     }
 

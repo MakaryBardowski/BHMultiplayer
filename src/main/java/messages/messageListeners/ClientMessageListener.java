@@ -8,8 +8,6 @@ import game.cameraAndInput.InputController;
 import game.entities.mobs.Mob;
 import game.entities.mobs.Player;
 import messages.SystemHealthUpdateMessage;
-import messages.MobPosUpdateMessage;
-import messages.MobRotUpdateMessage;
 import messages.NewMobMessage;
 import messages.PlayerJoinedMessage;
 import messages.SetPlayerMessage;
@@ -19,9 +17,7 @@ import com.jme3.network.MessageListener;
 import client.ClientGameAppState;
 import client.Main;
 import client.PlayerHUD;
-import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.entities.Chest;
@@ -29,47 +25,19 @@ import game.entities.Destructible;
 import game.entities.DestructibleDecoration;
 import game.entities.InteractiveEntity;
 import game.entities.factories.DestructibleDecorationFactory;
-import game.entities.grenades.ClientThrownGrenadeRotateControl;
 import game.entities.grenades.ThrownGrenade;
-import game.entities.grenades.ThrownSmokeGrenade;
 import game.entities.mobs.HumanMob;
-import game.items.AmmoPack;
 import game.items.Item;
-import game.items.ItemTemplates;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.items.factories.ItemFactory;
-import game.items.weapons.RangedWeapon;
-import game.items.weapons.Rifle;
-import java.util.Arrays;
-import java.util.concurrent.Callable;
-import messages.DestructibleDamageReceiveMessage;
-import messages.GrenadePosUpdateMessage;
-import messages.GrenadeThrownMessage;
-import messages.HitscanTrailMessage;
-import messages.InstantEntityPosCorrectionMessage;
 import messages.NewChestMessage;
 import messages.NewDestructibleDecorationMessage;
 import messages.ThrownGrenadeExplodedMessage;
 import messages.TwoWayMessage;
 import messages.items.ChestItemInteractionMessage;
-import messages.items.MobItemInteractionMessage;
-import messages.items.MobItemInteractionMessage.ItemInteractionType;
-import static messages.items.MobItemInteractionMessage.ItemInteractionType.DROP;
-import static messages.items.MobItemInteractionMessage.ItemInteractionType.EQUIP;
-import static messages.items.MobItemInteractionMessage.ItemInteractionType.PICK_UP;
-import static messages.items.MobItemInteractionMessage.ItemInteractionType.UNEQUIP;
-import messages.items.NewAmmoPackMessage;
-import messages.items.NewBootsMessage;
-import messages.items.NewGlovesMessage;
-import messages.items.NewGrenadeMessage;
-import messages.items.NewHelmetMessage;
-import messages.items.NewItemMessage;
-import messages.items.NewMeleeWeaponMessage;
-import messages.items.NewRangedWeaponMessage;
-import messages.items.NewVestMessage;
 import messages.items.SetDefaultItemMessage;
 
 /**
@@ -90,20 +58,8 @@ public class ClientMessageListener implements MessageListener<Client> {
     public void messageReceived(Client s, Message m) {
         if (m instanceof TwoWayMessage tm) {
             tm.handleClient(clientApp);
-        } else if (m instanceof MobRotUpdateMessage nmsg) {
-            updateMobRotation(nmsg);
-        } else if (m instanceof MobPosUpdateMessage nmsg) {
-            updateMobPosition(nmsg);
-        } else if (m instanceof DestructibleDamageReceiveMessage hmsg) {
-            entityReceiveDamage(hmsg);
         } else if (m instanceof SystemHealthUpdateMessage hmsg) {
             updateEntityHealth(hmsg);
-        } else if (m instanceof GrenadePosUpdateMessage gmsg) {
-            updateGrenadePosition(gmsg);
-        } else if (m instanceof InstantEntityPosCorrectionMessage cmsg) {
-            correctPosition(cmsg);
-        } else if (m instanceof HitscanTrailMessage tmsg) {
-            handleHitscanTrail(tmsg);
         } else if (m instanceof ThrownGrenadeExplodedMessage gemsg) {
             handleGrenadeExplosion(gemsg);
         } else if (m instanceof NewMobMessage nmsg) {
@@ -166,18 +122,6 @@ public class ClientMessageListener implements MessageListener<Client> {
     private void updateEntityHealth(SystemHealthUpdateMessage hmsg) {
         if (mobExistsLocally(hmsg.getId())) {
             getDestructibleById(hmsg.getId()).setHealth(hmsg.getHealth());
-        }
-    }
-
-    private void updateMobPosition(MobPosUpdateMessage nmsg) {
-        if (mobExistsLocally(nmsg.getId())) {
-            getMobById(nmsg.getId()).setServerLocation(nmsg.getPos());
-        }
-    }
-
-    private void updateMobRotation(MobRotUpdateMessage nmsg) {
-        if (mobExistsLocally(nmsg.getId())) {
-            getMobById(nmsg.getId()).setServerRotation(nmsg.getRot());
         }
     }
 
@@ -281,28 +225,6 @@ public class ClientMessageListener implements MessageListener<Client> {
         });
     }
 
-    private void entityReceiveDamage(DestructibleDamageReceiveMessage hmsg) {
-        enqueueExecution(() -> {
-            if (mobExistsLocally(hmsg.getTargetId())) {
-
-                Destructible d = getDestructibleById(hmsg.getTargetId());
-                d.receiveDamage(hmsg.getDamage());
-                if (d.getHealth() <= 0) {
-                    clientApp.getMobs().remove(d.getId());
-                }
-            }
-        }
-        );
-
-    }
-
-    private void handleHitscanTrail(HitscanTrailMessage tmsg) {
-        enqueueExecution(() -> {
-            Mob mob = getMobById(tmsg.getId());
-            Rifle.createBullet(mob.getNode().getWorldTranslation().clone().add(0, 1, 0), tmsg.getShotPos());
-        });
-    }
-
     private void setHumanMobDefaultItem(SetDefaultItemMessage dmsg) {
         enqueueExecution(() -> {
             HumanMob human = (HumanMob) getMobById(dmsg.getMobId());
@@ -321,12 +243,6 @@ public class ClientMessageListener implements MessageListener<Client> {
 
     }
 
-    private void correctPosition(InstantEntityPosCorrectionMessage cmsg) {
-        enqueueExecution(() -> {
-            getEntityById(cmsg.getId()).setPosition(cmsg.getPos());
-        });
-    }
-
     private void addNewDestructibleDecoration(NewDestructibleDecorationMessage nmsg) {
         if (mobDoesNotExistLocally(nmsg.getId())) {
             enqueueExecution(() -> {
@@ -335,13 +251,6 @@ public class ClientMessageListener implements MessageListener<Client> {
                 ClientGameAppState.getInstance().getGrid().insert(d);
             });
         }
-    }
-
-    private void updateGrenadePosition(GrenadePosUpdateMessage gmsg) {
-        if (getEntityById(gmsg.getId()) != null) {
-            ((ThrownGrenade) getEntityById(gmsg.getId())).setServerLocation(gmsg.getPos());
-        }
-
     }
 
     private void handleGrenadeExplosion(ThrownGrenadeExplodedMessage gemsg) {

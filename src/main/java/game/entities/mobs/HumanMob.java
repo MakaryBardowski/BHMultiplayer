@@ -22,6 +22,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.VertexBuffer;
 import game.effects.ParticleUtils;
 import game.entities.Collidable;
 import game.entities.Destructible;
@@ -313,11 +314,14 @@ public class HumanMob extends Mob {
     @Override
     public void interpolateRotation(float tpf) {
         setRotInterpolationValue(Math.min(rotInterpolationValue + MOB_ROTATION_RATE * tpf, 1));
+        
 
+        
         node.getLocalRotation().nlerp(ClientSynchronizationUtils.GetYAxisRotation(serverRotation), rotInterpolationValue);
         node.setLocalRotation(node.getLocalRotation());
+        
 
-        skinningControl.getArmature().getJoint("HandR").getLocalRotation().slerp(
+        skinningControl.getArmature().getJoint("HandR").getLocalRotation().nlerp(
                 ClientSynchronizationUtils.GetXAxisRotation(getServerRotation()), rotInterpolationValue
         );
 

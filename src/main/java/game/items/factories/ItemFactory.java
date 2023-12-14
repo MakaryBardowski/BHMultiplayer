@@ -19,6 +19,7 @@ import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
+import game.items.consumable.Medpack;
 import game.items.weapons.Grenade;
 import game.items.weapons.Knife;
 import game.items.weapons.LightMachineGun;
@@ -61,7 +62,6 @@ public class ItemFactory {
                 case PISTOL_AMMO:
                     return createPistolAmmoPack(id, template, droppable);
                 case RIFLE_AMMO:
-                    System.out.println("rifle!!!!");
                     return createRifleAmmoPack(id, template, droppable);
                 case SMG_AMMO:
                     return createSmgAmmoPack(id, template, droppable);
@@ -69,6 +69,8 @@ public class ItemFactory {
                     return createLmgAmmoPack(id, template, droppable);
                 case SHOTGUN_AMMO:
                     return createShotgunAmmoPack(id, template, droppable);
+                case MEDPACK:
+                    return createMedpack(id, template, droppable);
                 default:
                     break;
             }
@@ -139,16 +141,16 @@ public class ItemFactory {
 
     private Item createPistolAmmoPack(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        short ammo = 14;
-        short maxAmmo = 14;
+        short ammo = 24;
+        short maxAmmo = 24;
         AmmoPack ammoPack = new AmmoPack(id, template, "Ammo Pack", dropNode, droppable, ammo, maxAmmo);
         return ammoPack;
     }
 
     private Item createRifleAmmoPack(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        short ammo = 17;
-        short maxAmmo = 17;
+        short ammo = 23;
+        short maxAmmo = 23;
         AmmoPack ammoPack = new AmmoPack(id, template, "Ammo Pack", dropNode, droppable, ammo, maxAmmo);
         return ammoPack;
     }
@@ -175,6 +177,12 @@ public class ItemFactory {
         short maxAmmo = 9;
         AmmoPack ammoPack = new AmmoPack(id, template, "Ammo Pack", dropNode, droppable, ammo, maxAmmo);
         return ammoPack;
+    }
+
+    private Item createMedpack(int id, ItemTemplate template, boolean droppable) {
+        Node dropNode = createItemDropNode(template);
+        Medpack medpack = new Medpack(id, 0f, template, "Smoke Grenade", dropNode, droppable);
+        return medpack;
     }
 
     /**

@@ -38,7 +38,7 @@ public class Player extends HumanMob {
 
     @Getter
     @Setter
-    private boolean forward = true, backward, right, left, holdsTrigger;
+    private boolean forward, backward, right, left, holdsTrigger;
 
     // camera
     private CameraNode mainCameraNode;
@@ -76,6 +76,7 @@ public class Player extends HumanMob {
 
     @Override
     public void unequip(Item item) {
+
         if (item instanceof Equippable equippableItem) {
             equippableItem.playerUnequip(this);
         }

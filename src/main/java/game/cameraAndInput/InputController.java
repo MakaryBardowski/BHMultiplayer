@@ -7,6 +7,7 @@ package game.cameraAndInput;
 
 import game.entities.mobs.Player;
 import client.ClientGameAppState;
+import client.PlayerHUDController;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.InputManager;
@@ -24,6 +25,7 @@ import com.jme3.math.Vector3f;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
 import game.entities.InteractiveEntity;
+import game.items.Item;
 import game.items.weapons.Grenade;
 import game.items.weapons.MeleeWeapon;
 import game.items.weapons.RangedWeapon;
@@ -41,7 +43,7 @@ public class InputController {
     private InputManager m;
     private HeadBobControl headBob;
     private static final float ONE_DEGREE = 0.0174f;
-    private static final float NOTIFY_SERVER_THRESHOLD = ONE_DEGREE*2;
+    private static final float NOTIFY_SERVER_THRESHOLD = ONE_DEGREE * 2;
     /*
     JME cursor position cannot be altered externally
      */
@@ -107,8 +109,9 @@ public class InputController {
                 }
 
                 if (!player.isDead() && name.equals("1") && !keyPressed) {
-                    player.equip(player.getEquipment()[Integer.parseInt(name) - 1]);
-
+                    Item equippedItem = player.getEquipment()[Integer.parseInt(name) - 1];
+                    player.equip(equippedItem);
+                    PlayerHUDController.sendEquipMessageToServer(equippedItem);
                 }
 
                 // attack test

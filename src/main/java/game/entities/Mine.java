@@ -124,7 +124,7 @@ public class Mine extends DestructibleDecoration {
             if (c instanceof Destructible de && c.getCollisionShape().wouldCollideAtPosition(explosionHitbox, c.getCollisionShape().getPosition())) {
                 if (c != this) {
                     var emsg = new DestructibleDamageReceiveMessage(de.getId(), damage);
-                    ServerMessageListener.handleDestructibleDamageReceive(de, emsg, serverApp);
+                    emsg.handleDestructibleDamageReceive(de, serverApp);
                 }
 
             }

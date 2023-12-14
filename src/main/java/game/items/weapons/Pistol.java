@@ -30,6 +30,7 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import game.entities.Destructible;
@@ -52,22 +53,23 @@ import messages.items.NewRangedWeaponMessage;
  * @author 48793
  */
 public class Pistol extends RangedWeapon {
-    
+
     private static final float BULLET_SPEED = 1200f;
-    
+
     private Node muzzleNode;
     private CameraRecoilControl camRecoil;
     private RecoilControl gunRecoil;
     private ParticleEmitter muzzleEmitter;
-    
+    private int thirdPersonModelParentIndex;
+
     public Pistol(int id, float damage, ItemTemplate template, String name, Node node, int maxAmmo, float roundsPerSecond) {
         super(id, damage, template, name, node, maxAmmo, roundsPerSecond);
     }
-    
+
     public Pistol(int id, float damage, ItemTemplate template, String name, Node node, boolean droppable, int maxAmmo, float roundsPerSecond) {
         super(id, damage, template, name, node, droppable, maxAmmo, roundsPerSecond);
     }
-    
+
     @Override
     public void playerEquip(Player p) {
         Holdable unequippedItem = p.getEquippedRightHand();
@@ -76,65 +78,69 @@ public class Pistol extends RangedWeapon {
         }
         playerHoldInRightHand(p);
     }
-    
+
     @Override
     public void playerUnequip(Player p) {
-        p.setEquippedRightHand(null);
-        if(PlayerEqualsMyPlayer(p)){
-        p.getGunNode().removeControl(gunRecoil);
-        p.getMainCameraNode().removeControl(camRecoil);
-        p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+        if (p.getEquippedRightHand() == this) {
+
+            p.setEquippedRightHand(null);
+            if (PlayerEqualsMyPlayer(p)) {
+                p.getGunNode().removeControl(gunRecoil);
+                p.getMainCameraNode().removeControl(camRecoil);
+                p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+            }
+            p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
         }
     }
-    
+
     @Override
     public void attack(Mob m) {
-        
+
     }
-    
+
     @Override
     public void playerHoldInRightHand(Player p) {
         System.out.println("its a player... ");
         AssetManager assetManager = Main.getInstance().getAssetManager();
-        
+
         p.setEquippedRightHand(this);
-        
+
         if (PlayerEqualsMyPlayer(p)) {
             ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText((int) getAmmo() + "/" + (int) getMaxAmmo());
-            
+
             Node model = (Node) assetManager.loadModel(template.getFpPath());
-            
+
             Geometry ge = (Geometry) ((Node) model.getChild(0)).getChild(0);
             Material originalMaterial = ge.getMaterial();
             Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
             newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
             ge.setMaterial(newMaterial);
-            
+
             SkinningControl skinningControl = model.getChild(0).getControl(SkinningControl.class);
             muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
-            
+
             firerateControl = new FirerateControl(this);
-            gunRecoil = new RecoilControl(.2f, -0.3f, .0f, .00f, 20, 0.4f);
+            gunRecoil = new RecoilControl(.2f, -.3f, .0f, .00f, 20, 0.4f);
             camRecoil = new CameraRecoilControl(0.3f, -.05f, .1f, .05f, 20, 0.5f);
-            
+
             model.addControl(firerateControl);
             p.getFirstPersonHands().getHandsNode().addControl(gunRecoil);
             p.getMainCameraNode().addControl(camRecoil);
-            
+
             model.setLocalScale(3.5f);
             model.move(0.04f, 0.055f, -0.115f);
             p.getFirstPersonHands().attachToHandR(model);
-            
+
             muzzleEmitter = setupMuzzleFlashEmitter();
             muzzleNode.attachChild(muzzleEmitter);
-            
+
             p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimationData.HOLD_PISTOL);
-            
+
         }
-        
+
         Node model = (Node) assetManager.loadModel(template.getDropPath());
-        model.move(0,-0.43f,0.37f);
-        Geometry ge = (Geometry) ( model.getChild(0));
+        model.move(0, -0.43f, 0.37f);
+        Geometry ge = (Geometry) (model.getChild(0));
         Material originalMaterial = ge.getMaterial();
         Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
         newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
@@ -142,12 +148,16 @@ public class Pistol extends RangedWeapon {
         float length = 1f;
         float width = 1.4f;
         float height = 1f;
-        model.scale(length,width,height);
+        model.scale(length, width, height);
+        System.out.println("p.getSkinningControl().getAttachmentsNode(\"HandR\") " + p.getSkinningControl().getAttachmentsNode("HandR"));
         p.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
-        setupModelShootability(model,p.getId());
+        setupModelShootability(model, p.getId());
+        thirdPersonModelParentIndex = p.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
 
+        System.out.println("name " + p.getName());
+        System.out.println(" EQUIPPED A PISTOL! (pos = " + model.getWorldTranslation());
     }
-    
+
     @Override
     public void playerUseInRightHand(Player p) {
         System.out.println("use");
@@ -156,38 +166,38 @@ public class Pistol extends RangedWeapon {
             playerAttack(p);
         }
     }
-    
+
     @Override
     public void playerAttack(Player p) {
         muzzleEmitter.emitParticles(1);
         currentAttackCooldown = 0;
         int newAmmo = getAmmo() - 1;
-        
+
         var msg = new EntitySetIntegerAttributeMessage(this, AMMO_ATTRIBUTE, newAmmo);
         ClientGameAppState.getInstance().getClient().send(msg);
-        
+
         ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText((int) newAmmo + "/" + (int) getMaxAmmo());
         shoot(p);
     }
-    
+
     private void shoot(Player p) {
         System.out.println("shoot!");
         var cp = hitscan(p);
         var cs = ClientGameAppState.getInstance();
         createBullet(muzzleNode.getWorldTranslation(), cp);
-        
+
         int hostedConnectionId = cs.getClient().getId();
         HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(), cp, hostedConnectionId);
         cs.getClient().send(trailMessage);
-        
+
         recoilFire();
     }
-    
+
     private void recoilFire() {
         camRecoil.recoilFire();
         gunRecoil.recoilFire();
     }
-    
+
     public static void createBullet(Vector3f spawnpoint, Vector3f destination) {
         Node bullet = new Node("boolet");
         ClientGameAppState.getInstance().getDebugNode().attachChild(bullet);
@@ -195,9 +205,9 @@ public class Pistol extends RangedWeapon {
         GradientParticleEmitter trail = createTrail();
         bullet.attachChild(trail);
         bullet.addControl(new BulletTracerControl(bullet, destination, BULLET_SPEED, trail));
-        
+
     }
-    
+
     private static GradientParticleEmitter createTrail() {
         Material trailMat = createTrailMaterial();
         GradientParticleEmitter fire = new GradientParticleEmitter("Debris", GradientParticleMesh.Type.Triangle, 400);
@@ -218,10 +228,10 @@ public class Pistol extends RangedWeapon {
         fire.getParticleInfluencer().setVelocityVariation(0.4f);
         fire.setParticlesPerSec(0);
         fire.setQueueBucket(RenderQueue.Bucket.Transparent);
-        
+
         return fire;
     }
-    
+
     private static Material createTrailMaterial() {
         Material mat = new Material(Main.getInstance().getAssetManager(), "Common/MatDefs/Misc/Particle.j3md");
         mat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
@@ -230,12 +240,12 @@ public class Pistol extends RangedWeapon {
         mat.setTexture("Texture", tex1);
         return mat;
     }
-    
+
     @Override
     public void onShot(Mob shooter, float damage) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
+
     @Override
     public void onInteract() {
         ClientGameAppState gs = ClientGameAppState.getInstance();
@@ -243,28 +253,28 @@ public class Pistol extends RangedWeapon {
         imsg.setReliable(true);
         gs.getClient().send(imsg);
     }
-    
+
     @Override
     public AbstractMessage createNewEntityMessage() {
         NewRangedWeaponMessage msg = new NewRangedWeaponMessage(this);
         msg.setReliable(true);
         return msg;
     }
-    
+
     private boolean PlayerEqualsMyPlayer(Player p) {
         return p == ClientGameAppState.getInstance().getPlayer();
     }
-    
+
     @Override
     public void playerServerEquip(HumanMob m) {
         m.setEquippedRightHand(this);
     }
-    
+
     @Override
     public void playerServerUnequip(HumanMob m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
+
     private static ParticleEmitter setupMuzzleFlashEmitter() {
         ParticleEmitter blood
                 = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 10);
@@ -274,7 +284,7 @@ public class Pistol extends RangedWeapon {
                 "Textures/Gameplay/Effects/muzzleFlash.png");
         t.setMagFilter(Texture.MagFilter.Nearest);
         mat_red.setTexture("Texture", t);
-        
+
         mat_red.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
         blood.setQueueBucket(RenderQueue.Bucket.Transparent);
         blood.setMaterial(mat_red);
@@ -297,37 +307,37 @@ public class Pistol extends RangedWeapon {
         blood.setParticlesPerSec(0);
         return blood;
     }
-    
+
     @Override
     public void reload(Mob wielder) {
         int ammoToFullClip = getMaxAmmo() - getAmmo();
         int ammoFromPack = 0;
         int localAmmo = getAmmo();
         int maxAmmo = getMaxAmmo();
-        
+
         for (int i = 0; i < wielder.getEquipment().length; i++) {
             Item item = wielder.getEquipment()[i];
             if (item instanceof AmmoPack pack && pack.getTemplate().getType().equals(ItemType.PISTOL_AMMO)) {
                 int initialPackAmmo = pack.getAmmo();
                 ammoFromPack = Math.min(ammoToFullClip, initialPackAmmo);
-                
+
                 if (ammoFromPack > 0) {
                     var packMsg = new EntitySetIntegerAttributeMessage(pack, AmmoPack.AMMO_ATTRIBUTE, initialPackAmmo - ammoFromPack);
                     packMsg.setReliable(true);
                     ClientGameAppState.getInstance().getClient().send(packMsg);
-                    
+
                     localAmmo += ammoFromPack;
                     ammoToFullClip = maxAmmo - localAmmo;
                 }
             }
         }
-        
+
         var msg = new EntitySetIntegerAttributeMessage(this, AMMO_ATTRIBUTE, localAmmo);
         msg.setReliable(true);
         ClientGameAppState.getInstance().getClient().send(msg);
-        
+
     }
-    
+
     @Override
     public String getDescription() {
         StringBuilder builder = new StringBuilder();
@@ -345,7 +355,7 @@ public class Pistol extends RangedWeapon {
         builder.append("]");
         return builder.toString();
     }
-    
+
     @Override
     public float calculateDamage(float distance) {
         float damageDropoff = 0.75f;

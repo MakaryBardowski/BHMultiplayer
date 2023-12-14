@@ -48,7 +48,7 @@ public class PlayerHUDController implements ScreenController {
 
     }
         
-    private static void sendEquipMessageToServer(Item item){
+    public static void sendEquipMessageToServer(Item item){
             if (item != null) {
             MobItemInteractionMessage imsg = new MobItemInteractionMessage(item, gs.getPlayer(), ItemInteractionType.EQUIP);
             imsg.setReliable(true);

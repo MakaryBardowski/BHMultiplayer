@@ -4,9 +4,17 @@
  */
 package messages;
 
+import client.ClientGameAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.network.Filters;
 import com.jme3.network.serializing.Serializable;
+import game.entities.Collidable;
+import game.entities.mobs.Player;
+import game.map.collision.MovementCollisionUtils;
+import game.map.collision.WorldGrid;
+import java.util.ArrayList;
+import server.ServerMain;
 
 /**
  *
@@ -18,7 +26,7 @@ public class MobPosUpdateMessage extends EntityUpdateMessage {
     protected float x;
     protected float y;
     protected float z;
-    
+
     public MobPosUpdateMessage() {
     }
 
@@ -29,14 +37,25 @@ public class MobPosUpdateMessage extends EntityUpdateMessage {
         this.z = pos.getZ();
     }
 
-    public Vector3f getPos(){
-    return new Vector3f(x,y,z);
+    public Vector3f getPos() {
+        return new Vector3f(x, y, z);
     }
-    
 
     @Override
     public String toString() {
-        return "MobUpdatePosRotMessage{ id="+id + " x=" + x + ", y=" + y + ", z=" + z +'}';
+        return "MobUpdatePosRotMessage{ id=" + id + " x=" + x + ", y=" + y + ", z=" + z + '}';
+    }
+
+    @Override
+    public void handleServer(ServerMain server) {
+        throw new UnsupportedOperationException("Server got an update - but the server is authoritative!");
+    }
+
+    @Override
+    public void handleClient(ClientGameAppState client) {
+        if (entityExistsLocallyClient(id)) {
+            getMobByIdClient(id).setServerLocation(getPos());
+        }
     }
 
 }

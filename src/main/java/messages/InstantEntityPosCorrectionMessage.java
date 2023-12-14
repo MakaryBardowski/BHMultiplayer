@@ -4,10 +4,12 @@
  */
 package messages;
 
+import client.ClientGameAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.serializing.Serializable;
 import game.entities.InteractiveEntity;
+import server.ServerMain;
 
 /**
  *
@@ -32,6 +34,18 @@ public class InstantEntityPosCorrectionMessage extends EntityUpdateMessage {
 
     public Vector3f getPos(){
     return new Vector3f(x,y,z);
+    }
+
+    @Override
+    public void handleServer(ServerMain server) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void handleClient(ClientGameAppState client) {
+        enqueueExecution(() -> {
+            getEntityByIdClient(id).setPosition(getPos());
+        });
     }
     
 

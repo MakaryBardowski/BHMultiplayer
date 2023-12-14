@@ -29,6 +29,7 @@ import com.jme3.anim.tween.Tweens;
 import com.jme3.anim.tween.action.Action;
 import com.jme3.anim.tween.action.ClipAction;
 import de.lessvoid.nifty.controls.label.LabelControl;
+import static game.entities.DestructibleUtils.setupModelShootability;
 import game.items.Holdable;
 
 /**
@@ -36,6 +37,8 @@ import game.items.Holdable;
  * @author 48793
  */
 public class Grenade extends ThrowableWeapon {
+
+    private int thirdPersonModelParentIndex;
 
     @Getter
     private final float throwSpeed = 40;
@@ -80,12 +83,13 @@ public class Grenade extends ThrowableWeapon {
 
     @Override
     public void playerHoldInRightHand(Player p) {
+        AssetManager assetManager = Main.getInstance().getAssetManager();
+
         p.setEquippedRightHand(this);
 
-        if (isEquippedByMe(p)) {
+        if (playerIsMyPlayer(p)) {
             ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText("");
 
-            AssetManager assetManager = Main.getInstance().getAssetManager();
             Node model = (Node) assetManager.loadModel(template.getFpPath());
 
             Geometry ge = (Geometry) model.getChild(0);
@@ -105,12 +109,31 @@ public class Grenade extends ThrowableWeapon {
 
             p.getFirstPersonHands().getHandsComposer().setGlobalSpeed(1f);
         }
+
+        Node model = (Node) assetManager.loadModel(template.getDropPath());
+        model.move(0, -0.33f, 0.2f);
+
+        Geometry ge = (Geometry) (model.getChild(0));
+        Material originalMaterial = ge.getMaterial();
+        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+        ge.setMaterial(newMaterial);
+        float length = 1f;
+        float width = 1f;
+        float height = 1f;
+        model.scale(length, width, height);
+        p.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
+        setupModelShootability(model, p.getId());
+        thirdPersonModelParentIndex = p.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
+        System.out.println("name " + p.getName());
+        System.out.println(" EQUIPPED A GRENADE! (pos = " + model.getWorldTranslation());
+
     }
 
     @Override
     public void playerUseInRightHand(Player p) {
         var composer = p.getFirstPersonHands().getHandsComposer();
-        
+
         Action toIdle = composer.action("KnifeAttackToHold");
         Tween idle = Tweens.callMethod(composer, "setCurrentAction", "HoldKnife");
         composer.actionSequence("ThrowToHold", toIdle, idle);
@@ -121,12 +144,12 @@ public class Grenade extends ThrowableWeapon {
 
         ((ClipAction) composer.action("ThrowGrenade")).setTransitionLength(0);
         composer.setCurrentAction("fullSwing");
-        composer.getCurrentAction().setSpeed(1);
+        composer.getCurrentAction().setSpeed(1.5f);
         throwGrenade(p);
     }
 
     private void throwGrenade(Player p) {
-        
+
         var cs = ClientGameAppState.getInstance();
         var grenadeInitialPosition = cs.getCamera().getLocation();
         var throwDirection = cs.getCamera().getDirection().normalize();
@@ -154,21 +177,26 @@ public class Grenade extends ThrowableWeapon {
 
     @Override
     public void playerUnequip(Player p) {
-        p.setEquippedRightHand(null);
-        p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+        if (p.getEquippedRightHand() == this) {
+            p.setEquippedRightHand(null);
+            p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+            p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
+            System.out.println("unequipping GRENADE!");
+        }
+
     }
 
     @Override
     public void playerServerEquip(HumanMob m) {
-//        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        m.setEquippedRightHand(this);
     }
 
     @Override
     public void playerServerUnequip(HumanMob m) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        m.setEquippedRightHand(null);
     }
 
-    private boolean isEquippedByMe(Player p) {
+    private boolean playerIsMyPlayer(Player p) {
         return p == ClientGameAppState.getInstance().getPlayer();
     }
 

@@ -16,6 +16,7 @@ import game.entities.grenades.ClientThrownGrenadeRotateControl;
 import game.entities.grenades.ServerThrownGrenadeControl;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.grenades.ThrownSmokeGrenade;
+import game.entities.mobs.HumanMob;
 import game.items.ItemTemplates;
 import game.items.weapons.Grenade;
 import java.util.Arrays;
@@ -84,13 +85,17 @@ public class GrenadeThrownMessage extends TwoWayMessage {
         Node root = server.getRootNode();
         var grenadeControl = new ServerThrownGrenadeControl(thrownGrenade, getDirection(), speed);
 
+        ((HumanMob) server.getMobs().get(throwingMobId)).unequipServer(
+                originGrenade
+        );
+
         enqueueExecutionServer(() -> {
             thrownGrenade.getNode().move(getPos());
             root.attachChild(gnode);
             gnode.addControl(grenadeControl);
         });
 
-        removeItemFromMobEquipmentServer(throwingMobId, id);
+        ServerMain.removeItemFromMobEquipmentServer(throwingMobId, id);
         removeEntityByIdServer(originGrenade.getId());
         server.getMobs().put(thrownGrenade.getId(), thrownGrenade);
 
@@ -101,7 +106,6 @@ public class GrenadeThrownMessage extends TwoWayMessage {
         GrenadeThrownMessage msg = new GrenadeThrownMessage(throwingMobId, thrownGrenade.getId(), getPos(), getDirection());
         msg.setReliable(true);
         server.getServer().broadcast(msg);
-
     }
 
     @Override
@@ -111,6 +115,9 @@ public class GrenadeThrownMessage extends TwoWayMessage {
             client.getDebugNode().attachChild(model);
             model.setLocalTranslation(getPos());
             model.scale(1f);
+
+
+
 
             Geometry ge = (Geometry) model.getChild(0);
             Material originalMaterial = ge.getMaterial();
@@ -122,6 +129,7 @@ public class GrenadeThrownMessage extends TwoWayMessage {
 
             ThrownGrenade g = new ThrownSmokeGrenade(id, "Thrown Smoke", model);
             client.getMobs().put(g.getId(), g);
+
         });
     }
 

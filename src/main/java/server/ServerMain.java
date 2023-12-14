@@ -56,6 +56,7 @@ import game.items.weapons.Rifle;
 import game.map.MapGenerator;
 import game.map.collision.WorldGrid;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -256,9 +257,21 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
             SetDefaultItemMessage dbmsg = new SetDefaultItemMessage(hm.getDefaultBoots(), hm);
             sendMessageTCP(dbmsg, filter);
 
-            Item[] initalEq = {hm.getHelmet(), hm.getVest(), hm.getGloves(), hm.getBoots()};
+            List<Item> initialEq = new ArrayList<>();
 
-            for (Item i : initalEq) {
+            initialEq.add(hm.getHelmet());
+            initialEq.add(hm.getVest());
+            initialEq.add(hm.getGloves());
+            initialEq.add(hm.getBoots());
+
+            if (hm.getEquippedRightHand() != null) { // hands are required to attach gun hence the order
+                initialEq.add((Item) hm.getEquippedRightHand());
+            }
+
+            System.out.print("MOB <" + mob.getId() + "> initial EQ ");
+            initialEq.forEach(a -> System.out.print(a + "(" + a.getId() + "), "));
+            System.out.println("");
+            for (Item i : initialEq) {
                 if (i != null) {
                     MobItemInteractionMessage pmsg = new MobItemInteractionMessage(i, mob, ItemInteractionType.EQUIP);
                     sendMessageTCP(pmsg, filter);
@@ -351,7 +364,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
         player.addToEquipment(playerKnife);
 
         player.addToEquipment(playerRifle);
-        player.equipServer(playerRifle);
+//        player.equipServer(playerRifle);
 
         player.addToEquipment(playerGrenade);
 
@@ -375,7 +388,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     public Chest registerRandomChest(Vector3f offset) {
         Chest chest = Chest.createRandomChestServer(currentMaxId++, rootNode, offset, assetManager);
         Random r = new Random();
-        int randomValue = r.nextInt(12);
+        int randomValue = r.nextInt(14);
         if (randomValue < 2) {
             Vest playerVest = (Vest) registerItemLocal(ItemTemplates.VEST_TRENCH, true);
             playerVest.setArmorValue(1.05f + r.nextFloat(0f, 0.25f));
@@ -402,16 +415,21 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
             AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.LMG_AMMO_PACK, true);
             chest.addToEquipment(ammo);
         }
-        randomValue = 11;
         if (randomValue == 11) {
             var lmg = registerItemLocal(ItemTemplates.LMG_HOTCHKISS, true);
             chest.addToEquipment(lmg);
         }
 
-        if (randomValue == 11) {
+        if (randomValue == 12) {
             var helmet = registerItemLocal(ItemTemplates.TRENCH_HELMET, true);
 
             chest.addToEquipment(helmet);
+        }
+        randomValue = 13;
+        if (randomValue == 13) {
+            var medpack = registerItemLocal(ItemTemplates.MEDPACK, true);
+
+            chest.addToEquipment(medpack);
         }
 
         insertIntoCollisionGrid(chest);
@@ -453,6 +471,17 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
 
     public static void removeEntityByIdServer(int id) {
         instance.getMobs().remove(id);
+    }
+
+    public static void removeItemFromMobEquipmentServer(int mobId, int itemId) {
+        var mob = (Mob) instance.mobs.get(mobId);
+        var item = (Item) instance.mobs.get(itemId);
+        var mobEquipment = mob.getEquipment();
+        for (int i = 0; i < mobEquipment.length; i++) {
+            if (mobEquipment[i] != null && mobEquipment[i].getId() == item.getId()) {
+                mobEquipment[i] = null;
+            }
+        }
     }
 
 }

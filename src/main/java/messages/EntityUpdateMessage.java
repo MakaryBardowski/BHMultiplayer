@@ -4,28 +4,29 @@
  */
 package messages;
 
+import client.ClientGameAppState;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
+import lombok.Getter;
+import server.ServerMain;
 
 /**
  *
  * @author 48793
  */
-    @Serializable
-    public class EntityUpdateMessage extends AbstractMessage{
-        
-        protected int id;
-        
-        public EntityUpdateMessage(){}
-        
-        public EntityUpdateMessage(int id){
-        this.id = id;
-        }
+@Serializable
+public abstract class EntityUpdateMessage extends TwoWayMessage {
 
-    public int getId() {
-        return id;
+    @Getter
+    protected int id;
+
+    public EntityUpdateMessage() {
     }
-        
-        
-        
+
+    public EntityUpdateMessage(int id) {
+        this.id = id;
     }
+
+    
+
+}

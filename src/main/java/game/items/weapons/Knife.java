@@ -25,6 +25,7 @@ import com.jme3.scene.Node;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import game.entities.Collidable;
 import game.entities.Destructible;
+import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import game.items.Holdable;
 import game.map.collision.RectangleOBB;
@@ -37,6 +38,8 @@ import messages.items.NewMeleeWeaponMessage;
  * @author 48793
  */
 public class Knife extends MeleeWeapon {
+
+    private int thirdPersonModelParentIndex;
 
     public Knife(int id, float damage, ItemTemplate template, String name, Node node, float roundsPerSecond) {
         super(id, damage, template, name, node, roundsPerSecond);
@@ -59,17 +62,21 @@ public class Knife extends MeleeWeapon {
     public void playerUnequip(Player p) {
         p.setEquippedRightHand(null);
         p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+        p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
+        System.out.println("unequipping KNIFE!");
+
     }
 
     @Override
     public void playerHoldInRightHand(Player p) {
+        AssetManager assetManager = Main.getInstance().getAssetManager();
+
         p.setEquippedRightHand(this);
 
-        if (isEquippedByMe(p)) {
+        if (playerEqualsMyPlayer(p)) {
 
             ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText("");
 
-            AssetManager assetManager = Main.getInstance().getAssetManager();
             Node model = (Node) assetManager.loadModel(template.getFpPath());
             model.move(0, 0.3f, -0.05f);
             Geometry ge = (Geometry) ((Node) model.getChild(0)).getChild(0);
@@ -93,6 +100,25 @@ public class Knife extends MeleeWeapon {
             p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimationData.HOLD_KNIFE);
 
         }
+
+        Node model = (Node) assetManager.loadModel(template.getDropPath());
+        model.move(0, -0.33f, 0.2f);
+        
+        Geometry ge = (Geometry) (model.getChild(0));
+        Material originalMaterial = ge.getMaterial();
+        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+        ge.setMaterial(newMaterial);
+        float length = 1f;
+        float width = 1f;
+        float height = 1f;
+        model.scale(length, width, height);
+        p.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
+        setupModelShootability(model, p.getId());
+        thirdPersonModelParentIndex = p.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
+        System.out.println("name " + p.getName());
+        System.out.println(" EQUIPPED A KNIFE! (pos = " + model.getWorldTranslation());
+
     }
 
     @Override
@@ -191,7 +217,7 @@ public class Knife extends MeleeWeapon {
         return msg;
     }
 
-    private boolean isEquippedByMe(Player p) {
+    private boolean playerEqualsMyPlayer(Player p) {
         return p == ClientGameAppState.getInstance().getPlayer();
     }
 

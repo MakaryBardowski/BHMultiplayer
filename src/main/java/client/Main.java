@@ -34,7 +34,7 @@ public class Main extends SimpleApplication {
 
     private static final short STARTING_RESOLUTION_WIDTH = 1920;
     private static final short STARTING_RESOLUTION_HEIGHT = 1080;
-    private static final boolean FULLSCREEN = false;
+    private static final boolean FULLSCREEN = true;
 //    private static final short STARTING_RESOLUTION_WIDTH = 1000;
 //    private static final short STARTING_RESOLUTION_HEIGHT = 800;
 //    private static final boolean FULLSCREEN = false;
@@ -110,15 +110,15 @@ public class Main extends SimpleApplication {
         settings1.setVSync(true);
         settings1.setFrameRate(2000);
         settings1.setRenderer(AppSettings.LWJGL_OPENGL45);
-                settings1.setResolution(800, 800);
+
+//        settings1.setFullscreen(false);
+//        settings1.setResolution(950, 800);
 //        app.setDisplayFps(false);
 //        app.setDisplayStatView(false);
-        settings1.setCenterWindow(false);
+//        settings1.setCenterWindow(false);
+//        settings1.setWindowXPosition(1000);
 
-        
-//            settings1.setWindowXPosition(1000);
-
-       settings1.setTitle("BH");
+        settings1.setTitle("BH");
         app.setPauseOnLostFocus(false);
         app.setSettings(settings1);
 

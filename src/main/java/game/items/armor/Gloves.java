@@ -40,24 +40,18 @@ public class Gloves extends Armor {
         m.getFirstPersonHands().setFpHands(this);
 
         Node r = m.getSkinningControl().getAttachmentsNode("HandR");
-        Node l = m.getSkinningControl().getAttachmentsNode("HandL");
         r.detachAllChildren();
-        l.detachAllChildren();
 
         Node gloveR = (Node) Main.getInstance().getAssetManager().loadModel(template.getFpPath().replace("?", "R"));
+        gloveR.move(0.449f,0,0);
         setupModelLight(gloveR);
         setupModelShootability(gloveR, m.getId());
         r.attachChild(gloveR);
 
-        Node gloveL = (Node) Main.getInstance().getAssetManager().loadModel(template.getFpPath().replace("?", "L"));
-        setupModelLight(gloveL);
-        setupModelShootability(gloveL, m.getId());
-        l.attachChild(gloveL);
         
 
 
         gloveR.getChild(0).rotate(0, -FastMath.DEG_TO_RAD * 180, 0);
-        gloveL.getChild(0).rotate(0, -FastMath.DEG_TO_RAD * 180, 0);
     }
 
     @Override
