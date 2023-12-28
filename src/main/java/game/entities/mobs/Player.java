@@ -19,10 +19,12 @@ import game.entities.Attribute;
 import game.entities.FloatAttribute;
 import FirstPersonHands.FirstPersonHands;
 import com.jme3.anim.AnimComposer;
+import com.jme3.network.AbstractMessage;
 import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
 import game.map.collision.WorldGrid;
 import lombok.Getter;
 import lombok.Setter;
+import messages.NewMobMessage;
 import messages.PlayerPosUpdateRequest;
 
 /**
@@ -61,12 +63,11 @@ public class Player extends HumanMob {
     @Getter
     @Setter
     protected ViewPort gunViewPort;
-    
+
     @Getter
     @Setter
-    protected FirstPersonHands firstPersonHands; 
-    
-    
+    protected FirstPersonHands firstPersonHands;
+
     @Override
     public void equip(Item item) {
         if (item instanceof Equippable equippableItem) {
@@ -86,8 +87,8 @@ public class Player extends HumanMob {
         return gunNode;
     }
 
-    public Player(int id, Node node, String name, Camera mainCamera, SkinningControl skinningControl,AnimComposer composer) {
-        super(id, node, name, skinningControl,composer);
+    public Player(int id, Node node, String name, Camera mainCamera, SkinningControl skinningControl, AnimComposer composer) {
+        super(id, node, name, skinningControl, composer);
         this.mainCamera = mainCamera;
         firstPersonHands = new FirstPersonHands(this);
         hotbar = new Item[HOTBAR_SIZE];
@@ -193,7 +194,7 @@ public class Player extends HumanMob {
             }
             if (canMoveOnAxisX && wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(movementVector.getX(), 0, 0))) {
                 node.move(movementVector.getX(), 0, 0);
-                
+
             }
             if (node.getWorldTranslation().distance(serverLocation) > cachedSpeed * tpf) {
                 PlayerPosUpdateRequest posu = new PlayerPosUpdateRequest(id, node.getWorldTranslation());
@@ -249,12 +250,12 @@ public class Player extends HumanMob {
     }
 
     @Override
-    public void attributeChangedNotification(int attributeId,Attribute copy) {
-        if(attributeId == SPEED_ATTRIBUTE){
-        cachedSpeed = ((FloatAttribute) copy).getValue();
+    public void attributeChangedNotification(int attributeId, Attribute copy) {
+        if (attributeId == SPEED_ATTRIBUTE) {
+            cachedSpeed = ((FloatAttribute) copy).getValue();
         }
     }
-    
-    
+
+
 
 }

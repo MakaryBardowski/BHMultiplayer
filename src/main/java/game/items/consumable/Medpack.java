@@ -176,7 +176,7 @@ public class Medpack extends ThrowableWeapon {
     @Override
     public void playerServerEquip(HumanMob m) {
         var sm = ServerMain.getInstance();
-        var hc = sm.getConnectionsById().get(m.getId());
+        var hc = sm.getHostsByPlayerId().get(m.getId());
         Filters.notEqualTo(hc);
 
         var healthAfterHeal = Math.min(m.getHealth() + 10, m.getMaxHealth());

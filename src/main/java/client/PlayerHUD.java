@@ -122,6 +122,8 @@ public class PlayerHUD extends BaseAppState {
 
     @Override
     protected void onEnable() {
+        
+        
         NiftyJmeDisplay niftyDisplay = NiftyJmeDisplay.newNiftyJmeDisplay(
                 getApplication().getAssetManager(),
                 getApplication().getInputManager(),
@@ -457,6 +459,7 @@ public class PlayerHUD extends BaseAppState {
 
                                 control(new LabelBuilder("TooltipLabelControl", "") {
                                     {
+                                        
                                         wrap(true);
 //                         filename("Textures/GUI/tooltipFrame.png");
                                         childLayoutVertical(); // layer properties, add more...

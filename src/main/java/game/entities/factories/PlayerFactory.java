@@ -41,7 +41,7 @@ public class PlayerFactory extends MobFactory {
         this.mainCamera = null;
         this.firstPersonCamera = null;
         this.renderManager = renderManager;
-                playerSpawnpoint = new Vector3f( 10+new Random().nextInt(4), 4 ,10+new Random().nextInt(4));
+        playerSpawnpoint = new Vector3f(10 + new Random().nextInt(4), 4, 10 + new Random().nextInt(4));
 
     }
 
@@ -51,7 +51,7 @@ public class PlayerFactory extends MobFactory {
         this.firstPersonCamera = mainCamera.clone();
         this.renderManager = Main.getInstance().getRenderManager();
         this.setAsPlayer = setAsPlayer;
-        playerSpawnpoint = new Vector3f( 10+new Random().nextInt(4), 4 ,10+new Random().nextInt(4));
+        playerSpawnpoint = new Vector3f(10 + new Random().nextInt(4), 4, 10 + new Random().nextInt(4));
     }
 
     @Override
@@ -61,7 +61,7 @@ public class PlayerFactory extends MobFactory {
         if (setAsPlayer) {
             setupFirstPersonCamera(p);
         }
-         return p;
+        return p;
     }
 
     @Override
@@ -76,12 +76,13 @@ public class PlayerFactory extends MobFactory {
         String name = "Player_" + id;
         SkinningControl skinningControl = getSkinningControl(playerNode);
         AnimComposer composer = getAnimComposer(playerNode);
-        return new Player(id, playerNode, name, mainCamera, skinningControl,composer);
+        return new Player(id, playerNode, name, mainCamera, skinningControl, composer);
     }
 
     private void setupFirstPersonCamera(Player p) {
         setupMainCamera(p);
         setupHandsCamera(p);
+        
     }
 
     private Node loadPlayerModel() {
@@ -112,6 +113,7 @@ public class PlayerFactory extends MobFactory {
         view2.setClearFlags(false, true, true);
         view2.attachScene(p.getGunNode());
         p.setGunViewPort(view2);
+        System.out.println("setting frustum");
         firstPersonCamera.setFrustumPerspective(45f, (float) firstPersonCamera.getWidth() / firstPersonCamera.getHeight(), 0.01f, 300f);
         p.getRotationNode().attachChild(gunCameraNode);
         gunCameraNode.attachChild(p.getGunNode());

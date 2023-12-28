@@ -8,6 +8,7 @@ import game.entities.mobs.MobType;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
+import lombok.Getter;
 
 /**
  *
@@ -15,24 +16,26 @@ import com.jme3.network.serializing.Serializable;
  */
 @Serializable
 public class PlayerJoinedMessage extends AbstractMessage {
+
+    @Getter
     private int id;
     private float x;
     private float y;
     private float z;
+    @Getter
+    private String name;
 
     public PlayerJoinedMessage() {
     }
 
-    public PlayerJoinedMessage(int id, Vector3f pos) {
+    public PlayerJoinedMessage(int id, Vector3f pos, String name) {
         this.id = id;
         this.x = pos.getX();
         this.y = pos.getY();
         this.z = pos.getZ();
+        this.name = name;
     }
 
-    public int getId() {
-        return id;
-    }
 
     public Vector3f getPos() {
         return new Vector3f(x, y, z);

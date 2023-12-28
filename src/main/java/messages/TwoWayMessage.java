@@ -75,7 +75,7 @@ public abstract class TwoWayMessage extends AbstractMessage {
     }
 
     protected HostedConnection getHostedConnectionByPlayer(Player p) {
-        return ServerMain.getInstance().getConnectionsById().get(p.getId());
+        return ServerMain.getInstance().getHostsByPlayerId().get(p.getId());
     }
 
     protected void enqueueExecution(Runnable runnable) {

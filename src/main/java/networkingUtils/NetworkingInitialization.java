@@ -38,6 +38,11 @@ import messages.items.NewMeleeWeaponMessage;
 import messages.items.NewRangedWeaponMessage;
 import messages.items.NewVestMessage;
 import messages.items.SetDefaultItemMessage;
+import messages.lobby.GameStartedMessage;
+import messages.lobby.HostChangedNicknameMessage;
+import messages.lobby.HostChangedPlayerClassMessage;
+import messages.lobby.HostJoinedGameMessage;
+import messages.lobby.HostJoinedLobbyMessage;
 
 /**
  *
@@ -48,6 +53,12 @@ public class NetworkingInitialization {
     public static final int PORT = 6000;
 
     public static void initializeSerializables() {
+        Serializer.registerClass(HostJoinedLobbyMessage.class);
+        Serializer.registerClass(HostChangedNicknameMessage.class);
+        Serializer.registerClass(GameStartedMessage.class);
+        Serializer.registerClass(HostJoinedGameMessage.class);
+        Serializer.registerClass(HostChangedPlayerClassMessage.class);
+
         Serializer.registerClass(EntityUpdateMessage.class);
         Serializer.registerClass(MobPosUpdateMessage.class);
         Serializer.registerClass(MobRotUpdateMessage.class);
@@ -55,6 +66,7 @@ public class NetworkingInitialization {
         Serializer.registerClass(PlayerJoinedMessage.class);
         Serializer.registerClass(SetPlayerMessage.class);
         Serializer.registerClass(NewMobMessage.class);
+
         Serializer.registerClass(ServerMessageListener.class);
         Serializer.registerClass(NewChestMessage.class);
         Serializer.registerClass(DestructibleDamageReceiveMessage.class);

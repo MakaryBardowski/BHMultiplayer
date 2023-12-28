@@ -57,6 +57,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
+import messages.lobby.HostJoinedGameMessage;
+import messages.lobby.HostJoinedLobbyMessage;
 
 /**
  * This is the Main Class of your Game. You should only do initialization here.
@@ -65,6 +67,8 @@ import lombok.Setter;
  * @author normenhansen
  */
 public class ClientGameAppState extends AbstractAppState implements ClientStateListener {
+
+    private final AppStateManager stateManager;
 
     @Getter
     private static ClientGameAppState instance;
@@ -150,6 +154,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Getter
     private boolean debug;
+    
+    
 
     public ClientGameAppState(Main app, String serverIp) {
         instance = this;
@@ -159,63 +165,21 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         this.inputManager = app.getInputManager();
         this.applicationSettings = app.getAppSettings();
         app.getRootNode().attachChild(rootNode);
+        stateManager = Main.getInstance().getStateManager();
         this.serverIp = serverIp;
     }
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {        // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
-        Picture crosshair = new Picture("crosshair");
-        crosshair.setImage(assetManager, "Textures/GUI/crosshair.png", true);
-        crosshair.setWidth(applicationSettings.getHeight() * 0.04f);
-        crosshair.setHeight(applicationSettings.getHeight() * 0.04f); //0.04f
-        crosshair.setPosition((applicationSettings.getWidth() / 2) - applicationSettings.getHeight() * 0.04f / 2, applicationSettings.getHeight() / 2 - applicationSettings.getHeight() * 0.04f / 2);
-        Main.getInstance().getGuiNode().attachChild(crosshair);
-//        NetworkingInitialization.initializeSerializables();
-        worldNode.attachChild(debugNode);
-        worldNode.attachChild(entityNode);
-        pickableNode.attachChild(destructibleNode);
-        entityNode.attachChild(pickableNode);
-        worldNode.attachChild(mapNode);
-        rootNode.attachChild(worldNode);
-
-        stateManager.attach(new PlayerCameraControlAppState(this));
-
-        try {
-            client = Network.connectToServer(serverIp, NetworkingInitialization.PORT);
-            client.addClientStateListener(this);
-            client.start();
-
-        } catch (IOException ex) {
-            Logger.getLogger(ClientGameAppState.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        client.addMessageListener(new ClientMessageListener(this));
-        app.getViewPort().setBackgroundColor(ColorRGBA.Cyan.clone());
-        app.getViewPort().setClearColor(true);
-
-        grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
-
-        MapGenerator mg = new MapGenerator();
-        map = mg.generateMap(MapType.BOSS, BLOCK_SIZE, CHUNK_SIZE, MAP_SIZE, assetManager, mapNode);
-
-        AmbientLight al = new AmbientLight();
-        al.setColor(ColorRGBA.White.mult(0.7f));
-        worldNode.addLight(al);
-
-//        DebugUtils.drawGrid();
-
-
-   
-
+        System.out.println("GET CAMERA AT JOIN "+getCamera());
+        connectToServer();
     }
 
     @Override
     public void update(float tpf) {
-
         if (player != null) {
             player.move(tpf, this);
             player.updateTemporaryEffectsClient();
-
             if (player.isHoldsTrigger() && player.getEquippedRightHand() != null) {
                 player.getEquippedRightHand().playerUseInRightHand(player);
             }
@@ -238,7 +202,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
             }
         }
         );
-
 //
 //        
 //        System.out.println("\n\n\n");
@@ -257,15 +220,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     public ConcurrentLinkedQueue<AbstractMessage> getMessageQueue() {
         return messageQueue;
-    }
-
-    @Override
-    public void clientConnected(Client client) {
-    }
-
-    @Override
-    public void clientDisconnected(Client client, DisconnectInfo di) {
-
     }
 
     public Player registerPlayer(Integer id, boolean setAsPlayer) {
@@ -299,4 +253,63 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         instance.getMobs().remove(id);
     }
 
+    public void joinGame() {
+        System.out.println("GET CAMERA "+getCamera());
+        Picture crosshair = new Picture("crosshair");
+        crosshair.setImage(assetManager, "Textures/GUI/crosshair.png", true);
+        crosshair.setWidth(applicationSettings.getHeight() * 0.04f);
+        crosshair.setHeight(applicationSettings.getHeight() * 0.04f); //0.04f
+        crosshair.setPosition((applicationSettings.getWidth() / 2) - applicationSettings.getHeight() * 0.04f / 2, applicationSettings.getHeight() / 2 - applicationSettings.getHeight() * 0.04f / 2);
+        Main.getInstance().getGuiNode().attachChild(crosshair);
+
+        worldNode.attachChild(debugNode);
+        worldNode.attachChild(entityNode);
+        pickableNode.attachChild(destructibleNode);
+        entityNode.attachChild(pickableNode);
+        worldNode.attachChild(mapNode);
+        rootNode.attachChild(worldNode);
+
+        stateManager.attach(new PlayerCameraControlAppState(this));
+
+        app.getViewPort().setBackgroundColor(ColorRGBA.Cyan.clone());
+        app.getViewPort().setClearColor(true);
+
+        grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
+
+        MapGenerator mg = new MapGenerator();
+        map = mg.generateMap(MapType.BOSS, BLOCK_SIZE, CHUNK_SIZE, MAP_SIZE, assetManager, mapNode);
+
+        AmbientLight al = new AmbientLight();
+        al.setColor(ColorRGBA.White.mult(0.7f));
+        worldNode.addLight(al);
+
+//        DebugUtils.drawGrid();
+
+        int id = client.getId();
+        var msg = new HostJoinedGameMessage(id);
+        client.send(msg);
+    }
+
+    public void connectToServer() {
+        try {
+            client = Network.connectToServer(serverIp, NetworkingInitialization.PORT);
+            client.addClientStateListener(this);
+            client.start();
+
+        } catch (IOException ex) {
+            Logger.getLogger(ClientGameAppState.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public void clientConnected(Client client) {
+        client.addMessageListener(new ClientMessageListener(this));
+        var msg = new HostJoinedLobbyMessage(client.getId(), "Player " + client.getId());
+        client.send(msg);
+    }
+
+    @Override
+    public void clientDisconnected(Client client, DisconnectInfo di) {
+
+    }
 }

@@ -49,7 +49,9 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        flyCam.setMoveSpeed(30);
+        System.out.println("app camera" +cam); 
+        flyCam.setMoveSpeed(0); //30
+        flyCam.setRotationSpeed(0); //1.0
         speed = 1f;
         instance = this;
         NetworkingInitialization.initializeSerializables();
@@ -85,7 +87,7 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf
     ) {
-
+//        System.out.println("main cam "+cam);
         //TODO: add update code
     }
 
@@ -93,6 +95,7 @@ public class Main extends SimpleApplication {
     public void simpleRender(RenderManager rm
     ) {
         //TODO: add render code
+        
     }
 
     public FlyByCamera getFlyCam() {
@@ -109,8 +112,11 @@ public class Main extends SimpleApplication {
         settings1.setFullscreen(FULLSCREEN);
         settings1.setVSync(true);
         settings1.setFrameRate(2000);
+        settings1.setResizable(true);
         settings1.setRenderer(AppSettings.LWJGL_OPENGL45);
 
+        
+        // the camera and gui bug occurs when the player joins the game with minimized window
 //        settings1.setFullscreen(false);
 //        settings1.setResolution(950, 800);
 //        app.setDisplayFps(false);

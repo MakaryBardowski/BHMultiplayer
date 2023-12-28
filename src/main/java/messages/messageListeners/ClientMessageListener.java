@@ -86,11 +86,13 @@ public class ClientMessageListener implements MessageListener<Client> {
         placeMyPlayer(nmsg, p);
         addInputListeners();
         addPlayerHUD();
+        p.setName(nmsg.getName());
     }
 
     private void createOtherPlayer(PlayerJoinedMessage nmsg) {
         Player p = registerOtherPlayer(nmsg);
         placeOtherPlayer(nmsg, p);
+        p.setName(nmsg.getName());
     }
 
     private Player registerMyPlayer(SetPlayerMessage nmsg) {

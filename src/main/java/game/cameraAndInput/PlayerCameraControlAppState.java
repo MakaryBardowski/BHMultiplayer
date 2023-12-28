@@ -5,6 +5,7 @@
 package game.cameraAndInput;
 
 import client.ClientGameAppState;
+import client.Main;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
@@ -42,12 +43,16 @@ public class PlayerCameraControlAppState extends AbstractAppState {
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
         super.initialize(stateManager, app);
+        System.out.println("initing camra");
         initCamera();
 
     }
 
     public void initCamera() {
+        System.out.println("NEAR BEFORE SEt" + clientApp.getCamera().getFrustumNear() + " " + clientApp.getCamera());
         clientApp.getCamera().setFrustumPerspective(45, (float) clientApp.getSettings().getWidth() / clientApp.getSettings().getHeight(), 0.01f, renderDistance);
+        System.out.println("NEAR AFTER SEt" + clientApp.getCamera() + " " + clientApp.getCamera());
+
     }
 
     @Override
@@ -78,7 +83,6 @@ public class PlayerCameraControlAppState extends AbstractAppState {
         if (clientApp.getPlayer() != null && clientApp.getPlayer().getHealth() > 0) {//                                                          2.12f so you are level with humanoids
 
 //            clientApp.getCamera().setLocation(new Vector3f(clientApp.getPlayer().getNode().getWorldTranslation().x, CAMERA_Y_OFFSET + clientApp.getPlayer().getNode().getWorldTranslation().getY(), clientApp.getPlayer().getNode().getWorldTranslation().z));
-
 //            if (lookDirection != null) {
 //                clientApp.getPlayer().getGunNode().getParent().lookAt(lookDirection, Vector3f.UNIT_Y);
 //            }
@@ -88,7 +92,6 @@ public class PlayerCameraControlAppState extends AbstractAppState {
 //            clientApp.getPlayer().getGunNode().getLocalRotation().toAngles(playerAngles);
 //            playerAngles[0] = cameraRotAsAngles[0];
 //            clientApp.getPlayer().getGunNode().getParent().setLocalRotation(new Quaternion().fromAngles(playerAngles));
-
 //            CollisionResults results = new CollisionResults();
 //            Ray ray = new Ray(clientApp.getCamera().getLocation(), clientApp.getCamera().getDirection());
 //            clientApp.getMapNode().collideWith(ray, results);

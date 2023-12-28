@@ -71,6 +71,7 @@ import static messages.items.ChestItemInteractionMessage.ChestItemInteractionTyp
 import messages.items.MobItemInteractionMessage;
 import messages.items.MobItemInteractionMessage.ItemInteractionType;
 import messages.items.SetDefaultItemMessage;
+import messages.lobby.GameStartedMessage;
 
 public class ServerMain extends AbstractAppState implements ConnectionListener, MessageListener<HostedConnection> {
 
@@ -95,7 +96,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     private WorldGrid grid;
 
     @Getter
-    private final HashMap<Integer, HostedConnection> connectionsById = new HashMap<>(MAX_PLAYERS);
+    private final HashMap<Integer, HostedConnection> hostsByPlayerId = new HashMap<>(MAX_PLAYERS);
 
     @Getter
     private final int BLOCK_SIZE = 4;
@@ -150,10 +151,16 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
 
     }
 
-    @Override
-    public void connectionAdded(Server server, HostedConnection hc) {
+    public void startGame() {
+        var gameStartedMsg = new GameStartedMessage();
+        server.broadcast(gameStartedMsg);
+    }
+
+    public void addPlayerToGame(HostedConnection hc) {
+
         Player newPlayer = registerPlayer(hc);
-        connectionsById.put(newPlayer.getId(), hc);
+        System.out.println("added player " + newPlayer.getId());
+        hostsByPlayerId.put(newPlayer.getId(), hc);
 
         List<Item> itemsInGame = mobs.entrySet().stream()
                 .filter(entry -> entry.getValue() instanceof Item)
@@ -205,16 +212,21 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
             }
         });
 
-        SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation());
+        SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation(),newPlayer.getName());
         messageToNewPlayer.setReliable(true);
         server.broadcast(Filters.in(hc), messageToNewPlayer);
 
         // send info about new player eq
-        PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation());
+        PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation(),newPlayer.getName());
         msg.setReliable(true);
         server.broadcast(Filters.notEqualTo(hc), msg);
 
         sendNewEntityEquipmentInfo(newPlayer, null);
+
+    }
+
+    @Override
+    public void connectionAdded(Server server, HostedConnection hc) {
 
     }
 
@@ -268,9 +280,9 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
                 initialEq.add((Item) hm.getEquippedRightHand());
             }
 
-            System.out.print("MOB <" + mob.getId() + "> initial EQ ");
-            initialEq.forEach(a -> System.out.print(a + "(" + a.getId() + "), "));
-            System.out.println("");
+//            System.out.print("MOB <" + mob.getId() + "> initial EQ ");
+//            initialEq.forEach(a -> System.out.print(a + "(" + a.getId() + "), "));
+//            System.out.println("");
             for (Item i : initialEq) {
                 if (i != null) {
                     MobItemInteractionMessage pmsg = new MobItemInteractionMessage(i, mob, ItemInteractionType.EQUIP);
@@ -360,6 +372,11 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
         Item playerKnife = (Knife) registerItemAndNotifyTCP(ItemTemplates.KNIFE, true, Filters.notIn(hc));
 
         Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide();
+
+        if (hc != null) {
+            player.setName(hc.getAttribute("nick"));
+            System.out.println("ustawiono nazwe "+player.getName());
+        }
 
         player.addToEquipment(playerKnife);
 
