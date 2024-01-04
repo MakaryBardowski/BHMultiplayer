@@ -41,10 +41,14 @@ import de.lessvoid.nifty.Nifty;
 import debugging.DebugUtils;
 import game.entities.Collidable;
 import game.entities.InteractiveEntity;
+import game.entities.factories.AnimalMobFactory;
+import game.entities.factories.MobSpawnType;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.HumanMob;
+import game.entities.mobs.MudBeetle;
 import game.items.ItemTemplates;
 import game.items.weapons.Grenade;
+import game.map.blocks.VoxelLighting;
 import game.map.collision.WorldGrid;
 import java.io.IOException;
 import java.util.Arrays;
@@ -74,10 +78,10 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     private static ClientGameAppState instance;
 
     @Getter
-    private final int BLOCK_SIZE = 4;
+    private final int BLOCK_SIZE = 3;
 
     @Getter
-    private final int COLLISION_GRID_CELL_SIZE = 16;
+    private final int COLLISION_GRID_CELL_SIZE = 18;
 
     @Getter
     private final int CHUNK_SIZE = 16;
@@ -154,8 +158,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Getter
     private boolean debug;
-    
-    
 
     public ClientGameAppState(Main app, String serverIp) {
         instance = this;
@@ -171,7 +173,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {        // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
-        System.out.println("GET CAMERA AT JOIN "+getCamera());
         connectToServer();
     }
 
@@ -188,6 +189,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
         mobs.values().forEach(x -> {
             if (x instanceof Mob m && x != player) {
+
 //                System.out.println(m.getNode().getWorldTranslation());
                 if (!m.getNode().getWorldTranslation().equals(m.getServerLocation())) {
                     grid.remove(m);
@@ -222,8 +224,18 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         return messageQueue;
     }
 
+    public Mob registerMob(Integer id, MobSpawnType spawnType) {
+        var mobFactory = new AnimalMobFactory(id,
+                assetManager,
+                destructibleNode);
+
+        var p = mobFactory.createClientSide(spawnType);
+        this.mobs.put(id, p);
+        return p;
+    }
+
     public Player registerPlayer(Integer id, boolean setAsPlayer) {
-        Player p = new PlayerFactory(id, destructibleNode, getCamera(), setAsPlayer).createClientSide();
+        Player p = new PlayerFactory(id, destructibleNode, getCamera(), setAsPlayer).createClientSide(null);
         this.mobs.put(id, p);
         return p;
     }
@@ -254,7 +266,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     }
 
     public void joinGame() {
-        System.out.println("GET CAMERA "+getCamera());
         Picture crosshair = new Picture("crosshair");
         crosshair.setImage(assetManager, "Textures/GUI/crosshair.png", true);
         crosshair.setWidth(applicationSettings.getHeight() * 0.04f);
@@ -284,7 +295,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         worldNode.addLight(al);
 
 //        DebugUtils.drawGrid();
-
         int id = client.getId();
         var msg = new HostJoinedGameMessage(id);
         client.send(msg);

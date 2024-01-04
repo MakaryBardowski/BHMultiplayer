@@ -31,7 +31,7 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 
     public static final int SPEED_ATTRIBUTE = 2;
 
-    private static final float DEFAULT_SPEED = 13.25f; //10, 13.25f for knife
+    private static final float DEFAULT_SPEED = 11.25f; //10, 13.25f for knife
     protected static final int EQUIPMENT_SIZE = 18;
 
     protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
@@ -43,8 +43,6 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
     //mob ai variables
     protected Destructible currentTarget;
 
-    //sync
-    protected MobType mobType;
 
     @Getter
     protected Vector3f serverLocation; // updated by the server

@@ -36,9 +36,9 @@ public abstract class MobFactory {
         this.mobsNode = mobsNode;
     }
 
-    public abstract Mob createClientSide();
+    public abstract Mob createClientSide(MobSpawnType spawnType);
 
-    public abstract Mob createServerSide();
+    public abstract Mob createServerSide(MobSpawnType spawnType);
 
 
 

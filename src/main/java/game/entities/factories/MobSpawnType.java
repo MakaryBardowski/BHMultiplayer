@@ -2,12 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package game.entities.mobs;
+package game.entities.factories;
 
 /**
  *
  * @author 48793
  */
-public enum MobType {
-    HUMAN
+public enum MobSpawnType {
+    HUMAN, MUD_BEETLE
 }

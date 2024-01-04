@@ -18,6 +18,9 @@ import com.jme3.scene.Node;
 import game.entities.Attribute;
 import game.entities.FloatAttribute;
 import FirstPersonHands.FirstPersonHands;
+import client.Main;
+import static client.Main.CAM_ROT_SPEED;
+import static client.Main.CAM__MOVE_SPEED;
 import com.jme3.anim.AnimComposer;
 import com.jme3.network.AbstractMessage;
 import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
@@ -169,30 +172,10 @@ public class Player extends HumanMob {
 
             movementVector.setY(0);
 
-            Vector3f UMC = movementVector.clone();
-            float wallCollisionRange = 0.75f;
-            if (UMC.getX() < 0) {
-                UMC.setX(UMC.getX() - wallCollisionRange);
-            }
-            if (UMC.getX() > 0) {
-                UMC.setX(UMC.getX() + wallCollisionRange);
-            }
-
-            if (UMC.getZ() < 0) {
-                UMC.setZ(UMC.getZ() - wallCollisionRange);
-            }
-            if (UMC.getZ() > 0) {
-                UMC.setZ(UMC.getZ() + wallCollisionRange);
-            }
-
-            boolean[] canMoveOnAxes = collisionCheckWithMap(node, UMC, cm.getMap().getBlockWorld().getLogicMap(), cm.getBLOCK_SIZE());
-            boolean canMoveOnAxisX = canMoveOnAxes[0];
-            boolean canMoveOnAxisZ = canMoveOnAxes[2];
-
-            if (canMoveOnAxisZ && wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(0, 0, movementVector.getZ()))) {
+            if (wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(0, 0, movementVector.getZ()))) {
                 node.move(0, 0, movementVector.getZ());
             }
-            if (canMoveOnAxisX && wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(movementVector.getX(), 0, 0))) {
+            if (wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(movementVector.getX(), 0, 0))) {
                 node.move(movementVector.getX(), 0, 0);
 
             }
@@ -213,6 +196,9 @@ public class Player extends HumanMob {
         if (gunViewPort != null) {
             gunViewPort.detachScene(gunNode);
         }
+        Main.getInstance().getFlyCam().setMoveSpeed(CAM__MOVE_SPEED);
+        Main.getInstance().getFlyCam().setRotationSpeed(CAM_ROT_SPEED);
+
         super.die();
         forward = false;
         backward = false;
@@ -222,7 +208,7 @@ public class Player extends HumanMob {
 
     @Override
     public String toString() {
-        return "Player{" + id + "}";
+        return "Player{" + id + "} (visible name =  \"" + name + "\"  )";
     }
 
     public boolean isViewingEquipment() {
@@ -255,7 +241,5 @@ public class Player extends HumanMob {
             cachedSpeed = ((FloatAttribute) copy).getValue();
         }
     }
-
-
 
 }

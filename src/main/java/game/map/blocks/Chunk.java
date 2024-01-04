@@ -5,6 +5,7 @@
  */
 package game.map.blocks;
 
+import client.Main;
 import com.jme3.material.Material;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -54,19 +55,19 @@ public class Chunk {
 
         geometry.move(chunkPos.getX() * bw.getBLOCK_SIZE(), 0, chunkPos.getY() * bw.getBLOCK_SIZE());
 
-        Material matVC = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
+//        Material matVC = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
 
-        Texture t = bw.getAsm().loadTexture(BlockType.STONE.textureName);
-        t.setMagFilter(Texture.MagFilter.Nearest);
-        matVC.setTexture("ColorMap", t);
-        matVC.setBoolean("VertexColor", true);
-        geometry.setMaterial(matVC);
+//        Texture t = bw.getAsm().loadTexture(BlockType.STONE.textureName);
+//        t.setMagFilter(Texture.MagFilter.Nearest);
+//        matVC.setTexture("ColorMap", t);
+//        matVC.setBoolean("VertexColor", true);
+//        geometry.setMaterial(matVC);
 
         Material mat = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setTexture("ColorMap", bw.getTextureAtlas().getAtlasTexture("DiffuseMap"));
         mat.getTextureParam("ColorMap").getTextureValue().setMagFilter(Texture.MagFilter.Nearest);
         mat.setBoolean("VertexColor", true);
-//        mat.getAdditionalRenderState().setWireframe(true);
+        mat.getAdditionalRenderState().setWireframe(Main.WIREFRAME);
 //        mat.getAdditionalRenderState().setLineWidth(7);
 
         geometry.setMaterial(mat);

@@ -26,6 +26,7 @@ import com.jme3.scene.VertexBuffer;
 import game.effects.ParticleUtils;
 import game.entities.Collidable;
 import game.entities.Destructible;
+import static game.entities.factories.MobSpawnType.HUMAN;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
@@ -34,6 +35,7 @@ import game.map.collision.RectangleAABB;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import lombok.Getter;
@@ -86,14 +88,14 @@ public class HumanMob extends Mob {
         super(id, node, name);
         this.skinningControl = skinningControl;
         this.modelComposer = modelComposer;
-        
+
         var armature = skinningControl.getArmature();
         ArmatureMask mask = new ArmatureMask();
         mask.addBones(armature, "LegL");
         mask.addBones(armature, "LegR");
         mask.addBones(armature, "Spine");
         modelComposer.makeLayer("Legs", mask);
-        
+
         createHitbox();
     }
 
@@ -217,7 +219,7 @@ public class HumanMob extends Mob {
 
     @Override
     public AbstractMessage createNewEntityMessage() {
-        NewMobMessage msg = new NewMobMessage(this, node.getWorldTranslation());
+        NewMobMessage msg = new NewMobMessage(this, node.getWorldTranslation(),HUMAN);
         msg.setReliable(true);
         return msg;
     }
@@ -243,7 +245,6 @@ public class HumanMob extends Mob {
 
     @Override
     public float getArmorValue() {
-
         return helmet.getArmorValue() + vest.getArmorValue()
                 + gloves.getArmorValue()
                 + boots.getArmorValue();
@@ -263,6 +264,7 @@ public class HumanMob extends Mob {
         hitboxNode.move(0, hitboxHeight, 0);
         collisionShape = new RectangleAABB(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
         showHitboxIndicator();
+        System.out.println(" hitbox "+collisionShape);
     }
 
     @Override
@@ -283,7 +285,45 @@ public class HumanMob extends Mob {
 
     @Override
     public boolean wouldNotCollideWithSolidEntitiesAfterMove(Vector3f moveVec) {
-        Vector3f newPos = collisionShape.getPosition().add(moveVec);
+        // kolizja ze scianami
+        /*
+        for (wierzcholek hitboxa){
+        if( grid[wierzcholek.zaokraglony.x][...y][...z] != 0){
+        return false
+        }
+        }
+        
+        
+         */
+
+        var newPos = collisionShape.getPosition().add(moveVec);
+        float centerX = newPos.getX();
+        float centerY = newPos.getY();
+        float centerZ = newPos.getZ();
+        float width = collisionShape.getWidth();
+        float height = collisionShape.getHeight(); // height == 1.25??
+        float depth = collisionShape.getLength();
+        float[][] corners = new float[8][3];
+        corners[0] = new float[]{centerX - width, centerY + height, centerZ - depth};
+        corners[1] = new float[]{centerX + width, centerY + height, centerZ - depth};
+        corners[2] = new float[]{centerX - width, centerY + height, centerZ + depth};
+        corners[3] = new float[]{centerX + width, centerY + height, centerZ + depth};
+        corners[4] = new float[]{centerX - width, centerY , centerZ - depth};
+        corners[5] = new float[]{centerX + width, centerY , centerZ - depth};
+        corners[6] = new float[]{centerX - width, centerY , centerZ + depth};
+        corners[7] = new float[]{centerX + width, centerY , centerZ + depth};
+        var cellSize = ClientGameAppState.getInstance().getBLOCK_SIZE();
+        for (var corner : corners) {
+            int x =  (int) (Math.floor(corner[0] / cellSize));
+            int y = (int) (Math.floor(corner[1] / cellSize));
+            int z =(int) (Math.floor(corner[2] / cellSize));
+
+            if (ClientGameAppState.getInstance().getMap().getBlockWorld().getLogicMap()[x][y][z] != 0) {
+                return false;
+            }
+        }
+        // above is wall collision
+
         for (Collidable m : ClientGameAppState.getInstance().getGrid().getNearbyAfterMove(this, moveVec)) {
             if (isNotCollisionShapePassable(m) && this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
                 return false;
@@ -314,12 +354,9 @@ public class HumanMob extends Mob {
     @Override
     public void interpolateRotation(float tpf) {
         setRotInterpolationValue(Math.min(rotInterpolationValue + MOB_ROTATION_RATE * tpf, 1));
-        
 
-        
         node.getLocalRotation().nlerp(ClientSynchronizationUtils.GetYAxisRotation(serverRotation), rotInterpolationValue);
         node.setLocalRotation(node.getLocalRotation());
-        
 
         skinningControl.getArmature().getJoint("HandR").getLocalRotation().nlerp(
                 ClientSynchronizationUtils.GetXAxisRotation(getServerRotation()), rotInterpolationValue
@@ -337,7 +374,7 @@ public class HumanMob extends Mob {
             modelComposer.setCurrentAction("Run", "Legs");
             modelComposer.getLayer("Legs").getCurrentAction().setSpeed(2);
         } else if (posInterpolationValue == 1) {
-            modelComposer.setCurrentAction("Idle","Legs");
+            modelComposer.setCurrentAction("Idle", "Legs");
         }
 
     }

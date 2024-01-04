@@ -4,23 +4,11 @@ import com.jme3.app.DetailedProfilerState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.input.FlyByCamera;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
-import com.jme3.network.ClientStateListener;
 import com.jme3.renderer.RenderManager;
-import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
-import com.jme3.system.JmeContext;
-import de.lessvoid.nifty.Nifty;
-import java.util.Random;
-import com.jme3.niftygui.NiftyJmeDisplay;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
+import game.map.blocks.VoxelLighting;
 import networkingUtils.NetworkingInitialization;
-import server.ServerMain;
 
 /**
  * This is the Main Class of your Game. You should only do initialization here.
@@ -35,10 +23,12 @@ public class Main extends SimpleApplication {
     private static final short STARTING_RESOLUTION_WIDTH = 1920;
     private static final short STARTING_RESOLUTION_HEIGHT = 1080;
     private static final boolean FULLSCREEN = true;
+    public static final boolean WIREFRAME = false;
+    public static final float CAM__MOVE_SPEED = 30;
+    public static final float CAM_ROT_SPEED = 1.0f;
 //    private static final short STARTING_RESOLUTION_WIDTH = 1000;
 //    private static final short STARTING_RESOLUTION_HEIGHT = 800;
 //    private static final boolean FULLSCREEN = false;
-
     public static void main(String[] args) {
         Main app = new Main();
         setupSettings(app);
@@ -49,7 +39,7 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        System.out.println("app camera" +cam); 
+        System.out.println("app camera" + cam);
         flyCam.setMoveSpeed(0); //30
         flyCam.setRotationSpeed(0); //1.0
         speed = 1f;
@@ -64,6 +54,7 @@ public class Main extends SimpleApplication {
 
         MainMenuAppState mms = new MainMenuAppState(assetManager, inputManager, audioRenderer, guiViewPort);
         stateManager.attach(mms);
+
     }
 
     @Override
@@ -95,7 +86,7 @@ public class Main extends SimpleApplication {
     public void simpleRender(RenderManager rm
     ) {
         //TODO: add render code
-        
+
     }
 
     public FlyByCamera getFlyCam() {
@@ -114,16 +105,16 @@ public class Main extends SimpleApplication {
         settings1.setFrameRate(2000);
         settings1.setResizable(true);
         settings1.setRenderer(AppSettings.LWJGL_OPENGL45);
+//        settings1.setVSync(false);
 
-        
         // the camera and gui bug occurs when the player joins the game with minimized window
-//        settings1.setFullscreen(false);
-//        settings1.setResolution(950, 800);
-//        app.setDisplayFps(false);
-//        app.setDisplayStatView(false);
-//        settings1.setCenterWindow(false);
-//        settings1.setWindowXPosition(1000);
-
+        settings1.setFullscreen(false);
+        settings1.setResolution(950, 800);
+        app.setDisplayFps(false);
+        app.setDisplayStatView(false);
+        settings1.setCenterWindow(false);
+        settings1.setWindowXPosition(1000);
+        
         settings1.setTitle("BH");
         app.setPauseOnLostFocus(false);
         app.setSettings(settings1);

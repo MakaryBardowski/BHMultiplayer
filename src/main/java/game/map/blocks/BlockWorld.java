@@ -15,6 +15,7 @@ import jme3tools.optimize.TextureAtlas;
  * @author 48793
  */
 public class BlockWorld {
+    private final int MAP_HEIGHT = 20;
 
     private final int BLOCK_SIZE;
     private final int CHUNK_SIZE;
@@ -33,7 +34,7 @@ public class BlockWorld {
         this.CHUNK_SIZE = CHUNK_SIZE;
         this.MAP_SIZE = MAP_SIZE;
         this.asm = asm;
-        map = new Block[MAP_SIZE][MAP_SIZE][MAP_SIZE];
+        map = new Block[MAP_SIZE][MAP_HEIGHT][MAP_SIZE];
         this.logicMap = logicMap;
 
         chunks = createChunks();

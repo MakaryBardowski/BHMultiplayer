@@ -35,9 +35,12 @@ import game.entities.Destructible;
 import game.entities.DestructibleDecoration;
 import game.entities.InteractiveEntity;
 import game.entities.StatusEffectContainer;
+import game.entities.factories.AnimalMobFactory;
 import game.entities.factories.DestructibleDecorationFactory;
+import game.entities.factories.MobSpawnType;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.HumanMob;
+import game.entities.mobs.MudBeetle;
 import game.items.AmmoPack;
 import game.items.Item;
 import game.items.ItemTemplates;
@@ -73,7 +76,7 @@ import messages.items.MobItemInteractionMessage.ItemInteractionType;
 import messages.items.SetDefaultItemMessage;
 import messages.lobby.GameStartedMessage;
 
-public class ServerMain extends AbstractAppState implements ConnectionListener, MessageListener<HostedConnection> {
+public class ServerMain extends AbstractAppState implements ConnectionListener {
 
     @Getter
     private Server server;
@@ -99,10 +102,10 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     private final HashMap<Integer, HostedConnection> hostsByPlayerId = new HashMap<>(MAX_PLAYERS);
 
     @Getter
-    private final int BLOCK_SIZE = 4;
+    private final int BLOCK_SIZE = 3; //4
 
     @Getter
-    private final int COLLISION_GRID_CELL_SIZE = 16;
+    private final int COLLISION_GRID_CELL_SIZE = 18; //16
 
     @Getter
     private final int MAP_SIZE = 39;
@@ -122,7 +125,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
         createMap();
         initializeCollisionGrid();
         startServer();
-        pupulateMap();
+        populateMap();
     }
 
     @Override
@@ -159,7 +162,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
     public void addPlayerToGame(HostedConnection hc) {
 
         Player newPlayer = registerPlayer(hc);
-        System.out.println("added player " + newPlayer.getId());
+        System.out.println("[SERVER] added player " + newPlayer.getId());
         hostsByPlayerId.put(newPlayer.getId(), hc);
 
         List<Item> itemsInGame = mobs.entrySet().stream()
@@ -167,7 +170,11 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
                 .map(entity -> (Item) entity.getValue())
                 .toList();
         List<Mob> mobsInGame = mobs.entrySet().stream()
-                .filter(entry -> entry.getValue() instanceof Mob && entry.getValue() != newPlayer)
+                .filter(entry -> {
+                    // temporary fix, because currently every mob is a player so you get a duplicate on players
+                    var notRealPlayer = hostsByPlayerId.get(entry.getValue().getId()) == null;
+                    return entry.getValue() instanceof Mob && entry.getValue() != newPlayer && notRealPlayer;
+                })
                 .map(entity -> (Mob) entity.getValue())
                 .toList();
         List<Chest> chestsInGame = mobs.entrySet().stream()
@@ -212,12 +219,12 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
             }
         });
 
-        SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation(),newPlayer.getName());
+        SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation(), newPlayer.getName());
         messageToNewPlayer.setReliable(true);
         server.broadcast(Filters.in(hc), messageToNewPlayer);
 
         // send info about new player eq
-        PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation(),newPlayer.getName());
+        PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation(), newPlayer.getName());
         msg.setReliable(true);
         server.broadcast(Filters.notEqualTo(hc), msg);
 
@@ -232,10 +239,6 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
 
     @Override
     public void connectionRemoved(Server server, HostedConnection hc) {
-    }
-
-    @Override
-    public void messageReceived(HostedConnection s, Message msg) {
     }
 
     private Item registerItemAndNotifyTCP(ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
@@ -309,23 +312,21 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
         }
     }
 
-    public void populateMap() {
-        registerRandomChest(new Vector3f(17, 4, 5));
-        registerRandomChest(new Vector3f(17 + 2.3f * 0.8f, 4, 5));
-
-    }
-
     public void insertIntoCollisionGrid(Collidable c) {
         grid.insert(c);
     }
 
-    private void pupulateMap() {
+    private void populateMap() {
+        Random r = new Random();
+
         for (int i = 0; i < 40; i++) {
-            Random r = new Random();
-            registerRandomChest(new Vector3f(r.nextInt(38 * 4) + 4, 4, r.nextInt(38 * 4) + 4));
-            registerPlayer(null).setPositionServer(new Vector3f(r.nextInt(38 * 4) + 4, 4, r.nextInt(38 * 4) + 4));
-            registerRandomDestructibleDecoration(new Vector3f(r.nextInt(38 * 4) + 4, 4, r.nextInt(38 * 4) + 4));
+            registerRandomChest(new Vector3f(r.nextInt(38 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(38 * BLOCK_SIZE) + BLOCK_SIZE));
+            registerMob().setPositionServer(new Vector3f(r.nextInt(38 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(38 * BLOCK_SIZE) + BLOCK_SIZE));
+            registerRandomDestructibleDecoration(new Vector3f(r.nextInt(38 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(38 * BLOCK_SIZE) + BLOCK_SIZE));
         }
+
+//        for(int i = 0; i < 10;i++)
+//        registerMob().setPositionServer(new Vector3f(i*BLOCK_SIZE+BLOCK_SIZE + BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE + BLOCK_SIZE));
     }
 
     private void registerRandomDestructibleDecoration(Vector3f pos) {
@@ -342,6 +343,13 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
         DestructibleDecoration d = DestructibleDecorationFactory.createDecoration(currentMaxId++, rootNode, pos, template, assetManager);
         registerEntityLocal(d);
         insertIntoCollisionGrid(d);
+    }
+
+    public Mob registerMob() {
+        var player = new AnimalMobFactory(currentMaxId++, assetManager, rootNode).createServerSide(MobSpawnType.MUD_BEETLE);
+        insertIntoCollisionGrid(player);
+
+        return registerEntityLocal(player);
     }
 
     public Player registerPlayer(HostedConnection hc) {
@@ -371,11 +379,11 @@ public class ServerMain extends AbstractAppState implements ConnectionListener, 
         Item playerGrenade = (Grenade) registerItemAndNotifyTCP(ItemTemplates.SMOKE_GRENADE, true, Filters.notIn(hc));
         Item playerKnife = (Knife) registerItemAndNotifyTCP(ItemTemplates.KNIFE, true, Filters.notIn(hc));
 
-        Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide();
+        Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide(null);
 
         if (hc != null) {
             player.setName(hc.getAttribute("nick"));
-            System.out.println("ustawiono nazwe "+player.getName());
+            System.out.println("ustawiono nazwe " + player.getName());
         }
 
         player.addToEquipment(playerKnife);

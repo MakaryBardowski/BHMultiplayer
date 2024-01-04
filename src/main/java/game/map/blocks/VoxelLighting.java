@@ -27,8 +27,6 @@ import java.util.HashMap;
 import java.util.Random;
 import jme3tools.optimize.GeometryBatchFactory;
 
-
-
 /**
  *
  * @author 48793
@@ -55,7 +53,7 @@ public class VoxelLighting {
                     lighting = (lighting - min) / (max - min);
 
 //                float lighting = (0.2f +  range / dist   ) / 1.2f; // 0.4f fuller lighting , 0.1f rounder
-                    map[xv + x][yv][zv + z].setLightLevel( map[xv + x][yv][zv + z].getLightLevel() + (1 - lighting) );
+                    map[xv + x][yv][zv + z].setLightLevel(map[xv + x][yv][zv + z].getLightLevel() + (1 - lighting));
                 }
 
             }
@@ -109,7 +107,7 @@ public class VoxelLighting {
 
                     lighting = (lighting - min) / (max - min);
 
-                    map[xv + x][yv][zv + z].setLightLevel( map[xv + x][yv][zv + z].getLightLevel() - (1 - lighting)  );
+                    map[xv + x][yv][zv + z].setLightLevel(map[xv + x][yv][zv + z].getLightLevel() - (1 - lighting));
 
 //                        map[xv + x][yv + y][zv + z].lightLevel = map[xv + x][yv + y][zv + z].lightLevel - lighting;
                 }
@@ -122,10 +120,10 @@ public class VoxelLighting {
     }
 
     public static void updateLighting(int x, int y, int z, Block[][][] map, HashMap<String, Chunk> chunks) {
-int CHUNK_SIZE = 16;
-        if (map[x][y][z] != null ) {
-            int chunkX = (int) (Math.floor(x / CHUNK_SIZE)*CHUNK_SIZE);
-            int chunkZ = (int) (Math.floor(z / CHUNK_SIZE)*CHUNK_SIZE);
+        int CHUNK_SIZE = 16;
+        if (map[x][y][z] != null) {
+            int chunkX = (int) (Math.floor(x / CHUNK_SIZE) * CHUNK_SIZE);
+            int chunkZ = (int) (Math.floor(z / CHUNK_SIZE) * CHUNK_SIZE);
 //long t = System.currentTimeMillis();
             StringBuilder sb = new StringBuilder();
             sb.append(chunkX);
@@ -139,33 +137,28 @@ int CHUNK_SIZE = 16;
                 return;
             }
 
-
             Mesh bgm = c.getGeometry().getMesh(); // batched node is always the last one
             int updatedGeomindex = map[x][y][z].getVertexOffsetInParentChunk() * 4;
-            
-   
-            
+
             FloatBuffer m = bgm.getFloatBuffer(VertexBuffer.Type.Color);
             m.position(updatedGeomindex);
 
-
-            
-            
             int dx = (mapContainsX(x + 1, map) && mapContainsX(x - 1, map)) ? 1 : 0;
             int dy = (mapContainsY(y + 1, map) && mapContainsY(y - 1, map)) ? 1 : 0;
 
             int dz = (mapContainsZ(z + 1, map) && mapContainsZ(z - 1, map)) ? 1 : 0;
-            
-            
-            int vertexCount = 0; //test
-            
-            int cnt = 0;
-            
-            for(int i = 0; i< map[x][y][z].getFaceOffsetIndexes().length;i++)
-                if(map[x][y][z].getFaceOffsetIndexes()[i] != -1)
-                    cnt++;
 
-            cnt*=4;
+            int vertexCount = 0; //test
+
+            int cnt = 0;
+
+            for (int i = 0; i < map[x][y][z].getFaceOffsetIndexes().length; i++) {
+                if (map[x][y][z].getFaceOffsetIndexes()[i] != -1) {
+                    cnt++;
+                }
+            }
+
+            cnt *= 4;
             // index = changedGeomIndex*24*4 ; index < changedGeomIndex+(ilosc wartosci innych niz -1 z tablicy)*4;index++
             for (int i = 0; i < cnt; i++) {
                 int index = i;
@@ -175,7 +168,6 @@ int CHUNK_SIZE = 16;
                 float r = 0;
                 float g = 0;
                 float b = 0;
-
 
                 if (map[x][y][z].getFaceOffsetIndexes()[0] != -1 && index == map[x][y][z].getFaceOffsetIndexes()[0] + 3) { // gorna ----------------------------------------------------------------
                     r = 1;
@@ -518,7 +510,6 @@ int CHUNK_SIZE = 16;
                 m.put(lightVal);
                 m.put(lightVal);
                 m.put(1);
-                
 
             }
 
@@ -526,16 +517,21 @@ int CHUNK_SIZE = 16;
 
         }
     }
-    
-        public static void setupModelLight(Node node) {
-        for (Spatial c : node.getChildren()) {
-            if (c != null && c instanceof Geometry) {
-                Geometry g = (Geometry) c;
-                Material originalMaterial = g.getMaterial();
-                Material newMaterial = new Material(Main.getInstance().getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
-                newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
-                g.setMaterial(newMaterial);
 
+    public static void setupModelLight(Node node) {
+        for (Spatial c : node.getChildren()) {
+
+            if (c != null) {
+                if (c instanceof Geometry g) {
+                    Material originalMaterial = g.getMaterial();
+                    if (originalMaterial.getTextureParam("BaseColorMap") != null) {
+                        Material newMaterial = new Material(Main.getInstance().getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
+                        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+                        g.setMaterial(newMaterial);
+                    }
+                } else if (c instanceof Node n) {
+                    setupModelLight(n);
+                }
             }
         }
     }

@@ -29,19 +29,19 @@ import java.util.Random;
  */
 public class PlayerFactory extends MobFactory {
 
-    private static final float PLAYER_HEIGHT = 2.12f;
+    private static final float PLAYER_HEIGHT = 2.12f*0.975f;
     private final Camera mainCamera;
     private final Camera firstPersonCamera;
     private final RenderManager renderManager;
     private boolean setAsPlayer;
-    private Vector3f playerSpawnpoint = new Vector3f(10, 4, 10);
+    private Vector3f playerSpawnpoint = new Vector3f(10, 3, 10);
 
     public PlayerFactory(int id, AssetManager assetManager, Node mobNode, RenderManager renderManager) {
         super(id, assetManager, mobNode);
         this.mainCamera = null;
         this.firstPersonCamera = null;
         this.renderManager = renderManager;
-        playerSpawnpoint = new Vector3f(10 + new Random().nextInt(4), 4, 10 + new Random().nextInt(4));
+        playerSpawnpoint = new Vector3f(10 + new Random().nextInt(4), 3, 10 + new Random().nextInt(4));
 
     }
 
@@ -51,13 +51,13 @@ public class PlayerFactory extends MobFactory {
         this.firstPersonCamera = mainCamera.clone();
         this.renderManager = Main.getInstance().getRenderManager();
         this.setAsPlayer = setAsPlayer;
-        playerSpawnpoint = new Vector3f(10 + new Random().nextInt(4), 4, 10 + new Random().nextInt(4));
+        playerSpawnpoint = new Vector3f(10 + new Random().nextInt(4), 3, 10 + new Random().nextInt(4));
     }
 
     @Override
-    public Player createClientSide() {
+    public Player createClientSide(MobSpawnType spawnType) { // mob spawn type doesnt matter for player
         Player p = createPlayer();
-        DestructibleUtils.attachDestructibleToNode(p, mobsNode, playerSpawnpoint);
+//        DestructibleUtils.attachDestructibleToNode(p, mobsNode, playerSpawnpoint);
         if (setAsPlayer) {
             setupFirstPersonCamera(p);
         }
@@ -65,7 +65,7 @@ public class PlayerFactory extends MobFactory {
     }
 
     @Override
-    public Player createServerSide() {
+    public Player createServerSide(MobSpawnType spawnType) { // mob spawn type doesnt matter for player
         Player p = createPlayer();
         DestructibleUtils.attachDestructibleToNode(p, mobsNode, playerSpawnpoint);
         return p;
@@ -76,6 +76,7 @@ public class PlayerFactory extends MobFactory {
         String name = "Player_" + id;
         SkinningControl skinningControl = getSkinningControl(playerNode);
         AnimComposer composer = getAnimComposer(playerNode);
+        System.out.println("[PlayerFactory] create player id "+id);
         return new Player(id, playerNode, name, mainCamera, skinningControl, composer);
     }
 

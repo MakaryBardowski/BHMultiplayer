@@ -23,7 +23,9 @@ import com.jme3.scene.Spatial;
 import game.entities.Chest;
 import game.entities.Destructible;
 import game.entities.DestructibleDecoration;
+import game.entities.DestructibleUtils;
 import game.entities.InteractiveEntity;
+import game.entities.factories.AnimalMobFactory;
 import game.entities.factories.DestructibleDecorationFactory;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.HumanMob;
@@ -33,6 +35,7 @@ import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.items.factories.ItemFactory;
+import game.map.blocks.VoxelLighting;
 import messages.NewChestMessage;
 import messages.NewDestructibleDecorationMessage;
 import messages.ThrownGrenadeExplodedMessage;
@@ -146,8 +149,12 @@ public class ClientMessageListener implements MessageListener<Client> {
     private void addMob(NewMobMessage nmsg) {
         if (mobDoesNotExistLocally(nmsg.getId())) {
             enqueueExecution(() -> {
-                Mob p = clientApp.registerPlayer(nmsg.getId(), false);
+
+                Mob p = clientApp.registerMob(nmsg.getId(), nmsg.getMobType());
+                VoxelLighting.setupModelLight(p.getNode());
+                DestructibleUtils.setupModelShootability(p.getNode(), p.getId());
                 placeMob(nmsg.getPos(), p);
+
                 p.setHealth(nmsg.getHealth());
             }
             );
@@ -213,7 +220,6 @@ public class ClientMessageListener implements MessageListener<Client> {
                     case INSERT:
                         Item inserted = getItemById(cimsg.getItemId());
                         getChestById(cimsg.getChestId()).addToEquipment(inserted);
-                        System.out.println(" inserted ");
                         break;
                     case TAKE_OUT:
                         Item takenOut = getItemById(cimsg.getItemId());
@@ -230,7 +236,6 @@ public class ClientMessageListener implements MessageListener<Client> {
     private void setHumanMobDefaultItem(SetDefaultItemMessage dmsg) {
         enqueueExecution(() -> {
             HumanMob human = (HumanMob) getMobById(dmsg.getMobId());
-            System.out.println("human " + human.getId() + " registering item...");
             Item item = getItemById(dmsg.getItemId());
             if (item instanceof Vest v) {
                 human.setDefaultVest(v);

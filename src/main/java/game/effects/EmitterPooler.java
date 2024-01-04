@@ -46,7 +46,8 @@ public class EmitterPooler {
             bloodEmitters.offer(setupBloodEmitter());
         }
         for (int i = 0; i < SHOT_SMOKE_POOL_SIZE; i++) {
-            shotSmokeEmitters.offer(setupBulletHitSmoke());
+//            shotSmokeEmitters.offer(setupBulletHitSmoke()); // causes the emiiters to spawn at the beginning - debug
+// with chunk wireframe on
         }
     }
 

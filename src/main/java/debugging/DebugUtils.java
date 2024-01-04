@@ -37,7 +37,7 @@ public class DebugUtils {
                 Geometry g = new Geometry("wireframe grid", new Grid(2, 2, 1f));
 
                 g.setMaterial(mat);
-                g.center().move(cs.getGrid().getCellSize() * i + 0.5f, 4.01f, cs.getGrid().getCellSize() * j + 0.5f);
+                g.center().move(cs.getGrid().getCellSize() * i + 0.5f, cs.getBLOCK_SIZE()+.01f, cs.getGrid().getCellSize() * j + 0.5f);
                 g.scale(cs.getGrid().getCellSize());
                 cs.getDebugNode().attachChild(g);
             }

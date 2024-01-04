@@ -43,16 +43,12 @@ public class PlayerCameraControlAppState extends AbstractAppState {
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
         super.initialize(stateManager, app);
-        System.out.println("initing camra");
         initCamera();
 
     }
 
     public void initCamera() {
-        System.out.println("NEAR BEFORE SEt" + clientApp.getCamera().getFrustumNear() + " " + clientApp.getCamera());
         clientApp.getCamera().setFrustumPerspective(45, (float) clientApp.getSettings().getWidth() / clientApp.getSettings().getHeight(), 0.01f, renderDistance);
-        System.out.println("NEAR AFTER SEt" + clientApp.getCamera() + " " + clientApp.getCamera());
-
     }
 
     @Override

@@ -16,6 +16,7 @@ import com.jme3.scene.Node;
 public class MapGenerator {
 
     public Map generateMap(MapType type, int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
+
         return switch (type) {
             case ARMORY ->
                 generateArmory(blockSize, chunkSize, mapSize, a, mapNode);
