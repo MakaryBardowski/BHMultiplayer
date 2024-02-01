@@ -108,12 +108,12 @@ public class Main extends SimpleApplication {
 //        settings1.setVSync(false);
 
         // the camera and gui bug occurs when the player joins the game with minimized window
-        settings1.setFullscreen(false);
-        settings1.setResolution(950, 800);
-        app.setDisplayFps(false);
-        app.setDisplayStatView(false);
-        settings1.setCenterWindow(false);
-        settings1.setWindowXPosition(1000);
+//        settings1.setFullscreen(false);
+//        settings1.setResolution(950, 800);
+//        app.setDisplayFps(false);
+//        app.setDisplayStatView(false);
+//        settings1.setCenterWindow(false);
+//        settings1.setWindowXPosition(1000);
         
         settings1.setTitle("BH");
         app.setPauseOnLostFocus(false);

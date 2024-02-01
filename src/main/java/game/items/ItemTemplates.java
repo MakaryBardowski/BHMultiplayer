@@ -44,7 +44,9 @@ public class ItemTemplates {
     public static final ItemTemplate SHOTGUN_AMMO_PACK = new ItemTemplate("Shotgun Ammo Pack [Ammo]", null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/pistolAmmoPack.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1.1f), ItemType.SHOTGUN_AMMO, 15);
     public static final ItemTemplate LMG_HOTCHKISS = new ItemTemplate("Hotchkiss [LMG]", WEAPONS_PATH + "Hotchkiss/hotchkissFp.j3o", ICON_PATH + "equipmentHotchkiss.png", WEAPONS_PATH + "Hotchkiss/hotchkissDrop.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 0.8f), ItemType.LMG, 16);
     public static final ItemTemplate TRENCH_HELMET = new HelmetTemplate("Trench Helmet", ITEMS_PATH+"TrenchSet/trenchHelmet.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH+"TrenchSet/trenchHelmet.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 0.8f), ItemType.HELMET, 17,false);
+
     public static final ItemTemplate MEDPACK = new ItemTemplate("Medpack", CONSUMABLE_PATH+"medpack.j3o", ICON_PATH + "equipmentMedpack.png", CONSUMABLE_PATH+"medpack.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 0.8f), ItemType.MEDPACK, 18);
+    public static final ItemTemplate GAS_MASK = new HelmetTemplate("Gas Mask", ITEMS_PATH+"Misc/gasMask.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH+"Misc/gasMask.j3o", new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 0.8f), ItemType.HELMET, 19,false);
 
     static {
         templates.add(RIFLE_MANNLICHER_95.getTemplateIndex(), RIFLE_MANNLICHER_95);
@@ -67,6 +69,7 @@ public class ItemTemplates {
         templates.add(LMG_HOTCHKISS.getTemplateIndex(), LMG_HOTCHKISS);
         templates.add(TRENCH_HELMET.getTemplateIndex(), TRENCH_HELMET);
         templates.add(MEDPACK.getTemplateIndex(), MEDPACK);
+        templates.add(GAS_MASK.getTemplateIndex(), GAS_MASK);
 
     }
 

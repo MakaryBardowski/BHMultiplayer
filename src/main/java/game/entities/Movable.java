@@ -5,11 +5,23 @@
 package game.entities;
 
 import client.ClientGameAppState;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
  * @author 48793
  */
-public interface Movable {
-        public void move(float tpf, ClientGameAppState cm);
+public abstract class Movable extends InteractiveEntity {
+    @Getter
+    @Setter
+    protected Vector3f movementVector = new Vector3f(0,0,0);
+
+    public Movable(int id, String name, Node node) {
+        super(id, name, node);
+    }
+
+    public abstract void move(float tpf, ClientGameAppState cm);
 }

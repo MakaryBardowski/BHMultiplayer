@@ -21,7 +21,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public abstract class Collidable extends InteractiveEntity {
+public abstract class Collidable extends Movable {
 
     protected CollisionShape collisionShape;
     protected Node hitboxNode = new Node(); // hitbox center is at this node

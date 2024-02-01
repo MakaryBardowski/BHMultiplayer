@@ -15,7 +15,6 @@ import java.util.Random;
  * @author tomas
  */
 public class CameraRecoilControl extends RecoilControl {
-
     private float xperlin = 6;
     private float yperlin = 6;
     private float shakeStrength;

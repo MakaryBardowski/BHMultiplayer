@@ -15,6 +15,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.shape.Box;
 import com.jme3.texture.Texture;
@@ -161,34 +162,45 @@ public class LobbyTeamViewAppState extends BaseAppState {
 
     public static void changeClass(int classIndex) {
         teamNode.detachAllChildren();
-
-        if (classIndex == 0) {
-            ItemTemplates.HelmetTemplate helmetTemplate = (ItemTemplates.HelmetTemplate) ItemTemplates.HEAD_1;
-            var vestTemplate = ItemTemplates.TORSO_1;
-            var glovesTemplate = ItemTemplates.HAND_1;
-            var bootsTemplate = ItemTemplates.BOOTS_TRENCH;
-            var player = LobbyTeamViewAppState.loadPlayerDummy(helmetTemplate, vestTemplate, glovesTemplate, bootsTemplate);
-            teamNode.attachChild(player);
-            player.move(0, 4, 0);
-        } else if (classIndex == 1) {
-            ItemTemplates.HelmetTemplate helmetTemplate = (ItemTemplates.HelmetTemplate) ItemTemplates.HEAD_1;
-            var vestTemplate = ItemTemplates.VEST_TRENCH;
-            var glovesTemplate = ItemTemplates.HAND_1;
-            var bootsTemplate = ItemTemplates.BOOTS_TRENCH;
-            var player = LobbyTeamViewAppState.loadPlayerDummy(helmetTemplate, vestTemplate, glovesTemplate, bootsTemplate);
-            teamNode.attachChild(player);
-            player.move(0, 4, 0);
-        } else if (classIndex == 2) {
-            ItemTemplates.HelmetTemplate helmetTemplate = (ItemTemplates.HelmetTemplate) ItemTemplates.TRENCH_HELMET;
-            var vestTemplate = ItemTemplates.VEST_TRENCH;
-            var glovesTemplate = ItemTemplates.HAND_1;
-            var bootsTemplate = ItemTemplates.BOOTS_TRENCH;
-            var player = LobbyTeamViewAppState.loadPlayerDummy(helmetTemplate, vestTemplate, glovesTemplate, bootsTemplate);
-            teamNode.attachChild(player);
-            player.move(0, 4, 0);
-        } else {
-            throw new IllegalArgumentException("class index " + classIndex + " is invalid");
+        Spatial player = null; 
+        switch (classIndex) {
+            case 0:
+                {
+                    ItemTemplates.HelmetTemplate helmetTemplate = (ItemTemplates.HelmetTemplate) ItemTemplates.HEAD_1;
+                    var vestTemplate = ItemTemplates.TORSO_1;
+                    var glovesTemplate = ItemTemplates.HAND_1;
+                    var bootsTemplate = ItemTemplates.BOOTS_TRENCH;
+                    player = LobbyTeamViewAppState.loadPlayerDummy(helmetTemplate, vestTemplate, glovesTemplate, bootsTemplate);
+                    teamNode.attachChild(player);
+                    player.move(0, 4, 0);
+                    break;
+                }
+            case 1:
+                {
+                    ItemTemplates.HelmetTemplate helmetTemplate = (ItemTemplates.HelmetTemplate) ItemTemplates.GAS_MASK;
+                    var vestTemplate = ItemTemplates.VEST_TRENCH;
+                    var glovesTemplate = ItemTemplates.HAND_1;
+                    var bootsTemplate = ItemTemplates.BOOTS_TRENCH;
+                    player = LobbyTeamViewAppState.loadPlayerDummy(helmetTemplate, vestTemplate, glovesTemplate, bootsTemplate);
+                    teamNode.attachChild(player);
+                    player.move(0, 4, 0);
+                    break;
+                }
+            case 2:
+                {
+                    ItemTemplates.HelmetTemplate helmetTemplate = (ItemTemplates.HelmetTemplate) ItemTemplates.TRENCH_HELMET;
+                    var vestTemplate = ItemTemplates.VEST_TRENCH;
+                    var glovesTemplate = ItemTemplates.HAND_1;
+                    var bootsTemplate = ItemTemplates.BOOTS_TRENCH;
+                    player = LobbyTeamViewAppState.loadPlayerDummy(helmetTemplate, vestTemplate, glovesTemplate, bootsTemplate);
+                    teamNode.attachChild(player);
+                    player.move(0, 4, 0);
+                    break;
+                }
+            default:
+                throw new IllegalArgumentException("class index " + classIndex + " is invalid");
         }
+                player.rotate(0,FastMath.DEG_TO_RAD*30, 0);
 
     }
 

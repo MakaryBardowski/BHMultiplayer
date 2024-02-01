@@ -116,4 +116,9 @@ public class DestructibleDecoration extends Destructible {
     @Override
     public void onCollisionServer(Collidable other) {
     }
+
+    @Override
+    public void move(float tpf, ClientGameAppState cm) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }

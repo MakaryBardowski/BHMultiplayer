@@ -142,7 +142,7 @@ public class Player extends HumanMob {
     public void move(float tpf, ClientGameAppState cm) {
 
         if (forward || backward || left || right) {
-            Vector3f movementVector = new Vector3f(0, 0, 0);
+             movementVector.set(0,0,0);
 
             WorldGrid collisionGrid = ClientGameAppState.getInstance().getGrid();
             collisionGrid.remove(this);
@@ -175,10 +175,11 @@ public class Player extends HumanMob {
             if (wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(0, 0, movementVector.getZ()))) {
                 node.move(0, 0, movementVector.getZ());
             }
+            
             if (wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(movementVector.getX(), 0, 0))) {
                 node.move(movementVector.getX(), 0, 0);
-
             }
+            
             if (node.getWorldTranslation().distance(serverLocation) > cachedSpeed * tpf) {
                 PlayerPosUpdateRequest posu = new PlayerPosUpdateRequest(id, node.getWorldTranslation());
                 cm.getClient().send(posu);

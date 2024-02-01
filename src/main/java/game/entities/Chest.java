@@ -163,6 +163,11 @@ public class Chest extends Destructible {
         grid.insert(this);
     }
 
+    @Override
+    public void move(float tpf, ClientGameAppState cm) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
     enum ChestType {
         COMMON_LOOT_CHEST,
         WEAK_LOOT_CHEST,

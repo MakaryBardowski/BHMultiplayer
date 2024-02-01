@@ -36,7 +36,6 @@ public abstract class InteractiveEntity {
         this.id = id;
         this.name = name;
         this.node = node;
-        node.scale(0.93f);
     }
 
     public abstract void onShot(Mob shooter, float damage);

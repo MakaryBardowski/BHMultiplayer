@@ -15,7 +15,7 @@ import game.entities.Movable;
  *
  * @author 48793
  */
-public interface MobInterface extends Movable {
+public interface MobInterface {
 
     public boolean wouldNotCollideWithSolidEntitiesAfterMove(Vector3f moveVec);
     

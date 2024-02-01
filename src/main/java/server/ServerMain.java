@@ -440,7 +440,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
             AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.LMG_AMMO_PACK, true);
             chest.addToEquipment(ammo);
         }
-        if (randomValue == 11) {
+        if (true || randomValue == 11) {
             var lmg = registerItemLocal(ItemTemplates.LMG_HOTCHKISS, true);
             chest.addToEquipment(lmg);
         }

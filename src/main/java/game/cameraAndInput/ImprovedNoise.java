@@ -42,13 +42,13 @@ public final class ImprovedNoise {
     }
     
     private static double grad(int hash, double x, double y){
-    	switch(hash & 3){
-    	case 0: return x + y;
-    	case 1: return -x + y;
-    	case 2: return x - y;
-    	case 3: return -x - y;
-    	default: return 0;
-    	}
+           return switch (hash & 3) {
+               case 0 -> x + y;
+               case 1 -> -x + y;
+               case 2 -> x - y;
+               case 3 -> -x - y;
+               default -> 0;
+           };
     }
     static final int p[] = new int[512], permutation[] = { 151,160,137,91,90,15,
     		   131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,

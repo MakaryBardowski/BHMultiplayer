@@ -6,6 +6,7 @@
 package game.map.blocks;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import java.util.HashMap;
 import jme3tools.optimize.TextureAtlas;
@@ -15,6 +16,7 @@ import jme3tools.optimize.TextureAtlas;
  * @author 48793
  */
 public class BlockWorld {
+
     private final int MAP_HEIGHT = 20;
 
     private final int BLOCK_SIZE;
@@ -28,6 +30,10 @@ public class BlockWorld {
 
     private final HashMap<String, Chunk> chunks;
     private Node worldNode;
+    
+    private int temp1;
+    private int temp2;
+    private int temp3;
 
     public BlockWorld(int VOXEL_SIZE, int CHUNK_SIZE, int MAP_SIZE, byte[][][] logicMap, AssetManager asm, Node rootNode) {
         this.BLOCK_SIZE = VOXEL_SIZE;
@@ -86,7 +92,7 @@ public class BlockWorld {
         c.detachBlock(b);
         return b;
     }
-    
+
     public Block addBlockDataToChunk(int x, int y, int z, BlockType bt) { // o
 
         Chunk c = chunks.get("" + (x / CHUNK_SIZE) * CHUNK_SIZE + (z / CHUNK_SIZE) * CHUNK_SIZE);
@@ -97,9 +103,8 @@ public class BlockWorld {
 
         return b;
     }
-    
-///-----------------------------------------GETTERS, SETTERS AND INITS-----------------------------------------------------------
 
+///-----------------------------------------GETTERS, SETTERS AND INITS-----------------------------------------------------------
     public TextureAtlas getTextureAtlas() {
         return textureAtlas;
     }
@@ -158,6 +163,18 @@ public class BlockWorld {
         for (Chunk c : chunks.values()) {
             c.generateGeometry(c.generateMesh());
         }
+    }
+
+    // from now on only use below functions instead of explicit array access
+    public byte getBlockIndexByCellCoords(int x, int y, int z) {
+        return logicMap[x][y][z];
+    }
+
+    public byte getBlockTypeByPosition(Vector3f position) {
+         temp1 = (int) (Math.floor(position.x / BLOCK_SIZE));
+         temp2 = (int) (Math.floor(position.y / BLOCK_SIZE));
+         temp3 = (int) (Math.floor(position.z / BLOCK_SIZE));
+        return logicMap[temp1][temp2][temp3];
     }
 
 }

@@ -122,7 +122,7 @@ public class LightMachineGun extends RangedWeapon {
             muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
             firerateControl = new FirerateControl(this);
-            gunRecoil = new RecoilControl(-6f, -0.07f, 0.0425f, 0.04f, 30, 0.4f);
+            gunRecoil = new GunRecoilControl(-6f, -0.07f, 0.0425f, 0.04f, 30, 1f);
 
             camRecoil = new CameraRecoilControl(0.3f, -.05f, .1f, .05f, 30, 0.3f);
 
