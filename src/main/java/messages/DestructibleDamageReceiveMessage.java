@@ -10,6 +10,7 @@ import com.jme3.network.serializing.Serializable;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
 import game.map.collision.WorldGrid;
+import java.util.Random;
 import lombok.Getter;
 import server.ServerMain;
 
@@ -49,9 +50,12 @@ public class DestructibleDamageReceiveMessage extends EntityUpdateMessage {
 
                 Destructible d = (Destructible) getEntityByIdClient(id);
                 d.receiveDamage(damage);
+                
+                
                 if (d.getHealth() <= 0) {
                     ClientGameAppState.getInstance().getMobs().remove(d.getId());
                 }
+                
             }
         }
         );

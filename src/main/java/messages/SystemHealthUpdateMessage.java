@@ -4,15 +4,17 @@
  */
 package messages;
 
+import client.ClientGameAppState;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
+import server.ServerMain;
 
 /**
  *
  * @author 48793
  */
 @Serializable
-public class SystemHealthUpdateMessage extends AbstractMessage {
+public class SystemHealthUpdateMessage extends TwoWayMessage {
 
     protected int id;
     protected float health;
@@ -20,7 +22,7 @@ public class SystemHealthUpdateMessage extends AbstractMessage {
     public SystemHealthUpdateMessage() {
     }
 
-    public SystemHealthUpdateMessage(int id,float health) {
+    public SystemHealthUpdateMessage(int id, float health) {
         this.id = id;
         this.health = health;
     }
@@ -28,9 +30,25 @@ public class SystemHealthUpdateMessage extends AbstractMessage {
     public int getId() {
         return id;
     }
-    
-    public float getHealth(){
-    return health;
+
+    public float getHealth() {
+        return health;
+    }
+
+    @Override
+    public void handleServer(ServerMain server) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void handleClient(ClientGameAppState client) {
+        updateEntityHealth(this);
+    }
+
+    private void updateEntityHealth(SystemHealthUpdateMessage hmsg) {
+        if (entityExistsLocallyClient(hmsg.getId())) {
+            getDestructibleByIdClient(hmsg.getId()).setHealth(hmsg.getHealth());
+        }
     }
 
 }

@@ -21,6 +21,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.custom.ArmatureDebugger;
 import game.entities.DestructibleUtils;
+import java.util.HashSet;
 import java.util.Random;
 
 /**
@@ -29,29 +30,33 @@ import java.util.Random;
  */
 public class PlayerFactory extends MobFactory {
 
-    private static final float PLAYER_HEIGHT = 2.12f*0.975f;
+    private static final float PLAYER_HEIGHT = 2.12f * 0.975f;
     private final Camera mainCamera;
     private final Camera firstPersonCamera;
     private final RenderManager renderManager;
     private boolean setAsPlayer;
     private Vector3f playerSpawnpoint = new Vector3f(10, 3, 10);
 
+    private static int nextSpawnedPlayerOffset = 0;
+
+    //server constructor
     public PlayerFactory(int id, AssetManager assetManager, Node mobNode, RenderManager renderManager) {
         super(id, assetManager, mobNode);
         this.mainCamera = null;
         this.firstPersonCamera = null;
         this.renderManager = renderManager;
-        playerSpawnpoint = new Vector3f(10 + new Random().nextInt(4), 3, 10 + new Random().nextInt(4));
 
+        playerSpawnpoint = new Vector3f(10 + nextSpawnedPlayerOffset, 3, 10 + nextSpawnedPlayerOffset);
+        nextSpawnedPlayerOffset += 2;
     }
 
+    //client constructor
     public PlayerFactory(int id, Node mobNode, Camera mainCamera, boolean setAsPlayer) {
         super(id, mobNode);
         this.mainCamera = mainCamera;
         this.firstPersonCamera = mainCamera.clone();
         this.renderManager = Main.getInstance().getRenderManager();
         this.setAsPlayer = setAsPlayer;
-        playerSpawnpoint = new Vector3f(10 + new Random().nextInt(4), 3, 10 + new Random().nextInt(4));
     }
 
     @Override
@@ -76,14 +81,14 @@ public class PlayerFactory extends MobFactory {
         String name = "Player_" + id;
         SkinningControl skinningControl = getSkinningControl(playerNode);
         AnimComposer composer = getAnimComposer(playerNode);
-        System.out.println("[PlayerFactory] create player id "+id);
+        System.out.println("[PlayerFactory] create player id " + id);
         return new Player(id, playerNode, name, mainCamera, skinningControl, composer);
     }
 
     private void setupFirstPersonCamera(Player p) {
         setupMainCamera(p);
         setupHandsCamera(p);
-        
+
     }
 
     private Node loadPlayerModel() {

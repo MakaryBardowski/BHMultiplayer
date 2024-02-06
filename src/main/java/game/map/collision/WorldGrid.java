@@ -12,6 +12,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import game.entities.Collidable;
 import game.entities.InteractiveEntity;
+import game.entities.mobs.MudBeetle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WorldGrid {
 
     private final int cellSize;
-    private final ConcurrentHashMap<Integer, HashSet<Collidable>> contents;
+    private final ConcurrentHashMap<Integer, Set<Collidable>> contents;
 
     public WorldGrid(int mapSize, int blockSize, int cellSize) {
         this.cellSize = cellSize;
@@ -37,7 +38,7 @@ public class WorldGrid {
         for (int x = 0; x < cellNum; x++) {
             for (int y = 0; y < cellNum; y++) {
                 for (int z = 0; z < cellNum; z++) {
-                    contents.put(hash(new Vector3f(x * cellSize, y * cellSize, z * cellSize)), new HashSet<>(0));
+                    contents.put(hash(new Vector3f(x * cellSize, y * cellSize, z * cellSize)), ConcurrentHashMap.newKeySet(20));
                 }
             }
         }
@@ -66,15 +67,15 @@ public class WorldGrid {
 
         float[][] corners = new float[8][3];
 
-        corners[0] = new float[]{centerX - width , centerY - height , centerZ - depth };
-        corners[1] = new float[]{centerX + width , centerY - height , centerZ - depth };
-        corners[2] = new float[]{centerX - width , centerY + height , centerZ - depth };
-        corners[3] = new float[]{centerX + width , centerY + height , centerZ - depth };
-        
-        corners[4] = new float[]{centerX - width , centerY - height , centerZ + depth };
-        corners[5] = new float[]{centerX + width , centerY - height , centerZ + depth };
-        corners[6] = new float[]{centerX - width , centerY + height , centerZ + depth };
-        corners[7] = new float[]{centerX + width , centerY + height , centerZ + depth };
+        corners[0] = new float[]{centerX - width, centerY - height, centerZ - depth};
+        corners[1] = new float[]{centerX + width, centerY - height, centerZ - depth};
+        corners[2] = new float[]{centerX - width, centerY + height, centerZ - depth};
+        corners[3] = new float[]{centerX + width, centerY + height, centerZ - depth};
+
+        corners[4] = new float[]{centerX - width, centerY - height, centerZ + depth};
+        corners[5] = new float[]{centerX + width, centerY - height, centerZ + depth};
+        corners[6] = new float[]{centerX - width, centerY + height, centerZ + depth};
+        corners[7] = new float[]{centerX + width, centerY + height, centerZ + depth};
 
         for (float[] corner : corners) {
             Vector3f v = new Vector3f(corner[0], corner[1], corner[2]);
@@ -84,7 +85,29 @@ public class WorldGrid {
 
             }
         }
+    }
 
+    public Set<Collidable> getNearbyInRadius(Vector3f pos, Float radius) {
+        Set<Collidable> results = new HashSet<>();
+        var temp = new Vector3f(0, 0, 0);
+
+        Set<Collidable> cellContents;
+        for (float i = pos.x - radius; i < pos.x + radius; i += cellSize) {
+            for (float k = pos.z - radius; k < pos.z + radius; k += cellSize) {
+
+                cellContents = contents.get(
+                        hash(
+                                temp.set(i, 0, k)
+                        )
+                );
+                if (cellContents == null) {
+                    continue;
+                }
+                results.addAll(cellContents);
+
+            }
+        }
+        return results;
     }
 
     public void remove(Collidable entity) {
@@ -97,15 +120,15 @@ public class WorldGrid {
 
         float[][] corners = new float[8][3];
 
-         corners[0] = new float[]{centerX - width , centerY - height , centerZ - depth };
-        corners[1] = new float[]{centerX + width , centerY - height , centerZ - depth };
-        corners[2] = new float[]{centerX - width , centerY + height , centerZ - depth };
-        corners[3] = new float[]{centerX + width , centerY + height , centerZ - depth };
-        
-        corners[4] = new float[]{centerX - width , centerY - height , centerZ + depth };
-        corners[5] = new float[]{centerX + width , centerY - height , centerZ + depth };
-        corners[6] = new float[]{centerX - width , centerY + height , centerZ + depth };
-        corners[7] = new float[]{centerX + width , centerY + height , centerZ + depth };
+        corners[0] = new float[]{centerX - width, centerY - height, centerZ - depth};
+        corners[1] = new float[]{centerX + width, centerY - height, centerZ - depth};
+        corners[2] = new float[]{centerX - width, centerY + height, centerZ - depth};
+        corners[3] = new float[]{centerX + width, centerY + height, centerZ - depth};
+
+        corners[4] = new float[]{centerX - width, centerY - height, centerZ + depth};
+        corners[5] = new float[]{centerX + width, centerY - height, centerZ + depth};
+        corners[6] = new float[]{centerX - width, centerY + height, centerZ + depth};
+        corners[7] = new float[]{centerX + width, centerY + height, centerZ + depth};
 
         for (float[] corner : corners) {
             Vector3f v = new Vector3f(corner[0], corner[1], corner[2]);
@@ -115,6 +138,8 @@ public class WorldGrid {
             }
         }
     }
+
+
 
     public Set<Collidable> getNearbyAtPosition(Collidable entity, Vector3f pos) {
         HashSet<Collidable> output = new HashSet<>();
@@ -127,15 +152,15 @@ public class WorldGrid {
 
         float[][] corners = new float[8][3];
 
-        corners[0] = new float[]{centerX - width , centerY - height , centerZ - depth };
-        corners[1] = new float[]{centerX + width , centerY - height , centerZ - depth };
-        corners[2] = new float[]{centerX - width , centerY + height , centerZ - depth };
-        corners[3] = new float[]{centerX + width , centerY + height , centerZ - depth };
-        
-        corners[4] = new float[]{centerX - width , centerY - height , centerZ + depth };
-        corners[5] = new float[]{centerX + width , centerY - height , centerZ + depth };
-        corners[6] = new float[]{centerX - width , centerY + height , centerZ + depth };
-        corners[7] = new float[]{centerX + width , centerY + height , centerZ + depth };
+        corners[0] = new float[]{centerX - width, centerY - height, centerZ - depth};
+        corners[1] = new float[]{centerX + width, centerY - height, centerZ - depth};
+        corners[2] = new float[]{centerX - width, centerY + height, centerZ - depth};
+        corners[3] = new float[]{centerX + width, centerY + height, centerZ - depth};
+
+        corners[4] = new float[]{centerX - width, centerY - height, centerZ + depth};
+        corners[5] = new float[]{centerX + width, centerY - height, centerZ + depth};
+        corners[6] = new float[]{centerX - width, centerY + height, centerZ + depth};
+        corners[7] = new float[]{centerX + width, centerY + height, centerZ + depth};
 
         for (float[] corner : corners) {
             Vector3f v = new Vector3f(corner[0], corner[1], corner[2]);
@@ -145,7 +170,7 @@ public class WorldGrid {
         return output;
     }
 
-    public Set<Collidable> getNearbyCollisionShapeAtPos(Vector3f pos,CollisionShape cs) {
+    public Set<Collidable> getNearbyCollisionShapeAtPos(Vector3f pos, CollisionShape cs) {
         HashSet<Collidable> output = new HashSet<>();
         float centerX = pos.getX();
         float centerY = pos.getY();
@@ -155,15 +180,15 @@ public class WorldGrid {
         float depth = cs.getLength();
         float[][] corners = new float[8][3];
 
-        corners[0] = new float[]{centerX - width , centerY - height , centerZ - depth };
-        corners[1] = new float[]{centerX + width , centerY - height , centerZ - depth };
-        corners[2] = new float[]{centerX - width , centerY + height , centerZ - depth };
-        corners[3] = new float[]{centerX + width , centerY + height , centerZ - depth };
-        
-        corners[4] = new float[]{centerX - width , centerY - height , centerZ + depth };
-        corners[5] = new float[]{centerX + width , centerY - height , centerZ + depth };
-        corners[6] = new float[]{centerX - width , centerY + height , centerZ + depth };
-        corners[7] = new float[]{centerX + width , centerY + height , centerZ + depth };
+        corners[0] = new float[]{centerX - width, centerY - height, centerZ - depth};
+        corners[1] = new float[]{centerX + width, centerY - height, centerZ - depth};
+        corners[2] = new float[]{centerX - width, centerY + height, centerZ - depth};
+        corners[3] = new float[]{centerX + width, centerY + height, centerZ - depth};
+
+        corners[4] = new float[]{centerX - width, centerY - height, centerZ + depth};
+        corners[5] = new float[]{centerX + width, centerY - height, centerZ + depth};
+        corners[6] = new float[]{centerX - width, centerY + height, centerZ + depth};
+        corners[7] = new float[]{centerX + width, centerY + height, centerZ + depth};
 
         for (float[] corner : corners) {
             Vector3f v = new Vector3f(corner[0], corner[1], corner[2]);
@@ -189,15 +214,15 @@ public class WorldGrid {
 
         float[][] corners = new float[8][3];
 
-        corners[0] = new float[]{centerX - width , centerY - height , centerZ - depth };
-        corners[1] = new float[]{centerX + width , centerY - height , centerZ - depth };
-        corners[2] = new float[]{centerX - width , centerY + height , centerZ - depth };
-        corners[3] = new float[]{centerX + width , centerY + height , centerZ - depth };
-        
-        corners[4] = new float[]{centerX - width , centerY - height , centerZ + depth };
-        corners[5] = new float[]{centerX + width , centerY - height , centerZ + depth };
-        corners[6] = new float[]{centerX - width , centerY + height , centerZ + depth };
-        corners[7] = new float[]{centerX + width , centerY + height , centerZ + depth };
+        corners[0] = new float[]{centerX - width, centerY - height, centerZ - depth};
+        corners[1] = new float[]{centerX + width, centerY - height, centerZ - depth};
+        corners[2] = new float[]{centerX - width, centerY + height, centerZ - depth};
+        corners[3] = new float[]{centerX + width, centerY + height, centerZ - depth};
+
+        corners[4] = new float[]{centerX - width, centerY - height, centerZ + depth};
+        corners[5] = new float[]{centerX + width, centerY - height, centerZ + depth};
+        corners[6] = new float[]{centerX - width, centerY + height, centerZ + depth};
+        corners[7] = new float[]{centerX + width, centerY + height, centerZ + depth};
 
         for (float[] corner : corners) {
             Vector3f v = new Vector3f(corner[0], corner[1], corner[2]);
@@ -207,8 +232,26 @@ public class WorldGrid {
         return output;
     }
 
-    public ConcurrentHashMap<Integer, HashSet<Collidable>> getContents() {
+    public ConcurrentHashMap<Integer, Set<Collidable>> getContents() {
         return contents;
     }
+
+//    public void printAllEntities() {
+////        System.out.println("\n\n\n\n\n\n\n\n\nall entities in collision grid");
+//
+//        for (var entry : contents.entrySet()) {
+//            
+//            System.out.print("set: "+entry.getKey()+"\n");
+//            if(entry.getValue().isEmpty())
+//                continue;
+//            
+//            for (var c : entry.getValue()) {
+////                if(c.getClass() != MudBeetle.class)
+//                System.out.println(c.getName() + " id " + c.getId());
+//            }
+//            System.out.println("-");
+//        }
+//
+//    }
 
 }

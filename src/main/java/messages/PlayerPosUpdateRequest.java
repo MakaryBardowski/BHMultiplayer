@@ -70,6 +70,7 @@ public class PlayerPosUpdateRequest extends EntityUpdateMessage {
                 InstantEntityPosCorrectionMessage corrMsg = new InstantEntityPosCorrectionMessage(p, p.getNode().getWorldTranslation());
                 corrMsg.setReliable(true);
                 serverApp.getServer().broadcast(Filters.in(getHostedConnectionByPlayer(p)), corrMsg);
+          
             }
 
         }

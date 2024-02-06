@@ -6,9 +6,12 @@ package messages;
 
 import client.ClientGameAppState;
 import client.Main;
+import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
+import game.entities.Chest;
+import game.entities.Destructible;
 import game.entities.InteractiveEntity;
 import game.entities.mobs.Mob;
 import game.entities.mobs.Player;
@@ -27,6 +30,14 @@ public abstract class TwoWayMessage extends AbstractMessage {
 
     public abstract void handleClient(ClientGameAppState client);
 
+    protected Chest getChestByIdClient(int id) {
+        return ((Chest) ClientGameAppState.getInstance().getMobs().get(id));
+    }
+
+    protected Chest getChestByIdServer(int id) {
+        return ((Chest) ServerMain.getInstance().getMobs().get(id));
+    }
+
     protected InteractiveEntity getEntityByIdServer(int id) {
         return ServerMain.getInstance().getMobs().get(id);
     }
@@ -39,6 +50,10 @@ public abstract class TwoWayMessage extends AbstractMessage {
         return ((Item) ServerMain.getInstance().getMobs().get(id));
     }
 
+    protected Destructible getDestructibleByIdServer(int id) {
+        return ((Destructible) ServerMain.getInstance().getMobs().get(id));
+    }
+
     protected InteractiveEntity getEntityByIdClient(int id) {
         return ClientGameAppState.getInstance().getMobs().get(id);
     }
@@ -49,6 +64,10 @@ public abstract class TwoWayMessage extends AbstractMessage {
 
     protected Item getItemByIdClient(int id) {
         return ((Item) ClientGameAppState.getInstance().getMobs().get(id));
+    }
+
+    protected Destructible getDestructibleByIdClient(int id) {
+        return ((Destructible) ClientGameAppState.getInstance().getMobs().get(id));
     }
 
     protected void removeItemFromMobEquipmentClient(int mobId, int itemId) {
@@ -74,8 +93,22 @@ public abstract class TwoWayMessage extends AbstractMessage {
         return ServerMain.getInstance().getMobs().get(mobId) != null;
     }
 
+    protected boolean entityNotExistsLocallyClient(int mobId) {
+        return ClientGameAppState.getInstance().getMobs().get(mobId) == null;
+    }
+
+    protected boolean entityNotExistsLocallyServer(int mobId) {
+        return ServerMain.getInstance().getMobs().get(mobId) == null;
+    }
+
     protected HostedConnection getHostedConnectionByPlayer(Player p) {
         return ServerMain.getInstance().getHostsByPlayerId().get(p.getId());
+    }
+
+    protected void placeMob(Vector3f pos, Mob p) {
+        ClientGameAppState.getInstance().getDestructibleNode().attachChild(p.getNode());
+        p.getNode().setLocalTranslation(pos);
+        ClientGameAppState.getInstance().getGrid().insert(p);
     }
 
     protected void enqueueExecution(Runnable runnable) {

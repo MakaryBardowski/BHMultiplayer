@@ -105,7 +105,8 @@ public class Main extends SimpleApplication {
         settings1.setFrameRate(2000);
         settings1.setResizable(true);
         settings1.setRenderer(AppSettings.LWJGL_OPENGL45);
-//        settings1.setVSync(false);
+        settings1.setVSync(false);
+        settings1.setFrameRate(144);
 
         // the camera and gui bug occurs when the player joins the game with minimized window
 //        settings1.setFullscreen(false);

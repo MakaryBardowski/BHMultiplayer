@@ -4,6 +4,7 @@
  */
 package messages.items;
 
+import client.ClientGameAppState;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import game.entities.Chest;
@@ -13,6 +14,8 @@ import game.items.ItemTemplates;
 import game.items.ItemTemplates.ItemTemplate;
 import java.util.ArrayList;
 import lombok.Getter;
+import messages.TwoWayMessage;
+import server.ServerMain;
 
 /**
  *
@@ -20,14 +23,14 @@ import lombok.Getter;
  * new item.
  */
 @Serializable
-public class ChestItemInteractionMessage extends AbstractMessage {
+public class ChestItemInteractionMessage extends TwoWayMessage {
 
     @Getter
     protected int itemId;
-    
+
     @Getter
     protected int chestId;
-    
+
     protected int interactionTypeIndex;
 
     public ChestItemInteractionMessage() {
@@ -39,6 +42,16 @@ public class ChestItemInteractionMessage extends AbstractMessage {
         this.interactionTypeIndex = type.ordinal();
     }
 
+    @Override
+    public void handleServer(ServerMain server) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void handleClient(ClientGameAppState client) {
+        handleChestItemInteraction(this);
+    }
+
     public enum ChestItemInteractionType {
         INSERT,
         TAKE_OUT
@@ -46,6 +59,26 @@ public class ChestItemInteractionMessage extends AbstractMessage {
 
     public ChestItemInteractionType getInteractionType() {
         return ChestItemInteractionType.values()[interactionTypeIndex];
+    }
+
+    private void handleChestItemInteraction(ChestItemInteractionMessage cimsg) {
+        enqueueExecution(() -> {
+            if (null != cimsg.getInteractionType()) {
+                switch (cimsg.getInteractionType()) {
+                    case INSERT:
+                        Item inserted = getItemByIdClient(cimsg.getItemId());
+                        getChestByIdClient(cimsg.getChestId()).addToEquipment(inserted);
+                        break;
+                    case TAKE_OUT:
+                        Item takenOut = getItemByIdClient(cimsg.getItemId());
+                        getChestByIdClient(cimsg.getChestId()).removeFromEquipment(takenOut);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        });
     }
 
 }

@@ -121,4 +121,5 @@ public class DestructibleDecoration extends Destructible {
     public void move(float tpf, ClientGameAppState cm) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+    
 }

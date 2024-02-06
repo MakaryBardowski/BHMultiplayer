@@ -39,6 +39,7 @@ import game.entities.factories.AnimalMobFactory;
 import game.entities.factories.DestructibleDecorationFactory;
 import game.entities.factories.MobSpawnType;
 import game.entities.grenades.ThrownGrenade;
+import game.entities.mobs.AiSteerable;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.MudBeetle;
 import game.items.AmmoPack;
@@ -65,6 +66,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
@@ -113,6 +117,18 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
     @Getter
     private byte[][][] map;
 
+    @Getter
+    public static ScheduledThreadPoolExecutor pathfindingExecutor = new ScheduledThreadPoolExecutor(1);
+
+    @Getter
+    public static ScheduledThreadPoolExecutor mobAiExecutor = new ScheduledThreadPoolExecutor(1);
+
+    @Getter
+    private static float timePerFrame;
+    private AtomicBoolean update = new AtomicBoolean(false);
+    private boolean serverTick = false;
+    private boolean serverPaused = true;
+
     public ServerMain(AssetManager assetManager, RenderManager renderManager) {
         this.assetManager = assetManager;
         this.renderManager = renderManager;
@@ -126,37 +142,77 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
         initializeCollisionGrid();
         startServer();
         populateMap();
-    }
 
-    @Override
-    public void update(float tpf) {
-        rootNode.updateLogicalState(tpf);
-        tickTimer += tpf;
+        Runnable r = () -> {
+            while (true) {
+                if (update.get() == true) {
+                    update.set(false);
 
-        if (tickTimer >= TIME_PER_TICK) {
-            tickTimer = 0;
-            mobs.entrySet().stream().forEach(i -> {
-                //to be seriously optimized
-                if (i.getValue() instanceof Destructible d) {
-                    if (d instanceof StatusEffectContainer c) {
-                        c.updateTemporaryEffectsServer();
+                    tickTimer += timePerFrame;
+
+                    serverTick = tickTimer >= TIME_PER_TICK;
+
+                    for (var i : mobs.values()) {
+                        if (i instanceof AiSteerable agent) {
+//                            long time = System.nanoTime();
+
+                            agent.updateAi();
+
+//                            long time1 = System.nanoTime();
+//                            float tf = ((float) (time1 - time)) / 1_000_000;
+//                            System.out.println("tf " + tf);
+                        }
+
+//                        if(i.getClass() == DestructibleDecoration.class){
+//                            System.out.println(i.getName() +" id "+i.getId());
+//                        }
+                        if (serverTick) {
+                            if (i instanceof Destructible d) {
+//                                if (d instanceof StatusEffectContainer c) {
+//                                    c.updateTemporaryEffectsServer();
+//                                }
+                                if (d instanceof Mob x) {
+
+                                    server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
+                                    server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
+                                }
+                            } else if (i instanceof ThrownGrenade x) {
+                                server.broadcast(new GrenadePosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
+                            }
+
+                        }
+
                     }
-                    if (d instanceof Mob x) {
-                        server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
-                        server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
+
+                    if (serverTick) {
+                        tickTimer = 0;
+//                        grid.printAllEntities();
+
                     }
-                } else if (i.getValue() instanceof ThrownGrenade x) {
-                    server.broadcast(new GrenadePosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
+
                 }
             }
-            );
-        }
+        };
+        mobAiExecutor.schedule(r, 0, TimeUnit.MILLISECONDS);
+    }
 
+    @Override // the whole update method should be on another thread
+
+    public void update(float tpf) {
+        timePerFrame = tpf;
+
+        if (!serverPaused) {
+            rootNode.updateLogicalState(tpf);
+            update.set(true);
+        } else {
+            System.out.println("server is PAUSED");
+        }
     }
 
     public void startGame() {
         var gameStartedMsg = new GameStartedMessage();
         server.broadcast(gameStartedMsg);
+        serverPaused = false;
     }
 
     public void addPlayerToGame(HostedConnection hc) {
@@ -319,14 +375,37 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
     private void populateMap() {
         Random r = new Random();
 
-        for (int i = 0; i < 40; i++) {
-            registerRandomChest(new Vector3f(r.nextInt(38 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(38 * BLOCK_SIZE) + BLOCK_SIZE));
-            registerMob().setPositionServer(new Vector3f(r.nextInt(38 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(38 * BLOCK_SIZE) + BLOCK_SIZE));
-            registerRandomDestructibleDecoration(new Vector3f(r.nextInt(38 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(38 * BLOCK_SIZE) + BLOCK_SIZE));
+        int spawnpointOffset = 5 * BLOCK_SIZE;
+        for (int i = 0; i < 20; i++) {
+            registerRandomChest(new Vector3f(r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE));
         }
 
-//        for(int i = 0; i < 10;i++)
-//        registerMob().setPositionServer(new Vector3f(i*BLOCK_SIZE+BLOCK_SIZE + BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE + BLOCK_SIZE));
+        for (int i = 0; i < 20; i++) {
+            var playerSpawnpointOffset = new Vector3f(spawnpointOffset*2, 0, 0);
+            if (new Random().nextBoolean() == false) {
+                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset*2);
+            }
+
+            registerMob().setPositionServer(
+                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
+                            .addLocal(playerSpawnpointOffset)
+            );
+
+        }
+
+        for (int i = 0; i < 20; i++) {
+
+            var playerSpawnpointOffset = new Vector3f(spawnpointOffset, 0, 0);
+            if (new Random().nextBoolean() == false) {
+                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset);
+            }
+
+            registerRandomDestructibleDecoration(
+                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
+                            .addLocal(playerSpawnpointOffset)
+            );;
+        }
+
     }
 
     private void registerRandomDestructibleDecoration(Vector3f pos) {
@@ -347,6 +426,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
 
     public Mob registerMob() {
         var player = new AnimalMobFactory(currentMaxId++, assetManager, rootNode).createServerSide(MobSpawnType.MUD_BEETLE);
+        ((MudBeetle) player).addAi();
         insertIntoCollisionGrid(player);
 
         return registerEntityLocal(player);
@@ -413,7 +493,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
     public Chest registerRandomChest(Vector3f offset) {
         Chest chest = Chest.createRandomChestServer(currentMaxId++, rootNode, offset, assetManager);
         Random r = new Random();
-        int randomValue = r.nextInt(14);
+        int randomValue = r.nextInt(15);
         if (randomValue < 2) {
             Vest playerVest = (Vest) registerItemLocal(ItemTemplates.VEST_TRENCH, true);
             playerVest.setArmorValue(1.05f + r.nextFloat(0f, 0.25f));
@@ -440,18 +520,24 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
             AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.LMG_AMMO_PACK, true);
             chest.addToEquipment(ammo);
         }
-        if (true || randomValue == 11) {
+        if (randomValue == 11) {
             var lmg = registerItemLocal(ItemTemplates.LMG_HOTCHKISS, true);
             chest.addToEquipment(lmg);
         }
+//        randomValue = 12;
 
-        if (randomValue == 12) {
+        if (randomValue == 12 || randomValue == 11) {
             var helmet = registerItemLocal(ItemTemplates.TRENCH_HELMET, true);
 
             chest.addToEquipment(helmet);
         }
-        randomValue = 13;
-        if (randomValue == 13) {
+//        randomValue = 13;
+        if (randomValue == 12 || randomValue == 13) {
+            var helmet = registerItemLocal(ItemTemplates.GAS_MASK, true);
+
+            chest.addToEquipment(helmet);
+        }
+        if (randomValue == 14) {
             var medpack = registerItemLocal(ItemTemplates.MEDPACK, true);
 
             chest.addToEquipment(medpack);

@@ -93,6 +93,7 @@ public class Gloves extends Armor {
     public String getDescription() {
         StringBuilder builder = new StringBuilder();
         builder.append("-Worn\n");
+        builder.append("Armor value: ");
         builder.append(armorValue);
         return builder.toString();
     }

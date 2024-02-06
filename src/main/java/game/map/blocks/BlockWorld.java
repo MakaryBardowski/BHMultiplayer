@@ -9,7 +9,9 @@ import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import java.util.HashMap;
+import java.util.Random;
 import jme3tools.optimize.TextureAtlas;
+import lombok.Getter;
 
 /**
  *
@@ -17,11 +19,14 @@ import jme3tools.optimize.TextureAtlas;
  */
 public class BlockWorld {
 
+    @Getter
     private final int MAP_HEIGHT = 20;
+    @Getter
+    private final int MAP_SIZE;
 
     private final int BLOCK_SIZE;
     private final int CHUNK_SIZE;
-    private final int MAP_SIZE;
+
     private Block[][][] map;  // contains block data - generated based on logic map
     private final byte[][][] logicMap; // contains info if a block is present (!=0) needed for culling
 
@@ -30,7 +35,7 @@ public class BlockWorld {
 
     private final HashMap<String, Chunk> chunks;
     private Node worldNode;
-    
+
     private int temp1;
     private int temp2;
     private int temp3;
@@ -46,8 +51,9 @@ public class BlockWorld {
         chunks = createChunks();
 
         worldNode = new Node("Block World Node");
-        textureAtlas = new TextureAtlas(64, 64);
+        textureAtlas = new TextureAtlas(128, 128);
         textureAtlas.addTexture(asm.loadTexture(BlockType.STONE.textureName), "DiffuseMap");
+        textureAtlas.addTexture(asm.loadTexture(BlockType.DIRT_STONES.textureName), "DiffuseMap");
         textureAtlas.addTexture(asm.loadTexture(BlockType.DIRT.textureName), "DiffuseMap");
 
         initializeBlocks();
@@ -149,12 +155,22 @@ public class BlockWorld {
         // do not change below code - it performantly creates blockData in places where logicMap != 0
         // because it writes to chunk and batches it only once
 
+        Random r = new Random();
+
         for (int x = 0; x < logicMap.length; x++) {
             for (int y = 0; y < logicMap[x].length; y++) {
                 for (int z = 0; z < logicMap[x][y].length; z++) {
 
                     if (logicMap[x][y][z] == 1 || logicMap[x][y][z] == 9) {
                         addBlockDataToChunk(x, y, z, BlockType.STONE);
+                    } else if (logicMap[x][y][z] == 2) {
+                        var bt = BlockType.DIRT;
+                        if (r.nextInt(5) == 1) {
+                            bt = BlockType.DIRT_STONES;
+                        }
+
+                        addBlockDataToChunk(x, y, z, bt);
+
                     }
                 }
             }
@@ -171,9 +187,9 @@ public class BlockWorld {
     }
 
     public byte getBlockTypeByPosition(Vector3f position) {
-         temp1 = (int) (Math.floor(position.x / BLOCK_SIZE));
-         temp2 = (int) (Math.floor(position.y / BLOCK_SIZE));
-         temp3 = (int) (Math.floor(position.z / BLOCK_SIZE));
+        temp1 = (int) (Math.floor(position.x / BLOCK_SIZE));
+        temp2 = (int) (Math.floor(position.y / BLOCK_SIZE));
+        temp3 = (int) (Math.floor(position.z / BLOCK_SIZE));
         return logicMap[temp1][temp2][temp3];
     }
 

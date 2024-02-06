@@ -4,6 +4,7 @@
  */
 package game.entities.mobs;
 
+import behaviorTree.BehaviorTree;
 import client.ClientGameAppState;
 import game.entities.Destructible;
 import game.items.Item;
@@ -20,13 +21,15 @@ import java.util.Arrays;
 import java.util.Random;
 import lombok.Getter;
 import lombok.Setter;
+import server.ServerMain;
 
 /**
  *
  * @author 48793
  */
 public abstract class Mob extends StatusEffectContainer implements CollidableInterface, MobInterface {
-
+    protected BehaviorTree behaviorTree;
+    
     protected static final float MOB_ROTATION_RATE = 6f;
 
     public static final int SPEED_ATTRIBUTE = 2;
@@ -121,13 +124,13 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 
     protected void dropEquipment() {
         Random r = new Random();
-        System.err.println("player " + this + " equipment:\n" + Arrays.toString(this.getEquipment()) + "\n\n");
+//        System.err.println("player " + this + " equipment:\n" + Arrays.toString(this.getEquipment()) + "\n\n");
 
-        System.out.println("eq to be dropped: " + Arrays.toString(equipment));
+//        System.out.println("eq to be dropped: " + Arrays.toString(equipment));
         for (int i = 0; i < equipment.length; i++) {
             Item item = equipment[i];
             if (item != null) {
-                System.out.println("dropping " + item + " its node " + item.getNode() + " its position " + item.getNode().getWorldTranslation());
+//                System.out.println("dropping " + item + " its node " + item.getNode() + " its position " + item.getNode().getWorldTranslation());
                 item.drop(node.getWorldTranslation().add(r.nextFloat(-0.25f, 0.25f), 2 + r.nextFloat(-1, 1), r.nextFloat(-0.25f, 0.25f)));
                 equipment[i] = null;
             }
@@ -154,5 +157,18 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 
         return item;
     }
+
+    @Override
+    public void updateAi(){
+        if(behaviorTree != null)
+    behaviorTree.update();
+    };
+
+    @Override
+    public boolean isAbleToMove() {
+        return !isDead();
+    }
+    
+    
 
 }

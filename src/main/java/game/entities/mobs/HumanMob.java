@@ -165,7 +165,7 @@ public class HumanMob extends Mob {
     @Override
     public void receiveDamage(float damage) {
         health -= calculateDamage(damage);
-
+        
         var notMe = this != ClientGameAppState.getInstance().getPlayer();
         ParticleEmitter blood = EmitterPooler.getBlood();
         Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 2, 0);
@@ -254,6 +254,7 @@ public class HumanMob extends Mob {
     public float calculateDamage(float damage) {
         float reducedDmg = damage - getArmorValue();
         return reducedDmg > 0 ? reducedDmg : 0;
+//return 0;
     }
 
     @Override

@@ -106,6 +106,12 @@ public class MapGenerator {
         logicMap[16][1][22] = 1;
         logicMap[30][1][23] = 1;
         logicMap[11][1][23] = 1;
+        
+        for(int x = 0; x< logicMap.length;x++)
+            for(int z =0; z < logicMap[x][1].length;z++)
+                if(logicMap[x][0][z] != 0)
+                    logicMap[x][0][z] = 2;
+        
         return logicMap;
     }
 

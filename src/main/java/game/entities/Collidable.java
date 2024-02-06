@@ -5,6 +5,7 @@
 package game.entities;
 
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -12,8 +13,10 @@ import game.map.collision.CollisionDebugUtils;
 import game.map.collision.CollisionShape;
 import game.map.collision.RectangleAABB;
 import game.map.collision.RectangleOBB;
+import game.map.collision.WorldGrid;
 import lombok.Getter;
 import lombok.Setter;
+import server.ServerMain;
 
 /**
  *
@@ -56,4 +59,23 @@ public abstract class Collidable extends Movable {
     public static boolean isCollisionShapePassable(Collidable c) {
         return c.getCollisionShape() instanceof RectangleOBB;
     }
+
+    @Override
+    public void moveServer(Vector3f moveVec) {
+        if(isAbleToMove()){
+        WorldGrid grid = ServerMain.getInstance().getGrid();
+        grid.remove(this);
+        node.move(moveVec);
+        grid.insert(this);
+        }
+    }
+;
+
+    @Override
+    public String toString() {
+        return "Collidable{" +name+ '}';
+    }
+
+    
+    
 }

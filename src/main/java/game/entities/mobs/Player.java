@@ -92,6 +92,7 @@ public class Player extends HumanMob {
 
     public Player(int id, Node node, String name, Camera mainCamera, SkinningControl skinningControl, AnimComposer composer) {
         super(id, node, name, skinningControl, composer);
+        
         this.mainCamera = mainCamera;
         firstPersonHands = new FirstPersonHands(this);
         hotbar = new Item[HOTBAR_SIZE];

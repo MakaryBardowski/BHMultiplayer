@@ -64,7 +64,7 @@ public class TimedSpatialRemoveControl extends AbstractControl implements Savabl
                     it.next();
                     it.remove();
                 }
-                System.out.println(e.getActiveParticleCount());
+//                System.out.println(e.getActiveParticleCount());
             }
             spatial.removeFromParent();
             spatial.removeControl(this);

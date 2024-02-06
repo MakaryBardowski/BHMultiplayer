@@ -35,6 +35,7 @@ import com.jme3.network.ClientStateListener;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.custom.ArmatureDebugger;
 import com.jme3.ui.Picture;
 import de.lessvoid.nifty.Nifty;
@@ -121,7 +122,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     @Getter
     private final InputManager inputManager;
 
-    private final ConcurrentLinkedQueue<AbstractMessage> messageQueue = new ConcurrentLinkedQueue<>();
 
     @Getter
     private final ConcurrentHashMap<Integer, InteractiveEntity> mobs = new ConcurrentHashMap<>();
@@ -178,6 +178,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Override
     public void update(float tpf) {
+        
         if (player != null) {
             player.move(tpf, this);
             player.updateTemporaryEffectsClient();
@@ -220,9 +221,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 //                    });
     }
 
-    public ConcurrentLinkedQueue<AbstractMessage> getMessageQueue() {
-        return messageQueue;
-    }
 
     public Mob registerMob(Integer id, MobSpawnType spawnType) {
         var mobFactory = new AnimalMobFactory(id,
@@ -322,4 +320,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     public void clientDisconnected(Client client, DisconnectInfo di) {
 
     }
+
+    
 }

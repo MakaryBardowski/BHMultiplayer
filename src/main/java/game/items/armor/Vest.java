@@ -24,15 +24,15 @@ import messages.items.NewVestMessage;
  * @author 48793
  */
 public class Vest extends Armor {
-    
+
     public Vest(int id, ItemTemplates.ItemTemplate template, String name, Node node) {
         super(id, template, name, node);
     }
-    
+
     public Vest(int id, ItemTemplates.ItemTemplate template, String name, Node node, boolean droppable) {
         super(id, template, name, node, droppable);
     }
-    
+
     @Override
     public void playerEquip(Player m) {
         m.setVest(this);
@@ -43,47 +43,49 @@ public class Vest extends Armor {
         n.attachChild(vest);
         setupModelShootability(vest, m.getId());
     }
-    
+
     @Override
     public void playerUnequip(Player m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
+
     @Override
     public void onShot(Mob shooter, float damage) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
+
     @Override
     public void onInteract() {
-        
+
         ClientGameAppState gs = ClientGameAppState.getInstance();
         MobItemInteractionMessage imsg = new MobItemInteractionMessage(this, gs.getPlayer(), MobItemInteractionMessage.ItemInteractionType.PICK_UP);
         imsg.setReliable(true);
         gs.getClient().send(imsg);
-        
+
     }
-    
+
     @Override
     public AbstractMessage createNewEntityMessage() {
         NewVestMessage msg = new NewVestMessage(this);
         msg.setReliable(true);
         return msg;
     }
-    
+
     @Override
     public void playerServerEquip(HumanMob m) {
         m.setVest(this);
     }
-    
+
     @Override
     public void playerServerUnequip(HumanMob m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-            @Override
+
+    @Override
     public String getDescription() {
         StringBuilder builder = new StringBuilder();
         builder.append("-Worn\n");
+        builder.append("Armor value: ");
         builder.append(armorValue);
         return builder.toString();
     }

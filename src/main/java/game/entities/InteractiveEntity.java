@@ -8,6 +8,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import game.entities.mobs.Mob;
+import game.map.collision.WorldGrid;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -45,6 +46,9 @@ public abstract class InteractiveEntity {
     public abstract void setPosition(Vector3f newPos);
 
     public abstract void setPositionServer(Vector3f newPos);
+
+ 
+
 
     public abstract AbstractMessage createNewEntityMessage();
 
