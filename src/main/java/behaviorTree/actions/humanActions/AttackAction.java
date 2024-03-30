@@ -28,7 +28,7 @@ public class AttackAction extends NodeAction {
         var beetle = (MudBeetle) context.getBlackboard().get(MudBeetleContext.STEERED_MUD_BEETLE);
         var target = context.getBlackboard().get(MudBeetleContext.TARGET_DESTRUCTIBLE);
 
-        currentGunCooldown -= 0.016f;
+        currentGunCooldown -= ServerMain.getTimePerFrame();
         if (currentGunCooldown < 0) {
             if (target != null) {
                 var destructibleTarget = (Destructible) target;

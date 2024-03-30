@@ -121,6 +121,14 @@ public class Pistol extends RangedWeapon {
 
             firerateControl = new FirerateControl(this);
             gunRecoil = new RecoilControl(.2f, -.3f, .0f, .00f, 20, 0.4f);
+            
+//            gunRecoil = new GunRecoilControl(-6f, -0.07f, 0.0425f, 0.04f, 40, 1f);
+//            
+//            gunRecoil.setRotationReturnSpeed(0.02f);
+//            gunRecoil.setRotationSpeed(3);
+//            gunRecoil.setTranslationSpeed(0);
+//            gunRecoil.setTranslationReturnSpeed(0.0f);
+            
             camRecoil = new CameraRecoilControl(0.3f, -.05f, .1f, .05f, 20, 0.5f);
 
             model.addControl(firerateControl);

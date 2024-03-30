@@ -26,16 +26,18 @@ public class PlayerJoinedMessage extends TwoWayMessage {
     private float z;
     @Getter
     private String name;
+    private int classIndex;
 
     public PlayerJoinedMessage() {
     }
 
-    public PlayerJoinedMessage(int id, Vector3f pos, String name) {
+    public PlayerJoinedMessage(int id, Vector3f pos, String name, int classIndex) {
         this.id = id;
         this.x = pos.getX();
         this.y = pos.getY();
         this.z = pos.getZ();
         this.name = name;
+        this.classIndex = classIndex;
     }
 
     public Vector3f getPos() {
@@ -73,7 +75,7 @@ public class PlayerJoinedMessage extends TwoWayMessage {
     }
 
     private Player registerOtherPlayer(PlayerJoinedMessage nmsg) {
-        return ClientGameAppState.getInstance().registerPlayer(nmsg.getId(), false);
+        return ClientGameAppState.getInstance().registerPlayer(nmsg.getId(), false, classIndex);
     }
 
 }

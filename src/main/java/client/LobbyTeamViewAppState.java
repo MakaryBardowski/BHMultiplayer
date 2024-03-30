@@ -33,6 +33,7 @@ import static game.map.blocks.VoxelLighting.setupModelLight;
 import java.nio.FloatBuffer;
 import lombok.Setter;
 import messages.lobby.HostChangedNicknameMessage;
+import messages.lobby.HostChangedPlayerClassMessage;
 
 /**
  *
@@ -88,6 +89,8 @@ public class LobbyTeamViewAppState extends BaseAppState {
 
         var startCamLoc = getApplication().getCamera().getLocation().clone().setY(6).setZ(6.1f);
         getApplication().getCamera().setLocation(startCamLoc);
+
+        changeClass(0);
     }
 
     private void generateBackground() {
@@ -162,45 +165,44 @@ public class LobbyTeamViewAppState extends BaseAppState {
 
     public static void changeClass(int classIndex) {
         teamNode.detachAllChildren();
-        Spatial player = null; 
+        Spatial player = null;
         switch (classIndex) {
-            case 0:
-                {
-                    ItemTemplates.HelmetTemplate helmetTemplate = (ItemTemplates.HelmetTemplate) ItemTemplates.HEAD_1;
-                    var vestTemplate = ItemTemplates.TORSO_1;
-                    var glovesTemplate = ItemTemplates.HAND_1;
-                    var bootsTemplate = ItemTemplates.BOOTS_TRENCH;
-                    player = LobbyTeamViewAppState.loadPlayerDummy(helmetTemplate, vestTemplate, glovesTemplate, bootsTemplate);
-                    teamNode.attachChild(player);
-                    player.move(0, 4, 0);
-                    break;
-                }
-            case 1:
-                {
-                    ItemTemplates.HelmetTemplate helmetTemplate = (ItemTemplates.HelmetTemplate) ItemTemplates.GAS_MASK;
-                    var vestTemplate = ItemTemplates.VEST_TRENCH;
-                    var glovesTemplate = ItemTemplates.HAND_1;
-                    var bootsTemplate = ItemTemplates.BOOTS_TRENCH;
-                    player = LobbyTeamViewAppState.loadPlayerDummy(helmetTemplate, vestTemplate, glovesTemplate, bootsTemplate);
-                    teamNode.attachChild(player);
-                    player.move(0, 4, 0);
-                    break;
-                }
-            case 2:
-                {
-                    ItemTemplates.HelmetTemplate helmetTemplate = (ItemTemplates.HelmetTemplate) ItemTemplates.TRENCH_HELMET;
-                    var vestTemplate = ItemTemplates.VEST_TRENCH;
-                    var glovesTemplate = ItemTemplates.HAND_1;
-                    var bootsTemplate = ItemTemplates.BOOTS_TRENCH;
-                    player = LobbyTeamViewAppState.loadPlayerDummy(helmetTemplate, vestTemplate, glovesTemplate, bootsTemplate);
-                    teamNode.attachChild(player);
-                    player.move(0, 4, 0);
-                    break;
-                }
+            case 0: {
+                ItemTemplates.HelmetTemplate helmetTemplate = (ItemTemplates.HelmetTemplate) ItemTemplates.HEAD_1;
+                var vestTemplate = ItemTemplates.TORSO_1;
+                var glovesTemplate = ItemTemplates.HAND_1;
+                var bootsTemplate = ItemTemplates.BOOTS_TRENCH;
+                player = LobbyTeamViewAppState.loadPlayerDummy(helmetTemplate, vestTemplate, glovesTemplate, bootsTemplate);
+                teamNode.attachChild(player);
+                player.move(0, 4, 0);
+                break;
+            }
+            case 1: {
+                ItemTemplates.HelmetTemplate helmetTemplate = (ItemTemplates.HelmetTemplate) ItemTemplates.GAS_MASK;
+                var vestTemplate = ItemTemplates.VEST_TRENCH;
+                var glovesTemplate = ItemTemplates.HAND_1;
+                var bootsTemplate = ItemTemplates.BOOTS_TRENCH;
+                player = LobbyTeamViewAppState.loadPlayerDummy(helmetTemplate, vestTemplate, glovesTemplate, bootsTemplate);
+                teamNode.attachChild(player);
+                player.move(0, 4, 0);
+                break;
+            }
+            case 2: {
+                ItemTemplates.HelmetTemplate helmetTemplate = (ItemTemplates.HelmetTemplate) ItemTemplates.TRENCH_HELMET;
+                var vestTemplate = ItemTemplates.VEST_TRENCH;
+                var glovesTemplate = ItemTemplates.HAND_1;
+                var bootsTemplate = ItemTemplates.BOOTS_TRENCH;
+                player = LobbyTeamViewAppState.loadPlayerDummy(helmetTemplate, vestTemplate, glovesTemplate, bootsTemplate);
+                teamNode.attachChild(player);
+                player.move(0, 4, 0);
+                break;
+            }
             default:
                 throw new IllegalArgumentException("class index " + classIndex + " is invalid");
         }
-                player.rotate(0,FastMath.DEG_TO_RAD*30, 0);
+        player.rotate(0, FastMath.DEG_TO_RAD * 30, 0);
+        var classChangedMsg = new HostChangedPlayerClassMessage(client.getClient().getId(), classIndex);
+        client.getClient().send(classChangedMsg);
 
     }
 

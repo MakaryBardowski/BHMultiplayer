@@ -35,7 +35,7 @@ public class AnimalMobFactory extends MobFactory {
     }
 
     @Override
-    public Mob createClientSide(MobSpawnType spawnType) {
+    public Mob createClientSide(MobSpawnType spawnType,Object... creationData) {
       if(spawnType == MUD_BEETLE){
         MudBeetle p = createMudBeetle();
         return p;
@@ -44,7 +44,7 @@ public class AnimalMobFactory extends MobFactory {
     }
 
     @Override
-    public Mob createServerSide(MobSpawnType spawnType) {
+    public Mob createServerSide(MobSpawnType spawnType,Object... creationData) {
         if(spawnType == MUD_BEETLE){
         MudBeetle p = createMudBeetle();
         DestructibleUtils.attachDestructibleToNode(p, mobsNode, new Vector3f(10, 4, 10));

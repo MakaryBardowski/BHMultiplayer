@@ -14,7 +14,6 @@ import game.effects.ParticleUtils;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.InteractiveEntity;
 import game.items.ItemTemplates.ItemTemplate;
-import javax.naming.OperationNotSupportedException;
 import lombok.Getter;
 
 /**

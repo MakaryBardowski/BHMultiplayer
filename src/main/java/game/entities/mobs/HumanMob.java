@@ -95,6 +95,7 @@ public class HumanMob extends Mob {
         mask.addBones(armature, "LegR");
         mask.addBones(armature, "Spine");
         modelComposer.makeLayer("Legs", mask);
+        modelComposer.setCurrentAction("Idle", "Legs");
 
         createHitbox();
     }
@@ -165,7 +166,7 @@ public class HumanMob extends Mob {
     @Override
     public void receiveDamage(float damage) {
         health -= calculateDamage(damage);
-        
+
         var notMe = this != ClientGameAppState.getInstance().getPlayer();
         ParticleEmitter blood = EmitterPooler.getBlood();
         Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 2, 0);
@@ -219,7 +220,7 @@ public class HumanMob extends Mob {
 
     @Override
     public AbstractMessage createNewEntityMessage() {
-        NewMobMessage msg = new NewMobMessage(this, node.getWorldTranslation(),HUMAN);
+        NewMobMessage msg = new NewMobMessage(this, node.getWorldTranslation(), HUMAN);
         msg.setReliable(true);
         return msg;
     }
@@ -265,7 +266,7 @@ public class HumanMob extends Mob {
         hitboxNode.move(0, hitboxHeight, 0);
         collisionShape = new RectangleAABB(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
         showHitboxIndicator();
-        System.out.println(" hitbox "+collisionShape);
+        System.out.println(" hitbox " + collisionShape);
     }
 
     @Override
@@ -282,66 +283,6 @@ public class HumanMob extends Mob {
         grid.remove(this);
         node.setLocalTranslation(newPos);
         grid.insert(this);
-    }
-
-    @Override
-    public boolean wouldNotCollideWithSolidEntitiesAfterMove(Vector3f moveVec) {
-        // kolizja ze scianami
-        /*
-        for (wierzcholek hitboxa){
-        if( grid[wierzcholek.zaokraglony.x][...y][...z] != 0){
-        return false
-        }
-        }
-        
-        
-         */
-
-        var newPos = collisionShape.getPosition().add(moveVec);
-        float centerX = newPos.getX();
-        float centerY = newPos.getY();
-        float centerZ = newPos.getZ();
-        float width = collisionShape.getWidth();
-        float height = collisionShape.getHeight(); // height == 1.25??
-        float depth = collisionShape.getLength();
-        float[][] corners = new float[8][3];
-        corners[0] = new float[]{centerX - width, centerY + height, centerZ - depth};
-        corners[1] = new float[]{centerX + width, centerY + height, centerZ - depth};
-        corners[2] = new float[]{centerX - width, centerY + height, centerZ + depth};
-        corners[3] = new float[]{centerX + width, centerY + height, centerZ + depth};
-        corners[4] = new float[]{centerX - width, centerY , centerZ - depth};
-        corners[5] = new float[]{centerX + width, centerY , centerZ - depth};
-        corners[6] = new float[]{centerX - width, centerY , centerZ + depth};
-        corners[7] = new float[]{centerX + width, centerY , centerZ + depth};
-        var cellSize = ClientGameAppState.getInstance().getBLOCK_SIZE();
-        for (var corner : corners) {
-            int x =  (int) (Math.floor(corner[0] / cellSize));
-            int y = (int) (Math.floor(corner[1] / cellSize));
-            int z =(int) (Math.floor(corner[2] / cellSize));
-
-            if (ClientGameAppState.getInstance().getMap().getBlockWorld().getLogicMap()[x][y][z] != 0) {
-                return false;
-            }
-        }
-        // above is wall collision
-
-        for (Collidable m : ClientGameAppState.getInstance().getGrid().getNearbyAfterMove(this, moveVec)) {
-            if (isNotCollisionShapePassable(m) && this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    protected void checkCollisionWithPassableEntities() {
-        Vector3f newPos = collisionShape.getPosition();
-        for (Collidable m : ClientGameAppState.getInstance().getGrid().getNearby(this)) {
-            if (isCollisionShapePassable(m) && this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
-                m.onCollisionClient(this); // mine explodes etc
-            }
-        }
-
     }
 
     @Override
@@ -370,13 +311,15 @@ public class HumanMob extends Mob {
 
     @Override
     public void setPosInterpolationValue(float posInterpolationValue) {
-        super.setPosInterpolationValue(posInterpolationValue); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-        if (posInterpolationValue != 1 && modelComposer.getLayer("Legs").getCurrentActionName() != null && !modelComposer.getLayer("Legs").getCurrentActionName().equals("Run")) {
+        super.setPosInterpolationValue(posInterpolationValue);
+
+        System.out.println("posInterpolationValue " + posInterpolationValue);
+        System.out.println("modelComposer.getLayer(\"Legs\").getTime() " + modelComposer.getLayer("Legs").getTime());
+
+        if (!modelComposer.getLayer("Legs").getCurrentActionName().equals("Run")) {
             modelComposer.setCurrentAction("Run", "Legs");
             modelComposer.getLayer("Legs").getCurrentAction().setSpeed(2);
-        } else if (posInterpolationValue == 1) {
-            modelComposer.setCurrentAction("Idle", "Legs");
-        }
+        }  
 
     }
 

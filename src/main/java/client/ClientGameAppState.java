@@ -122,7 +122,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     @Getter
     private final InputManager inputManager;
 
-
     @Getter
     private final ConcurrentHashMap<Integer, InteractiveEntity> mobs = new ConcurrentHashMap<>();
 
@@ -154,7 +153,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     private Nifty nifty;
 
     @Getter
-    private String serverIp;
+    private final String serverIp;
 
     @Getter
     private boolean debug;
@@ -173,12 +172,13 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {        // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
+        grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
         connectToServer();
     }
 
     @Override
     public void update(float tpf) {
-        
+
         if (player != null) {
             player.move(tpf, this);
             player.updateTemporaryEffectsClient();
@@ -205,22 +205,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
             }
         }
         );
-//
-//        
-//        System.out.println("\n\n\n");
-//                mobs.values().stream()
-//                    .filter(x -> x instanceof HumanMob)
-//                    .map(x -> (HumanMob) x)
-//                    .forEach((x) -> {
-//                        System.err.println("----CLIENT----Player " + x.getId());
-//                        System.err.println("equipped helmet =" + x.getHelmet() + " (default " + x.getDefaultHelmet());
-//                        System.err.println("equipped vest =" + x.getVest() + " (default " + x.getDefaultVest());
-//                        System.err.println("equipped gloves =" + x.getGloves() + " (default " + x.getDefaultGloves());
-//                        System.err.println("equipped boots =" + x.getBoots() + " (default " + x.getDefaultBoots());
-//                        System.err.println("equipment = "+Arrays.toString(x.getEquipment()));
-//                    });
-    }
 
+    }
 
     public Mob registerMob(Integer id, MobSpawnType spawnType) {
         var mobFactory = new AnimalMobFactory(id,
@@ -232,8 +218,8 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         return p;
     }
 
-    public Player registerPlayer(Integer id, boolean setAsPlayer) {
-        Player p = new PlayerFactory(id, destructibleNode, getCamera(), setAsPlayer).createClientSide(null);
+    public Player registerPlayer(Integer id, boolean setAsPlayer, int playerClassIndex) {
+        Player p = new PlayerFactory(id, destructibleNode, getCamera(), setAsPlayer).createClientSide(null, playerClassIndex);
         this.mobs.put(id, p);
         return p;
     }
@@ -283,8 +269,6 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
         app.getViewPort().setBackgroundColor(ColorRGBA.Cyan.clone());
         app.getViewPort().setClearColor(true);
 
-        grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
-
         MapGenerator mg = new MapGenerator();
         map = mg.generateMap(MapType.BOSS, BLOCK_SIZE, CHUNK_SIZE, MAP_SIZE, assetManager, mapNode);
 
@@ -321,5 +305,4 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     }
 
-    
 }

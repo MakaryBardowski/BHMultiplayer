@@ -22,6 +22,7 @@ import com.jme3.scene.shape.Box;
  * @author 48793
  */
 public class DebugUtils {
+    public static Geometry DEBUG_GEO = null;
 
     public static void drawGrid() {
         var cs = ClientGameAppState.getInstance();

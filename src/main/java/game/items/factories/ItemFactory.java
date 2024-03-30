@@ -20,6 +20,7 @@ import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.items.consumable.Medpack;
+import game.items.weapons.Axe;
 import game.items.weapons.Grenade;
 import game.items.weapons.Knife;
 import game.items.weapons.LightMachineGun;
@@ -59,6 +60,8 @@ public class ItemFactory {
                     return createGrenade(id, template, droppable);
                 case KNIFE:
                     return createKnife(id, template, droppable);
+                case AXE:
+                    return createAxe(id, template, droppable);
                 case PISTOL_AMMO:
                     return createPistolAmmoPack(id, template, droppable);
                 case RIFLE_AMMO:
@@ -136,6 +139,13 @@ public class ItemFactory {
         Node dropNode = createItemDropNode(template);
         float attacksPerSec = 2;
         Knife pistol = new Knife(id, 6f, template, "Trench Knife", dropNode, droppable, attacksPerSec);
+        return pistol;
+    }
+
+    private Item createAxe(int id, ItemTemplate template, boolean droppable) {
+        Node dropNode = createItemDropNode(template);
+        float attacksPerSec = 1.25f;
+        Axe pistol = new Axe(id, 6f, template, "Fireaxe", dropNode, droppable, attacksPerSec);
         return pistol;
     }
 

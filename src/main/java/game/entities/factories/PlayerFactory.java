@@ -21,6 +21,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.custom.ArmatureDebugger;
 import game.entities.DestructibleUtils;
+import game.entities.mobs.playerClasses.PlayerClass;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -60,8 +61,9 @@ public class PlayerFactory extends MobFactory {
     }
 
     @Override
-    public Player createClientSide(MobSpawnType spawnType) { // mob spawn type doesnt matter for player
-        Player p = createPlayer();
+    public Player createClientSide(MobSpawnType spawnType, Object... creationData) { // mob spawn type doesnt matter for player
+        PlayerClass pc = PlayerClass.getClassByIndex((int)creationData[0]);
+        Player p = createPlayer(pc);
 //        DestructibleUtils.attachDestructibleToNode(p, mobsNode, playerSpawnpoint);
         if (setAsPlayer) {
             setupFirstPersonCamera(p);
@@ -70,19 +72,20 @@ public class PlayerFactory extends MobFactory {
     }
 
     @Override
-    public Player createServerSide(MobSpawnType spawnType) { // mob spawn type doesnt matter for player
-        Player p = createPlayer();
+    public Player createServerSide(MobSpawnType spawnType, Object... creationData) { // mob spawn type doesnt matter for player
+        PlayerClass pc = PlayerClass.getClassByIndex((int)creationData[0]);
+        Player p = createPlayer(pc);
         DestructibleUtils.attachDestructibleToNode(p, mobsNode, playerSpawnpoint);
         return p;
     }
 
-    private Player createPlayer() {
+    private Player createPlayer(PlayerClass pc) {
         Node playerNode = loadPlayerModel();
         String name = "Player_" + id;
         SkinningControl skinningControl = getSkinningControl(playerNode);
         AnimComposer composer = getAnimComposer(playerNode);
         System.out.println("[PlayerFactory] create player id " + id);
-        return new Player(id, playerNode, name, mainCamera, skinningControl, composer);
+        return new Player(id, playerNode, name, mainCamera, skinningControl, composer, pc);
     }
 
     private void setupFirstPersonCamera(Player p) {

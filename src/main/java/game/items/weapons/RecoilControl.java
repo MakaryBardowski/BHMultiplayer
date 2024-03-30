@@ -12,12 +12,15 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import java.util.Random;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
  * @author tomas
  */
 public class RecoilControl extends AbstractControl {
+
     protected Random random = new Random();
     protected static final float RECOIL_SPEED = 0.016f;
     protected float recoilX = 0f;
@@ -25,18 +28,34 @@ public class RecoilControl extends AbstractControl {
     protected float recoilZ = 0f;
     protected int snap; // 30 feels strong
     protected float kickback;
-    
+
     protected Quaternion currentRotationRecoil = new Quaternion(0, 0, 0, 1);
     protected Quaternion targetRotationRecoil = new Quaternion(0, 0, 0, 1);
     protected Vector3f currentVectorRecoil = new Vector3f(0, 0, 0);
     protected Vector3f targetVectorRecoil = new Vector3f(0, 0, 0);
     protected float backRecoil;
-    
-    public RecoilControl(float kickback, float recoilX, float recoilY, float recoilZ,int  snap) {
-        this(kickback,recoilX,recoilY,recoilZ,snap,0);
+
+    @Getter
+    @Setter
+    protected float rotationReturnSpeed = 1f;
+
+    @Getter
+    @Setter
+    protected float rotationSpeed = 1f;
+
+    @Getter
+    @Setter
+    protected float translationReturnSpeed = 1f;
+
+    @Getter
+    @Setter
+    protected float translationSpeed = 1f;
+
+    public RecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, int snap) {
+        this(kickback, recoilX, recoilY, recoilZ, snap, 0);
     }
-    
-        public RecoilControl(float kickback, float recoilX, float recoilY, float recoilZ,int  snap, float backRecoil) {
+
+    public RecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, int snap, float backRecoil) {
         this.kickback = kickback;
         this.recoilX = recoilX;
         this.recoilY = recoilY;
@@ -44,15 +63,14 @@ public class RecoilControl extends AbstractControl {
         this.snap = snap;
         this.backRecoil = backRecoil;
     }
-    
-    
 
     // better recoil for any type of weapon
     public void recoilUpdate() {
-        targetRotationRecoil.nlerp(new Quaternion(0, 0, 0, 1), RECOIL_SPEED * snap);
-        currentRotationRecoil.slerp(targetRotationRecoil, RECOIL_SPEED * snap);
-        targetVectorRecoil.interpolateLocal(new Vector3f(0, 0, 0), RECOIL_SPEED * snap);
-        currentVectorRecoil.interpolateLocal(targetVectorRecoil, RECOIL_SPEED * snap);
+        targetRotationRecoil.nlerp(new Quaternion(0, 0, 0, 1), RECOIL_SPEED * snap * rotationReturnSpeed);
+        currentRotationRecoil.slerp(targetRotationRecoil, RECOIL_SPEED * snap * rotationSpeed);
+
+        targetVectorRecoil.interpolateLocal(new Vector3f(0, 0, 0), RECOIL_SPEED * snap * translationReturnSpeed);
+        currentVectorRecoil.interpolateLocal(targetVectorRecoil, RECOIL_SPEED * snap * translationSpeed);
 
         spatial.setLocalRotation(currentRotationRecoil);
         spatial.setLocalTranslation(currentVectorRecoil);
@@ -134,6 +152,4 @@ public class RecoilControl extends AbstractControl {
         //
     }
 
-
-    
 }

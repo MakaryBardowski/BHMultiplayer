@@ -23,6 +23,7 @@ import static client.Main.CAM_ROT_SPEED;
 import static client.Main.CAM__MOVE_SPEED;
 import com.jme3.anim.AnimComposer;
 import com.jme3.network.AbstractMessage;
+import game.entities.mobs.playerClasses.PlayerClass;
 import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
 import game.map.collision.WorldGrid;
 import lombok.Getter;
@@ -70,6 +71,10 @@ public class Player extends HumanMob {
     @Getter
     @Setter
     protected FirstPersonHands firstPersonHands;
+    
+    
+    @Getter
+    private PlayerClass playerClass;
 
     @Override
     public void equip(Item item) {
@@ -90,9 +95,9 @@ public class Player extends HumanMob {
         return gunNode;
     }
 
-    public Player(int id, Node node, String name, Camera mainCamera, SkinningControl skinningControl, AnimComposer composer) {
+    public Player(int id, Node node, String name, Camera mainCamera, SkinningControl skinningControl, AnimComposer composer,PlayerClass playerClass) {
         super(id, node, name, skinningControl, composer);
-        
+        this.playerClass = playerClass;
         this.mainCamera = mainCamera;
         firstPersonHands = new FirstPersonHands(this);
         hotbar = new Item[HOTBAR_SIZE];
@@ -141,8 +146,7 @@ public class Player extends HumanMob {
 
     @Override
     public void move(float tpf, ClientGameAppState cm) {
-
-        if (forward || backward || left || right) {
+        if ((forward || backward || left || right) && !isMovementControlLocked()) {
              movementVector.set(0,0,0);
 
             WorldGrid collisionGrid = ClientGameAppState.getInstance().getGrid();
@@ -186,7 +190,7 @@ public class Player extends HumanMob {
                 cm.getClient().send(posu);
             }
 
-            checkCollisionWithPassableEntities();
+            checkCollisionWithPassableEntitiesClient();
 
             collisionGrid.insert(this);
         }

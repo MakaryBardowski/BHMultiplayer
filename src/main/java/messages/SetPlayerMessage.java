@@ -30,16 +30,20 @@ public class SetPlayerMessage extends TwoWayMessage {
     private float z;
     @Getter
     private String name;
+    
+    @Getter
+    private int classIndex;
 
     public SetPlayerMessage() {
     }
 
-    public SetPlayerMessage(int id, Vector3f pos, String name) {
+    public SetPlayerMessage(int id, Vector3f pos, String name,int classIndex) {
         this.id = id;
         this.x = pos.getX();
         this.y = pos.getY();
         this.z = pos.getZ();
         this.name = name;
+        this.classIndex = classIndex;
     }
 
     public Vector3f getPos() {
@@ -89,7 +93,7 @@ public class SetPlayerMessage extends TwoWayMessage {
     }
 
     private Player registerMyPlayer(SetPlayerMessage nmsg) {
-        return ClientGameAppState.getInstance().registerPlayer(nmsg.getId(), true);
+        return ClientGameAppState.getInstance().registerPlayer(nmsg.getId(), true,classIndex);
     }
 
 }

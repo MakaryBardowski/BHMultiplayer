@@ -29,7 +29,7 @@ public class CheckForTargetAction extends NodeAction {
     private Random r = new Random();
     private static List<Destructible> viableTargets = new ArrayList<>();
     private static float TEST_SIGHT_RANGE = 16;
-    private static float CONE_WIDTH_DEG = 180;
+    private static float CONE_WIDTH_DEG = 45;
 
     private Vector3f previousTargetPosition = null;
 

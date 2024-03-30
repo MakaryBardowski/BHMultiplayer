@@ -7,6 +7,9 @@ package game.cameraAndInput;
 
 import game.entities.mobs.Player;
 import client.ClientGameAppState;
+import client.Main;
+import static client.Main.CAM_ROT_SPEED;
+import static client.Main.CAM__MOVE_SPEED;
 import client.PlayerHUDController;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
@@ -18,12 +21,15 @@ import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
+import static debugging.DebugUtils.DEBUG_GEO;
 import game.entities.InteractiveEntity;
 import game.items.Item;
 import game.items.weapons.Grenade;
@@ -56,6 +62,8 @@ public class InputController {
     private Quaternion newRotationQuat;
     private float currentMaxDeviationX = 0;
     private float currentMaxDeviationY = 0;
+
+    private boolean updatePlayersThirdPersonHandsRot = false;
 
     public void createInputListeners(ClientGameAppState gs) {
         m = gs.getInputManager();
@@ -157,11 +165,40 @@ public class InputController {
                     }
                 }
 
+//                if (name.equals("2") && !keyPressed) {
+//                    DEBUG_GEO.rotate(10 * FastMath.DEG_TO_RAD, 0, 0);
+//                }
+//
+//                if (name.equals("3") && !keyPressed) {
+//                    DEBUG_GEO.rotate(0, 0, 10 * FastMath.DEG_TO_RAD);
+//                }
+//                if (name.equals("4") && !keyPressed) {
+//                    DEBUG_GEO.rotate(0, 10 * FastMath.DEG_TO_RAD, 0);
+//                }
+
                 if (name.equals(
                         "K") && !keyPressed) {
-//                    gs.chatPutMessage("Cheat!");
-                }
+//                    float[] rot = new float[3];
+//                    DEBUG_GEO.getLocalRotation().toAngles(rot);
+//                    System.out.println("DEBUG GEO ROT "+Arrays.toString(rot));
+                    player.setRight(false);
+                    player.setLeft(false);
+                    player.setBackward(false);
+                    player.setForward(false);
 
+                    System.out.println("cheat!");
+                    Main.getInstance().getFlyCam().setMoveSpeed(CAM__MOVE_SPEED);
+                    Main.getInstance().getFlyCam().setRotationSpeed(CAM_ROT_SPEED);
+
+                    player.getMainCameraNode().removeFromParent();
+
+                    player.getFirstPersonHands().getHandsNode().setCullHint(Spatial.CullHint.Always);
+                    player.getNode().setCullHint(Spatial.CullHint.Inherit);
+
+                    player.setMovementControlLocked(true);
+                    updatePlayersThirdPersonHandsRot = true;
+
+                }
             }
         };
 
@@ -173,6 +210,7 @@ public class InputController {
     private AnalogListener initAnalogListener(final ClientGameAppState gs) {
         final Player player = gs.getPlayer();
 
+//        prevJMEcursorPos.set(gs.getInputManager().getCursorPosition());
         AnalogListener analogListener = new AnalogListener() {
             @Override
             public void onAnalog(String name, float value, float tpf) {
@@ -218,6 +256,17 @@ public class InputController {
                     currentMaxDeviationY = 0;
                     MobRotUpdateMessage rotu = new MobRotUpdateMessage(player.getId(), player.getNode().getLocalRotation().mult(player.getRotationNode().getLocalRotation()));
                     ClientGameAppState.getInstance().getClient().send(rotu);
+
+                    if (updatePlayersThirdPersonHandsRot) {
+                        var handsRot = player.getRotationNode().getLocalRotation();
+
+                        var skinningControl = player.getSkinningControl();
+                        skinningControl.getArmature().getJoint("HandR").setLocalRotation(handsRot);
+
+                        var rot = skinningControl.getArmature().getJoint("HandR").getLocalRotation();
+                        skinningControl.getArmature().getJoint("HandL").setLocalRotation(rot);
+                        skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(rot);
+                    }
                 }
 
             }
@@ -248,6 +297,9 @@ public class InputController {
         inputManager.addMapping("K", new KeyTrigger(KeyInput.KEY_K));
         inputManager.addMapping("1", new KeyTrigger(KeyInput.KEY_1)); // hotbar 1
         inputManager.addMapping("2", new KeyTrigger(KeyInput.KEY_2)); // hotbar 2
+        inputManager.addMapping("3", new KeyTrigger(KeyInput.KEY_3)); // hotbar 3
+        inputManager.addMapping("4", new KeyTrigger(KeyInput.KEY_4)); // hotbar 4
+
         inputManager.addMapping("MouseMovedX",
                 new MouseAxisTrigger(MouseInput.AXIS_X, false),
                 new MouseAxisTrigger(MouseInput.AXIS_X, true)
@@ -277,6 +329,8 @@ public class InputController {
         inputManager.addListener(actionListener, "1");
 
         inputManager.addListener(actionListener, "2");
+        inputManager.addListener(actionListener, "3");
+        inputManager.addListener(actionListener, "4");
 
     }
 

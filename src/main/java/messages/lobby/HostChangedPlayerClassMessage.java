@@ -45,7 +45,6 @@ public class HostChangedPlayerClassMessage extends TwoWayMessage {
         var newHc = server.getConnection(connectionId);
         
         newHc.setAttribute("class", classId);
-        server.broadcast(this);
     }
 
     @Override

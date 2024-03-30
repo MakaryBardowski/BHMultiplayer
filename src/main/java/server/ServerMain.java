@@ -42,10 +42,12 @@ import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.AiSteerable;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.MudBeetle;
+import game.entities.mobs.playerClasses.PlayerClass;
 import game.items.AmmoPack;
 import game.items.Item;
 import game.items.ItemTemplates;
 import game.items.ItemTemplates.ItemTemplate;
+import game.items.armor.Armor;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
@@ -146,6 +148,8 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
         Runnable r = () -> {
             while (true) {
                 if (update.get() == true) {
+//                    long time = System.nanoTime();
+
                     update.set(false);
 
                     tickTimer += timePerFrame;
@@ -154,13 +158,9 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
 
                     for (var i : mobs.values()) {
                         if (i instanceof AiSteerable agent) {
-//                            long time = System.nanoTime();
 
                             agent.updateAi();
 
-//                            long time1 = System.nanoTime();
-//                            float tf = ((float) (time1 - time)) / 1_000_000;
-//                            System.out.println("tf " + tf);
                         }
 
 //                        if(i.getClass() == DestructibleDecoration.class){
@@ -168,9 +168,9 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
 //                        }
                         if (serverTick) {
                             if (i instanceof Destructible d) {
-//                                if (d instanceof StatusEffectContainer c) {
-//                                    c.updateTemporaryEffectsServer();
-//                                }
+                                if (d instanceof StatusEffectContainer c) {
+                                    c.updateTemporaryEffectsServer();
+                                }
                                 if (d instanceof Mob x) {
 
                                     server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
@@ -190,6 +190,9 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
 
                     }
 
+//                    long time1 = System.nanoTime();
+//                    float tf = ((float) (time1 - time)) / 1_000_000;
+//                    System.out.println("tf " + tf);
                 }
             }
         };
@@ -210,6 +213,8 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
     }
 
     public void startGame() {
+        server.getConnections().stream().forEach(hc -> addPlayerToGame(hc));
+
         var gameStartedMsg = new GameStartedMessage();
         server.broadcast(gameStartedMsg);
         serverPaused = false;
@@ -225,6 +230,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
                 .filter(entry -> entry.getValue() instanceof Item)
                 .map(entity -> (Item) entity.getValue())
                 .toList();
+
         List<Mob> mobsInGame = mobs.entrySet().stream()
                 .filter(entry -> {
                     // temporary fix, because currently every mob is a player so you get a duplicate on players
@@ -233,6 +239,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
                 })
                 .map(entity -> (Mob) entity.getValue())
                 .toList();
+
         List<Chest> chestsInGame = mobs.entrySet().stream()
                 .filter(entry -> entry.getValue() instanceof Chest)
                 .map(entity -> (Chest) entity.getValue())
@@ -275,12 +282,14 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
             }
         });
 
-        SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation(), newPlayer.getName());
+        int playerClassIndex = (int) hc.getAttribute("class");
+
+        SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation(), newPlayer.getName(), playerClassIndex);
         messageToNewPlayer.setReliable(true);
         server.broadcast(Filters.in(hc), messageToNewPlayer);
 
         // send info about new player eq
-        PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation(), newPlayer.getName());
+        PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation(), newPlayer.getName(), playerClassIndex);
         msg.setReliable(true);
         server.broadcast(Filters.notEqualTo(hc), msg);
 
@@ -339,9 +348,6 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
                 initialEq.add((Item) hm.getEquippedRightHand());
             }
 
-//            System.out.print("MOB <" + mob.getId() + "> initial EQ ");
-//            initialEq.forEach(a -> System.out.print(a + "(" + a.getId() + "), "));
-//            System.out.println("");
             for (Item i : initialEq) {
                 if (i != null) {
                     MobItemInteractionMessage pmsg = new MobItemInteractionMessage(i, mob, ItemInteractionType.EQUIP);
@@ -381,11 +387,11 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
         }
 
         for (int i = 0; i < 20; i++) {
-            var playerSpawnpointOffset = new Vector3f(spawnpointOffset*2, 0, 0);
+            var playerSpawnpointOffset = new Vector3f(spawnpointOffset * 2, 0, 0);
             if (new Random().nextBoolean() == false) {
-                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset*2);
+                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset * 2);
             }
-
+//
             registerMob().setPositionServer(
                     new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
                             .addLocal(playerSpawnpointOffset)
@@ -433,57 +439,46 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
     }
 
     public Player registerPlayer(HostedConnection hc) {
-        Helmet playerHead = (Helmet) registerItemAndNotifyTCP(ItemTemplates.HEAD_1, false, Filters.notIn(hc));
-        Vest playerVest = (Vest) registerItemAndNotifyTCP(ItemTemplates.TORSO_1, false, Filters.notIn(hc));
-        Gloves playerGloves = (Gloves) registerItemAndNotifyTCP(ItemTemplates.HAND_1, false, Filters.notIn(hc));
-        Boots playerBoots = (Boots) registerItemAndNotifyTCP(ItemTemplates.LEG_1, false, Filters.notIn(hc));
-        Item playerRifle;
-
-        int random = new Random().nextInt(3);
-        if (random == 0) {
-//            playerRifle = (Pistol) registerItemAndNotifyTCP(ItemTemplates.PISTOL_C96, true, Filters.notIn(hc));
-
-            playerRifle = (Rifle) registerItemAndNotifyTCP(ItemTemplates.RIFLE_MANNLICHER_95, true, Filters.notIn(hc));
-        } else if (random == 1) {
-//                        playerRifle = (Rifle) registerItemAndNotifyTCP(ItemTemplates.RIFLE_MANNLICHER_95, true, Filters.notIn(hc));
-
-            playerRifle = (Pistol) registerItemAndNotifyTCP(ItemTemplates.PISTOL_C96, true, Filters.notIn(hc));
-
-        } else {
-//                                    playerRifle = (Rifle) registerItemAndNotifyTCP(ItemTemplates.RIFLE_MANNLICHER_95, true, Filters.notIn(hc));
-
-            playerRifle = (Pistol) registerItemAndNotifyTCP(ItemTemplates.PISTOL_C96, true, Filters.notIn(hc));
-
-//            playerRifle = (Grenade) registerItemAndNotifyTCP(ItemTemplates.SMOKE_GRENADE, true, Filters.notIn(hc));
-        }
-        Item playerGrenade = (Grenade) registerItemAndNotifyTCP(ItemTemplates.SMOKE_GRENADE, true, Filters.notIn(hc));
-        Item playerKnife = (Knife) registerItemAndNotifyTCP(ItemTemplates.KNIFE, true, Filters.notIn(hc));
-
-        Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide(null);
+        int playerClassIndex = (int) hc.getAttribute("class");
+        Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide(null, playerClassIndex);
 
         if (hc != null) {
             player.setName(hc.getAttribute("nick"));
             System.out.println("ustawiono nazwe " + player.getName());
         }
 
-        player.addToEquipment(playerKnife);
+        Helmet defaultHead = (Helmet) registerItemAndNotifyTCP(ItemTemplates.HEAD_1, false, Filters.notIn(hc));
+        Vest defaultVest = (Vest) registerItemAndNotifyTCP(ItemTemplates.TORSO_1, false, Filters.notIn(hc));
+        Gloves defaultGloves = (Gloves) registerItemAndNotifyTCP(ItemTemplates.HAND_1, false, Filters.notIn(hc));
+        Boots defaultBoots = (Boots) registerItemAndNotifyTCP(ItemTemplates.LEG_1, false, Filters.notIn(hc));
 
-        player.addToEquipment(playerRifle);
-//        player.equipServer(playerRifle);
+        player.setDefaultHelmet(defaultHead);
+        player.setDefaultVest(defaultVest);
+        player.setDefaultGloves(defaultGloves);
+        player.setDefaultBoots(defaultBoots);
 
-        player.addToEquipment(playerGrenade);
+        // player starts naked (equips bare body parts. overriden by starting eq later)
+        player.equipServer(defaultHead);
+        player.equipServer(defaultVest);
+        player.equipServer(defaultGloves);
+        player.equipServer(defaultBoots);
 
-        player.equipServer(playerHead);
-        player.setDefaultHelmet(playerHead);
+        Item playerRifle;
 
-        player.equipServer(playerVest);
-        player.setDefaultVest(playerVest);
+     
+        List<ItemTemplate> startingEquipmentTemplates = player.getPlayerClass().getStartingEquipmentTemplates();
 
-        player.equipServer(playerGloves);
-        player.setDefaultGloves(playerGloves);
+        for (ItemTemplate template : startingEquipmentTemplates) {
+            var otherPlayersFilter = Filters.notIn(hc);
+            Item item = registerItemAndNotifyTCP(template, true, otherPlayersFilter);
+            
+            player.addToEquipment(item);
+            
+            if (item instanceof Armor) {
+                player.equipServer(item);
+            }
+        }
 
-        player.equipServer(playerBoots);
-        player.setDefaultBoots(playerBoots);
 
         insertIntoCollisionGrid(player);
 
@@ -543,6 +538,10 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
             chest.addToEquipment(medpack);
         }
 
+        //test
+        var axe = registerItemLocal(ItemTemplates.AXE, true);
+        chest.addToEquipment(axe);
+        //test
         insertIntoCollisionGrid(chest);
 
         return registerEntityLocal(chest);

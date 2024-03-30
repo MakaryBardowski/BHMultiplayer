@@ -39,10 +39,10 @@ public class HostJoinedGameMessage extends TwoWayMessage {
 
     @Override
     public void handleServer(ServerMain serverMain) {
-        var server = serverMain.getServer();
-        var conns = server.getConnections();
-        var newHc = conns.stream().filter(a->a.getId()==connectionId).toList().get(0);
-        serverMain.addPlayerToGame(newHc);
+//        var server = serverMain.getServer();
+//        var conns = server.getConnections();
+//        var newHc = conns.stream().filter(a->a.getId()==connectionId).toList().get(0);
+//        serverMain.addPlayerToGame(newHc);
 
     }
 

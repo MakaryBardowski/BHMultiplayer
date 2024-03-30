@@ -4,6 +4,10 @@
  */
 package game.entities.mobs.playerClasses;
 
+import game.items.ItemTemplates;
+import static game.items.ItemTemplates.*;
+import java.util.List;
+
 /**
  *
  * @author 48793
@@ -18,5 +22,19 @@ public class MedicClass extends PlayerClass {
                 + "Equipped to mend wounds, the Medic stands as a crucial lifeline, "
                 + "turning the tide of battle with compassion and unwavering dedication to preserving life.";
     }
-    
+
+ @Override
+    public List<ItemTemplates.ItemTemplate> getStartingEquipmentTemplates() {
+        return List.of(
+                KNIFE,
+                PISTOL_C96,
+                GAS_MASK,
+                VEST_TRENCH,
+                BOOTS_TRENCH,
+                MEDPACK,
+                MEDPACK
+        );
+
+    }
+
 }

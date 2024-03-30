@@ -232,10 +232,10 @@ public class MudBeetle extends Mob {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    @Override
-    public boolean wouldNotCollideWithSolidEntitiesAfterMove(Vector3f moveVec) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+//    @Override
+//    public boolean wouldNotCollideWithSolidEntitiesAfterMoveClient(Vector3f moveVec) {
+//        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+//    }
 
     @Override
     public void attack() {

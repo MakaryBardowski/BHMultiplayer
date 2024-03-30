@@ -17,7 +17,6 @@ import game.entities.Movable;
  */
 public interface MobInterface extends AiSteerable{
 
-    public boolean wouldNotCollideWithSolidEntitiesAfterMove(Vector3f moveVec);
     
     public void attack();
 

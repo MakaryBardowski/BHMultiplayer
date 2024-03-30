@@ -4,11 +4,15 @@
  */
 package game.entities.mobs.playerClasses;
 
+import game.items.ItemTemplates;
+import static game.items.ItemTemplates.*;
+import java.util.List;
+
 /**
  *
  * @author 48793
  */
-public class AssaultClass extends PlayerClass{
+public class AssaultClass extends PlayerClass {
 
     @Override
     public String getDescription() {
@@ -18,4 +22,17 @@ public class AssaultClass extends PlayerClass{
                 + "These soldiers specialize in breaching enemy defenses and wreaking havoc in "
                 + "the midst of combat.";
     }
+
+    @Override
+    public List<ItemTemplates.ItemTemplate> getStartingEquipmentTemplates() {
+        return List.of(
+                KNIFE,
+                RIFLE_MANNLICHER_95,
+                RIFLE_AMMO_PACK,
+                SMOKE_GRENADE,
+                BOOTS_TRENCH
+        );
+
+    }
+
 }

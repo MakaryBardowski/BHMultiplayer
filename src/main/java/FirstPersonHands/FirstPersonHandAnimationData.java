@@ -18,6 +18,7 @@ public enum FirstPersonHandAnimationData {
     HOLD_LMG("HoldLMG", new Vector3f(0, -0.3f, 1)),
     HOLD_RIFLE("HoldRifle", new Vector3f(0, 0.0f, 1)),
     HOLD_KNIFE("HoldKnife", new Vector3f(0, 0.0f, 0.5f)),
+    HOLD_AXE("HoldAxe", new Vector3f(0, -0.15f, 0.6f)),
     HOLD_GRENADE("HoldGrenade", new Vector3f(0, 0.0f, 0.7f));
 
     @Getter

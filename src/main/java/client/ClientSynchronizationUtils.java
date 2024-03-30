@@ -9,6 +9,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import game.entities.grenades.ThrownGrenade;
+import game.entities.mobs.HumanMob;
 
 /**
  *
@@ -24,7 +25,11 @@ public class ClientSynchronizationUtils {
         mob.setPosInterpolationValue(Math.min(mob.getPosInterpolationValue() + (mob.getCachedSpeed() / mob.getNode().getWorldTranslation().distance(mob.getServerLocation())) * tpf, 1));
 
         Vector3f newPos = mob.getNode().getWorldTranslation().interpolateLocal(mob.getServerLocation(), mob.getPosInterpolationValue());
-
+        
+        if( mob instanceof HumanMob hm && newPos.equals(mob.getServerLocation())){
+            hm.getModelComposer().setCurrentAction("Idle", "Legs");
+        }
+        
         mob.getNode().setLocalTranslation(newPos);
 
     }
