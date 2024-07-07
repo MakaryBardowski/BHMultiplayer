@@ -8,6 +8,9 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 import game.map.blocks.VoxelLighting;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import networkingUtils.NetworkingInitialization;
 
 /**
@@ -29,6 +32,7 @@ public class Main extends SimpleApplication {
 //    private static final short STARTING_RESOLUTION_WIDTH = 1000;
 //    private static final short STARTING_RESOLUTION_HEIGHT = 800;
 //    private static final boolean FULLSCREEN = false;
+
     public static void main(String[] args) {
         Main app = new Main();
         setupSettings(app);
@@ -99,7 +103,15 @@ public class Main extends SimpleApplication {
 
     private static void setupSettings(SimpleApplication app) {
         AppSettings settings1 = new AppSettings(true);
-        settings1.setResolution(STARTING_RESOLUTION_WIDTH, STARTING_RESOLUTION_HEIGHT);
+
+        GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        DisplayMode[] modes = device.getDisplayModes();
+        int i = 0; // note: there are usually several, let's pick the first
+        settings1.setResolution(modes[i].getWidth(), modes[i].getHeight());
+
+//        settings1.setResolution(STARTING_RESOLUTION_WIDTH, STARTING_RESOLUTION_HEIGHT);
+//        settings1.setResolution(1680, 1050);
+
         settings1.setFullscreen(FULLSCREEN);
         settings1.setVSync(true);
         settings1.setFrameRate(2000);
@@ -115,7 +127,6 @@ public class Main extends SimpleApplication {
 //        app.setDisplayStatView(false);
 //        settings1.setCenterWindow(false);
 //        settings1.setWindowXPosition(1000);
-        
         settings1.setTitle("BH");
         app.setPauseOnLostFocus(false);
         app.setSettings(settings1);

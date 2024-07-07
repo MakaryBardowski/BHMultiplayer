@@ -15,6 +15,7 @@ import messages.SetPlayerMessage;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
+import messages.DeleteEntityMessage;
 import messages.DestructibleDamageReceiveMessage;
 import messages.EntitySetFloatAttributeMessage;
 import messages.EntitySetIntegerAttributeMessage;
@@ -25,7 +26,10 @@ import messages.NewChestMessage;
 import messages.PlayerPosUpdateRequest;
 import messages.InstantEntityPosCorrectionMessage;
 import messages.NewDestructibleDecorationMessage;
+import messages.NewIndestructibleDecorationMessage;
 import messages.ThrownGrenadeExplodedMessage;
+import messages.gameSetupMessages.GameInfoOnStartMessage;
+import messages.gameSetupMessages.NextLevelMessage;
 import messages.items.ChestItemInteractionMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewAmmoPackMessage;
@@ -41,7 +45,6 @@ import messages.items.SetDefaultItemMessage;
 import messages.lobby.GameStartedMessage;
 import messages.lobby.HostChangedNicknameMessage;
 import messages.lobby.HostChangedPlayerClassMessage;
-import messages.lobby.HostJoinedGameMessage;
 import messages.lobby.HostJoinedLobbyMessage;
 
 /**
@@ -56,8 +59,8 @@ public class NetworkingInitialization {
         Serializer.registerClass(HostJoinedLobbyMessage.class);
         Serializer.registerClass(HostChangedNicknameMessage.class);
         Serializer.registerClass(GameStartedMessage.class);
-        Serializer.registerClass(HostJoinedGameMessage.class);
         Serializer.registerClass(HostChangedPlayerClassMessage.class);
+        Serializer.registerClass(GameInfoOnStartMessage.class);
 
         Serializer.registerClass(EntityUpdateMessage.class);
         Serializer.registerClass(MobPosUpdateMessage.class);
@@ -73,6 +76,7 @@ public class NetworkingInitialization {
         Serializer.registerClass(GrenadePosUpdateMessage.class);
         Serializer.registerClass(EntitySetIntegerAttributeMessage.class);
         Serializer.registerClass(EntitySetFloatAttributeMessage.class);
+        Serializer.registerClass(NextLevelMessage.class);
 
         Serializer.registerClass(NewItemMessage.class);
         Serializer.registerClass(NewHelmetMessage.class);
@@ -91,6 +95,9 @@ public class NetworkingInitialization {
         Serializer.registerClass(PlayerPosUpdateRequest.class);
         Serializer.registerClass(InstantEntityPosCorrectionMessage.class);
         Serializer.registerClass(NewDestructibleDecorationMessage.class);
+        Serializer.registerClass(NewIndestructibleDecorationMessage.class);
+        Serializer.registerClass(DeleteEntityMessage.class);
+
         Serializer.registerClass(ThrownGrenadeExplodedMessage.class);
 
     }

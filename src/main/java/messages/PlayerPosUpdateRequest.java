@@ -52,7 +52,7 @@ public class PlayerPosUpdateRequest extends EntityUpdateMessage {
     public void handleServer(ServerMain server) {
         if (entityExistsLocallyServer(id)) {
             var serverApp = ServerMain.getInstance();
-            Player p = (Player) serverApp.getMobs().get(id);
+            Player p = (Player) serverApp.getLevelManagerMobs().get(id);
 
             var allCollidables = serverApp.getGrid().getNearbyAtPosition(p, getPos());
             var solid = new ArrayList<Collidable>();

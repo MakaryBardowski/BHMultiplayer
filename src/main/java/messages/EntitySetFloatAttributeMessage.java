@@ -37,7 +37,7 @@ public class EntitySetFloatAttributeMessage extends TwoWayMessage {
 
     @Override
     public void handleServer(ServerMain server) {
-        var entity = server.getMobs().get(entityId);
+        var entity = server.getLevelManagerMobs().get(entityId);
         entity.setFloatAttributeAndNotifyClients(attributeId, attributeValue);
     }
 

@@ -57,7 +57,6 @@ public class VoxelAdding {
 
         int neighborCnt = (left ? 1 : 0) + (right ? 1 : 0) + (back ? 1 : 0) + (front ? 1 : 0) + (top ? 1 : 0) + (floor ? 1 : 0);
         int vertexCount = neighborCnt * 4;
-        int c = 0;
 
         float FACE_OFFSET = 0;
 
@@ -247,7 +246,6 @@ public class VoxelAdding {
         }
 
         List<Vector4f> colors = new ArrayList<>();
-        //Set custom RGBA value for each Vertex. Values range from 0.0f to 1.0f
         for (int i = 0; i < vertices.size(); i++) {
             colors.add(new Vector4f(0.1f, 0.1f, 0.1f, 1));
 

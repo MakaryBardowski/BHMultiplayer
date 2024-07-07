@@ -12,6 +12,7 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import game.entities.DecorationTemplates;
 import game.entities.DestructibleDecoration;
+import game.entities.IndestructibleDecoration;
 import game.entities.factories.DecorationFactory;
 import game.items.Item;
 import lombok.Getter;
@@ -23,28 +24,25 @@ import server.ServerMain;
  * new decoration.
  */
 @Serializable
-public class NewDestructibleDecorationMessage extends TwoWayMessage {
+public class NewIndestructibleDecorationMessage extends TwoWayMessage {
 
     @Getter
     protected int id;
     protected int templateIndex;
-    @Getter
-    private float health;
     protected float x;
     protected float y;
     protected float z;
 
-    public NewDestructibleDecorationMessage() {
+    public NewIndestructibleDecorationMessage() {
     }
 
-    public NewDestructibleDecorationMessage(DestructibleDecoration decoration) {
+    public NewIndestructibleDecorationMessage(IndestructibleDecoration decoration) {
         this.id = decoration.getId();
         this.templateIndex = decoration.getTemplate().getTemplateIndex();
-        this.health = decoration.getHealth();
         this.x = decoration.getNode().getWorldTranslation().getX();
         this.y = decoration.getNode().getWorldTranslation().getY();
         this.z = decoration.getNode().getWorldTranslation().getZ();
-
+        setReliable(true);
     }
 
     public DecorationTemplates.DecorationTemplate getTemplate() {
@@ -62,19 +60,17 @@ public class NewDestructibleDecorationMessage extends TwoWayMessage {
 
     @Override
     public void handleClient(ClientGameAppState client) {
-        addNewDestructibleDecoration(this);
+        addNewIndestructibleDecoration(this);
     }
 
-    private void addNewDestructibleDecoration(NewDestructibleDecorationMessage nmsg) {
+    private void addNewIndestructibleDecoration(NewIndestructibleDecorationMessage nmsg) {
 
         if (entityNotExistsLocallyClient(nmsg.getId())) {
             enqueueExecution(() -> {
-                DestructibleDecoration d = DecorationFactory.createDestructibleDecoration(nmsg.getId(), ClientGameAppState.getInstance().getDestructibleNode(), nmsg.getPos(), nmsg.getTemplate(), ClientGameAppState.getInstance().getAssetManager());
+                var d = DecorationFactory.createIndestructibleDecoration(nmsg.getId(), ClientGameAppState.getInstance().getDestructibleNode(), nmsg.getPos(), nmsg.getTemplate(), ClientGameAppState.getInstance().getAssetManager());
                 ClientGameAppState.getInstance().getMobs().put(d.getId(), d);
-                d.setHealth(nmsg.getHealth());
                 ClientGameAppState.getInstance().getGrid().insert(d);
             });
         }
     }
-
 }

@@ -77,15 +77,19 @@ public class GrenadeThrownMessage extends TwoWayMessage {
 
     @Override
     public void handleServer(ServerMain server) {
+        System.out.println("got id "+id);
         int grenadeId = server.getAndIncreaseNextEntityId();
+                System.out.println("new grenade id "+grenadeId);
+
         ThrownGrenade thrownGrenade = new ThrownSmokeGrenade(grenadeId, "Thrown Smoke Grenade", new Node());
+        
         Grenade originGrenade = ((Grenade) getEntityByIdServer(id));
         float speed = originGrenade.getThrowSpeed();
         Node gnode = thrownGrenade.getNode();
-        Node root = server.getRootNode();
+        Node root = server.getCurrentGamemode().getLevelManager().getRootNode();
         var grenadeControl = new ServerThrownGrenadeControl(thrownGrenade, getDirection(), speed);
 
-        ((HumanMob) server.getMobs().get(throwingMobId)).unequipServer(
+        ((HumanMob) server.getLevelManagerMobs().get(throwingMobId)).unequipServer(
                 originGrenade
         );
 
@@ -97,7 +101,7 @@ public class GrenadeThrownMessage extends TwoWayMessage {
 
         ServerMain.removeItemFromMobEquipmentServer(throwingMobId, id);
         removeEntityByIdServer(originGrenade.getId());
-        server.getMobs().put(thrownGrenade.getId(), thrownGrenade);
+        server.getLevelManagerMobs().put(thrownGrenade.getId(), thrownGrenade);
 
         MobItemInteractionMessage imsg = new MobItemInteractionMessage(originGrenade.getId(), throwingMobId, MobItemInteractionMessage.ItemInteractionType.DESTROY);
         imsg.setReliable(true);
@@ -106,6 +110,8 @@ public class GrenadeThrownMessage extends TwoWayMessage {
         GrenadeThrownMessage msg = new GrenadeThrownMessage(throwingMobId, thrownGrenade.getId(), getPos(), getDirection());
         msg.setReliable(true);
         server.getServer().broadcast(msg);
+                System.out.println("server thrown grenade id "+id);
+
     }
 
     @Override
@@ -117,6 +123,7 @@ public class GrenadeThrownMessage extends TwoWayMessage {
             model.scale(1f);
 
 
+        System.out.println("vlient thrown grenade id "+id);
 
 
             Geometry ge = (Geometry) model.getChild(0);

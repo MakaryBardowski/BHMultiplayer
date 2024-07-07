@@ -12,6 +12,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import game.entities.Attribute;
+import game.entities.Destructible;
 import game.entities.IntegerAttribute;
 import game.entities.InteractiveEntity;
 import game.entities.mobs.Mob;
@@ -68,7 +69,6 @@ public abstract class RangedWeapon extends Weapon {
 
     public abstract void reload(Mob wielder);
 
-    
     protected Vector3f hitscan(Player p) {
         var cs = ClientGameAppState.getInstance();
         CollisionResults results = new CollisionResults();
@@ -97,7 +97,10 @@ public abstract class RangedWeapon extends Weapon {
 
                 Integer hitId = Integer.valueOf(closest.getGeometry().getName());
                 InteractiveEntity mobHit = cs.getMobs().get(hitId);
-                mobHit.onShot(p, calculateDamage(distanceToFirstTarget));
+                
+                if (mobHit instanceof Destructible destructible) {
+                    destructible.onShot(p, calculateDamage(distanceToFirstTarget));
+                }
             }
         }
         return cp;

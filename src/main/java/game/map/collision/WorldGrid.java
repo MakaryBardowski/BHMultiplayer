@@ -12,6 +12,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import game.entities.Collidable;
 import game.entities.InteractiveEntity;
+import game.entities.LevelExit;
 import game.entities.mobs.MudBeetle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,7 +83,6 @@ public class WorldGrid {
             var cellContents = contents.get(hash(v));
             if (!cellContents.contains(entity)) {
                 cellContents.add(entity);
-
             }
         }
     }

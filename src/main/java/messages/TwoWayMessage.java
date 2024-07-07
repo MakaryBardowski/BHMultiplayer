@@ -35,23 +35,23 @@ public abstract class TwoWayMessage extends AbstractMessage {
     }
 
     protected Chest getChestByIdServer(int id) {
-        return ((Chest) ServerMain.getInstance().getMobs().get(id));
+        return ((Chest) ServerMain.getInstance().getLevelManagerMobs().get(id));
     }
 
     protected InteractiveEntity getEntityByIdServer(int id) {
-        return ServerMain.getInstance().getMobs().get(id);
+        return ServerMain.getInstance().getLevelManagerMobs().get(id);
     }
 
     protected Mob getMobByIdServer(int id) {
-        return ((Mob) ServerMain.getInstance().getMobs().get(id));
+        return ((Mob) ServerMain.getInstance().getLevelManagerMobs().get(id));
     }
 
     protected Item getItemByIdServer(int id) {
-        return ((Item) ServerMain.getInstance().getMobs().get(id));
+        return ((Item) ServerMain.getInstance().getLevelManagerMobs().get(id));
     }
 
     protected Destructible getDestructibleByIdServer(int id) {
-        return ((Destructible) ServerMain.getInstance().getMobs().get(id));
+        return ((Destructible) ServerMain.getInstance().getLevelManagerMobs().get(id));
     }
 
     protected InteractiveEntity getEntityByIdClient(int id) {
@@ -90,7 +90,7 @@ public abstract class TwoWayMessage extends AbstractMessage {
     }
 
     protected boolean entityExistsLocallyServer(int mobId) {
-        return ServerMain.getInstance().getMobs().get(mobId) != null;
+        return ServerMain.getInstance().getLevelManagerMobs().get(mobId) != null;
     }
 
     protected boolean entityNotExistsLocallyClient(int mobId) {
@@ -98,7 +98,7 @@ public abstract class TwoWayMessage extends AbstractMessage {
     }
 
     protected boolean entityNotExistsLocallyServer(int mobId) {
-        return ServerMain.getInstance().getMobs().get(mobId) == null;
+        return ServerMain.getInstance().getLevelManagerMobs().get(mobId) == null;
     }
 
     protected HostedConnection getHostedConnectionByPlayer(Player p) {

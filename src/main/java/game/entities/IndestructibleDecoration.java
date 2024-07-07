@@ -6,22 +6,17 @@ package game.entities;
 
 import client.ClientGameAppState;
 import static client.ClientGameAppState.removeEntityByIdClient;
-import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import game.entities.DecorationTemplates.DecorationTemplate;
-import static game.entities.DestructibleUtils.attachDestructibleToNode;
-import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.Mob;
-import game.items.Item;
-import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.map.collision.RectangleAABB;
 import game.map.collision.WorldGrid;
 import lombok.Getter;
 import messages.DeleteEntityMessage;
 import messages.DestructibleDamageReceiveMessage;
-import messages.NewDestructibleDecorationMessage;
+import messages.NewIndestructibleDecorationMessage;
 import server.ServerMain;
 import static server.ServerMain.removeEntityByIdServer;
 
@@ -29,19 +24,19 @@ import static server.ServerMain.removeEntityByIdServer;
  *
  * @author 48793
  */
-public class DestructibleDecoration extends Destructible {
+public class IndestructibleDecoration extends Collidable {
 
     @Getter
     protected DecorationTemplate template;
 
-    public DestructibleDecoration(int id, String name, Node node, DecorationTemplate template) {
+    public IndestructibleDecoration(int id, String name, Node node, DecorationTemplate template) {
         super(id, name, node);
         this.template = template;
         createHitbox();
     }
 
     @Override
-    protected void createHitbox() {
+    protected final void createHitbox() {
         float hitboxWidth = template.getCollisionShapeWidth();
         float hitboxHeight = template.getCollisionShapeHeight();
         float hitboxLength = template.getCollisionShapeLength();
@@ -52,7 +47,6 @@ public class DestructibleDecoration extends Destructible {
 
     @Override
     public void onShot(Mob shooter, float damage) {
-        notifyServerAboutDealingDamage(damage, this);
     }
 
     @Override
@@ -61,7 +55,10 @@ public class DestructibleDecoration extends Destructible {
 
     @Override
     public void setPosition(Vector3f newPos) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        WorldGrid grid = ServerMain.getInstance().getGrid();
+        grid.remove(this);
+        node.setLocalTranslation(newPos);
+        grid.insert(this);
     }
 
     @Override
@@ -74,42 +71,9 @@ public class DestructibleDecoration extends Destructible {
 
     @Override
     public AbstractMessage createNewEntityMessage() {
-        NewDestructibleDecorationMessage msg = new NewDestructibleDecorationMessage(this);
+        var msg = new NewIndestructibleDecorationMessage(this);
         msg.setReliable(true);
         return msg;
-    }
-
-    @Override
-    public void receiveDamage(float rawDamage) {
-        health = health - rawDamage;
-
-        if (health <= 0) {
-            die();
-        }
-    }
-
-    @Override
-    public void die() {
-        node.removeFromParent();
-        ClientGameAppState.getInstance().getGrid().remove(this);
-        hideHitboxIndicator();
-    }
-
-    @Override
-    public float getArmorValue() {
-        return 0;
-    }
-
-    @Override
-    public float calculateDamage(float damage) {
-        float reducedDmg = damage - getArmorValue();
-        return reducedDmg > 0 ? reducedDmg : 0;
-    }
-
-    public void notifyServerAboutDealingDamage(float damage, DestructibleDecoration mob) {
-        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(mob.getId(), damage);
-        hpUpd.setReliable(true);
-        ClientGameAppState.getInstance().getClient().send(hpUpd);
     }
 
     @Override
@@ -145,7 +109,7 @@ public class DestructibleDecoration extends Destructible {
         removeEntityByIdClient(id);
     }
 
-     @Override
+    @Override
     public void destroyAndNotifyClients() {
         destroyServer();
         var dem = new DeleteEntityMessage(id);

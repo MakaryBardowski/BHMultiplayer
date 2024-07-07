@@ -56,7 +56,7 @@ public class DamageOverTimeEffect extends RepeatedTemporaryEffect {
             if (target.getHealth() <= 0) {
                 WorldGrid grid = ServerMain.getInstance().getGrid();
                 grid.remove(target);
-                ServerMain.getInstance().getMobs().remove(target.getId());
+                ServerMain.getInstance().getLevelManagerMobs().remove(target.getId());
 
             }
 

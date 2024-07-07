@@ -356,7 +356,7 @@ public class DecalProjector {
 
             geometry.setMaterial(material);
 
-            gs.getRootNode().attachChild(geometry);
+            gs.getDebugNode().attachChild(geometry);
 //            var box = new Geometry("box", new Box(projectionBox.x / 2f, projectionBox.y / 2f, projectionBox.z / 2f));
 //            var boxmat = new Material(gs.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 //            boxmat.getAdditionalRenderState().setWireframe(true);

@@ -20,7 +20,7 @@ import messages.TwoWayMessage;
 public class ServerMessageListener implements MessageListener<HostedConnection> {
 
     private ServerMain serverApp;
-    private static final Main mainApp = Main.getInstance();
+    private static final Main MAIN_APP = Main.getInstance();
 
     public ServerMessageListener() {
     }
@@ -38,7 +38,7 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
 
 
     public static void enqueueExecutionServer(Runnable runnable) {
-        mainApp.enqueue(runnable);
+        MAIN_APP.enqueue(runnable);
     }
 
 }

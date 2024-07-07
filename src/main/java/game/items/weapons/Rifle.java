@@ -58,7 +58,8 @@ public class Rifle extends RangedWeapon {
     private static final float BULLET_SPEED = 1200f;
 
     private Node muzzleNode;
-    private CameraRecoilControl camRecoil;
+//    private CameraRecoilControl camRecoil;
+    private NewGunRecoilControl camRecoil;
     private RecoilControl gunRecoil;
 
     private ParticleEmitter muzzleEmitter;
@@ -125,8 +126,8 @@ public class Rifle extends RangedWeapon {
             muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
             firerateControl = new FirerateControl(this);
-            gunRecoil = new RecoilControl(.2f, -0.1f, .0f, .00f, 30, 1);
-            camRecoil = new CameraRecoilControl(0.3f, -.05f, .1f, .05f, 20, 0.5f);
+            gunRecoil = new RecoilControl(.2f, -0.1f, .0f, .00f, 30, 3);
+            camRecoil = new NewGunRecoilControl(2, 0.85f, .35f, 60, 0.f);
 
             model.addControl(firerateControl);
             p.getFirstPersonHands().getHandsNode().addControl(gunRecoil);

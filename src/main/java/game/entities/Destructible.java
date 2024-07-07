@@ -29,10 +29,5 @@ public abstract class Destructible extends Collidable implements Damageable {
         attributes.put(MAX_HEALTH_ATTRIBUTE, new FloatAttribute(maxHealth));
     }
 
-    protected abstract void createHitbox();
-
-    public void onDeathServer() {
-    }
-;
-
+    public void onDeathServer() {};
 }

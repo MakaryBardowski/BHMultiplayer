@@ -14,11 +14,18 @@ import game.entities.mobs.Mob;
  * @author 48793
  */
 public class DestructibleUtils {
-        public static void attachDestructibleToNode(Destructible m,Node parent, Vector3f spawnpoint) {
+
+    public static void attachDestructibleToNode(Destructible m, Node parent, Vector3f spawnpoint) {
         Node node = m.getNode();
         parent.attachChild(node);
         node.move(spawnpoint);
     }
+    
+    public static void attachNodeToNode(Node child, Node parent, Vector3f spawnpoint) {
+        parent.attachChild(child);
+        child.move(spawnpoint);
+    }
+
     public static void setupModelShootability(Node node, int id) {
         node.setName("" + id);
         for (Spatial spatial : node.getChildren()) {

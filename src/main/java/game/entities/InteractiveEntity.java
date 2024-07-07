@@ -47,25 +47,27 @@ public abstract class InteractiveEntity {
 
     public abstract void setPositionServer(Vector3f newPos);
 
- 
+    // this should be abstract!
+    public void destroyAndNotifyClients(){}; 
+    // this should be abstract!
+    public void destroyClient(){};
+    // this should be abstract!
 
+    public void destroyServer(){};
 
     public abstract AbstractMessage createNewEntityMessage();
 
-    public void attributeChangedNotification(int attributeId, Attribute copyOfAttribute) {
-    }
+    public void attributeChangedNotification(int attributeId, Attribute copyOfAttribute) {}
 
     public void setFloatAttributeAndNotifyClients(int attributeId, float val) {
         setFloatAttribute(attributeId, val);
         var msg = new EntitySetFloatAttributeMessage(this, attributeId, val);
-        msg.setReliable(true);
         ServerMain.getInstance().getServer().broadcast(msg);
     }
 
     public void setIntegerAttributeAndNotifyClients(int attributeId, int val) {
         setIntegerAttribute(attributeId, val);
         var msg = new EntitySetIntegerAttributeMessage(this, attributeId, val);
-        msg.setReliable(true);
         ServerMain.getInstance().getServer().broadcast(msg);
     }
 

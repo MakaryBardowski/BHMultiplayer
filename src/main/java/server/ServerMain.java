@@ -2,71 +2,29 @@ package server;
 
 import com.jme3.app.Application;
 import game.entities.mobs.Mob;
-import game.entities.factories.PlayerFactory;
-import game.entities.mobs.Player;
 import messages.messageListeners.ServerMessageListener;
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
-import messages.PlayerJoinedMessage;
-import messages.SetPlayerMessage;
 
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
-import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 
 import com.jme3.network.ConnectionListener;
-import com.jme3.network.Filter;
 import com.jme3.network.HostedConnection;
-import com.jme3.network.Message;
-import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
 import networkingUtils.NetworkingInitialization;
-import com.jme3.network.Filters;
 import com.jme3.renderer.RenderManager;
-import com.jme3.scene.Node;
-import game.entities.Chest;
-import game.entities.Collidable;
-import game.entities.DecorationTemplates;
-import game.entities.DecorationTemplates.DecorationTemplate;
 import game.entities.Destructible;
-import game.entities.DestructibleDecoration;
 import game.entities.InteractiveEntity;
 import game.entities.StatusEffectContainer;
-import game.entities.factories.AnimalMobFactory;
-import game.entities.factories.DestructibleDecorationFactory;
-import game.entities.factories.MobSpawnType;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.AiSteerable;
-import game.entities.mobs.HumanMob;
-import game.entities.mobs.MudBeetle;
-import game.entities.mobs.playerClasses.PlayerClass;
-import game.items.AmmoPack;
 import game.items.Item;
-import game.items.ItemTemplates;
-import game.items.ItemTemplates.ItemTemplate;
-import game.items.armor.Armor;
-import game.items.armor.Boots;
-import game.items.armor.Gloves;
-import game.items.armor.Helmet;
-import game.items.armor.Vest;
-import game.items.factories.ItemFactory;
-import game.items.weapons.Grenade;
-import game.items.weapons.Knife;
-import game.items.weapons.LightMachineGun;
-import game.items.weapons.Pistol;
-import game.items.weapons.RangedWeapon;
-import game.items.weapons.Rifle;
-import game.map.MapGenerator;
 import game.map.collision.WorldGrid;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -75,37 +33,22 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
 import messages.GrenadePosUpdateMessage;
-import messages.items.ChestItemInteractionMessage;
-import static messages.items.ChestItemInteractionMessage.ChestItemInteractionType.INSERT;
-import messages.items.MobItemInteractionMessage;
-import messages.items.MobItemInteractionMessage.ItemInteractionType;
-import messages.items.SetDefaultItemMessage;
 import messages.lobby.GameStartedMessage;
 
 public class ServerMain extends AbstractAppState implements ConnectionListener {
+    public static final byte MAX_PLAYERS = 4;
 
+    // server variables
     @Getter
     private Server server;
 
     @Getter
-    private static ServerMain instance;
-    private static final byte MAX_PLAYERS = 4;
-    private final float TIME_PER_TICK = 0.0156f;
-
-    @Getter
-    private final ConcurrentHashMap<Integer, InteractiveEntity> mobs = new ConcurrentHashMap<>();
-    private float tickTimer;
-
-    private int currentMaxId = 0;
-    private final AssetManager assetManager;
-    private final RenderManager renderManager;
-    private final Node rootNode;
-
-    @Getter
-    private WorldGrid grid;
-
-    @Getter
     private final HashMap<Integer, HostedConnection> hostsByPlayerId = new HashMap<>(MAX_PLAYERS);
+
+    @Getter
+    private static ServerMain instance;
+    private final float TIME_PER_TICK = 0.0156f;
+    private float tickTimer;
 
     @Getter
     private final int BLOCK_SIZE = 3; //4
@@ -115,9 +58,6 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
 
     @Getter
     private final int MAP_SIZE = 39;
-
-    @Getter
-    private byte[][][] map;
 
     @Getter
     public static ScheduledThreadPoolExecutor pathfindingExecutor = new ScheduledThreadPoolExecutor(1);
@@ -130,42 +70,55 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
     private AtomicBoolean update = new AtomicBoolean(false);
     private boolean serverTick = false;
     private boolean serverPaused = true;
+    
+    @Getter
+    private final ServerGameManager currentGamemode;
 
     public ServerMain(AssetManager assetManager, RenderManager renderManager) {
-        this.assetManager = assetManager;
-        this.renderManager = renderManager;
-        this.rootNode = new Node("server rootNode");
+
         instance = this;
+        currentGamemode = new ServerStoryGameManager();
     }
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
-        createMap();
-        initializeCollisionGrid();
+
         startServer();
-        populateMap();
+
+    }
+
+    @Override // the whole update method should be on another thread
+
+    public void update(float tpf) {
+        timePerFrame = tpf;
+
+        if (!serverPaused) {
+            currentGamemode.levelManager.getRootNode().updateLogicalState(tpf);
+            update.set(true);
+        } else {
+            System.out.println("server is PAUSED");
+        }
+    }
+
+    public void startGame() {
+        currentGamemode.startGame();
 
         Runnable r = () -> {
             while (true) {
                 if (update.get() == true) {
-//                    long time = System.nanoTime();
-
                     update.set(false);
 
                     tickTimer += timePerFrame;
 
                     serverTick = tickTimer >= TIME_PER_TICK;
 
-                    for (var i : mobs.values()) {
+                    for (var i : getLevelManagerMobs().values()) {
                         if (i instanceof AiSteerable agent) {
 
                             agent.updateAi();
 
                         }
 
-//                        if(i.getClass() == DestructibleDecoration.class){
-//                            System.out.println(i.getName() +" id "+i.getId());
-//                        }
                         if (serverTick) {
                             if (i instanceof Destructible d) {
                                 if (d instanceof StatusEffectContainer c) {
@@ -186,116 +139,22 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
 
                     if (serverTick) {
                         tickTimer = 0;
-//                        grid.printAllEntities();
-
                     }
 
-//                    long time1 = System.nanoTime();
-//                    float tf = ((float) (time1 - time)) / 1_000_000;
-//                    System.out.println("tf " + tf);
                 }
             }
         };
         mobAiExecutor.schedule(r, 0, TimeUnit.MILLISECONDS);
-    }
 
-    @Override // the whole update method should be on another thread
-
-    public void update(float tpf) {
-        timePerFrame = tpf;
-
-        if (!serverPaused) {
-            rootNode.updateLogicalState(tpf);
-            update.set(true);
-        } else {
-            System.out.println("server is PAUSED");
-        }
-    }
-
-    public void startGame() {
-        server.getConnections().stream().forEach(hc -> addPlayerToGame(hc));
+        // notify players about game starting
+        server.getConnections().stream().forEach(hc -> currentGamemode.levelManager.addPlayerToGame(hc));
 
         var gameStartedMsg = new GameStartedMessage();
         server.broadcast(gameStartedMsg);
         serverPaused = false;
     }
 
-    public void addPlayerToGame(HostedConnection hc) {
-
-        Player newPlayer = registerPlayer(hc);
-        System.out.println("[SERVER] added player " + newPlayer.getId());
-        hostsByPlayerId.put(newPlayer.getId(), hc);
-
-        List<Item> itemsInGame = mobs.entrySet().stream()
-                .filter(entry -> entry.getValue() instanceof Item)
-                .map(entity -> (Item) entity.getValue())
-                .toList();
-
-        List<Mob> mobsInGame = mobs.entrySet().stream()
-                .filter(entry -> {
-                    // temporary fix, because currently every mob is a player so you get a duplicate on players
-                    var notRealPlayer = hostsByPlayerId.get(entry.getValue().getId()) == null;
-                    return entry.getValue() instanceof Mob && entry.getValue() != newPlayer && notRealPlayer;
-                })
-                .map(entity -> (Mob) entity.getValue())
-                .toList();
-
-        List<Chest> chestsInGame = mobs.entrySet().stream()
-                .filter(entry -> entry.getValue() instanceof Chest)
-                .map(entity -> (Chest) entity.getValue())
-                .toList();
-
-        List<DestructibleDecoration> destructibleDecorationsInGame = mobs.entrySet().stream()
-                .filter(entry -> entry.getValue() instanceof DestructibleDecoration)
-                .map(entity -> (DestructibleDecoration) entity.getValue())
-                .toList();
-
-        itemsInGame.forEach(item -> {
-            AbstractMessage msg = item.createNewEntityMessage();
-            msg.setReliable(true);
-            server.broadcast(Filters.in(hc), msg);
-        });
-
-        mobsInGame.forEach(mob -> {
-            AbstractMessage msg = mob.createNewEntityMessage();
-            server.broadcast(Filters.in(hc), msg);
-        });
-
-        mobsInGame.forEach(mob -> {
-            sendNewEntityEquipmentInfo(mob, Filters.in(hc));
-        });
-
-        destructibleDecorationsInGame.forEach(dd -> {
-            AbstractMessage msg = dd.createNewEntityMessage();
-            server.broadcast(Filters.in(hc), msg);
-        });
-
-        chestsInGame.forEach(chest -> {
-            AbstractMessage chestMsg = chest.createNewEntityMessage();
-            server.broadcast(Filters.in(hc), chestMsg);
-            for (Item item : chest.getEquipment()) {
-                if (item != null) {
-                    ChestItemInteractionMessage msg = new ChestItemInteractionMessage(item, chest, INSERT);
-                    msg.setReliable(true);
-                    server.broadcast(Filters.in(hc), msg);
-                }
-            }
-        });
-
-        int playerClassIndex = (int) hc.getAttribute("class");
-
-        SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation(), newPlayer.getName(), playerClassIndex);
-        messageToNewPlayer.setReliable(true);
-        server.broadcast(Filters.in(hc), messageToNewPlayer);
-
-        // send info about new player eq
-        PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation(), newPlayer.getName(), playerClassIndex);
-        msg.setReliable(true);
-        server.broadcast(Filters.notEqualTo(hc), msg);
-
-        sendNewEntityEquipmentInfo(newPlayer, null);
-
-    }
+    
 
     @Override
     public void connectionAdded(Server server, HostedConnection hc) {
@@ -304,247 +163,6 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
 
     @Override
     public void connectionRemoved(Server server, HostedConnection hc) {
-    }
-
-    private Item registerItemAndNotifyTCP(ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
-        Item i = registerItemLocal(template, droppable);
-        sendMessageTCP(i.createNewEntityMessage(), notificationFilter);
-        return i;
-    }
-
-    public Item registerItemLocal(ItemTemplate template, boolean droppable) {
-        ItemFactory ifa = new ItemFactory();
-        Item item = ifa.createItem(currentMaxId++, template, droppable);
-        return registerEntityLocal(item);
-    }
-
-    private <T extends InteractiveEntity> T registerEntityLocal(T entity) {
-        this.mobs.put(entity.getId(), entity);
-        return entity;
-    }
-
-    private void sendNewEntityEquipmentInfo(Mob mob, Filter<HostedConnection> filter) {
-        if (mob instanceof HumanMob hm) {
-            SetDefaultItemMessage dhmsg = new SetDefaultItemMessage(hm.getDefaultHelmet(), hm);
-            sendMessageTCP(dhmsg, filter);
-
-            SetDefaultItemMessage dvmsg = new SetDefaultItemMessage(hm.getDefaultVest(), hm);
-            sendMessageTCP(dvmsg, filter);
-
-            SetDefaultItemMessage dgmsg = new SetDefaultItemMessage(hm.getDefaultGloves(), hm);
-            sendMessageTCP(dgmsg, filter);
-
-            SetDefaultItemMessage dbmsg = new SetDefaultItemMessage(hm.getDefaultBoots(), hm);
-            sendMessageTCP(dbmsg, filter);
-
-            List<Item> initialEq = new ArrayList<>();
-
-            initialEq.add(hm.getHelmet());
-            initialEq.add(hm.getVest());
-            initialEq.add(hm.getGloves());
-            initialEq.add(hm.getBoots());
-
-            if (hm.getEquippedRightHand() != null) { // hands are required to attach gun hence the order
-                initialEq.add((Item) hm.getEquippedRightHand());
-            }
-
-            for (Item i : initialEq) {
-                if (i != null) {
-                    MobItemInteractionMessage pmsg = new MobItemInteractionMessage(i, mob, ItemInteractionType.EQUIP);
-                    sendMessageTCP(pmsg, filter);
-                }
-            }
-        }
-
-        for (Item i : mob.getEquipment()) {
-            if (i != null) {
-                MobItemInteractionMessage pmsg = new MobItemInteractionMessage(i, mob, ItemInteractionType.PICK_UP);
-                sendMessageTCP(pmsg, filter);
-            }
-        }
-
-    }
-
-    private void sendMessageTCP(AbstractMessage imsg, Filter<HostedConnection> filter) {
-        imsg.setReliable(true);
-        if (filter == null) {
-            server.broadcast(imsg);
-        } else {
-            server.broadcast(filter, imsg);
-        }
-    }
-
-    public void insertIntoCollisionGrid(Collidable c) {
-        grid.insert(c);
-    }
-
-    private void populateMap() {
-        Random r = new Random();
-
-        int spawnpointOffset = 5 * BLOCK_SIZE;
-        for (int i = 0; i < 20; i++) {
-            registerRandomChest(new Vector3f(r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE));
-        }
-
-        for (int i = 0; i < 20; i++) {
-            var playerSpawnpointOffset = new Vector3f(spawnpointOffset * 2, 0, 0);
-            if (new Random().nextBoolean() == false) {
-                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset * 2);
-            }
-//
-            registerMob().setPositionServer(
-                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
-                            .addLocal(playerSpawnpointOffset)
-            );
-
-        }
-
-        for (int i = 0; i < 20; i++) {
-
-            var playerSpawnpointOffset = new Vector3f(spawnpointOffset, 0, 0);
-            if (new Random().nextBoolean() == false) {
-                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset);
-            }
-
-            registerRandomDestructibleDecoration(
-                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
-                            .addLocal(playerSpawnpointOffset)
-            );;
-        }
-
-    }
-
-    private void registerRandomDestructibleDecoration(Vector3f pos) {
-        int randomNumber = new Random().nextInt(3);
-        DecorationTemplate template = DecorationTemplates.TABLE;
-        if (randomNumber == 0) {
-            template = DecorationTemplates.TABLE;
-        } else if (randomNumber == 1) {
-            template = DecorationTemplates.BARBED_WIRE;
-        } else if (randomNumber == 2) {
-            template = DecorationTemplates.MINE;
-        }
-
-        DestructibleDecoration d = DestructibleDecorationFactory.createDecoration(currentMaxId++, rootNode, pos, template, assetManager);
-        registerEntityLocal(d);
-        insertIntoCollisionGrid(d);
-    }
-
-    public Mob registerMob() {
-        var player = new AnimalMobFactory(currentMaxId++, assetManager, rootNode).createServerSide(MobSpawnType.MUD_BEETLE);
-        ((MudBeetle) player).addAi();
-        insertIntoCollisionGrid(player);
-
-        return registerEntityLocal(player);
-    }
-
-    public Player registerPlayer(HostedConnection hc) {
-        int playerClassIndex = (int) hc.getAttribute("class");
-        Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide(null, playerClassIndex);
-
-        if (hc != null) {
-            player.setName(hc.getAttribute("nick"));
-            System.out.println("ustawiono nazwe " + player.getName());
-        }
-
-        Helmet defaultHead = (Helmet) registerItemAndNotifyTCP(ItemTemplates.HEAD_1, false, Filters.notIn(hc));
-        Vest defaultVest = (Vest) registerItemAndNotifyTCP(ItemTemplates.TORSO_1, false, Filters.notIn(hc));
-        Gloves defaultGloves = (Gloves) registerItemAndNotifyTCP(ItemTemplates.HAND_1, false, Filters.notIn(hc));
-        Boots defaultBoots = (Boots) registerItemAndNotifyTCP(ItemTemplates.LEG_1, false, Filters.notIn(hc));
-
-        player.setDefaultHelmet(defaultHead);
-        player.setDefaultVest(defaultVest);
-        player.setDefaultGloves(defaultGloves);
-        player.setDefaultBoots(defaultBoots);
-
-        // player starts naked (equips bare body parts. overriden by starting eq later)
-        player.equipServer(defaultHead);
-        player.equipServer(defaultVest);
-        player.equipServer(defaultGloves);
-        player.equipServer(defaultBoots);
-
-        Item playerRifle;
-
-     
-        List<ItemTemplate> startingEquipmentTemplates = player.getPlayerClass().getStartingEquipmentTemplates();
-
-        for (ItemTemplate template : startingEquipmentTemplates) {
-            var otherPlayersFilter = Filters.notIn(hc);
-            Item item = registerItemAndNotifyTCP(template, true, otherPlayersFilter);
-            
-            player.addToEquipment(item);
-            
-            if (item instanceof Armor) {
-                player.equipServer(item);
-            }
-        }
-
-
-        insertIntoCollisionGrid(player);
-
-        return registerEntityLocal(player);
-    }
-
-    public Chest registerRandomChest(Vector3f offset) {
-        Chest chest = Chest.createRandomChestServer(currentMaxId++, rootNode, offset, assetManager);
-        Random r = new Random();
-        int randomValue = r.nextInt(15);
-        if (randomValue < 2) {
-            Vest playerVest = (Vest) registerItemLocal(ItemTemplates.VEST_TRENCH, true);
-            playerVest.setArmorValue(1.05f + r.nextFloat(0f, 0.25f));
-            chest.addToEquipment(playerVest);
-        }
-        if (randomValue >= 1 && randomValue <= 4) {
-            Boots playerBoots = (Boots) registerItemLocal(ItemTemplates.BOOTS_TRENCH, true);
-            playerBoots.setArmorValue(0.65f + r.nextFloat(0f, 0.25f));
-            chest.addToEquipment(playerBoots);
-        }
-
-        if (randomValue == 5) {
-            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.PISTOL_AMMO_PACK, true);
-            chest.addToEquipment(ammo);
-        } else if (randomValue == 6) {
-            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.RIFLE_AMMO_PACK, true);
-            chest.addToEquipment(ammo);
-        } else if (randomValue == 7) {
-//            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.SMG_AMMO_PACK, true);
-            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.LMG_AMMO_PACK, true);
-
-            chest.addToEquipment(ammo);
-        } else if (randomValue == 8) {
-            AmmoPack ammo = (AmmoPack) registerItemLocal(ItemTemplates.LMG_AMMO_PACK, true);
-            chest.addToEquipment(ammo);
-        }
-        if (randomValue == 11) {
-            var lmg = registerItemLocal(ItemTemplates.LMG_HOTCHKISS, true);
-            chest.addToEquipment(lmg);
-        }
-//        randomValue = 12;
-
-        if (randomValue == 12 || randomValue == 11) {
-            var helmet = registerItemLocal(ItemTemplates.TRENCH_HELMET, true);
-
-            chest.addToEquipment(helmet);
-        }
-//        randomValue = 13;
-        if (randomValue == 12 || randomValue == 13) {
-            var helmet = registerItemLocal(ItemTemplates.GAS_MASK, true);
-
-            chest.addToEquipment(helmet);
-        }
-        if (randomValue == 14) {
-            var medpack = registerItemLocal(ItemTemplates.MEDPACK, true);
-
-            chest.addToEquipment(medpack);
-        }
-
-        //test
-        var axe = registerItemLocal(ItemTemplates.AXE, true);
-        chest.addToEquipment(axe);
-        //test
-        insertIntoCollisionGrid(chest);
-
-        return registerEntityLocal(chest);
     }
 
     private void startServer() {
@@ -558,40 +176,40 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
         }
     }
 
-    private void initializeCollisionGrid() {
-        grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
-
-    }
-
-    private void createMap() {
-        map = new MapGenerator().createBossLogicMap(MAP_SIZE);
-    }
-
     public int getAndIncreaseNextEntityId() {
-        return currentMaxId++;
+        return currentGamemode.getLevelManager().getAndIncreaseNextEntityId();
     }
 
     public int getNextEntityId() {
-        return currentMaxId;
+        return currentGamemode.getLevelManager().getNextEntityId();
     }
 
-    public Node getRootNode() {
-        return rootNode;
-    }
 
     public static void removeEntityByIdServer(int id) {
-        instance.getMobs().remove(id);
+        instance.getLevelManagerMobs().remove(id);
     }
 
     public static void removeItemFromMobEquipmentServer(int mobId, int itemId) {
-        var mob = (Mob) instance.mobs.get(mobId);
-        var item = (Item) instance.mobs.get(itemId);
+        var mob = (Mob) instance.getLevelManagerMobs().get(mobId);
+        var item = (Item) instance.getLevelManagerMobs().get(itemId);
         var mobEquipment = mob.getEquipment();
         for (int i = 0; i < mobEquipment.length; i++) {
             if (mobEquipment[i] != null && mobEquipment[i].getId() == item.getId()) {
                 mobEquipment[i] = null;
             }
         }
+    }
+
+    public ConcurrentHashMap<Integer, InteractiveEntity> getLevelManagerMobs() {
+        return currentGamemode.getLevelManager().getMobs();
+    }
+
+    public WorldGrid getGrid() {
+        return currentGamemode.getLevelManager().getGrid();
+    }
+
+    public byte[][][] getMap() {
+        return currentGamemode.getLevelManager().getMap();
     }
 
 }

@@ -6,7 +6,7 @@ package game.entities.mobs.playerClasses;
 
 import game.items.Item;
 import game.items.ItemTemplates;
-import game.map.Map;
+import game.map.Level;
 import java.util.HashMap;
 import java.util.List;
 

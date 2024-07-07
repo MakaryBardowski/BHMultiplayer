@@ -5,6 +5,7 @@
 package messages.items;
 
 import client.ClientGameAppState;
+import static client.ClientGameAppState.removeEntityByIdClient;
 import client.Main;
 import com.jme3.network.serializing.Serializable;
 import game.entities.mobs.Mob;
@@ -100,7 +101,7 @@ public class MobItemInteractionMessage extends TwoWayMessage {
                     break;
                 case DESTROY:
                     removeItemFromMobEquipmentClient(mobId, itemId);
-                    client.getMobs().remove(itemId);
+                    removeEntityByIdClient(itemId);
                 default:
                     break;
             }

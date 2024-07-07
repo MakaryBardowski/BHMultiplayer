@@ -26,7 +26,7 @@ public abstract class Movable extends InteractiveEntity {
         super(id, name, node);
     }
 
-    public abstract void move(float tpf, ClientGameAppState cm);
+    public abstract void move(float tpf);
 
     public abstract void moveServer(Vector3f moveVec);
     

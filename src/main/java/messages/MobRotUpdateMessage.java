@@ -45,7 +45,7 @@ public class MobRotUpdateMessage extends EntityUpdateMessage {
     @Override
     public void handleServer(ServerMain server) {
         if (entityExistsLocallyServer(id)) {
-            ServerMain.getInstance().getMobs().get(id).getNode().setLocalRotation(getRot());
+            ServerMain.getInstance().getLevelManagerMobs().get(id).getNode().setLocalRotation(getRot());
         }
     }
 

@@ -152,7 +152,7 @@ public class Knife extends MeleeWeapon {
     public void slashPlayer(Player p) {
         var playerPos = p.getNode().getWorldTranslation();
         var cs = ClientGameAppState.getInstance();
-        var hitboxLength = 1.6f;
+        var hitboxLength = 1.65f;
 
         var hitboxHeight = 1f;
         var hitboxWidth = 1f;

@@ -36,7 +36,10 @@ import game.items.weapons.Grenade;
 import game.items.weapons.MeleeWeapon;
 import game.items.weapons.RangedWeapon;
 import java.util.Arrays;
+import java.util.Random;
 import messages.MobRotUpdateMessage;
+import messages.gameSetupMessages.NextLevelMessage;
+import server.ServerMain;
 
 /**
  *
@@ -176,11 +179,7 @@ public class InputController {
 //                    DEBUG_GEO.rotate(0, 10 * FastMath.DEG_TO_RAD, 0);
 //                }
 
-                if (name.equals(
-                        "K") && !keyPressed) {
-//                    float[] rot = new float[3];
-//                    DEBUG_GEO.getLocalRotation().toAngles(rot);
-//                    System.out.println("DEBUG GEO ROT "+Arrays.toString(rot));
+                if (name.equals("K") && !keyPressed) {
                     player.setRight(false);
                     player.setLeft(false);
                     player.setBackward(false);

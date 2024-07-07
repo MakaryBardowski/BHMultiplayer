@@ -71,12 +71,10 @@ public class HostJoinedLobbyMessage extends TwoWayMessage {
 
     @Override
     public void handleClient(ClientGameAppState client) {
-//        System.out.println("got nick "+nick+"\n\n\n\n");
         updateLobby(connectionId, nick);
     }
 
     public static void updateLobby(int connectionId, String nick) {
-//        System.out.println("player nick : "+nick);
         var nifty = MainMenuAppState.getNifty();
         Label textField = nifty.getCurrentScreen().findNiftyControl("playerSlot" + connectionId, Label.class);
         if (textField == null) {
@@ -85,7 +83,6 @@ public class HostJoinedLobbyMessage extends TwoWayMessage {
         textField.setText(nick);
 
         if (connectionId == MainMenuAppState.getClient().getClient().getId()) {
-            System.out.println(nick);
             LobbyTeamViewAppState.setCurrentNickname(nick);
         }
     }

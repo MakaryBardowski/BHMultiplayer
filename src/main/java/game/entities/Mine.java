@@ -144,7 +144,7 @@ public class Mine extends DestructibleDecoration {
         if (d.getHealth() <= 0) {
             WorldGrid grid = serverApp.getGrid();
             grid.remove(d);
-            serverApp.getMobs().remove(d.getId());
+            serverApp.getLevelManagerMobs().remove(d.getId());
         }
     }
 

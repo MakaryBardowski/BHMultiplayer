@@ -124,6 +124,7 @@ public class ItemTemplates {
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0 * FastMath.DEG_TO_RAD, 0, 0 * FastMath.DEG_TO_RAD), 1),
             new ThirdPersonOffsetData(new Vector3f(0, -0.33f, 0.3f), new Vector3f(0*FastMath.DEG_TO_RAD, -90*FastMath.DEG_TO_RAD, -210*FastMath.DEG_TO_RAD), 1),
             ItemType.AXE, 20);
+    
 
     static {
         templates.add(RIFLE_MANNLICHER_95.getTemplateIndex(), RIFLE_MANNLICHER_95);

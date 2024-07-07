@@ -26,7 +26,7 @@ import server.ServerMain;
 @Getter
 @Setter
 public abstract class Collidable extends Movable {
-
+    private static final Spatial.CullHint HITBOX_CULLING = Spatial.CullHint.Always;
     protected CollisionShape collisionShape;
     protected Node hitboxNode = new Node(); // hitbox center is at this node
     protected Geometry hitboxDebug;
@@ -34,8 +34,10 @@ public abstract class Collidable extends Movable {
     public Collidable(int id, String name, Node node) {
         super(id, name, node);
         node.attachChild(hitboxNode);
-        hitboxNode.setCullHint(Spatial.CullHint.Never);
+        hitboxNode.setCullHint(HITBOX_CULLING);
     }
+    
+    protected void createHitbox(){};
 
     public abstract void onCollisionClient(Collidable other);
 
@@ -142,7 +144,7 @@ public abstract class Collidable extends Movable {
         if (isAbleToMove()) {
             WorldGrid grid = ServerMain.getInstance().getGrid();
             grid.remove(this);
-
+       
             if (wouldNotCollideWithSolidEntitiesAfterMoveServer(new Vector3f(0, 0, moveVec.getZ()))) {
                 node.move(0, 0, moveVec.getZ());
             }

@@ -27,17 +27,19 @@ public class EntitySetIntegerAttributeMessage extends TwoWayMessage {
     private int attributeValue;
 
     public EntitySetIntegerAttributeMessage() {
+        setReliable(true);
     }
 
     public EntitySetIntegerAttributeMessage(InteractiveEntity entity, int attributeId, int attributeValue) {
         this.entityId = entity.getId();
         this.attributeId = attributeId;
         this.attributeValue = attributeValue;
+        setReliable(true);
     }
 
     @Override
     public void handleServer(ServerMain server) {
-        var entity = server.getMobs().get(entityId);
+        var entity = server.getLevelManagerMobs().get(entityId);
         entity.setIntegerAttributeAndNotifyClients(attributeId, attributeValue);
         server.getServer().broadcast(this);
 

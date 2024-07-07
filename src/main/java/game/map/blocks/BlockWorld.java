@@ -5,13 +5,19 @@
  */
 package game.map.blocks;
 
+import client.ClientGameAppState;
+import client.Main;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import game.entities.DecorationTemplates;
+import game.entities.LevelExit;
+import static game.map.blocks.VoxelLighting.setupModelLight;
 import java.util.HashMap;
 import java.util.Random;
 import jme3tools.optimize.TextureAtlas;
 import lombok.Getter;
+import static game.entities.DestructibleUtils.setupModelShootability;
 
 /**
  *
@@ -33,15 +39,15 @@ public class BlockWorld {
     private TextureAtlas textureAtlas;
     private final AssetManager asm;
 
-    private final HashMap<String, Chunk> chunks;
+    private HashMap<String, Chunk> chunks;
     private Node worldNode;
 
     private int temp1;
     private int temp2;
     private int temp3;
 
-    public BlockWorld(int VOXEL_SIZE, int CHUNK_SIZE, int MAP_SIZE, byte[][][] logicMap, AssetManager asm, Node rootNode) {
-        this.BLOCK_SIZE = VOXEL_SIZE;
+    public BlockWorld(int BLOCK_SIZE, int CHUNK_SIZE, int MAP_SIZE, byte[][][] logicMap, AssetManager asm, Node rootNode) {
+        this.BLOCK_SIZE = BLOCK_SIZE;
         this.CHUNK_SIZE = CHUNK_SIZE;
         this.MAP_SIZE = MAP_SIZE;
         this.asm = asm;
@@ -76,6 +82,10 @@ public class BlockWorld {
         return cs;
     }
 
+    private void deleteChunks() {
+        chunks = null;
+    }
+
     public Block placeBlock(int x, int y, int z, BlockType bt) {
 
         if (logicMap[x][y][z] != 0) {
@@ -100,7 +110,6 @@ public class BlockWorld {
     }
 
     public Block addBlockDataToChunk(int x, int y, int z, BlockType bt) { // o
-
         Chunk c = chunks.get("" + (x / CHUNK_SIZE) * CHUNK_SIZE + (z / CHUNK_SIZE) * CHUNK_SIZE);
 //       Block   b = VoxelAdding.addBox((x * BLOCK_SIZE)-c.getChunkPos().getX()*BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE)-c.getChunkPos().getY()*BLOCK_SIZE, BLOCK_SIZE,  c.getBlocksCount(),  asm,  bt);
         Block b = VoxelAdding.AddOptimizedBox(c, map, logicMap, x, y, z, BLOCK_SIZE, c.getBlocksCount(), asm, bt, (x * BLOCK_SIZE) - c.getChunkPos().getX() * BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE) - c.getChunkPos().getY() * BLOCK_SIZE);
@@ -154,7 +163,6 @@ public class BlockWorld {
     private void initializeBlocks() {
         // do not change below code - it performantly creates blockData in places where logicMap != 0
         // because it writes to chunk and batches it only once
-
         Random r = new Random();
 
         for (int x = 0; x < logicMap.length; x++) {
@@ -192,5 +200,43 @@ public class BlockWorld {
         temp3 = (int) (Math.floor(position.z / BLOCK_SIZE));
         return logicMap[temp1][temp2][temp3];
     }
+
+    private void clear() {
+        for (int x = 0; x < map.length; x++) {
+            for (int y = 0; y < map[0].length; y++) {
+                for (int z = 0; z < map[0][0].length; z++) {
+                    map[x][y][z] = null;
+                }
+            }
+        }
+
+        deleteChunks();
+        worldNode.detachAllChildren();
+    }
+
+    public void updateAfterLogicMapChange() {
+        double time = (double) System.currentTimeMillis();
+        clear();
+        chunks = createChunks();
+        initializeBlocks();
+        double time1 = (double) System.currentTimeMillis();
+        double totalTime = (time1 - time) / 1000d;
+        System.out.println("time for regeneration = " + totalTime + "s");
+    }
+
+//    public void spawnCarAtLocation() {
+//        var template = DecorationTemplates.EXIT_CAR;
+//        var car = (Node) Main.getInstance().getAssetManager().loadModel(template.getModelPath());
+//        car.getChild(0).scale(template.getScale());
+//        setupModelLight(car);
+//        setupModelShootability(car, -1);
+//        LevelExit exit = new LevelExit(-1, "Exit Car", car, template);
+//        ClientGameAppState.getInstance().getPickableNode().attachChild(car);
+//        ClientGameAppState.getInstance().registerEntity(exit);
+//        car.move(BLOCK_SIZE * x + 0.5f * BLOCK_SIZE, BLOCK_SIZE * y, BLOCK_SIZE * z + 0.5f * BLOCK_SIZE);
+//
+//        ClientGameAppState.getInstance().getGrid().insert(exit);
+//
+//    }
 
 }

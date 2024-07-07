@@ -31,6 +31,7 @@ import com.jme3.anim.tween.action.ClipAction;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.items.Holdable;
+import server.ServerMain;
 
 /**
  *
@@ -149,11 +150,13 @@ public class Grenade extends ThrowableWeapon {
     }
 
     private void throwGrenade(Player p) {
-
+//            ServerMain.getInstance().getLevelManagerMobs().forEach((a,b) -> {
+//                System.out.println("enitty "+a+"  class "+b.getClass().getSimpleName());
+//            });
         var cs = ClientGameAppState.getInstance();
         var grenadeInitialPosition = cs.getCamera().getLocation();
         var throwDirection = cs.getCamera().getDirection().normalize();
-
+        
         var gtm = new GrenadeThrownMessage(p.getId(), id, grenadeInitialPosition, throwDirection);
         gtm.setReliable(true);
 

@@ -41,7 +41,6 @@ public class GameStartedMessage extends TwoWayMessage {
     @Override
     public void handleClient(ClientGameAppState clientApp) {
         Main.getInstance().enqueue(() -> {
-            System.out.println("camera on game start "+clientApp.getCamera());
             MainMenuController.leaveLobby();
             clientApp.joinGame();
         });

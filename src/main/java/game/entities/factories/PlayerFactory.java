@@ -62,7 +62,7 @@ public class PlayerFactory extends MobFactory {
 
     @Override
     public Player createClientSide(MobSpawnType spawnType, Object... creationData) { // mob spawn type doesnt matter for player
-        PlayerClass pc = PlayerClass.getClassByIndex((int)creationData[0]);
+        PlayerClass pc = PlayerClass.getClassByIndex((int) creationData[0]);
         Player p = createPlayer(pc);
 //        DestructibleUtils.attachDestructibleToNode(p, mobsNode, playerSpawnpoint);
         if (setAsPlayer) {
@@ -73,7 +73,7 @@ public class PlayerFactory extends MobFactory {
 
     @Override
     public Player createServerSide(MobSpawnType spawnType, Object... creationData) { // mob spawn type doesnt matter for player
-        PlayerClass pc = PlayerClass.getClassByIndex((int)creationData[0]);
+        PlayerClass pc = PlayerClass.getClassByIndex((int) creationData[0]);
         Player p = createPlayer(pc);
         DestructibleUtils.attachDestructibleToNode(p, mobsNode, playerSpawnpoint);
         return p;
@@ -91,7 +91,6 @@ public class PlayerFactory extends MobFactory {
     private void setupFirstPersonCamera(Player p) {
         setupMainCamera(p);
         setupHandsCamera(p);
-
     }
 
     private Node loadPlayerModel() {

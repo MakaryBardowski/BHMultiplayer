@@ -111,7 +111,7 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public void move(float tpf, ClientGameAppState cm) {
+    public void move(float tpf ) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

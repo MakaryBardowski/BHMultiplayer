@@ -145,11 +145,12 @@ public class Player extends HumanMob {
     }
 
     @Override
-    public void move(float tpf, ClientGameAppState cm) {
+    public void move(float tpf) {
+       var cm = ClientGameAppState.getInstance();
         if ((forward || backward || left || right) && !isMovementControlLocked()) {
              movementVector.set(0,0,0);
 
-            WorldGrid collisionGrid = ClientGameAppState.getInstance().getGrid();
+            WorldGrid collisionGrid = cm.getGrid();
             collisionGrid.remove(this);
 
             if (forward) {

@@ -45,6 +45,7 @@ import game.entities.FloatAttribute;
 import game.entities.factories.MobSpawnType;
 import static game.entities.mobs.Mob.MOB_ROTATION_RATE;
 import static game.entities.mobs.Mob.SPEED_ATTRIBUTE;
+import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.map.collision.RectangleAABB;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -69,6 +70,7 @@ public class MudBeetle extends Mob {
 
     public MudBeetle(int id, Node node, String name, SkinningControl skinningControl, AnimComposer modelComposer) {
         super(id, node, name);
+        
         maxHealth = 8;
         health = 8;
 
@@ -270,7 +272,7 @@ public class MudBeetle extends Mob {
     }
 
     @Override
-    public void move(float tpf, ClientGameAppState cm) {
+    public void move(float tpf) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
