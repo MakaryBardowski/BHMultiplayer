@@ -5,6 +5,7 @@
 package game.entities;
 
 import client.ClientGameAppState;
+import static client.ClientGameAppState.removeEntityByIdClient;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -25,17 +26,19 @@ import messages.DestructibleDamageReceiveMessage;
 import messages.NewChestMessage;
 import messages.SystemHealthUpdateMessage;
 import server.ServerMain;
+import static server.ServerMain.removeEntityByIdServer;
 
 /**
  *
  * @author 48793
  */
 public class Chest extends Destructible {
+   static int cnt;
 
     @Getter
     private final Item[] equipment = new Item[9];
     private boolean locked;
-    private static final String WOODEN_CRATE = "Models/Chests/crate.j3o";
+    private static final String WOODEN_CRATE = "Models/Chests/crate.j3o"; //should be moved to decoration tempaltes
 
     public Chest(int id, String name, Node node) {
         super(id, name, node);
@@ -66,7 +69,7 @@ public class Chest extends Destructible {
 
     public static Chest createRandomChestClient(int id, Node parentNode, Vector3f offset, AssetManager a) {
         Node node = (Node) a.loadModel(WOODEN_CRATE);
-        Chest chest = new Chest(id, "Crate "+id, node);
+        Chest chest = new Chest(id, "Crate " + id, node);
         node.scale(0.8f);
         chest.hitboxNode.scale(1.25f);
         attachDestructibleToNode(chest, parentNode, offset);
@@ -77,7 +80,7 @@ public class Chest extends Destructible {
 
     public static Chest createRandomChestServer(int id, Node parentNode, Vector3f offset, AssetManager a) {
         Node node = (Node) a.loadModel(WOODEN_CRATE);
-        Chest chest = new Chest(id, "Crate "+id, node);
+        Chest chest = new Chest(id, "Crate " + id, node);
         attachDestructibleToNode(chest, parentNode, offset);
         return chest;
     }
@@ -178,9 +181,36 @@ public class Chest extends Destructible {
     @Override
     public void onCollisionClient(Collidable other) {
     }
-    
+
     @Override
     public void onCollisionServer(Collidable other) {
     }
 
+    @Override
+    public void destroyServer() {
+        var server = ServerMain.getInstance();
+        server.getGrid().remove(this);
+        if (node.getParent() != null) {
+            node.removeFromParent();
+        }
+        removeEntityByIdServer(id);
+    }
+
+    @Override
+    public void destroyClient() {
+        var client = ClientGameAppState.getInstance();
+        client.getGrid().remove(this);
+        if (node.getParent() != null) {
+            node.removeFromParent();
+        }
+        removeEntityByIdClient(id);
+    }
+
+//    @Override
+//    protected void finalize() throws Throwable {
+//        cnt++;
+//
+//                System.out.println(cnt+"deleting "+name);
+//        super.finalize(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+//    }
 }

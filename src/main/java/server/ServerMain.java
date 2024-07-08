@@ -1,5 +1,6 @@
 package server;
 
+import client.Main;
 import com.jme3.app.Application;
 import game.entities.mobs.Mob;
 import messages.messageListeners.ServerMessageListener;
@@ -36,6 +37,7 @@ import messages.GrenadePosUpdateMessage;
 import messages.lobby.GameStartedMessage;
 
 public class ServerMain extends AbstractAppState implements ConnectionListener {
+
     public static final byte MAX_PLAYERS = 4;
 
     // server variables
@@ -70,7 +72,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
     private AtomicBoolean update = new AtomicBoolean(false);
     private boolean serverTick = false;
     private boolean serverPaused = true;
-    
+
     @Getter
     private final ServerGameManager currentGamemode;
 
@@ -93,7 +95,8 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
         timePerFrame = tpf;
 
         if (!serverPaused) {
-            currentGamemode.levelManager.getRootNode().updateLogicalState(tpf);
+            // may throw exception when items are deleted and the node is updated 
+//                currentGamemode.levelManager.getRootNode().updateLogicalState(tpf);
             update.set(true);
         } else {
             System.out.println("server is PAUSED");
@@ -154,8 +157,6 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
         serverPaused = false;
     }
 
-    
-
     @Override
     public void connectionAdded(Server server, HostedConnection hc) {
 
@@ -183,7 +184,6 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
     public int getNextEntityId() {
         return currentGamemode.getLevelManager().getNextEntityId();
     }
-
 
     public static void removeEntityByIdServer(int id) {
         instance.getLevelManagerMobs().remove(id);

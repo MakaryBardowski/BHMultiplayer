@@ -145,11 +145,6 @@ public class DestructibleDecoration extends Destructible {
         removeEntityByIdClient(id);
     }
 
-     @Override
-    public void destroyAndNotifyClients() {
-        destroyServer();
-        var dem = new DeleteEntityMessage(id);
-        ServerMain.getInstance().getServer().broadcast(dem);
-    }
+
 
 }

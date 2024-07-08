@@ -161,22 +161,22 @@ public class ServerLevelManager extends LevelManager {
         Random r = new Random();
 
         int spawnpointOffset = 5 * BLOCK_SIZE;
-//        for (int i = 0; i < 20; i++) {
-//            registerRandomChest(new Vector3f(r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE));
-//        }
-
-        for (int i = 0; i < 200; i++) {
-            var playerSpawnpointOffset = new Vector3f(spawnpointOffset * 2, 0, 0);
-            if (new Random().nextBoolean() == false) {
-                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset * 2);
-            }
-//
-            registerMob().setPositionServer(
-                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
-                            .addLocal(playerSpawnpointOffset)
-            );
+        for (int i = 0; i < 15000; i++) {
+            registerRandomChest(new Vector3f(r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE));
         }
 
+//        for (int i = 0; i < 20; i++) {
+//            var playerSpawnpointOffset = new Vector3f(spawnpointOffset * 2, 0, 0);
+//            if (new Random().nextBoolean() == false) {
+//                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset * 2);
+//            }
+////
+//            registerMob().setPositionServer(
+//                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
+//                            .addLocal(playerSpawnpointOffset)
+//            );
+//        }
+//
 //        for (int i = 0; i < 20; i++) {
 //
 //            var playerSpawnpointOffset = new Vector3f(spawnpointOffset, 0, 0);
@@ -347,8 +347,8 @@ public class ServerLevelManager extends LevelManager {
         }
 
         //test
-//        var axe = registerItemLocal(ItemTemplates.AXE, true);
-//        chest.addToEquipment(axe);
+        var axe = registerItemLocal(ItemTemplates.AXE, true);
+        chest.addToEquipment(axe);
         //test
         insertIntoCollisionGrid(chest);
 

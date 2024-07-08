@@ -34,6 +34,7 @@ public class NextLevelMessage extends TwoWayMessage {
 
     @Override
     public void handleServer(ServerMain server) {
+        // ensure that lagged player doesnt try to invoke the method again skipping 2 levels
         var levelManager = server.getCurrentGamemode().getLevelManager();
         nextLevelIndex = levelManager.getCurrentLevelIndex()+1;
         levelManager.jumpToLevel(nextLevelIndex);

@@ -5,6 +5,7 @@
 package game.items;
 
 import client.ClientGameAppState;
+import static client.ClientGameAppState.removeEntityByIdClient;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
@@ -15,6 +16,7 @@ import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.InteractiveEntity;
 import game.items.ItemTemplates.ItemTemplate;
 import lombok.Getter;
+import static server.ServerMain.removeEntityByIdServer;
 
 /**
  *
@@ -81,5 +83,27 @@ public abstract class Item extends InteractiveEntity {
     }
 
     public abstract String getDescription();
+
+    @Override
+    public void destroyServer() {
+        if (node.getParent() != null) {
+            node.removeFromParent();
+        }
+        removeEntityByIdServer(id);
+    }
+
+    @Override
+    public void destroyClient() {
+        if (node.getParent() != null) {
+            node.removeFromParent();
+        }
+        removeEntityByIdClient(id);
+    }
+
+//    @Override
+//    protected void finalize() throws Throwable {
+//        System.out.println("deleting ITEEEEEEEEm "+name);
+//        super.finalize(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+//    }
 
 }

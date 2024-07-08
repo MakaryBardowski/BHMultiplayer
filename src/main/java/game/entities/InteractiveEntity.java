@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import messages.DeleteEntityMessage;
 import messages.EntitySetFloatAttributeMessage;
 import messages.EntitySetIntegerAttributeMessage;
 import server.ServerMain;
@@ -24,7 +25,7 @@ import server.ServerMain;
  */
 @Getter
 public abstract class InteractiveEntity {
-
+    private static final DeleteEntityMessage dem = new DeleteEntityMessage();
     @Getter
     protected ConcurrentHashMap<Integer, Attribute> attributes = new ConcurrentHashMap<>(0);
 
@@ -47,8 +48,12 @@ public abstract class InteractiveEntity {
 
     public abstract void setPositionServer(Vector3f newPos);
 
-    // this should be abstract!
-    public void destroyAndNotifyClients(){}; 
+    public final void destroyAndNotifyClients() {
+        destroyServer();
+//        var dem = new DeleteEntityMessage(id);
+        dem.setId(id);
+        ServerMain.getInstance().getServer().broadcast(dem);
+    }
     // this should be abstract!
     public void destroyClient(){};
     // this should be abstract!

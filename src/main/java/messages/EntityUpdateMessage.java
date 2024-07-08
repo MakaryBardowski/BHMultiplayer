@@ -8,6 +8,7 @@ import client.ClientGameAppState;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import lombok.Getter;
+import lombok.Setter;
 import server.ServerMain;
 
 /**
@@ -16,7 +17,7 @@ import server.ServerMain;
  */
 @Serializable
 public abstract class EntityUpdateMessage extends TwoWayMessage {
-
+@Setter
     @Getter
     protected int id;
 

@@ -33,12 +33,17 @@ public class Main extends SimpleApplication {
 //    private static final short STARTING_RESOLUTION_HEIGHT = 800;
 //    private static final boolean FULLSCREEN = false;
 
+    private double used_mem_debug = 0;
+    private double max_mem_debug = 0;
+    private static double previous_max_mem_debug = 0;
+    private double time_from_start_millis_debug = 0;
+
     public static void main(String[] args) {
         Main app = new Main();
         setupSettings(app);
 
         app.start();
-
+        previous_max_mem_debug = Runtime.getRuntime().totalMemory() / 1048576;
     }
 
     @Override
@@ -82,8 +87,19 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf
     ) {
-//        System.out.println("main cam "+cam);
-        //TODO: add update code
+        time_from_start_millis_debug += tpf;
+
+        used_mem_debug = (double) (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576;
+        max_mem_debug = Runtime.getRuntime().totalMemory() / 1048576;
+        System.out.print(used_mem_debug);
+        System.out.print("/");
+        System.out.println(max_mem_debug);
+
+        if (previous_max_mem_debug != max_mem_debug) {
+            previous_max_mem_debug = max_mem_debug;
+            System.out.println("max mem changed this many seconds from start: " + (time_from_start_millis_debug));
+        }
+
     }
 
     @Override
@@ -111,7 +127,6 @@ public class Main extends SimpleApplication {
 
 //        settings1.setResolution(STARTING_RESOLUTION_WIDTH, STARTING_RESOLUTION_HEIGHT);
 //        settings1.setResolution(1680, 1050);
-
         settings1.setFullscreen(FULLSCREEN);
         settings1.setVSync(true);
         settings1.setFrameRate(2000);

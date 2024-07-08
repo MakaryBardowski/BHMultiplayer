@@ -38,7 +38,7 @@ import messages.PlayerPosUpdateRequest;
 public class Player extends HumanMob {
 
     public static final float IDENTIFY_RANGE = 8;
-    public static final float PICKUP_RANGE = 8;
+    public static final float PICKUP_RANGE = 800;
 
     private static final int HOTBAR_SIZE = 10;
 

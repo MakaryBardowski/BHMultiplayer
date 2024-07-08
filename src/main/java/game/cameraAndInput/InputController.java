@@ -30,6 +30,7 @@ import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
 import static debugging.DebugUtils.DEBUG_GEO;
+import game.entities.Chest;
 import game.entities.InteractiveEntity;
 import game.items.Item;
 import game.items.weapons.Grenade;
@@ -180,22 +181,23 @@ public class InputController {
 //                }
 
                 if (name.equals("K") && !keyPressed) {
-                    player.setRight(false);
-                    player.setLeft(false);
-                    player.setBackward(false);
-                    player.setForward(false);
-
-                    System.out.println("cheat!");
-                    Main.getInstance().getFlyCam().setMoveSpeed(CAM__MOVE_SPEED);
-                    Main.getInstance().getFlyCam().setRotationSpeed(CAM_ROT_SPEED);
-
-                    player.getMainCameraNode().removeFromParent();
-
-                    player.getFirstPersonHands().getHandsNode().setCullHint(Spatial.CullHint.Always);
-                    player.getNode().setCullHint(Spatial.CullHint.Inherit);
-
-                    player.setMovementControlLocked(true);
-                    updatePlayersThirdPersonHandsRot = true;
+                    System.gc();
+//                    player.setRight(false);
+//                    player.setLeft(false);
+//                    player.setBackward(false);
+//                    player.setForward(false);
+//
+//                    System.out.println("cheat!");
+//                    Main.getInstance().getFlyCam().setMoveSpeed(CAM__MOVE_SPEED);
+//                    Main.getInstance().getFlyCam().setRotationSpeed(CAM_ROT_SPEED);
+//
+//                    player.getMainCameraNode().removeFromParent();
+//
+//                    player.getFirstPersonHands().getHandsNode().setCullHint(Spatial.CullHint.Always);
+//                    player.getNode().setCullHint(Spatial.CullHint.Inherit);
+//
+//                    player.setMovementControlLocked(true);
+//                    updatePlayersThirdPersonHandsRot = true;
 
                 }
             }
