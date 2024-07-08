@@ -30,7 +30,7 @@ public class Floor {
     private int lowerBound=-1;
     private int upperBound=-1;
 
-    Floor(int sizeX, int sizeY, int numOfRooms, Random randomGen, int lowerBound, int upperBound, int floorIdx, boolean IsLastFloor) {
+    Floor(int sizeX, int sizeY, int numOfRooms, final Random randomGen, int lowerBound, int upperBound, int floorIdx, boolean IsLastFloor) {
         this.sizeX = sizeX;this.sizeY = sizeY;
         this.numOfRooms = numOfRooms;
         this.randomGen=randomGen;
@@ -40,7 +40,12 @@ public class Floor {
         this.IsLastFloor = IsLastFloor;
         
         initRooms();
-        generateBSPFloor();
+        if (numOfRooms>1){
+            generateBSPFloor();
+        }else{
+            initStartEnd();
+            createOneRoomFloor();
+        }
     }
     
     private void generateBSPFloor(){
@@ -107,7 +112,6 @@ public class Floor {
                 break;
             }
             addCorridor(startRoom.getCentreAsArray(), endRoom.getCentreAsArray());
-            printMap();
         }
     }
     
@@ -156,21 +160,11 @@ public class Floor {
         floorMap[pos[0]][pos[1]] = 9;
     }
     
-    public Vector3f getFreeSpace() {
-        while(true){
-            int i = randomGen.nextInt(sizeX);
-            int j = randomGen.nextInt(sizeY);
-            if (floorMap[i][j] == 1){
-                return new Vector3f(i*2-1, 3.1f, j*2-1);
-            }
-        }
-    }
-    
     private void initStartEnd() {
         start = new int[2];
         end = new int[2];
         
-        start[0] = 0;
+        start[0]=0;
         start[1]=0;
         end[0]=sizeX;
         end[1]=sizeY;
@@ -217,13 +211,21 @@ public class Floor {
     private void guaranteeClosedMap() {
         for (int i=0; i<floorMap.length; i++){
             for (int j=0; j<floorMap[0].length; j++){
-                if (i == floorMap.length-1 ||i == 0  || j == floorMap[0].length-1 ||j==0){
+                if (i == floorMap.length-1 || i == 0  || j == floorMap[0].length-1 ||j==0){
                     floorMap[i][j] = 1;
                     floorMap[i][j] = 1;
                     floorMap[i][j] = 1;
                 }
             }
         }
+    }
+
+    private void createOneRoomFloor() {
+        start[0] = 1;
+        start[1] = 1;
+        end[0] = sizeX-1;
+        end[1] = sizeY-1;
+        addRoom();
     }
     
 }
