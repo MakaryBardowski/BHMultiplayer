@@ -112,7 +112,6 @@ public class WeaponSwingControl extends AbstractControl{
     
     @Override
     protected void controlRender(RenderManager rm, ViewPort vp) {
-        //    
     }
 
 }

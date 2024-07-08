@@ -8,9 +8,9 @@ import game.entities.mobs.Player;
 
 /**
  *
- * @author tomasz potoczko
+ * @author 48793
  */
-public interface Holdable {
-    void playerHoldRight(Player p);
-    void playerUseRight(Player p);
+public interface Holdable extends Equippable{
+    void playerHoldInRightHand(Player p);
+    void playerUseInRightHand(Player p);
 }

@@ -1,130 +1,164 @@
 package server;
 
+import client.Main;
+import com.jme3.app.Application;
 import game.entities.mobs.Mob;
-import game.entities.mobFactories.PlayerFactory;
-import game.entities.mobs.Player;
 import messages.messageListeners.ServerMessageListener;
-import messages.DestructibleHealthUpdateMessage;
 import messages.MobPosUpdateMessage;
 import messages.MobRotUpdateMessage;
-import messages.MobsInGameMessage;
-import messages.PlayerJoinedMessage;
-import messages.SetPlayerMessage;
 
-import com.jme3.app.SimpleApplication;
-import com.jme3.math.Vector3f;
+import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.state.AppStateManager;
+import com.jme3.asset.AssetManager;
 
 import com.jme3.network.ConnectionListener;
 import com.jme3.network.HostedConnection;
-import com.jme3.network.Message;
-import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
-import com.jme3.system.JmeContext;
 import networkingUtils.NetworkingInitialization;
-import com.jme3.network.Filters;
 import com.jme3.renderer.RenderManager;
-import com.jme3.scene.Node;
-import game.entities.Chest;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
+import game.entities.StatusEffectContainer;
+import game.entities.grenades.ThrownGrenade;
+import game.entities.mobs.AiSteerable;
+import game.items.Item;
+import game.map.collision.WorldGrid;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import messages.ChestsInGameMessage;
+import lombok.Getter;
+import messages.GrenadePosUpdateMessage;
+import messages.lobby.GameStartedMessage;
 
-/**
- * This is the Main Class of your Game. You should only do initialization here.
- * Move your Logic into AppStates or Controls
- *
- * @author normenhansen
- */
-public class ServerMain extends SimpleApplication implements ConnectionListener, MessageListener<HostedConnection> {
+public class ServerMain extends AbstractAppState implements ConnectionListener {
 
-    private static final String SERVER_IP = "localhost";
+    public static final byte MAX_PLAYERS = 4;
+
+    // server variables
+    @Getter
     private Server server;
-    private final HashMap<Integer, InteractiveEntity> mobs = new HashMap<>();
+
+    @Getter
+    private final HashMap<Integer, HostedConnection> hostsByPlayerId = new HashMap<>(MAX_PLAYERS);
+
+    @Getter
+    private static ServerMain instance;
+    private final float TIME_PER_TICK = 0.0156f;
     private float tickTimer;
-    private final float TIME_PER_TICK = 0.033f;
-    private int currentMaxId = 0;
 
-    public static void main(String[] args) {
-        NetworkingInitialization.initializeSerializables();
-        ServerMain app = new ServerMain();
-        app.start(JmeContext.Type.Headless);
+    @Getter
+    private final int BLOCK_SIZE = 3; //4
+
+    @Getter
+    private final int COLLISION_GRID_CELL_SIZE = 18; //16
+
+    @Getter
+    private final int MAP_SIZE = 39;
+
+    @Getter
+    public static ScheduledThreadPoolExecutor pathfindingExecutor = new ScheduledThreadPoolExecutor(1);
+
+    @Getter
+    public static ScheduledThreadPoolExecutor mobAiExecutor = new ScheduledThreadPoolExecutor(1);
+
+    @Getter
+    private static float timePerFrame;
+    private AtomicBoolean update = new AtomicBoolean(false);
+    private boolean serverTick = false;
+    private boolean serverPaused = true;
+
+    @Getter
+    private final ServerGameManager currentGamemode;
+
+    public ServerMain(AssetManager assetManager, RenderManager renderManager) {
+
+        instance = this;
+        currentGamemode = new ServerStoryGameManager();
     }
 
     @Override
-    public void simpleInitApp() {
-        try {
-            server = Network.createServer(NetworkingInitialization.PORT);
-            server.addConnectionListener(this);
-            server.addMessageListener(new ServerMessageListener(this));
+    public void initialize(AppStateManager stateManager, Application app) {
 
-            server.start();
-
-        } catch (IOException ex) {
-            Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        for (int row = 5; row < 8; row++) {
-            for (int x = 5; x < 8; x++) {
-                registerPlayer().getNode().move(10 + row * 2, 0, 10 + (x - 5) * 4);
-            }
-        }
-
-        for (int i = 0; i < 10; i++) {
-            registerRandomChest();
-        }
+        startServer();
 
     }
 
-    @Override
-    public void simpleUpdate(float tpf) {
-        //glowna petla serwera, 30dw111w tickow (wiadomosci od serwera) na sekunde, co 0.033s kazda
-        tickTimer += tpf;
-        if (tickTimer >= TIME_PER_TICK) {
-            tickTimer = 0;
-            mobs.entrySet().stream().forEach(i -> {
-                //to be seriously optimized
-                if (i.getValue() instanceof Destructible d) {
-                    server.broadcast(new DestructibleHealthUpdateMessage(d.getId(), d.getHealth()));
-                    if (d instanceof Mob x) {
-                        server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
-                        server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
+    @Override // the whole update method should be on another thread
+
+    public void update(float tpf) {
+        timePerFrame = tpf;
+
+        if (!serverPaused) {
+            // may throw exception when items are deleted and the node is updated 
+//                currentGamemode.levelManager.getRootNode().updateLogicalState(tpf);
+            update.set(true);
+        } else {
+            System.out.println("server is PAUSED");
+        }
+    }
+
+    public void startGame() {
+        currentGamemode.startGame();
+
+        Runnable r = () -> {
+            while (true) {
+                if (update.get() == true) {
+                    update.set(false);
+
+                    tickTimer += timePerFrame;
+
+                    serverTick = tickTimer >= TIME_PER_TICK;
+
+                    for (var i : getLevelManagerMobs().values()) {
+                        if (i instanceof AiSteerable agent) {
+
+                            agent.updateAi();
+
+                        }
+
+                        if (serverTick) {
+                            if (i instanceof Destructible d) {
+                                if (d instanceof StatusEffectContainer c) {
+                                    c.updateTemporaryEffectsServer();
+                                }
+                                if (d instanceof Mob x) {
+
+                                    server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
+                                    server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
+                                }
+                            } else if (i instanceof ThrownGrenade x) {
+                                server.broadcast(new GrenadePosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
+                            }
+
+                        }
+
                     }
+
+                    if (serverTick) {
+                        tickTimer = 0;
+                    }
+
                 }
             }
-            );
+        };
+        mobAiExecutor.schedule(r, 0, TimeUnit.MILLISECONDS);
 
-        }
+        // notify players about game starting
+        server.getConnections().stream().forEach(hc -> currentGamemode.levelManager.addPlayerToGame(hc));
 
+        var gameStartedMsg = new GameStartedMessage();
+        server.broadcast(gameStartedMsg);
+        serverPaused = false;
     }
 
     @Override
     public void connectionAdded(Server server, HostedConnection hc) {
-        mobs.entrySet().forEach(x -> {
-            if (x.getValue() instanceof Mob mob) {
-                MobsInGameMessage m = new MobsInGameMessage(mob.getId(), mob.getNode().getWorldTranslation());
-                m.setReliable(true);
-                server.broadcast(Filters.in(hc), m);
-            } else if (x.getValue() instanceof Chest chest) {
-                ChestsInGameMessage m = new ChestsInGameMessage(chest.getId(), chest.getNode().getWorldTranslation());
-                m.setReliable(true);
-                server.broadcast(Filters.in(hc), m);
-            }
-        });
-
-        Mob newPlayer = registerPlayer();
-        SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation());
-        messageToNewPlayer.setReliable(true);
-        server.broadcast(Filters.in(hc), messageToNewPlayer);
-
-        PlayerJoinedMessage msg = new PlayerJoinedMessage(newPlayer.getId(), newPlayer.getNode().getWorldTranslation());
-        msg.setReliable(true);
-        server.broadcast(Filters.notEqualTo(hc), msg);
 
     }
 
@@ -132,42 +166,50 @@ public class ServerMain extends SimpleApplication implements ConnectionListener,
     public void connectionRemoved(Server server, HostedConnection hc) {
     }
 
-    @Override
-    public void messageReceived(HostedConnection s, Message msg) {
-    }
-
-    @Override
-    public void destroy() {
-        for (HostedConnection h : server.getConnections()) {
-            h.close("server shutdown");
+    private void startServer() {
+        try {
+            server = Network.createServer(NetworkingInitialization.PORT);
+            server.addConnectionListener(this);
+            server.addMessageListener(new ServerMessageListener(this));
+            server.start();
+        } catch (IOException ex) {
+            Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, null, ex);
         }
-        server.close();
-        super.destroy();
     }
 
-    public Server getServer() {
-        return server;
+    public int getAndIncreaseNextEntityId() {
+        return currentGamemode.getLevelManager().getAndIncreaseNextEntityId();
     }
 
-    public HashMap<Integer, InteractiveEntity> getMobs() {
-        return mobs;
+    public int getNextEntityId() {
+        return currentGamemode.getLevelManager().getNextEntityId();
     }
 
-    public Player registerPlayer() {
-        Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide();
-        this.mobs.put(player.getId(), player);
-        System.out.println("adding player " + player.getId());
-        return player;
+    public static void removeEntityByIdServer(int id) {
+        instance.getLevelManagerMobs().remove(id);
     }
 
-    public Chest registerRandomChest() {
-        Random r = new Random();
-        Vector3f offset = new Vector3f(r.nextFloat() * 30 * 4, 4, r.nextFloat() * 30 * 4);
-        Chest chest = Chest.createRandomChestServer(currentMaxId++, rootNode, offset, assetManager);
-        this.mobs.put(chest.getId(), chest);
-        System.out.println("adding chest " + chest.getId());
+    public static void removeItemFromMobEquipmentServer(int mobId, int itemId) {
+        var mob = (Mob) instance.getLevelManagerMobs().get(mobId);
+        var item = (Item) instance.getLevelManagerMobs().get(itemId);
+        var mobEquipment = mob.getEquipment();
+        for (int i = 0; i < mobEquipment.length; i++) {
+            if (mobEquipment[i] != null && mobEquipment[i].getId() == item.getId()) {
+                mobEquipment[i] = null;
+            }
+        }
+    }
 
-        return chest;
+    public ConcurrentHashMap<Integer, InteractiveEntity> getLevelManagerMobs() {
+        return currentGamemode.getLevelManager().getMobs();
+    }
+
+    public WorldGrid getGrid() {
+        return currentGamemode.getLevelManager().getGrid();
+    }
+
+    public byte[][][] getMap() {
+        return currentGamemode.getLevelManager().getMap();
     }
 
 }

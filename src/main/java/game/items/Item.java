@@ -5,31 +5,39 @@
 package game.items;
 
 import client.ClientGameAppState;
+import static client.ClientGameAppState.removeEntityByIdClient;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import static debugging.DebugUtils.createUnshadedBoxNode;
 import game.effects.ParticleUtils;
+import static game.entities.DestructibleUtils.setupModelShootability;
+import game.entities.InteractiveEntity;
 import game.items.ItemTemplates.ItemTemplate;
 import lombok.Getter;
+import static server.ServerMain.removeEntityByIdServer;
 
 /**
  *
  * @author 48793
  */
 @Getter
-public abstract class Item {
+public abstract class Item extends InteractiveEntity {
 
     protected boolean droppable;
-    protected String name;
     protected String description;
     protected ItemTemplate template;
+    protected Node droppedItemNode;
 
-    protected Item(ItemTemplate template) {
+    protected Item(int id, ItemTemplate template, String name, Node node) {
+        super(id, name, node);
         this.template = template;
         this.droppable = true;
     }
 
-    protected Item(ItemTemplate template, boolean droppable) {
+    protected Item(int id, ItemTemplate template, String name, Node node, boolean droppable) {
+        super(id, name, node);
         this.template = template;
         this.droppable = droppable;
     }
@@ -38,22 +46,20 @@ public abstract class Item {
         if (!droppable) {
             return;
         }
-        Node node = new Node();
-        Node childNode = createItemDropNode();
-        applyInitialDropRotation(childNode);
-        node.attachChild(childNode);
-        node.scale(template.getDropData().getScale());
-        node.setLocalTranslation(itemSpawnpoint);
-        ClientGameAppState.getInstance().getPickableNode().attachChild(node);
-        ParticleUtils.spawnItemPhysicalParticleShaded(node, itemSpawnpoint, this);
-    }
+        Node parentNode = createUnshadedBoxNode();
+        var invisibleHitbox = parentNode.getChild("Box");
+        invisibleHitbox.scale(2);
+        invisibleHitbox.setCullHint(Spatial.CullHint.Always);
+        setupModelShootability(parentNode, id);
+        setupModelShootability(node, id);
 
-    private Node createItemDropNode() {
-        if (template.getDropPath() != null) {
-            return (Node) ClientGameAppState.getInstance().getAssetManager().loadModel(template.getDropPath());
-        } else {
-            return (Node) ClientGameAppState.getInstance().getAssetManager().loadModel(ItemTemplates.RIFLE_MANNLICHER_95.getDropPath());
-        }
+        applyInitialDropRotation(node);
+        parentNode.attachChild(node);
+        parentNode.scale(template.getDropData().getScale());
+        parentNode.setLocalTranslation(itemSpawnpoint);
+        droppedItemNode = parentNode;
+        ClientGameAppState.getInstance().getPickableNode().attachChild(parentNode);
+        ParticleUtils.spawnItemPhysicalParticleShaded(parentNode, itemSpawnpoint, this);
     }
 
     private void applyInitialDropRotation(Node childNode) {
@@ -61,5 +67,43 @@ public abstract class Item {
         float[] angles = {dr.getX(), dr.getY(), dr.getZ()};
         childNode.setLocalRotation(new Quaternion().fromAngles(angles));
     }
+
+    @Override
+    public void setPosition(Vector3f newPos) {
+        if (droppedItemNode != null) {
+            droppedItemNode.setLocalTranslation(newPos);
+        } else {
+            throw new IllegalStateException("the " + this + " cannot be moved - it is not on the ground!");
+        }
+    }
+
+    @Override
+    public void setPositionServer(Vector3f newPos) {
+        throw new StackOverflowError("item.setPositionServer not supported");
+    }
+
+    public abstract String getDescription();
+
+    @Override
+    public void destroyServer() {
+        if (node.getParent() != null) {
+            node.removeFromParent();
+        }
+        removeEntityByIdServer(id);
+    }
+
+    @Override
+    public void destroyClient() {
+        if (node.getParent() != null) {
+            node.removeFromParent();
+        }
+        removeEntityByIdClient(id);
+    }
+
+//    @Override
+//    protected void finalize() throws Throwable {
+//        System.out.println("deleting ITEEEEEEEEm "+name);
+//        super.finalize(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+//    }
 
 }

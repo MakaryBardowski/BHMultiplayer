@@ -5,44 +5,73 @@
 package game.entities;
 
 import client.ClientGameAppState;
-import client.Main;
+import static client.ClientGameAppState.removeEntityByIdClient;
 import com.jme3.asset.AssetManager;
-import com.jme3.math.FastMath;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.network.AbstractMessage;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import static game.entities.DestructibleUtils.attachDestructibleToNode;
 import static game.entities.DestructibleUtils.setupModelShootability;
-import game.entities.mobs.Damageable;
 import game.entities.mobs.Mob;
 import game.items.Item;
-import game.items.ItemTemplates;
-import game.items.armor.Vest;
-import game.items.weapons.Rifle;
 import static game.map.blocks.VoxelLighting.setupModelLight;
-import java.util.Random;
-import messages.DestructibleHealthUpdateMessage;
+import game.map.collision.CollisionDebugUtils;
+import game.map.collision.RectangleAABB;
+import game.map.collision.WorldGrid;
+import lombok.Getter;
+import messages.DestructibleDamageReceiveMessage;
+import messages.NewChestMessage;
+import messages.SystemHealthUpdateMessage;
+import server.ServerMain;
+import static server.ServerMain.removeEntityByIdServer;
 
 /**
  *
  * @author 48793
  */
-public class Chest extends Destructible implements Damageable {
+public class Chest extends Destructible {
+   static int cnt;
 
-    private Item[] drop = new Item[3];
+    @Getter
+    private final Item[] equipment = new Item[9];
     private boolean locked;
-    private static final String WOODEN_CRATE = "Models/Chests/crate.j3o";
+    private static final String WOODEN_CRATE = "Models/Chests/crate.j3o"; //should be moved to decoration tempaltes
 
     public Chest(int id, String name, Node node) {
         super(id, name, node);
         locked = true;
-        drop[0] = new Rifle(1, ItemTemplates.RIFLE_MANNLICHER_95);
-        drop[1] = new Vest(ItemTemplates.VEST_TRENCH);
+
+        createHitbox();
+    }
+
+    public Item addToEquipment(Item item) {
+        for (int i = 0; i < equipment.length; i++) {
+            if (equipment[i] == null) {
+                equipment[i] = item;
+                break;
+            }
+        }
+        return item;
+    }
+
+    public Item removeFromEquipment(Item item) {
+        for (int i = 0; i < equipment.length; i++) {
+            if (equipment[i] != null && equipment[i] == item) {
+                equipment[i] = null;
+                break;
+            }
+        }
+        return item;
     }
 
     public static Chest createRandomChestClient(int id, Node parentNode, Vector3f offset, AssetManager a) {
         Node node = (Node) a.loadModel(WOODEN_CRATE);
-        Chest chest = new Chest(id, "Crate", node);
+        Chest chest = new Chest(id, "Crate " + id, node);
         node.scale(0.8f);
+        chest.hitboxNode.scale(1.25f);
         attachDestructibleToNode(chest, parentNode, offset);
         setupModelShootability(node, id);
         setupModelLight(node);
@@ -51,26 +80,31 @@ public class Chest extends Destructible implements Damageable {
 
     public static Chest createRandomChestServer(int id, Node parentNode, Vector3f offset, AssetManager a) {
         Node node = (Node) a.loadModel(WOODEN_CRATE);
-        Chest chest = new Chest(id, "Crate", node);
+        Chest chest = new Chest(id, "Crate " + id, node);
         attachDestructibleToNode(chest, parentNode, offset);
         return chest;
     }
 
     @Override
     public void onShot(Mob shooter, float damage) {
-        receiveDamage(damage);
+        notifyServerAboutDealingDamage(damage, this);
     }
 
     @Override
     public void onInteract() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("This " + name + " might contain valuable loot.");
+    }
+
+    public void notifyServerAboutDealingDamage(float damage, Chest mob) {
+        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(mob.getId(), damage);
+        hpUpd.setReliable(true);
+        ClientGameAppState.getInstance().getClient().send(hpUpd);
     }
 
     @Override
     public void receiveDamage(float damage) {
         health = health - damage;
-        DestructibleHealthUpdateMessage hpUpd = new DestructibleHealthUpdateMessage(id, health);
-        ClientGameAppState.getInstance().getClient().send(hpUpd);
+
         if (health <= 0) {
             die();
         }
@@ -78,12 +112,63 @@ public class Chest extends Destructible implements Damageable {
 
     @Override
     public void die() {
-        for (Item i : drop) {
+        for (Item i : equipment) {
             if (i != null) {
                 i.drop(node.getWorldTranslation().add(0, 1, 0));
             }
         }
         node.removeFromParent();
+        ClientGameAppState.getInstance().getGrid().remove(this);
+        hideHitboxIndicator();
+    }
+
+    @Override
+    public AbstractMessage createNewEntityMessage() {
+        NewChestMessage msg = new NewChestMessage(this, node.getWorldTranslation());
+        msg.setReliable(true);
+        return msg;
+    }
+
+    @Override
+    public float getArmorValue() {
+        return 0;
+    }
+
+    @Override
+    public float calculateDamage(float damage) {
+        float reducedDmg = damage - getArmorValue();
+        return reducedDmg > 0 ? reducedDmg : 0;
+    }
+
+    @Override
+    protected final void createHitbox() {
+        float hitboxWidth = 0.8f;
+        float hitboxHeight = 0.8f;
+        float hitboxLength = 0.8f;
+        hitboxNode.move(0, hitboxHeight, 0);
+        collisionShape = new RectangleAABB(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
+        showHitboxIndicator();
+
+    }
+
+    @Override
+    public void setPosition(Vector3f newPos) {
+        ClientGameAppState.getInstance().getGrid().remove(this);
+        node.setLocalTranslation(newPos);
+        ClientGameAppState.getInstance().getGrid().insert(this);
+    }
+
+    @Override
+    public void setPositionServer(Vector3f newPos) {
+        WorldGrid grid = ServerMain.getInstance().getGrid();
+        grid.remove(this);
+        node.setLocalTranslation(newPos);
+        grid.insert(this);
+    }
+
+    @Override
+    public void move(float tpf) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     enum ChestType {
@@ -93,4 +178,39 @@ public class Chest extends Destructible implements Damageable {
         GOOD_LOOT_CHEST
     }
 
+    @Override
+    public void onCollisionClient(Collidable other) {
+    }
+
+    @Override
+    public void onCollisionServer(Collidable other) {
+    }
+
+    @Override
+    public void destroyServer() {
+        var server = ServerMain.getInstance();
+        server.getGrid().remove(this);
+        if (node.getParent() != null) {
+            node.removeFromParent();
+        }
+        removeEntityByIdServer(id);
+    }
+
+    @Override
+    public void destroyClient() {
+        var client = ClientGameAppState.getInstance();
+        client.getGrid().remove(this);
+        if (node.getParent() != null) {
+            node.removeFromParent();
+        }
+        removeEntityByIdClient(id);
+    }
+
+//    @Override
+//    protected void finalize() throws Throwable {
+//        cnt++;
+//
+//                System.out.println(cnt+"deleting "+name);
+//        super.finalize(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+//    }
 }

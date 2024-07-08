@@ -5,6 +5,7 @@
  */
 package game.map.blocks;
 
+import client.Main;
 import com.jme3.material.Material;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -54,19 +55,19 @@ public class Chunk {
 
         geometry.move(chunkPos.getX() * bw.getBLOCK_SIZE(), 0, chunkPos.getY() * bw.getBLOCK_SIZE());
 
-        Material matVC = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
-
-        Texture t = bw.getAsm().loadTexture(BlockType.STONE.textureName);
-        t.setMagFilter(Texture.MagFilter.Nearest);
-        matVC.setTexture("ColorMap", t);
-        matVC.setBoolean("VertexColor", true);
-        geometry.setMaterial(matVC);
-
+//        Material matVC = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
+//        Texture t = bw.getAsm().loadTexture(BlockType.STONE.textureName);
+//        t.setMagFilter(Texture.MagFilter.Nearest);
+//        matVC.setTexture("ColorMap", t);
+//        matVC.setBoolean("VertexColor", true);
+//        geometry.setMaterial(matVC);
         Material mat = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setTexture("ColorMap", bw.getTextureAtlas().getAtlasTexture("DiffuseMap"));
         mat.getTextureParam("ColorMap").getTextureValue().setMagFilter(Texture.MagFilter.Nearest);
+        mat.getTextureParam("ColorMap").getTextureValue().setMinFilter(Texture.MinFilter.NearestNearestMipMap);
+
         mat.setBoolean("VertexColor", true);
-//        mat.getAdditionalRenderState().setWireframe(true);
+        mat.getAdditionalRenderState().setWireframe(Main.WIREFRAME);
 //        mat.getAdditionalRenderState().setLineWidth(7);
 
         geometry.setMaterial(mat);
@@ -178,9 +179,8 @@ public class Chunk {
         uvs.clear();
 
     }
-    
-///---------------------------------------MESH GENERATION AND BUFFER METHODS----------------------------------------------------------------------------
 
+///---------------------------------------MESH GENERATION AND BUFFER METHODS----------------------------------------------------------------------------
     public Mesh generateMesh() {
         Mesh mesh = new Mesh();
 
@@ -209,7 +209,6 @@ public class Chunk {
 //        
 //        return mesh;
 //    }
-    
     private static FloatBuffer vector3fToBuffer(List<Vector3f> list) {
         FloatBuffer buf = BufferUtils.createFloatBuffer(list.size() * 3);
         for (Vector3f vec : list) {
@@ -325,8 +324,5 @@ public class Chunk {
     public void setNormals(List<Vector3f> normals) {
         this.normals = normals;
     }
-    
-    
-    
 
 }

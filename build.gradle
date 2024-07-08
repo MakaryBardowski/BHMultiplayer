@@ -4,9 +4,9 @@ plugins {
 }
 
 group 'com.mygame'
-version '1.0'
+version '0.0.821'
 
-mainClassName = "com.mygame.ServerMain"
+mainClassName = "client.Main"
 
 repositories {
     mavenCentral()
@@ -59,7 +59,7 @@ dependencies {
     implementation "org.jmonkeyengine:jme3-effects:$jmeVer"
     implementation "com.github.stephengold:Heart:8.6.0"
     implementation "com.epagagames:particlemonkey:1.1.0"
-    implementation "com.github.polincdev:ShaderBlowEx:master-SNAPSHOT"
+   // implementation "com.github.polincdev:ShaderBlowEx:master-SNAPSHOT"
     implementation "com.simsilica:zay-es-net:1.5.2"
   
     compileOnly 'org.projectlombok:lombok:1.18.28'

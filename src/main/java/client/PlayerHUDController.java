@@ -9,28 +9,27 @@ import game.items.Item;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
+import messages.MobRotUpdateMessage;
+import messages.items.MobItemInteractionMessage;
+import messages.items.MobItemInteractionMessage.ItemInteractionType;
 
 /**
  *
  * @author 48793
  */
-public class PlayerHUDController implements ScreenController{
+public class PlayerHUDController implements ScreenController {
+
     private static ClientGameAppState gs;
 
     public PlayerHUDController(ClientGameAppState gs) {
-        this.gs =gs;
+        this.gs = gs;
     }
-    
-    
-    
-    
 
-  @Override
+    @Override
     public void bind(Nifty nifty, Screen screen) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-  
     @Override
     public void onStartScreen() {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -41,12 +40,20 @@ public class PlayerHUDController implements ScreenController{
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
-    public static void playerEquipItem(String strIndex){
+    public static void playerEquipItem(String strIndex) {
         int i = Integer.parseInt(strIndex);
         Item item = gs.getPlayer().getEquipment()[i];
-        gs.getPlayer().equip(item); 
+        gs.getPlayer().equip(item);
+        sendEquipMessageToServer(item);
+
     }
-    
-    
+        
+    public static void sendEquipMessageToServer(Item item){
+            if (item != null) {
+            MobItemInteractionMessage imsg = new MobItemInteractionMessage(item, gs.getPlayer(), ItemInteractionType.EQUIP);
+            imsg.setReliable(true);
+            gs.getClient().send(imsg);
+        }
+    }
+
 }

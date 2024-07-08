@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nifty xmlns="http://nifty-gui.sourceforge.net/nifty-1.3.xsd"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://nifty-gui.sourceforge.net/nifty-1.3.xsd http://nifty-gui.sourceforge.net/nifty-1.3.xsd">
+    <useStyles filename="nifty-default-styles.xml" />
+    <useControls filename="nifty-default-controls.xml" />
+
+    <screen id="MainMenu" controller="client.MainMenuController">
+        <layer childLayout="center">
+
+<!--backgroundColor="#55a5"-->
+            <panel childLayout="vertical" align="right" valign="center" width="30%" height="100%"  padding="10">
+                <control id="single" name="button" label="Play" width = "100%" height = "10%" marginTop = "10%" />
+                <control id="host" name="button" label="Host (LAN)" width = "100%" height = "10%" marginTop = "10%">
+                    <interact onClick="startServer()"/>  
+                </control>
+                
+                <control id="join" name="button" label="Join (LAN)" width = "100%" height = "10%" marginTop = "10%">
+                    <interact onClick="joinGame()"/>
+                </control>
+                <control id="ip-textfield" name="textfield" text="IP" width = "100%" height = "5%" marginTop = "10%" />
+                <control id="name-textfield" name="textfield" text="NICK" width = "100%" height = "5%" marginTop = "10%" />
+
+                <!--                <control id="sliderV" name="verticalSlider" height="200px" />
+                <panel width="10" />
+                <control id="sliderH" name="horizontalSlider" width="200px" />-->
+            </panel>
+        </layer>
+    </screen>
+</nifty>

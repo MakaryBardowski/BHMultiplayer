@@ -5,28 +5,44 @@
 package game.entities.mobs;
 
 import game.effects.EmitterPooler;
-import game.effects.PhysicalParticleControl;
-import game.effects.PhysicalParticle;
 import game.items.Equippable;
 import game.items.Holdable;
 import game.items.Item;
-import game.map.collision.CollidableInterface;
 import game.map.collision.WorldGrid;
-import messages.DestructibleHealthUpdateMessage;
 import client.ClientGameAppState;
+import client.ClientSynchronizationUtils;
 import client.Main;
+import com.jme3.anim.AnimComposer;
+import com.jme3.anim.AnimationMask;
+import com.jme3.anim.ArmatureMask;
 import com.jme3.anim.SkinningControl;
 import com.jme3.effect.ParticleEmitter;
-import com.jme3.material.Material;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
+import com.jme3.scene.VertexBuffer;
 import game.effects.ParticleUtils;
+import game.entities.Collidable;
+import game.entities.Destructible;
+import static game.entities.factories.MobSpawnType.HUMAN;
+import game.items.armor.Boots;
+import game.items.armor.Gloves;
+import game.items.armor.Helmet;
+import game.items.armor.Vest;
+import game.map.collision.RectangleAABB;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import lombok.Getter;
+import lombok.Setter;
+import messages.DestructibleDamageReceiveMessage;
+import messages.NewMobMessage;
+import server.ServerMain;
 
 /**
  *
@@ -38,24 +54,64 @@ public class HumanMob extends Mob {
     protected Holdable equippedLeftHand;
     protected SkinningControl skinningControl;
 
-    public HumanMob(int id,Node node, String name, SkinningControl skinningControl) {
-        super(id,node, name);
+    @Getter
+    @Setter
+    protected Helmet helmet;
+    @Getter
+    @Setter
+    protected Helmet defaultHelmet; // equipped when nothing is equipped (bare head)
+    @Getter
+    @Setter
+    protected Vest vest;
+    @Getter
+    @Setter
+    protected Vest defaultVest;
+    @Getter
+    @Setter
+    protected Boots boots;
+    @Getter
+    @Setter
+    protected Boots defaultBoots;
+    @Getter
+    @Setter
+    protected Gloves gloves;
+    @Getter
+    @Setter
+    protected Gloves defaultGloves;
+
+    @Getter
+    private AnimComposer modelComposer;
+
+    private Geometry hitboxDebug;
+
+    public HumanMob(int id, Node node, String name, SkinningControl skinningControl, AnimComposer modelComposer) {
+        super(id, node, name);
         this.skinningControl = skinningControl;
+        this.modelComposer = modelComposer;
+
+        var armature = skinningControl.getArmature();
+        ArmatureMask mask = new ArmatureMask();
+        mask.addBones(armature, "LegL");
+        mask.addBones(armature, "LegR");
+        mask.addBones(armature, "Spine");
+        modelComposer.makeLayer("Legs", mask);
+        modelComposer.setCurrentAction("Idle", "Legs");
+
+        createHitbox();
     }
 
-
     @Override
-    public void onShot(Mob shooter,float damage) {
-        shooter.dealDamage(damage,this);
+    public void onShot(Mob shooter, float damage) {
+        shooter.notifyServerAboutDealingDamage(damage, this);
     }
 
     @Override
     public void onInteract() {
-        System.err.println(name+" says hi! ");
+        System.out.println(name + " says hi! ");
     }
 
     @Override
-    public void move(float tpf, ClientGameAppState cm) {
+    public void move(float tpf ) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -98,6 +154,8 @@ public class HumanMob extends Mob {
             gut.scale(1 + r.nextFloat(0.25f));
         }
         node.removeFromParent();
+        ClientGameAppState.getInstance().getGrid().remove(this);
+        hideHitboxIndicator();
     }
 
     @Override
@@ -107,54 +165,32 @@ public class HumanMob extends Mob {
 
     @Override
     public void receiveDamage(float damage) {
-        health = health - damage;
-        DestructibleHealthUpdateMessage hpUpd = new DestructibleHealthUpdateMessage(id, health);
-        ClientGameAppState.getInstance().getClient().send(hpUpd);
+        health -= calculateDamage(damage);
 
+        var notMe = this != ClientGameAppState.getInstance().getPlayer();
         ParticleEmitter blood = EmitterPooler.getBlood();
         Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 2, 0);
         blood.setLocalTranslation(bloodPos);
         if (health <= 0) {
-            blood.emitParticles(50);
+            if (notMe) {
+                blood.emitParticles(50);
+            }
             die();
-        } else {
+        } else if (notMe) {
             blood.emitParticles(20);
         }
+
     }
 
     @Override
-    public void dealDamage(float damage, Mob mob) {
-        mob.receiveDamage(damage);
-    }
-
-    @Override
-    public void insert(WorldGrid wg) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void removeFromGrid(WorldGrid wg) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public HashSet<CollidableInterface> getFromCellsImIn(WorldGrid wg) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public HashSet<CollidableInterface> getEntitiesFromTilesInRange(WorldGrid wg, float distance) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void checkCollision() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void notifyServerAboutDealingDamage(float damage, Destructible mob) {
+        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(mob.getId(), damage);
+        hpUpd.setReliable(true);
+        ClientGameAppState.getInstance().getClient().send(hpUpd);
     }
 
     @Override
     public void onCollision() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     public Holdable getEquippedRightHand() {
@@ -180,6 +216,111 @@ public class HumanMob extends Mob {
     @Override
     public void equip(Item i) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public AbstractMessage createNewEntityMessage() {
+        NewMobMessage msg = new NewMobMessage(this, node.getWorldTranslation(), HUMAN);
+        msg.setReliable(true);
+        return msg;
+    }
+
+    @Override
+    public void unequip(Item e) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void equipServer(Item e) {
+        if (e instanceof Equippable equippableItem) {
+            equippableItem.playerServerEquip(this);
+        }
+    }
+
+    @Override
+    public void unequipServer(Item e) {
+        if (e instanceof Equippable equippableItem) {
+            equippableItem.playerServerUnequip(this);
+        }
+    }
+
+    @Override
+    public float getArmorValue() {
+        return helmet.getArmorValue() + vest.getArmorValue()
+                + gloves.getArmorValue()
+                + boots.getArmorValue();
+    }
+
+    @Override
+    public float calculateDamage(float damage) {
+        float reducedDmg = damage - getArmorValue();
+        return reducedDmg > 0 ? reducedDmg : 0;
+//return 0;
+    }
+
+    @Override
+    protected final void createHitbox() {
+        float hitboxWidth = 0.5f;
+        float hitboxHeight = 1.25f;
+        float hitboxLength = 0.5f;
+        hitboxNode.move(0, hitboxHeight, 0);
+        collisionShape = new RectangleAABB(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
+        showHitboxIndicator();
+        System.out.println(" hitbox " + collisionShape);
+    }
+
+    @Override
+    public void setPosition(Vector3f newPos) {
+        WorldGrid grid = ClientGameAppState.getInstance().getGrid();
+        grid.remove(this);
+        node.setLocalTranslation(newPos);
+        grid.insert(this);
+    }
+
+    @Override
+    public void setPositionServer(Vector3f newPos) {
+        WorldGrid grid = ServerMain.getInstance().getGrid();
+        grid.remove(this);
+        node.setLocalTranslation(newPos);
+        grid.insert(this);
+    }
+
+    @Override
+    public void onCollisionClient(Collidable other) {
+    }
+
+    @Override
+    public void onCollisionServer(Collidable other) {
+    }
+
+    @Override
+    public void interpolateRotation(float tpf) {
+        setRotInterpolationValue(Math.min(rotInterpolationValue + MOB_ROTATION_RATE * tpf, 1));
+
+        node.getLocalRotation().nlerp(ClientSynchronizationUtils.GetYAxisRotation(serverRotation), rotInterpolationValue);
+        node.setLocalRotation(node.getLocalRotation());
+
+        skinningControl.getArmature().getJoint("HandR").getLocalRotation().nlerp(
+                ClientSynchronizationUtils.GetXAxisRotation(getServerRotation()), rotInterpolationValue
+        );
+
+        var rot = skinningControl.getArmature().getJoint("HandR").getLocalRotation();
+        skinningControl.getArmature().getJoint("HandL").setLocalRotation(rot);
+        skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(rot);
+    }
+
+    @Override
+    public void setPosInterpolationValue(float posInterpolationValue) {
+        super.setPosInterpolationValue(posInterpolationValue);
+
+        System.out.println("posInterpolationValue " + posInterpolationValue);
+        System.out.println("modelComposer.getLayer(\"Legs\").getTime() " + modelComposer.getLayer("Legs").getTime());
+
+        if (!modelComposer.getLayer("Legs").getCurrentActionName().equals("Run")) {
+            modelComposer.setCurrentAction("Run", "Legs");
+            modelComposer.getLayer("Legs").getCurrentAction().setSpeed(2);
+        }  
+
     }
 
 }

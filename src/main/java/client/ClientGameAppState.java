@@ -1,23 +1,10 @@
 package client;
 
-import game.cameraAndInput.PlayerCameraControlAppState;
-import game.map.Map;
-import game.map.MapGenerator;
-import game.map.MapType;
-import game.entities.mobs.Mob;
-import game.entities.mobFactories.PlayerFactory;
-import game.entities.mobs.Player;
 import messages.messageListeners.ClientMessageListener;
-import static client.ClientSynchronizationUtils.interpolateMobPosition;
-import static client.ClientSynchronizationUtils.interpolateMobRotation;
 import com.jme3.app.SimpleApplication;
-import com.jme3.math.ColorRGBA;
-import com.jme3.network.AbstractMessage;
 import com.jme3.network.Client;
 import com.jme3.network.Network;
-import com.jme3.renderer.RenderManager;
 import com.jme3.system.AppSettings;
-import com.jme3.system.JmeContext;
 import networkingUtils.NetworkingInitialization;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -27,19 +14,28 @@ import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
-import com.jme3.light.AmbientLight;
 import com.jme3.network.ClientStateListener;
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.FadeFilter;
 import com.jme3.renderer.Camera;
+import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
+import com.jme3.ui.Picture;
 import de.lessvoid.nifty.Nifty;
 import game.entities.InteractiveEntity;
+import game.entities.factories.MobSpawnType;
+import game.entities.mobs.Mob;
+import game.entities.mobs.Player;
+import game.map.Level;
+import static game.map.blocks.VoxelLighting.setupModelLight;
+import game.map.collision.WorldGrid;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
+import java.util.concurrent.ConcurrentHashMap;
+import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 import lombok.Getter;
 import lombok.Setter;
+import messages.lobby.HostJoinedLobbyMessage;
 
 /**
  * This is the Main Class of your Game. You should only do initialization here.
@@ -49,60 +45,18 @@ import lombok.Setter;
  */
 public class ClientGameAppState extends AbstractAppState implements ClientStateListener {
 
-    @Getter
-    private static ClientGameAppState instance;
-
-    @Getter
-    private final int BLOCK_SIZE = 4;
-
-    @Getter
-    private final int CHUNK_SIZE = 16;
-
-    @Getter
-    private final int MAP_SIZE = 39;
-
-    @Getter
-    private final Node rootNode = new Node("ROOT NODE");
-
-    @Getter
-    private final Node worldNode = new Node("WORLD NODE");
-
-    @Getter
-    private final Node mapNode = new Node("MAP NODE");
-
-    @Getter
-    private final Node debugNode = new Node("DEBUG NODE");
-
-    @Getter
-    private final Node destructibleNode = new Node("DESTRUCTIBLE NODE");
-
-    @Getter
-    private final Node entityNode = new Node("ENTITY NODE");
-    
-    @Getter
-    private final Node pickableNode = new Node("PICKABLE NODE");
-
     private final SimpleApplication app;
 
     @Getter
-    private final AssetManager assetManager;
+    private final AppStateManager stateManager;
 
     @Getter
-    private final InputManager inputManager;
-
-    private final ConcurrentLinkedQueue<AbstractMessage> messageQueue = new ConcurrentLinkedQueue<>();
-
-    @Getter
-    private final HashMap<Integer, InteractiveEntity> mobs = new HashMap<>();
+    private static ClientGameAppState instance;
 
     private final AppSettings applicationSettings;
 
     @Getter
     private Client client;
-
-    @Getter
-    @Setter
-    private Player player;
 
     @Getter
     @Setter
@@ -113,77 +67,146 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     private AnalogListener analogListener;
 
     @Getter
-    private Map map;
-
-    @Getter
     @Setter
     private Nifty nifty;
 
-    public ClientGameAppState(Main app) {
+    @Getter
+    private final String serverIp;
+
+    @Getter
+    private boolean debug;
+
+    @Setter
+    @Getter
+    private ClientGameManager currentGamemode = new ClientStoryGameManager();
+
+    public ClientGameAppState(Main app, String serverIp) {
         instance = this;
         this.app = app;
-        this.assetManager = app.getAssetManager();
-        this.inputManager = app.getInputManager();
         this.applicationSettings = app.getAppSettings();
-        app.getRootNode().attachChild(rootNode);
+        stateManager = Main.getInstance().getStateManager();
+        this.serverIp = serverIp;
     }
 
     @Override
-    public void initialize(AppStateManager stateManager, Application app) {        // rejestrujemy klasy serializowalne (nie musicie rozumiec, architektura klient-serwer)
-        NetworkingInitialization.initializeSerializables();
-        worldNode.attachChild(debugNode);
-        worldNode.attachChild(entityNode);
-        pickableNode.attachChild(destructibleNode);
-        entityNode.attachChild(pickableNode);
-        worldNode.attachChild(mapNode);
-        rootNode.attachChild(worldNode);
+    public void initialize(AppStateManager stateManager, Application app) {
+        currentGamemode.startGame();
+        connectToServer();
+        currentGamemode.getLevelManager().setClient(client);
+    }
 
-        stateManager.attach(new PlayerCameraControlAppState(this));
-
-        try {
-            client = Network.connectToServer("localhost", NetworkingInitialization.PORT);
-            client.addClientStateListener(this);
-            client.start();
-
-        } catch (IOException ex) {
-            Logger.getLogger(ClientGameAppState.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        client.addMessageListener(new ClientMessageListener(this));
-        app.getViewPort().setBackgroundColor(ColorRGBA.Cyan);
-
-        MapGenerator mg = new MapGenerator();
-        map = mg.generateMap(MapType.BOSS, BLOCK_SIZE, CHUNK_SIZE, MAP_SIZE, assetManager, mapNode);
-
-        AmbientLight al = new AmbientLight();
-        al.setColor(ColorRGBA.White.mult(0.7f));
-        worldNode.addLight(al);
-
+    public void joinGame() {
+        drawCrosshair();
     }
 
     @Override
     public void update(float tpf) {
-
-        if (player != null) {
-            player.move(tpf, this);
+        if (currentGamemode != null) {
+            currentGamemode.updateMainLoop(tpf);
         }
-
-        mobs.values().forEach(x -> {
-            if (x instanceof Mob m && x != player) {
-                interpolateMobPosition(m, tpf);
-                interpolateMobRotation(m, tpf);
-            }
-        }
-        );
 
     }
 
-    public ConcurrentLinkedQueue<AbstractMessage> getMessageQueue() {
-        return messageQueue;
+    public <T extends InteractiveEntity> T registerEntity(T entity) {
+        return currentGamemode.getLevelManager().registerEntity(entity);
+    }
+
+    public void setPlayer(Player player) {
+        currentGamemode.getLevelManager().setPlayer(player);
+    }
+
+    public Player registerPlayer(Integer id, boolean setAsPlayer, int playerClassIndex) {
+        return currentGamemode.getLevelManager().registerPlayer(id, setAsPlayer, playerClassIndex);
+    }
+
+    public Mob registerMob(Integer id, MobSpawnType spawnType) {
+        return currentGamemode.getLevelManager().registerMob(id, spawnType);
+    }
+
+    public int getBLOCK_SIZE() {
+        return currentGamemode.getLevelManager().getBLOCK_SIZE();
+    }
+
+    public ConcurrentHashMap<Integer, InteractiveEntity> getMobs() {
+        return currentGamemode.getLevelManager().getMobs();
+    }
+
+    public Level getMap() {
+        return currentGamemode.getLevelManager().getMap();
+    }
+
+    public InputManager getInputManager() {
+        return currentGamemode.getLevelManager().getInputManager();
+    }
+
+    public AssetManager getAssetManager() {
+        return currentGamemode.getLevelManager().getAssetManager();
+    }
+
+    public RenderManager getRenderManager() {
+        return currentGamemode.getLevelManager().getRenderManager();
+    }
+
+    public Node getEntityNode() {
+        return currentGamemode.getLevelManager().getEntityNode();
+    }
+
+    public Node getDestructibleNode() {
+        return currentGamemode.getLevelManager().getDestructibleNode();
+    }
+
+    public Node getPickableNode() {
+        return currentGamemode.getLevelManager().getPickableNode();
+    }
+
+    public Node getDebugNode() {
+        return currentGamemode.getLevelManager().getDebugNode();
+    }
+
+    public Node getMapNode() {
+        return currentGamemode.getLevelManager().getMapNode();
+    }
+
+    public Player getPlayer() {
+        return currentGamemode.getLevelManager().getPlayer();
+    }
+
+    public WorldGrid getGrid() {
+        return currentGamemode.getLevelManager().getGrid();
+    }
+
+    public Camera getCamera() {
+        return Main.getInstance().getCamera();
+    }
+
+    public FlyByCamera getFlyCam() {
+        return currentGamemode.getLevelManager().getFlyCam();
+    }
+
+    public AppSettings getSettings() {
+        return applicationSettings;
+    }
+
+    public static void removeEntityByIdClient(int id) {
+        instance.currentGamemode.getLevelManager().getMobs().remove(id);
+    }
+
+    public void connectToServer() {
+        try {
+            client = Network.connectToServer(serverIp, NetworkingInitialization.PORT);
+            client.addClientStateListener(this);
+            client.start();
+
+        } catch (IOException ex) {
+            Logger.getLogger(ClientGameAppState.class.getName()).log(SEVERE, null, ex);
+        }
     }
 
     @Override
     public void clientConnected(Client client) {
+        client.addMessageListener(new ClientMessageListener(this));
+        var msg = new HostJoinedLobbyMessage(client.getId(), "Player " + client.getId());
+        client.send(msg);
     }
 
     @Override
@@ -191,26 +214,13 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
 
     }
 
-    public Player registerPlayer(Integer id, boolean setAsPlayer) {
-        Player p = new PlayerFactory(id,destructibleNode, getCamera(), setAsPlayer).createClientSide();
-        this.mobs.put(id, p);
-        return p;
-    }
-
-    public AppSettings getSettings() {
-        return applicationSettings;
-    }
-
-    public Camera getCamera() {
-        return app.getCamera();
-    }
-
-    public FlyByCamera getFlyCam() {
-        return app.getFlyByCamera();
-    }
-
-    public AppStateManager getStateManager() {
-        return app.getStateManager();
+    public void drawCrosshair() {
+        Picture crosshair = new Picture("crosshair");
+        crosshair.setImage(Main.getInstance().getAssetManager(), "Textures/GUI/crosshair.png", true);
+        crosshair.setWidth(getSettings().getHeight() * 0.04f);
+        crosshair.setHeight(getSettings().getHeight() * 0.04f); //0.04f
+        crosshair.setPosition((getSettings().getWidth() / 2) - getSettings().getHeight() * 0.04f / 2, getSettings().getHeight() / 2 - getSettings().getHeight() * 0.04f / 2);
+        Main.getInstance().getGuiNode().attachChild(crosshair);
     }
 
 }

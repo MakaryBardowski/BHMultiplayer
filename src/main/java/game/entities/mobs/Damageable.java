@@ -10,6 +10,8 @@ package game.entities.mobs;
  */
 public interface Damageable {
 
-    public void receiveDamage(float damage);
+    public void receiveDamage(float rawDamage);
     public void die();
+    public float getArmorValue();
+    public float calculateDamage(float damage );
 }

@@ -5,6 +5,7 @@
 package game.entities;
 
 import com.jme3.scene.Node;
+import game.entities.mobs.Damageable;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,13 +15,19 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public abstract class Destructible extends InteractiveEntity {
+public abstract class Destructible extends Collidable implements Damageable {
 
-    protected float health = 10;
-    protected float maxHealth = 10;
+    protected static final int HEALTH_ATTRIBUTE = 0;
+    protected static final int MAX_HEALTH_ATTRIBUTE = 1;
 
-    public Destructible(int id,String name, Node node) {
-        super(id,name, node);
+    protected float health = 12;
+    protected float maxHealth = 12;
+
+    public Destructible(int id, String name, Node node) {
+        super(id, name, node);
+        attributes.put(HEALTH_ATTRIBUTE, new FloatAttribute(health));
+        attributes.put(MAX_HEALTH_ATTRIBUTE, new FloatAttribute(maxHealth));
     }
 
+    public void onDeathServer() {};
 }

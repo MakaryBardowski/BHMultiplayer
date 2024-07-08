@@ -4,16 +4,18 @@
  */
 package messages;
 
+import client.ClientGameAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.serializing.Serializable;
+import server.ServerMain;
 
 /**
  *
  * @author 48793
  */
 @Serializable
-public class MobRotUpdateMessage extends MobUpdateMessage {
+public class MobRotUpdateMessage extends EntityUpdateMessage {
 
     private float w;
     private float x;
@@ -32,12 +34,26 @@ public class MobRotUpdateMessage extends MobUpdateMessage {
     }
 
     public Quaternion getRot() {
-        return new Quaternion(x,y,z,w);
+        return new Quaternion(x, y, z, w);
     }
 
     @Override
     public String toString() {
         return "MobUpdatePosRotMessage{ id=" + id + " ,rot=" + getRot() + '}';
+    }
+
+    @Override
+    public void handleServer(ServerMain server) {
+        if (entityExistsLocallyServer(id)) {
+            ServerMain.getInstance().getLevelManagerMobs().get(id).getNode().setLocalRotation(getRot());
+        }
+    }
+
+    @Override
+    public void handleClient(ClientGameAppState client) {
+        if (entityExistsLocallyClient(id)) {
+            getMobByIdClient(id).setServerRotation(getRot());
+        }
     }
 
 }

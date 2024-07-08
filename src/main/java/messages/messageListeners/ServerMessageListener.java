@@ -4,21 +4,13 @@
  */
 package messages.messageListeners;
 
-import messages.DestructibleHealthUpdateMessage;
-import messages.MobUpdateMessage;
-import messages.MobPosUpdateMessage;
-import messages.MobRotUpdateMessage;
-import com.jme3.network.AbstractMessage;
-import com.jme3.network.Client;
+import client.Main;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
-import client.ClientGameAppState;
 import server.ServerMain;
-import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
-import game.entities.Destructible;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import messages.TwoWayMessage;
 
 /**
  *
@@ -28,31 +20,25 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class ServerMessageListener implements MessageListener<HostedConnection> {
 
     private ServerMain serverApp;
+    private static final Main MAIN_APP = Main.getInstance();
 
     public ServerMessageListener() {
     }
 
-    ;
     public ServerMessageListener(ServerMain s) {
         this.serverApp = s;
     }
 
     @Override
     public void messageReceived(HostedConnection s, Message msg) {
-        if (msg instanceof MobRotUpdateMessage nmsg) {
-            serverApp.getMobs().get(nmsg.getId()).getNode().setLocalRotation(nmsg.getRot());
-
-        } else if (msg instanceof MobPosUpdateMessage nmsg) {
-            validateMovement();
-            serverApp.getMobs().get(nmsg.getId()).getNode().setLocalTranslation(nmsg.getPos());
-
-        } else if (msg instanceof DestructibleHealthUpdateMessage hmsg) {
-            ((Destructible)serverApp.getMobs().get(hmsg.getId())).setHealth(hmsg.getHealth());
+        if (msg instanceof TwoWayMessage tm) {
+            tm.handleServer(serverApp);
         }
     }
 
-    private void validateMovement() {
-        // validate
+
+    public static void enqueueExecutionServer(Runnable runnable) {
+        MAIN_APP.enqueue(runnable);
     }
 
 }
