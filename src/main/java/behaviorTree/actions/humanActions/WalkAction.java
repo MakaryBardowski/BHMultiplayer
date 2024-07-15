@@ -8,33 +8,12 @@ import static behaviorTree.NodeCompletionStatus.STOP_TREE_EXECUTION;
 import static behaviorTree.NodeCompletionStatus.SUCCESS;
 import behaviorTree.context.Context;
 import behaviorTree.context.MudBeetleContext;
-import client.ClientGameAppState;
 import client.Main;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.VertexBuffer;
-import com.jme3.util.BufferUtils;
-import game.entities.Movable;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.MudBeetle;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import pathfinding.AStar;
-import pathfinding.Node;
 import server.ServerMain;
 
 public class WalkAction extends NodeAction {

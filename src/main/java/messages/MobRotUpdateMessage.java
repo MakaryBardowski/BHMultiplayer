@@ -5,6 +5,7 @@
 package messages;
 
 import client.ClientGameAppState;
+import client.Main;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.serializing.Serializable;
@@ -45,7 +46,9 @@ public class MobRotUpdateMessage extends EntityUpdateMessage {
     @Override
     public void handleServer(ServerMain server) {
         if (entityExistsLocallyServer(id)) {
+            Main.getInstance().enqueue(() -> {
             ServerMain.getInstance().getLevelManagerMobs().get(id).getNode().setLocalRotation(getRot());
+            });
         }
     }
 

@@ -6,6 +6,7 @@ package game.entities;
 
 import client.ClientGameAppState;
 import static client.ClientGameAppState.removeEntityByIdClient;
+import client.Main;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
@@ -94,7 +95,9 @@ public class IndestructibleDecoration extends Collidable {
         var server = ServerMain.getInstance();
         server.getGrid().remove(this);
         if (node.getParent() != null) {
-            node.removeFromParent();
+            Main.getInstance().enqueue(() -> {
+                node.removeFromParent();
+            });
         }
         removeEntityByIdServer(id);
     }
@@ -103,12 +106,10 @@ public class IndestructibleDecoration extends Collidable {
     public void destroyClient() {
         var client = ClientGameAppState.getInstance();
         client.getGrid().remove(this);
-        if (node.getParent() != null) {
+        Main.getInstance().enqueue(() -> {
             node.removeFromParent();
-        }
+        });
         removeEntityByIdClient(id);
     }
-
-
 
 }

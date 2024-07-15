@@ -5,7 +5,6 @@
 package game.entities;
 
 import com.jme3.scene.Node;
-import game.entities.mobs.Damageable;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +14,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public abstract class Destructible extends Collidable implements Damageable {
+public abstract class Destructible extends Collidable {
 
     protected static final int HEALTH_ATTRIBUTE = 0;
     protected static final int MAX_HEALTH_ATTRIBUTE = 1;
@@ -30,4 +29,13 @@ public abstract class Destructible extends Collidable implements Damageable {
     }
 
     public void onDeathServer() {};
+    public void onDeathClient() {};
+
+    public abstract void receiveDamage(float rawDamage);
+
+    public abstract void die();
+
+    public abstract float getArmorValue();
+
+    public abstract float calculateDamage(float damage);
 }

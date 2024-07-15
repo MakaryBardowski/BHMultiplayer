@@ -5,6 +5,7 @@
 package messages;
 
 import client.ClientGameAppState;
+import client.Main;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import game.entities.Destructible;
@@ -50,22 +51,19 @@ public class DestructibleDamageReceiveMessage extends EntityUpdateMessage {
 
                 Destructible d = (Destructible) getEntityByIdClient(id);
                 d.receiveDamage(damage);
-                
-                
+
                 if (d.getHealth() <= 0) {
-                    ClientGameAppState.getInstance().getMobs().remove(d.getId());
+                    d.destroyClient();
                 }
-                
+
             }
         }
         );
     }
 
-    private void checkAndManageDestructibleDeath(Destructible d, ServerMain serverApp) {
+    private void checkAndManageDestructibleDeath(Destructible d) {
         if (d.getHealth() <= 0) {
-            WorldGrid grid = serverApp.getGrid();
-            grid.remove(d);
-            serverApp.getLevelManagerMobs().remove(d.getId());
+            d.destroyServer();
             d.onDeathServer();
         }
     }
@@ -78,7 +76,7 @@ public class DestructibleDamageReceiveMessage extends EntityUpdateMessage {
 
     public void handleDestructibleDamageReceive(Destructible d, ServerMain serverApp) {
         applyDestructibleDamageAndNotifyClients(d, serverApp);
-        checkAndManageDestructibleDeath(d, serverApp);
+        checkAndManageDestructibleDeath(d);
     }
 
 }

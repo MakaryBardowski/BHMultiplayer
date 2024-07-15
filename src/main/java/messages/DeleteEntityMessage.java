@@ -38,12 +38,9 @@ public class DeleteEntityMessage extends EntityUpdateMessage {
     @Override
     public void handleClient(ClientGameAppState client) {
         var entity = getEntityByIdClient(id);
-        Main.getInstance().enqueue(() -> {
             if (entity != null) {
                 entity.destroyClient();
             }
-        }
-        );
     }
 
 }

@@ -95,8 +95,6 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
         timePerFrame = tpf;
 
         if (!serverPaused) {
-            // may throw exception when items are deleted and the node is updated 
-//                currentGamemode.levelManager.getRootNode().updateLogicalState(tpf);
             update.set(true);
         } else {
             System.out.println("server is PAUSED");
@@ -210,6 +208,10 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
 
     public byte[][][] getMap() {
         return currentGamemode.getLevelManager().getMap();
+    }
+
+    public boolean containsEntityWithId(int id) {
+        return currentGamemode.getLevelManager().getMobs().get(id) != null;
     }
 
 }
