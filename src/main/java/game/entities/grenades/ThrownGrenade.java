@@ -1,5 +1,8 @@
 package game.entities.grenades;
 
+import client.ClientGameAppState;
+import static client.ClientGameAppState.removeEntityByIdClient;
+import client.Main;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
@@ -8,6 +11,8 @@ import game.entities.Collidable;
 import game.entities.mobs.Mob;
 import lombok.Getter;
 import lombok.Setter;
+import server.ServerMain;
+import static server.ServerMain.removeEntityByIdServer;
 
 /**
  *
@@ -17,7 +22,7 @@ public abstract class ThrownGrenade extends Collidable {
 
     @Getter
     protected Vector3f serverLocation; // updated by the server
-    
+
     @Getter
     protected Quaternion serverRotation;
 
@@ -28,7 +33,7 @@ public abstract class ThrownGrenade extends Collidable {
     @Getter
     @Setter
     protected float rotInterpolationValue;
-    
+
     @Getter
     protected float speed = 120;
 
@@ -39,6 +44,7 @@ public abstract class ThrownGrenade extends Collidable {
     }
 
     public abstract void explodeClient();
+
     public abstract void explodeServer();
 
     @Override
@@ -75,8 +81,7 @@ public abstract class ThrownGrenade extends Collidable {
     public AbstractMessage createNewEntityMessage() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
-    
+
     public void setServerLocation(Vector3f serverLocation) {
         this.serverLocation = serverLocation;
         this.posInterpolationValue = 0;
@@ -87,5 +92,25 @@ public abstract class ThrownGrenade extends Collidable {
         this.rotInterpolationValue = 0;
     }
 
+    @Override
+    public void destroyServer() {
+        var server = ServerMain.getInstance();
+        if (node.getParent() != null) {
+            Main.getInstance().enqueue(() -> {
+                server.getGrid().remove(this); 
+                node.removeFromParent();
+            });
+        }
+        removeEntityByIdServer(id);
+    }
 
+    @Override
+    public void destroyClient() {
+        var client = ClientGameAppState.getInstance();
+        Main.getInstance().enqueue(() -> {
+            client.getGrid().remove(this); 
+            node.removeFromParent();
+        });
+        removeEntityByIdClient(id);
+    }
 }

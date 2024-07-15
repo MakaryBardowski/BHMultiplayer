@@ -62,12 +62,6 @@ public class ServerThrownGrenadeControl extends AbstractControl implements Savab
         if (spatial != null) {
             spatial.lookAt(direction.add(spatial.getWorldTranslation()), Vector3f.UNIT_Y);
         }
-        /* Example:
-        
-        else{
-            // cleanup
-        }
-         */
     }
 
     @Override
