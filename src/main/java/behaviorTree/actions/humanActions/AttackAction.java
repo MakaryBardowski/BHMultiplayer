@@ -21,16 +21,19 @@ public class AttackAction extends NodeAction {
     private float currentGunCooldown;
     private float TEST_GUN_COOLDOWN = 1;
     private float TEST_GUN_RANGE = 2;
-    private float TEST_DAMAGE = 2;
+    private float TEST_DAMAGE = 2; 
 
     @Override
     public NodeCompletionStatus execute(Context context) {
         var beetle = (MudBeetle) context.getBlackboard().get(MudBeetleContext.STEERED_MUD_BEETLE);
         var target = context.getBlackboard().get(MudBeetleContext.TARGET_DESTRUCTIBLE);
-
+//if(target != null)
+//    System.out.println("target " + target + new Random().nextInt());
         currentGunCooldown -= ServerMain.getTimePerFrame();
         if (currentGunCooldown < 0) {
             if (target != null) {
+                
+                
                 var destructibleTarget = (Destructible) target;
 
                 var distance = beetle.getNode().getWorldTranslation().distance(destructibleTarget.getNode().getWorldTranslation());

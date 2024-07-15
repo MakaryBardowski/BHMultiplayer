@@ -56,11 +56,11 @@ public class ThrownGrenadeExplodedMessage extends TwoWayMessage {
     private void handleGrenadeExplosion(ThrownGrenadeExplodedMessage gemsg) {
         enqueueExecution(() -> {
             ThrownGrenade g = (ThrownGrenade) getEntityByIdClient(gemsg.getId());
-            g.getNode().setLocalTranslation(gemsg.getPos());
-            g.explodeClient();
-            ClientGameAppState.getInstance().getMobs().remove(gemsg.getId());
-            g.getNode().removeFromParent();
-
+                g.getNode().setLocalTranslation(gemsg.getPos());
+                g.explodeClient();
+                ClientGameAppState.getInstance().getMobs().remove(gemsg.getId());
+                g.getNode().removeFromParent();
+            
         });
     }
 

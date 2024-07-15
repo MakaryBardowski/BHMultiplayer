@@ -620,6 +620,8 @@ public class PlayerHUD extends BaseAppState {
     }
 
     private void updateItemDropTooltipMaterial(Item itemHit) {
+        if(itemHit.getDroppedItemNode() == null)
+            return;
         itemHit.getDroppedItemNode().attachChild(itemDropTooltipNode);
 
         Element textElement = tooltipNifty.getCurrentScreen().findElementByName("itemName");

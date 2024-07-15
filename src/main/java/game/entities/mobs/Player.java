@@ -18,6 +18,7 @@ import com.jme3.scene.Node;
 import game.entities.Attribute;
 import game.entities.FloatAttribute;
 import FirstPersonHands.FirstPersonHands;
+import static client.ClientGameAppState.removeEntityByIdClient;
 import client.Main;
 import static client.Main.CAM_ROT_SPEED;
 import static client.Main.CAM__MOVE_SPEED;
@@ -30,6 +31,8 @@ import lombok.Getter;
 import lombok.Setter;
 import messages.NewMobMessage;
 import messages.PlayerPosUpdateRequest;
+import server.ServerMain;
+import static server.ServerMain.removeEntityByIdServer;
 
 /**
  *
@@ -38,7 +41,7 @@ import messages.PlayerPosUpdateRequest;
 public class Player extends HumanMob {
 
     public static final float IDENTIFY_RANGE = 8;
-    public static final float PICKUP_RANGE = 800;
+    public static final float PICKUP_RANGE = 8;
 
     private static final int HOTBAR_SIZE = 10;
 
@@ -71,8 +74,7 @@ public class Player extends HumanMob {
     @Getter
     @Setter
     protected FirstPersonHands firstPersonHands;
-    
-    
+
     @Getter
     private PlayerClass playerClass;
 
@@ -95,12 +97,14 @@ public class Player extends HumanMob {
         return gunNode;
     }
 
-    public Player(int id, Node node, String name, Camera mainCamera, SkinningControl skinningControl, AnimComposer composer,PlayerClass playerClass) {
+    public Player(int id, Node node, String name, Camera mainCamera, SkinningControl skinningControl, AnimComposer composer, PlayerClass playerClass) {
         super(id, node, name, skinningControl, composer);
         this.playerClass = playerClass;
         this.mainCamera = mainCamera;
         firstPersonHands = new FirstPersonHands(this);
         hotbar = new Item[HOTBAR_SIZE];
+        health = 500;
+        maxHealth = 500;
     }
 
     @Override
@@ -146,9 +150,9 @@ public class Player extends HumanMob {
 
     @Override
     public void move(float tpf) {
-       var cm = ClientGameAppState.getInstance();
+        var cm = ClientGameAppState.getInstance();
         if ((forward || backward || left || right) && !isMovementControlLocked()) {
-             movementVector.set(0,0,0);
+            movementVector.set(0, 0, 0);
 
             WorldGrid collisionGrid = cm.getGrid();
             collisionGrid.remove(this);
@@ -181,11 +185,11 @@ public class Player extends HumanMob {
             if (wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(0, 0, movementVector.getZ()))) {
                 node.move(0, 0, movementVector.getZ());
             }
-            
+
             if (wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(movementVector.getX(), 0, 0))) {
                 node.move(movementVector.getX(), 0, 0);
             }
-            
+
             if (node.getWorldTranslation().distance(serverLocation) > cachedSpeed * tpf) {
                 PlayerPosUpdateRequest posu = new PlayerPosUpdateRequest(id, node.getWorldTranslation());
                 cm.getClient().send(posu);
@@ -247,6 +251,28 @@ public class Player extends HumanMob {
         if (attributeId == SPEED_ATTRIBUTE) {
             cachedSpeed = ((FloatAttribute) copy).getValue();
         }
+    }
+
+    @Override
+    public void destroyServer() { // can leak player into grid
+        var server = ServerMain.getInstance();
+        server.getGrid().remove(this);
+        if (node.getParent() != null) {
+            Main.getInstance().enqueue(() -> {
+                node.removeFromParent();
+            });
+        }
+        removeEntityByIdServer(id);
+    }
+
+    @Override
+    public void destroyClient() { // can leak player into grid
+        var client = ClientGameAppState.getInstance();
+        client.getGrid().remove(this);
+        Main.getInstance().enqueue(() -> {
+            node.removeFromParent();
+        });
+        removeEntityByIdClient(id);
     }
 
 }

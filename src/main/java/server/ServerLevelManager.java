@@ -42,6 +42,7 @@ import game.items.factories.ItemFactory;
 import game.items.weapons.Knife;
 import game.map.MapGenerator;
 import game.map.MapType;
+import game.map.MobGenerator;
 import lombok.Getter;
 import game.map.collision.WorldGrid;
 import java.util.ArrayList;
@@ -126,8 +127,8 @@ public class ServerLevelManager extends LevelManager {
 
     public void createMap(long seed, MapType mapType) {
         map = new MapGenerator(seed, mapType).decideAndGenerateMapServer(new byte[MAP_SIZE][MAP_SIZE][MAP_SIZE]);
-        Main.getInstance().enqueue(()->{
-        registerLevelExit(mapType);
+        Main.getInstance().enqueue(() -> {
+            registerLevelExit(mapType);
         });
     }
 
@@ -156,74 +157,17 @@ public class ServerLevelManager extends LevelManager {
         var newLevelType = levelTypes[levelIndex];
         createMap(newLevelSeed, newLevelType);
 
-        if (levelIndex == 0) { // so that weird stuff doesnt happen after swapping levels, armor is hardcoded anyway
-            populateMap();
+        if (levelIndex != 0) { // so that weird stuff doesnt happen after swapping levels, armor is hardcoded anyway
+            MobGenerator mg = new MobGenerator();
+            Main.getInstance().enqueue(() -> {
+                mg.spawnMobs(map);
+                notifyPlayersAboutNewLevelEntities();
+            });
         }
 
     }
 
-    private void populateMap() {
-        Random r = new Random();
-
-        int spawnpointOffset = 5 * BLOCK_SIZE;
-        for (int i = 0; i < 300; i++) {
-            registerRandomChest(new Vector3f(r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE));
-        }
-
-        for (int i = 0; i < 300; i++) {
-            var playerSpawnpointOffset = new Vector3f(spawnpointOffset * 2, 0, 0);
-            if (new Random().nextBoolean() == false) {
-                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset * 2);
-            }
-//
-            registerMob().setPositionServer(
-                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
-                            .addLocal(playerSpawnpointOffset)
-            );
-        }
-
-        for (int i = 0; i < 300; i++) {
-
-            var playerSpawnpointOffset = new Vector3f(spawnpointOffset, 0, 0);
-            if (new Random().nextBoolean() == false) {
-                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset);
-            }
-
-            registerRandomDestructibleDecoration(
-                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
-                            .addLocal(playerSpawnpointOffset)
-            );
-        }
-
-    }
-
-    private Item registerItemAndNotifyTCP(ItemTemplates.ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
-        Item i = registerItemLocal(template, droppable);
-        sendMessageTCP(i.createNewEntityMessage(), notificationFilter);
-        return i;
-    }
-
-    public Item registerItemLocal(ItemTemplates.ItemTemplate template, boolean droppable) {
-        ItemFactory ifa = new ItemFactory();
-        Item item = ifa.createItem(currentMaxId++, template, droppable);
-        return registerEntityLocal(item);
-    }
-
-    private <T extends InteractiveEntity> T registerEntityLocal(T entity) {
-        mobs.put(entity.getId(), entity);
-        return entity;
-    }
-
-    private void sendMessageTCP(AbstractMessage imsg, Filter<HostedConnection> filter) {
-        imsg.setReliable(true);
-        if (filter == null) {
-            server.broadcast(imsg);
-        } else {
-            server.broadcast(filter, imsg);
-        }
-    }
-
-    private void registerRandomDestructibleDecoration(Vector3f pos) {
+    public void registerRandomDestructibleDecoration(Vector3f pos) {
         int randomNumber = new Random().nextInt(3);
         DecorationTemplates.DecorationTemplate template = DecorationTemplates.TABLE;
         if (randomNumber == 0) {
@@ -402,8 +346,65 @@ public class ServerLevelManager extends LevelManager {
 
     }
 
-    public void insertIntoCollisionGrid(Collidable c) {
-        grid.insert(c);
+    public void notifyPlayersAboutNewLevelEntities() {
+        var hostsByPlayerId = ServerMain.getInstance().getHostsByPlayerId();
+
+        List<Item> itemsInGame = mobs.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof Item)
+                .map(entity -> (Item) entity.getValue())
+                .toList();
+
+        List<Mob> mobsInGame = mobs.entrySet().stream()
+                .filter(entry -> {
+                    // temporary fix, because currently every mob is a player so you get a duplicate on players
+                    var notRealPlayer = hostsByPlayerId.get(entry.getValue().getId()) == null;
+                    return entry.getValue() instanceof Mob && notRealPlayer;
+                })
+                .map(entity -> (Mob) entity.getValue())
+                .toList();
+
+        List<Chest> chestsInGame = mobs.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof Chest)
+                .map(entity -> (Chest) entity.getValue())
+                .toList();
+
+        List<DestructibleDecoration> destructibleDecorationsInGame = mobs.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof DestructibleDecoration)
+                .map(entity -> (DestructibleDecoration) entity.getValue())
+                .toList();
+
+        itemsInGame.forEach(item -> {
+            AbstractMessage msg = item.createNewEntityMessage();
+            msg.setReliable(true);
+            server.broadcast(msg);
+        });
+
+        mobsInGame.forEach(mob -> {
+            AbstractMessage msg = mob.createNewEntityMessage();
+            server.broadcast(msg);
+        });
+
+        mobsInGame.forEach(mob -> {
+            sendNewEntityEquipmentInfo(mob, null);
+        });
+
+        destructibleDecorationsInGame.forEach(dd -> {
+            AbstractMessage msg = dd.createNewEntityMessage();
+            server.broadcast(msg);
+        });
+
+        chestsInGame.forEach(chest -> {
+            AbstractMessage chestMsg = chest.createNewEntityMessage();
+            server.broadcast(null, chestMsg);
+            for (Item item : chest.getEquipment()) {
+                if (item != null) {
+                    ChestItemInteractionMessage msg = new ChestItemInteractionMessage(item, chest, INSERT);
+                    msg.setReliable(true);
+                    server.broadcast(msg);
+                }
+            }
+        });
+
     }
 
     public void addPlayerToGame(HostedConnection hc) {
@@ -524,7 +525,7 @@ public class ServerLevelManager extends LevelManager {
         var itemsToKeep = getItemsTokeep();
         mobs.forEach((id, entity) -> {
             if (isNotItemToKeep(entity, itemsToKeep) && isNotPlayer(entity)) { // if not an item to keep
-                    entity.destroyAndNotifyClients();
+                entity.destroyAndNotifyClients();
             }
         });
 
@@ -547,7 +548,34 @@ public class ServerLevelManager extends LevelManager {
     private boolean isNotPlayer(InteractiveEntity entity) {
         return !(entity instanceof Player);
     }
-    
 
+    public void insertIntoCollisionGrid(Collidable c) {
+        grid.insert(c);
+    }
 
+    private Item registerItemAndNotifyTCP(ItemTemplates.ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
+        Item i = registerItemLocal(template, droppable);
+        sendMessageTCP(i.createNewEntityMessage(), notificationFilter);
+        return i;
+    }
+
+    public Item registerItemLocal(ItemTemplates.ItemTemplate template, boolean droppable) {
+        ItemFactory ifa = new ItemFactory();
+        Item item = ifa.createItem(currentMaxId++, template, droppable);
+        return registerEntityLocal(item);
+    }
+
+    private <T extends InteractiveEntity> T registerEntityLocal(T entity) {
+        mobs.put(entity.getId(), entity);
+        return entity;
+    }
+
+    private void sendMessageTCP(AbstractMessage imsg, Filter<HostedConnection> filter) {
+        imsg.setReliable(true);
+        if (filter == null) {
+            server.broadcast(imsg);
+        } else {
+            server.broadcast(filter, imsg);
+        }
+    }
 }

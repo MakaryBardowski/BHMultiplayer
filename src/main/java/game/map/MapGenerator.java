@@ -30,8 +30,6 @@ public class MapGenerator {
      * this method returns a new map (allocates a new array for voxel data).
      * Recommended use is for first-time map generation
      *
-     * @param seed map generation seed
-     * @param type map generation type
      * @param blockSize size of 1 voxel
      * @param chunkSize chunk size is equal to chunkSize * chunkSize
      * @param mapSize map size is equal to mapSize * mapSize
