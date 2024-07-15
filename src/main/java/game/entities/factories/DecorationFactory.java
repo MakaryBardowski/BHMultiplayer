@@ -57,6 +57,17 @@ public class DecorationFactory {
         return d;
     }
 
+    public static DestructibleDecoration createCrate(int id, Node parentNode, Vector3f pos, AssetManager a) {
+        DecorationTemplate template = DecorationTemplates.CRATE;
+        Node node = (Node) a.loadModel(template.getModelPath());
+        node.scale(template.getScale());
+        Mine d = new Mine(id, "Landmine " + id, node, template);
+        attachDestructibleToNode(d, parentNode, pos);
+        setupModelShootability(node, id);
+        setupModelLight(node);
+        return d;
+    }
+
     public static DestructibleDecoration createDestructibleDecoration(int id, Node parentNode, Vector3f pos, DecorationTemplate template, AssetManager a) {
         if (template.equals(DecorationTemplates.TABLE)) {
             return createTable(id, parentNode, pos, a);
@@ -64,11 +75,14 @@ public class DecorationFactory {
             return createBarbedWire(id, parentNode, pos, a);
         } else if (template.equals(DecorationTemplates.MINE)) {
             return createMine(id, parentNode, pos, a);
+        } else if (template.equals(DecorationTemplates.CRATE)) {
+            return createCrate(id, parentNode, pos, a);
         }
 
         return null;
     }
 
+    // indestructible
     public static IndestructibleDecoration createExit(int id, Node parentNode, Vector3f pos, AssetManager a) {
         Node node = (Node) a.loadModel(DecorationTemplates.EXIT_CAR.getModelPath());
         node.scale(DecorationTemplates.EXIT_CAR.getScale());

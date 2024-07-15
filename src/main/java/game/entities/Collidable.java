@@ -141,7 +141,10 @@ public abstract class Collidable extends Movable {
 
     @Override
     public void moveServer(Vector3f moveVec) {
-        if (isAbleToMove()) {
+        if (isAbleToMove() && ServerMain.getInstance().containsEntityWithId(id)) { /*
+            if registered, then we can remove it from the grid and insert it again - this means we wont re-insert a mob that is deleted.
+            Because list of mobs is a concurent hashmap, it means either deletion or the check will occur first (not at the same time meaning proper removal
+            */
             WorldGrid grid = ServerMain.getInstance().getGrid();
             grid.remove(this);
        

@@ -6,6 +6,7 @@ package game.entities;
 
 import client.ClientGameAppState;
 import static client.ClientGameAppState.removeEntityByIdClient;
+import client.Main;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -13,6 +14,7 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import game.entities.DecorationTemplates.DecorationTemplate;
 import static game.entities.DestructibleUtils.attachDestructibleToNode;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.Mob;
@@ -33,12 +35,14 @@ import static server.ServerMain.removeEntityByIdServer;
  * @author 48793
  */
 public class Chest extends Destructible {
-   static int cnt;
+
+    static int cnt;
 
     @Getter
     private final Item[] equipment = new Item[9];
     private boolean locked;
-    private static final String WOODEN_CRATE = "Models/Chests/crate.j3o"; //should be moved to decoration tempaltes
+
+    private static final DecorationTemplate TEMPLATE = DecorationTemplates.CRATE;
 
     public Chest(int id, String name, Node node) {
         super(id, name, node);
@@ -68,7 +72,7 @@ public class Chest extends Destructible {
     }
 
     public static Chest createRandomChestClient(int id, Node parentNode, Vector3f offset, AssetManager a) {
-        Node node = (Node) a.loadModel(WOODEN_CRATE);
+        Node node = (Node) a.loadModel(TEMPLATE.getModelPath());
         Chest chest = new Chest(id, "Crate " + id, node);
         node.scale(0.8f);
         chest.hitboxNode.scale(1.25f);
@@ -79,7 +83,7 @@ public class Chest extends Destructible {
     }
 
     public static Chest createRandomChestServer(int id, Node parentNode, Vector3f offset, AssetManager a) {
-        Node node = (Node) a.loadModel(WOODEN_CRATE);
+        Node node = (Node) a.loadModel(TEMPLATE.getModelPath());
         Chest chest = new Chest(id, "Crate " + id, node);
         attachDestructibleToNode(chest, parentNode, offset);
         return chest;
@@ -112,14 +116,17 @@ public class Chest extends Destructible {
 
     @Override
     public void die() {
-        for (Item i : equipment) {
-            if (i != null) {
-                i.drop(node.getWorldTranslation().add(0, 1, 0));
+        for (int i = 0; i < equipment.length; i++) {
+            Item item = equipment[i];
+            if (item != null) {
+                item.drop(node.getWorldTranslation().add(0, 1, 0));
             }
+            equipment[i] = null;
         }
         node.removeFromParent();
         ClientGameAppState.getInstance().getGrid().remove(this);
         hideHitboxIndicator();
+        destroyClient();
     }
 
     @Override
@@ -191,7 +198,9 @@ public class Chest extends Destructible {
         var server = ServerMain.getInstance();
         server.getGrid().remove(this);
         if (node.getParent() != null) {
-            node.removeFromParent();
+            Main.getInstance().enqueue(() -> {
+                node.removeFromParent();
+            });
         }
         removeEntityByIdServer(id);
     }
@@ -200,17 +209,10 @@ public class Chest extends Destructible {
     public void destroyClient() {
         var client = ClientGameAppState.getInstance();
         client.getGrid().remove(this);
-        if (node.getParent() != null) {
+        Main.getInstance().enqueue(() -> {
             node.removeFromParent();
-        }
+        });
         removeEntityByIdClient(id);
     }
 
-//    @Override
-//    protected void finalize() throws Throwable {
-//        cnt++;
-//
-//                System.out.println(cnt+"deleting "+name);
-//        super.finalize(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-//    }
 }

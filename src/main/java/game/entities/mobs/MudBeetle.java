@@ -22,6 +22,7 @@ import game.effects.EmitterPooler;
 import game.items.Item;
 import game.map.collision.WorldGrid;
 import client.ClientGameAppState;
+import static client.ClientGameAppState.removeEntityByIdClient;
 import client.ClientSynchronizationUtils;
 import client.Main;
 import com.jme3.anim.AnimComposer;
@@ -56,6 +57,7 @@ import lombok.Getter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewMobMessage;
 import server.ServerMain;
+import static server.ServerMain.removeEntityByIdServer;
 
 /**
  *
@@ -70,7 +72,7 @@ public class MudBeetle extends Mob {
 
     public MudBeetle(int id, Node node, String name, SkinningControl skinningControl, AnimComposer modelComposer) {
         super(id, node, name);
-        
+
         maxHealth = 8;
         health = 8;
 
@@ -128,8 +130,6 @@ public class MudBeetle extends Mob {
         var rootNode = new ParallelNode(children);
         var context = new MudBeetleContext(this);
         behaviorTree = new BehaviorTree(rootNode, context);
-        
-
 
     }
 
@@ -238,7 +238,6 @@ public class MudBeetle extends Mob {
 //    public boolean wouldNotCollideWithSolidEntitiesAfterMoveClient(Vector3f moveVec) {
 //        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
 //    }
-
     @Override
     public void attack() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
@@ -275,9 +274,30 @@ public class MudBeetle extends Mob {
     public void move(float tpf) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
-    //-----------------------------TEST
 
+    @Override
+    public void destroyServer() {
+        removeEntityByIdServer(id);
+        var server = ServerMain.getInstance();
+        server.getGrid().remove(this);
+        if (node.getParent() != null) {
+            Main.getInstance().enqueue(() -> {
+                node.removeFromParent();
+            });
+        }
+    }
+
+    @Override
+    public void destroyClient() {
+        var client = ClientGameAppState.getInstance();
+        client.getGrid().remove(this);
+        Main.getInstance().enqueue(() -> {
+            node.removeFromParent();
+        });
+        removeEntityByIdClient(id);
+    }
+
+    //-----------------------------TEST
     private static Geometry createCircle(float radius, ColorRGBA color) {
         Circle b = new Circle(radius, 60);
         Geometry geom = new Geometry("Box", b);
@@ -288,125 +308,124 @@ public class MudBeetle extends Mob {
 
         return geom;
     }
-    
+
     public static class Circle
-        extends Mesh {
+            extends Mesh {
 
-    /**
-     * The center.
-     *
-     */
-    private Vector3f center;
+        /**
+         * The center.
+         *
+         */
+        private Vector3f center;
 
-    /**
-     * The radius.
-     *
-     */
-    private float radius;
+        /**
+         * The radius.
+         *
+         */
+        private float radius;
 
-    /**
-     * The samples.
-     *
-     */
-    private int samples;
+        /**
+         * The samples.
+         *
+         */
+        private int samples;
 
-    /**
-     * Constructs a new instance of this class.
-     *
-     *
-     * @param radius
-     *
-     */
-    public Circle(float radius) {
+        /**
+         * Constructs a new instance of this class.
+         *
+         *
+         * @param radius
+         *
+         */
+        public Circle(float radius) {
 
-        this(Vector3f.ZERO, radius, 16);
-
-    }
-
-    /**
-     * Constructs a new instance of this class.
-     *
-     *
-     * @param radius
-     * @param samples
-     *
-     */
-    public Circle(float radius, int samples) {
-
-        this(Vector3f.ZERO, radius, samples);
-
-    }
-
-    /**
-     * Constructs a new instance of this class.
-     *
-     *
-     * @param center
-     * @param radius
-     * @param samples
-     *
-     */
-    public Circle(Vector3f center, float radius, int samples) {
-
-        super();
-
-        this.center = center;
-
-        this.radius = radius;
-
-        this.samples = samples;
-
-        setMode(Mesh.Mode.Lines);
-
-        updateGeometry();
-
-    }
-
-    protected void updateGeometry() {
-
-        FloatBuffer positions = BufferUtils.createFloatBuffer(samples * 3);
-
-        FloatBuffer normals = BufferUtils.createFloatBuffer(samples * 3);
-
-        short[] indices = new short[samples * 2];
-
-        float rate = FastMath.TWO_PI / (float) samples;
-
-        float angle = 0;
-
-        for (int i = 0; i < samples; i++) {
-
-            float x = FastMath.cos(angle) + center.x;
-
-            float z = FastMath.sin(angle) + center.z;
-
-            positions.put(x * radius).put(center.y).put(z * radius);
-
-            normals.put(new float[]{0, 1, 0});
-
-            indices[i] = (short) i;
-
-            if (i < samples - 1) {
-                indices[i] = (short) (i + 1);
-            } else {
-                indices[i] = 0;
-            }
-
-            angle += rate;
+            this(Vector3f.ZERO, radius, 16);
 
         }
 
-        setBuffer(VertexBuffer.Type.Position, 3, positions);
+        /**
+         * Constructs a new instance of this class.
+         *
+         *
+         * @param radius
+         * @param samples
+         *
+         */
+        public Circle(float radius, int samples) {
 
-        setBuffer(VertexBuffer.Type.Normal, 3, normals);
+            this(Vector3f.ZERO, radius, samples);
 
-        setBuffer(VertexBuffer.Type.Index, 2, indices);
+        }
 
-        setBuffer(VertexBuffer.Type.TexCoord, 2, new float[]{0, 0, 1, 1});
+        /**
+         * Constructs a new instance of this class.
+         *
+         *
+         * @param center
+         * @param radius
+         * @param samples
+         *
+         */
+        public Circle(Vector3f center, float radius, int samples) {
 
-        updateBound();
+            super();
+
+            this.center = center;
+
+            this.radius = radius;
+
+            this.samples = samples;
+
+            setMode(Mesh.Mode.Lines);
+
+            updateGeometry();
+
+        }
+
+        protected void updateGeometry() {
+
+            FloatBuffer positions = BufferUtils.createFloatBuffer(samples * 3);
+
+            FloatBuffer normals = BufferUtils.createFloatBuffer(samples * 3);
+
+            short[] indices = new short[samples * 2];
+
+            float rate = FastMath.TWO_PI / (float) samples;
+
+            float angle = 0;
+
+            for (int i = 0; i < samples; i++) {
+
+                float x = FastMath.cos(angle) + center.x;
+
+                float z = FastMath.sin(angle) + center.z;
+
+                positions.put(x * radius).put(center.y).put(z * radius);
+
+                normals.put(new float[]{0, 1, 0});
+
+                indices[i] = (short) i;
+
+                if (i < samples - 1) {
+                    indices[i] = (short) (i + 1);
+                } else {
+                    indices[i] = 0;
+                }
+
+                angle += rate;
+
+            }
+
+            setBuffer(VertexBuffer.Type.Position, 3, positions);
+
+            setBuffer(VertexBuffer.Type.Normal, 3, normals);
+
+            setBuffer(VertexBuffer.Type.Index, 2, indices);
+
+            setBuffer(VertexBuffer.Type.TexCoord, 2, new float[]{0, 0, 1, 1});
+
+            updateBound();
+        }
     }
-}
-
 
 }

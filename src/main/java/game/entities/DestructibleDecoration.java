@@ -6,6 +6,7 @@ package game.entities;
 
 import client.ClientGameAppState;
 import static client.ClientGameAppState.removeEntityByIdClient;
+import client.Main;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
@@ -130,7 +131,9 @@ public class DestructibleDecoration extends Destructible {
         var server = ServerMain.getInstance();
         server.getGrid().remove(this);
         if (node.getParent() != null) {
+            Main.getInstance().enqueue(() ->{
             node.removeFromParent();
+            });
         }
         removeEntityByIdServer(id);
     }
@@ -139,9 +142,9 @@ public class DestructibleDecoration extends Destructible {
     public void destroyClient() {
         var client = ClientGameAppState.getInstance();
         client.getGrid().remove(this);
-        if (node.getParent() != null) {
+        Main.getInstance().enqueue(() -> {
             node.removeFromParent();
-        }
+        });
         removeEntityByIdClient(id);
     }
 

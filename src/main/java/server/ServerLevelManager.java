@@ -14,6 +14,7 @@ import com.jme3.network.HostedConnection;
 import com.jme3.network.Server;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import game.entities.Chest;
 import game.entities.Collidable;
 import game.entities.DecorationTemplates;
@@ -98,6 +99,8 @@ public class ServerLevelManager extends LevelManager {
         this.assetManager = Main.getInstance().getAssetManager();
         this.renderManager = Main.getInstance().getRenderManager();
         this.rootNode = new Node("server rootNode");
+        this.rootNode.setCullHint(Spatial.CullHint.Always);
+        Main.getInstance().getRootNode().attachChild(this.rootNode);
         this.server = server;
         levelSeeds = new long[levelCount];
         levelTypes = new MapType[levelCount];
@@ -123,7 +126,9 @@ public class ServerLevelManager extends LevelManager {
 
     public void createMap(long seed, MapType mapType) {
         map = new MapGenerator(seed, mapType).decideAndGenerateMapServer(new byte[MAP_SIZE][MAP_SIZE][MAP_SIZE]);
+        Main.getInstance().enqueue(()->{
         registerLevelExit(mapType);
+        });
     }
 
     private void initializeCollisionGrid() {
@@ -161,34 +166,34 @@ public class ServerLevelManager extends LevelManager {
         Random r = new Random();
 
         int spawnpointOffset = 5 * BLOCK_SIZE;
-        for (int i = 0; i < 15000; i++) {
+        for (int i = 0; i < 300; i++) {
             registerRandomChest(new Vector3f(r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE));
         }
 
-//        for (int i = 0; i < 20; i++) {
-//            var playerSpawnpointOffset = new Vector3f(spawnpointOffset * 2, 0, 0);
-//            if (new Random().nextBoolean() == false) {
-//                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset * 2);
-//            }
-////
-//            registerMob().setPositionServer(
-//                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
-//                            .addLocal(playerSpawnpointOffset)
-//            );
-//        }
+        for (int i = 0; i < 300; i++) {
+            var playerSpawnpointOffset = new Vector3f(spawnpointOffset * 2, 0, 0);
+            if (new Random().nextBoolean() == false) {
+                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset * 2);
+            }
 //
-//        for (int i = 0; i < 20; i++) {
-//
-//            var playerSpawnpointOffset = new Vector3f(spawnpointOffset, 0, 0);
-//            if (new Random().nextBoolean() == false) {
-//                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset);
-//            }
-//
-//            registerRandomDestructibleDecoration(
-//                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
-//                            .addLocal(playerSpawnpointOffset)
-//            );
-//        }
+            registerMob().setPositionServer(
+                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
+                            .addLocal(playerSpawnpointOffset)
+            );
+        }
+
+        for (int i = 0; i < 300; i++) {
+
+            var playerSpawnpointOffset = new Vector3f(spawnpointOffset, 0, 0);
+            if (new Random().nextBoolean() == false) {
+                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset);
+            }
+
+            registerRandomDestructibleDecoration(
+                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
+                            .addLocal(playerSpawnpointOffset)
+            );
+        }
 
     }
 
@@ -542,5 +547,7 @@ public class ServerLevelManager extends LevelManager {
     private boolean isNotPlayer(InteractiveEntity entity) {
         return !(entity instanceof Player);
     }
+    
+
 
 }

@@ -6,12 +6,14 @@ package game.items;
 
 import client.ClientGameAppState;
 import static client.ClientGameAppState.removeEntityByIdClient;
+import client.Main;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import static debugging.DebugUtils.createUnshadedBoxNode;
 import game.effects.ParticleUtils;
+import game.effects.PhysicalParticleControl;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.InteractiveEntity;
 import game.items.ItemTemplates.ItemTemplate;
@@ -86,16 +88,22 @@ public abstract class Item extends InteractiveEntity {
 
     @Override
     public void destroyServer() {
-        if (node.getParent() != null) {
-            node.removeFromParent();
+        // does it ever execute on server?
+        if (droppedItemNode != null && droppedItemNode.getParent() != null) {
+            Main.getInstance().enqueue(() -> {
+                droppedItemNode.removeFromParent();
+            });
         }
+        //
         removeEntityByIdServer(id);
     }
 
     @Override
     public void destroyClient() {
-        if (node.getParent() != null) {
-            node.removeFromParent();
+        if (droppedItemNode != null && node.getParent() != null) {
+            Main.getInstance().enqueue(() -> {
+                droppedItemNode.removeFromParent();
+            });
         }
         removeEntityByIdClient(id);
     }
@@ -105,5 +113,4 @@ public abstract class Item extends InteractiveEntity {
 //        System.out.println("deleting ITEEEEEEEEm "+name);
 //        super.finalize(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
 //    }
-
 }

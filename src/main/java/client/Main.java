@@ -87,19 +87,18 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf
     ) {
-        time_from_start_millis_debug += tpf;
-
-        used_mem_debug = (double) (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576;
-        max_mem_debug = Runtime.getRuntime().totalMemory() / 1048576;
-        System.out.print(used_mem_debug);
-        System.out.print("/");
-        System.out.println(max_mem_debug);
-
-        if (previous_max_mem_debug != max_mem_debug) {
-            previous_max_mem_debug = max_mem_debug;
-            System.out.println("max mem changed this many seconds from start: " + (time_from_start_millis_debug));
-        }
-
+//        time_from_start_millis_debug += tpf;
+//
+//        used_mem_debug = (double) (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576;
+//        max_mem_debug = Runtime.getRuntime().totalMemory() / 1048576;
+//        System.out.print(used_mem_debug);
+//        System.out.print("/");
+//        System.out.println(max_mem_debug);
+//
+//        if (previous_max_mem_debug != max_mem_debug) {
+//            previous_max_mem_debug = max_mem_debug;
+//            System.out.println("max mem changed this many seconds from start: " + (time_from_start_millis_debug));
+//        }
     }
 
     @Override

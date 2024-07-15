@@ -27,6 +27,7 @@ public class DecorationTemplates {
     public static final DecorationTemplate BARBED_WIRE = new DecorationTemplate(DECO_PATH + "barbedWire.j3o", 1f, 1, 1.2f, 0.6f, 0.75f);
     public static final DecorationTemplate MINE = new DecorationTemplate(DECO_PATH + "mine.j3o", 1f, 2, 0.5f, 0.3f, 0.5f);
     public static final DecorationTemplate EXIT_CAR = new DecorationTemplate(DECO_PATH + "exitCar.j3o", 1.4f, 3, 1.6f, 0.7f, 3f);
+    public static final DecorationTemplate CRATE = new DecorationTemplate(DECO_PATH + "crate.j3o", 1f, 2, 0.5f, 0.3f, 0.5f);
 
     static {
         templates.add(TABLE.templateIndex, TABLE);

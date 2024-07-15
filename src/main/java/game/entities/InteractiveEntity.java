@@ -6,6 +6,7 @@ package game.entities;
 
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import game.entities.mobs.Mob;
 import game.map.collision.WorldGrid;

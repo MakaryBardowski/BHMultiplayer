@@ -72,9 +72,9 @@ public class InputController {
     public void createInputListeners(ClientGameAppState gs) {
         m = gs.getInputManager();
         initKeys(m, initActionListener(gs), initAnalogListener(gs));
-
-        headBob = new HeadBobControl(gs.getPlayer());
-        gs.getPlayer().getRotationNode().addControl(headBob);
+        var rotationNode = gs.getPlayer().getRotationNode();
+        headBob = new HeadBobControl(gs.getPlayer(),rotationNode.getLocalTranslation());
+        rotationNode.addControl(headBob);
     }
 
     private ActionListener initActionListener(final ClientGameAppState gs) {
@@ -198,7 +198,12 @@ public class InputController {
 //
 //                    player.setMovementControlLocked(true);
 //                    updatePlayersThirdPersonHandsRot = true;
-
+                    ServerMain.getInstance().getGrid().getContents().forEach((i,set)->{
+                    if(!set.isEmpty()){
+                        System.err.println("------------set "+i);
+                    System.err.println(set);
+                    }
+                    });
                 }
             }
         };

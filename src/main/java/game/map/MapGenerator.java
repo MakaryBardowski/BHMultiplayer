@@ -155,6 +155,8 @@ public class MapGenerator {
             }
         }
         
+        logicMap[armorySizeX-4][1][armorySizeZ-1]= 0;
+        
         for (int x = 5; x < 8; x++) {
             logicMap[x][1][4] = 1;
 

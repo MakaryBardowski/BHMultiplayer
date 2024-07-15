@@ -91,7 +91,9 @@ public class MobItemInteractionMessage extends TwoWayMessage {
                     Item pickedUp = getItemByIdClient(itemId);
 
                     if (pickedUp.getDroppedItemNode() != null) {
+                        Main.getInstance().enqueue( () -> {
                         pickedUp.getDroppedItemNode().removeFromParent();
+                        });
                     }
 
                     getMobByIdClient(mobId).addToEquipment(pickedUp);
