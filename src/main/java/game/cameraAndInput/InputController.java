@@ -182,28 +182,28 @@ public class InputController {
 
                 if (name.equals("K") && !keyPressed) {
                     System.gc();
-//                    player.setRight(false);
-//                    player.setLeft(false);
-//                    player.setBackward(false);
-//                    player.setForward(false);
-//
-//                    System.out.println("cheat!");
-//                    Main.getInstance().getFlyCam().setMoveSpeed(CAM__MOVE_SPEED);
-//                    Main.getInstance().getFlyCam().setRotationSpeed(CAM_ROT_SPEED);
-//
-//                    player.getMainCameraNode().removeFromParent();
-//
-//                    player.getFirstPersonHands().getHandsNode().setCullHint(Spatial.CullHint.Always);
-//                    player.getNode().setCullHint(Spatial.CullHint.Inherit);
-//
-//                    player.setMovementControlLocked(true);
-//                    updatePlayersThirdPersonHandsRot = true;
-                    ServerMain.getInstance().getGrid().getContents().forEach((i,set)->{
-                    if(!set.isEmpty()){
-                        System.err.println("------------set "+i);
-                    System.err.println(set);
-                    }
-                    });
+                    player.setRight(false);
+                    player.setLeft(false);
+                    player.setBackward(false);
+                    player.setForward(false);
+
+                    System.out.println("cheat!");
+                    Main.getInstance().getFlyCam().setMoveSpeed(CAM__MOVE_SPEED);
+                    Main.getInstance().getFlyCam().setRotationSpeed(CAM_ROT_SPEED);
+
+                    player.getMainCameraNode().removeFromParent();
+
+                    player.getFirstPersonHands().getHandsNode().setCullHint(Spatial.CullHint.Always);
+                    player.getNode().setCullHint(Spatial.CullHint.Inherit);
+
+                    player.setMovementControlLocked(true);
+                    updatePlayersThirdPersonHandsRot = true;
+//                    ServerMain.getInstance().getGrid().getContents().forEach((i,set)->{
+//                    if(!set.isEmpty()){
+//                        System.err.println("------------set "+i);
+//                    System.err.println(set);
+//                    }
+//                    });
                 }
             }
         };

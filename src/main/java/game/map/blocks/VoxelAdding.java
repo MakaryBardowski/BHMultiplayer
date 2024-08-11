@@ -25,7 +25,7 @@ public class VoxelAdding {
     public static Block AddOptimizedBox(Chunk chunk, Block[][][] map, byte[][][] logicMap, int vmX, int vmY, int vmZ, float voxelSize, int index, AssetManager asm, BlockType bt, float x, float y, float z) {
         Block b = new Block();
         map[vmX][vmY][vmZ] = b;
-        
+
         boolean top = false;
         boolean floor = false;
         boolean left = false;
@@ -33,27 +33,24 @@ public class VoxelAdding {
         boolean front = false;
         boolean back = false;
 
-        if (!mapContainsX(vmX - 1, map) || logicMap[vmX - 1][vmY][vmZ] == 0) {
-
+        if (mapContainsX(vmX - 1, map) && logicMap[vmX - 1][vmY][vmZ] == 0) {
             left = true;
         }
-        if (!mapContainsX(vmX + 1, map) || logicMap[vmX + 1][vmY][vmZ] == 0) {
+        if (mapContainsX(vmX + 1, map) && logicMap[vmX + 1][vmY][vmZ] == 0) {
             right = true;
         }
-        if (!mapContainsZ(vmZ - 1, map) || logicMap[vmX][vmY][vmZ - 1] == 0) {
+        if (mapContainsZ(vmZ - 1, map) && logicMap[vmX][vmY][vmZ - 1] == 0) {
             front = true;
         }
-        if (!mapContainsZ(vmZ + 1, map) || logicMap[vmX][vmY][vmZ + 1] == 0) {
+        if (mapContainsZ(vmZ + 1, map) && logicMap[vmX][vmY][vmZ + 1] == 0) {
             back = true;
         }
-        if (!mapContainsY(vmY + 1, map) || logicMap[vmX][vmY + 1][vmZ] == 0) {
+        if (mapContainsY(vmY + 1, map) && logicMap[vmX][vmY + 1][vmZ] == 0) {
             top = true;
         }
-        if (!mapContainsY(vmY - 1, map) || logicMap[vmX][vmY - 1][vmZ] == 0) {
+        if (mapContainsY(vmY - 1, map) && logicMap[vmX][vmY - 1][vmZ] == 0) {
             floor = true;
         }
-
-
 
         int neighborCnt = (left ? 1 : 0) + (right ? 1 : 0) + (back ? 1 : 0) + (front ? 1 : 0) + (top ? 1 : 0) + (floor ? 1 : 0);
         int vertexCount = neighborCnt * 4;

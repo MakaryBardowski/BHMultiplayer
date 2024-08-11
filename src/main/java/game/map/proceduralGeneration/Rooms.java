@@ -6,10 +6,12 @@ package game.map.proceduralGeneration;
 
 /**
  *
- * @author tomasz_potoczko
+ * @author 48793
  */
-public enum GenType {
-    BSP,
-    CellularAutomata,
-    PerlinNoise
+public class Rooms {
+    
+//    public getRandomRoomFirstStage(){
+//    
+//    }
+    
 }

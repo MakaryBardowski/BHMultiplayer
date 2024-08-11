@@ -32,6 +32,10 @@ public abstract class Destructible extends Collidable {
     public void onDeathClient() {};
 
     public abstract void receiveDamage(float rawDamage);
+    
+    public void receiveHeal(float heal) {
+        health += heal;
+    }
 
     public abstract void die();
 

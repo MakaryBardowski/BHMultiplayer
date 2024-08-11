@@ -81,9 +81,9 @@ public class WorldGrid {
         for (float[] corner : corners) {
             Vector3f v = new Vector3f(corner[0], corner[1], corner[2]);
             var cellContents = contents.get(hash(v));
-            if (!cellContents.contains(entity)) {
-                cellContents.add(entity);
-            }
+                if (!cellContents.contains(entity)) {
+                    cellContents.add(entity);
+                }
         }
     }
 
@@ -138,8 +138,6 @@ public class WorldGrid {
             }
         }
     }
-
-
 
     public Set<Collidable> getNearbyAtPosition(Collidable entity, Vector3f pos) {
         HashSet<Collidable> output = new HashSet<>();
@@ -253,5 +251,4 @@ public class WorldGrid {
 //        }
 //
 //    }
-
 }

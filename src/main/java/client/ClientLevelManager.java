@@ -4,6 +4,7 @@
  */
 package client;
 
+import PlayerHud.LemurPlayerHud;
 import static client.ClientSynchronizationUtils.interpolateGrenadePosition;
 import static client.ClientSynchronizationUtils.interpolateMobPosition;
 import com.jme3.app.state.AppStateManager;
@@ -140,8 +141,8 @@ public class ClientLevelManager extends LevelManager {
 
         var levelSeed = levelSeeds[levelIndex];
         var levelType = levelTypes[levelIndex];
-
-        MapGenerator mg = new MapGenerator(levelSeed, levelType);
+        System.out.println("CLIENT: generating map of type "+levelType);
+        MapGenerator mg = new MapGenerator(levelSeed, levelType,MAP_SIZE);
 
         MAIN_INSTANCE.enqueue(() -> {
             if (map == null) {
@@ -175,6 +176,9 @@ public class ClientLevelManager extends LevelManager {
 
     public void updateLoop(float tpf) {
         if (player != null) {
+            if(player.getPlayerHud() != null){
+                player.getPlayerHud().updateHealthbar(tpf);
+            }
             player.move(tpf);
             player.updateTemporaryEffectsClient();
             if (player.isHoldsTrigger() && player.getEquippedRightHand() != null) {

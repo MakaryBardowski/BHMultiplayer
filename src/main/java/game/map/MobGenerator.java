@@ -20,7 +20,7 @@ public class MobGenerator {
         var blockSize = server.getBLOCK_SIZE();
 
         int spawnpointOffset = 5 * blockSize;
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 50; i++) {
             Vector3f pos = new Vector3f(RANDOM.nextInt(37 * blockSize) + blockSize, blockSize, RANDOM.nextInt(37 * blockSize) + blockSize);
 //            4.5
 //            if(logicMap[][][] != 0){

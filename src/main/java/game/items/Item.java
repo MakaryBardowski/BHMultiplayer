@@ -48,6 +48,7 @@ public abstract class Item extends InteractiveEntity {
         if (!droppable) {
             return;
         }
+
         Node parentNode = createUnshadedBoxNode();
         var invisibleHitbox = parentNode.getChild("Box");
         invisibleHitbox.scale(2);
@@ -60,6 +61,8 @@ public abstract class Item extends InteractiveEntity {
         parentNode.scale(template.getDropData().getScale());
         parentNode.setLocalTranslation(itemSpawnpoint);
         droppedItemNode = parentNode;
+        System.out.println("dropping: " + this);
+        System.out.println("droppedItem node " + droppedItemNode);
         ClientGameAppState.getInstance().getPickableNode().attachChild(parentNode);
         ParticleUtils.spawnItemPhysicalParticleShaded(parentNode, itemSpawnpoint, this);
     }

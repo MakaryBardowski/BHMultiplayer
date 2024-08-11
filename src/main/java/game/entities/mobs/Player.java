@@ -18,6 +18,7 @@ import com.jme3.scene.Node;
 import game.entities.Attribute;
 import game.entities.FloatAttribute;
 import FirstPersonHands.FirstPersonHands;
+import PlayerHud.LemurPlayerHud;
 import static client.ClientGameAppState.removeEntityByIdClient;
 import client.Main;
 import static client.Main.CAM_ROT_SPEED;
@@ -78,6 +79,10 @@ public class Player extends HumanMob {
     @Getter
     private PlayerClass playerClass;
 
+    @Getter
+    @Setter
+    private LemurPlayerHud playerHud;
+
     @Override
     public void equip(Item item) {
         if (item instanceof Equippable equippableItem) {
@@ -103,13 +108,31 @@ public class Player extends HumanMob {
         this.mainCamera = mainCamera;
         firstPersonHands = new FirstPersonHands(this);
         hotbar = new Item[HOTBAR_SIZE];
-        health = 500;
-        maxHealth = 500;
+        health = 15;
+        maxHealth = 15;
     }
 
     @Override
     public void receiveDamage(float damage) {
+        float previousHealth = getHealth();
         super.receiveDamage(damage);
+        if (playerHud != null) {
+            float normalizedPercentHealth = getHealth() / getMaxHealth();
+            float normalizedChange = (previousHealth - getHealth()) / getMaxHealth();
+            playerHud.setHealthbarParams(normalizedPercentHealth, normalizedChange);
+        }
+    }
+
+    @Override
+    public void receiveHeal(float heal) {
+        float previousHealth = getHealth();
+        super.receiveHeal(heal);
+
+        if (playerHud != null) {
+            float normalizedPercentHealth = getHealth() / getMaxHealth();
+            float normalizedChange = (previousHealth - getHealth()) / getMaxHealth();
+            playerHud.setHealthbarParams(normalizedPercentHealth, normalizedChange);
+        }
     }
 
     public Item[] getHotbar() {
@@ -254,7 +277,10 @@ public class Player extends HumanMob {
     }
 
     @Override
-    public void destroyServer() { // can leak player into grid
+    public void destroyServer() {
+        /* cant leak player into grid because it removes the player from mob list immediately, and re-insert on move checks if the mobs still is in hashmap
+        and the mob hashmap is thread safe */
+        removeEntityByIdServer(id);
         var server = ServerMain.getInstance();
         server.getGrid().remove(this);
         if (node.getParent() != null) {
@@ -262,11 +288,10 @@ public class Player extends HumanMob {
                 node.removeFromParent();
             });
         }
-        removeEntityByIdServer(id);
     }
 
     @Override
-    public void destroyClient() { // can leak player into grid
+    public void destroyClient() { // cannot leak player into grid because both move and destroyClient are invoked on main thread :)
         var client = ClientGameAppState.getInstance();
         client.getGrid().remove(this);
         Main.getInstance().enqueue(() -> {

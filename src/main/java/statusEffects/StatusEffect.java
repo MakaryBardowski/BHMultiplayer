@@ -38,7 +38,8 @@ public abstract class StatusEffect {
 
     protected enum EffectSource {
         BARBED_WIRE_BLEED,
-        SLOW
+        SLOW,
+        REGENERATION,
     }
 
     public int getEffectId() {
