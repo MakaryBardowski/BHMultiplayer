@@ -177,36 +177,6 @@ public class PlayerHUD extends BaseAppState {
                     }
                 });
 
-                layer(new LayerBuilder("modifiableLayer") {
-                    {
-                        childLayoutHorizontal(); // layer properties, add more...
-
-                        // <panel>
-                        panel(new PanelBuilder("modifiable_bars") {
-                            {
-                                childLayoutHorizontal(); // panel properties, add more...
-                                paddingLeft("3.1%"); // 3.1%
-                                paddingTop(HP_BAR_TOP_MARGIN + "%");
-
-                                // GUI elements
-                                control(new LabelBuilder("hp_bar", "") {
-                                    {
-                                        alignCenter();
-                                        valignCenter();
-                                        height("" + (percentMobHealthbarHeight * 100) + "%");
-                                        width("25%");
-                                        backgroundColor("#A30000");
-                                        visibleToMouse(false);
-                                    }
-                                });
-
-                                //.. add more GUI elements here
-                            }
-                        });
-                        // </panel>
-
-                    }
-                });
 
                 layer(new LayerBuilder("ammo") {
                     {
@@ -487,7 +457,6 @@ public class PlayerHUD extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        nifty.getCurrentScreen().findElementById("hp_bar").setWidth((int) ((gs.getPlayer().getHealth() / gs.getPlayer().getMaxHealth()) * (playerHealthbarWidth * nifty.getRenderEngine().getNativeWidth())));
         checkTargetedEntity(gs, gs.getPickableNode());
 
 //        System.out.println(                    tooltipNifty.getCurrentScreen().findControl("hp_bar_target_label", LabelControl.class).getText() );
@@ -620,6 +589,8 @@ public class PlayerHUD extends BaseAppState {
     }
 
     private void updateItemDropTooltipMaterial(Item itemHit) {
+        if(itemHit.getDroppedItemNode() == null)
+            return;
         itemHit.getDroppedItemNode().attachChild(itemDropTooltipNode);
 
         Element textElement = tooltipNifty.getCurrentScreen().findElementByName("itemName");

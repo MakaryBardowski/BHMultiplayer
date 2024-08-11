@@ -48,6 +48,8 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        setDisplayFps(false);      
+        setDisplayStatView(false);
         System.out.println("app camera" + cam);
         flyCam.setMoveSpeed(0); //30
         flyCam.setRotationSpeed(0); //1.0
@@ -119,12 +121,12 @@ public class Main extends SimpleApplication {
     private static void setupSettings(SimpleApplication app) {
         AppSettings settings1 = new AppSettings(true);
 
-        GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        DisplayMode[] modes = device.getDisplayModes();
-        int i = 0; // note: there are usually several, let's pick the first
-        settings1.setResolution(modes[i].getWidth(), modes[i].getHeight());
+//        GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+//        DisplayMode[] modes = device.getDisplayModes();
+//        int i = 0; // note: there are usually several, let's pick the first
+//        settings1.setResolution(modes[i].getWidth(), modes[i].getHeight());
 
-//        settings1.setResolution(STARTING_RESOLUTION_WIDTH, STARTING_RESOLUTION_HEIGHT);
+        settings1.setResolution(STARTING_RESOLUTION_WIDTH, STARTING_RESOLUTION_HEIGHT);
 //        settings1.setResolution(1680, 1050);
         settings1.setFullscreen(FULLSCREEN);
         settings1.setVSync(true);

@@ -39,6 +39,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
+import static game.effects.DecalProjector.projectFromTo;
 import game.effects.ParticleUtils;
 import game.entities.Collidable;
 import game.entities.Destructible;
@@ -199,11 +200,16 @@ public class MudBeetle extends Mob {
         ParticleEmitter blood = EmitterPooler.getBlood();
         Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 1, 0);
         blood.setLocalTranslation(bloodPos);
+
         if (health <= 0) {
-            blood.emitParticles(50);
+            blood.emitParticles(2);
+            Main.getInstance().enqueue(() -> {
+                projectFromTo(ClientGameAppState.getInstance(), node.getWorldTranslation().clone().add(0, 1, 0), new Vector3f(0, -1, 0), "Textures/Gameplay/Decals/testBlood" + new Random().nextInt(2) + ".png", new Random().nextInt(2) + 2f);
+
+            });
             die();
         } else {
-            blood.emitParticles(20);
+            blood.emitParticles(2);
         }
 
     }

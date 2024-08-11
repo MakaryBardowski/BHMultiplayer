@@ -107,10 +107,10 @@ public class ItemFactory {
 
     private Rifle createRifle(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        int maxAmmo = 15;
-        float roundsPerSecond = 3f;
-//        int maxAmmo = 15000;
-//        float roundsPerSecond = 10f;
+//        int maxAmmo = 15;
+//        float roundsPerSecond = 3f;
+        int maxAmmo = 30;
+        float roundsPerSecond = 6f;
 
         Rifle rifle = new Rifle(id, 6f, template, "Rifle", dropNode, droppable, maxAmmo, roundsPerSecond);
         return rifle;

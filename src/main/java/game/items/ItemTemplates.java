@@ -122,9 +122,13 @@ public class ItemTemplates {
 
     public static final ItemTemplate AXE = new ItemTemplate("Fireaxe [Melee]", WEAPONS_PATH + "Fireaxe/fireaxe.j3o", ICON_PATH + "equipmentTrenchKnife.png", WEAPONS_PATH + "Fireaxe/fireaxeDrop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0 * FastMath.DEG_TO_RAD, 0, 0 * FastMath.DEG_TO_RAD), 1),
-            new ThirdPersonOffsetData(new Vector3f(0, -0.33f, 0.3f), new Vector3f(0*FastMath.DEG_TO_RAD, -90*FastMath.DEG_TO_RAD, -210*FastMath.DEG_TO_RAD), 1),
+            new ThirdPersonOffsetData(new Vector3f(0, -0.33f, 0.3f), new Vector3f(0 * FastMath.DEG_TO_RAD, -90 * FastMath.DEG_TO_RAD, -210 * FastMath.DEG_TO_RAD), 1),
             ItemType.AXE, 20);
-    
+
+    public static final ItemTemplate RIFLE_BORYSOV = new ItemTemplate("Borysov [Rifle]", WEAPONS_PATH + "borysov/borysovFP.j3o", ICON_PATH + "equipmentMannlicher95.png", WEAPONS_PATH + "borysov/borysovDrop.j3o",
+            new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f),
+            new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
+            ItemType.RIFLE, 21);
 
     static {
         templates.add(RIFLE_MANNLICHER_95.getTemplateIndex(), RIFLE_MANNLICHER_95);
@@ -149,6 +153,7 @@ public class ItemTemplates {
         templates.add(MEDPACK.getTemplateIndex(), MEDPACK);
         templates.add(GAS_MASK.getTemplateIndex(), GAS_MASK);
         templates.add(AXE.getTemplateIndex(), AXE);
+        templates.add(RIFLE_BORYSOV.getTemplateIndex(), RIFLE_BORYSOV);
 
     }
 

@@ -39,22 +39,19 @@ import static server.ServerMain.removeEntityByIdServer;
  */
 public class ThrownSmokeGrenade extends ThrownGrenade {
 
-    private static Material mat;
-    private static ColorInfluencer ci;
-
+    private static final Material mat;
+    private static final ColorInfluencer ci;
     private static final BlendMode BLEND_MODE = BlendMode.Alpha;
     private static final byte NUM_SMOKE_PARTICLES = 30;
-    private float smokeLifetime = 15f;
-    private float smokeMaxParticles = 300f;
-    private float smokeSpeed = 0.265f;
-    private ColorRGBA smokeColor = ColorRGBA.DarkGray;
-    private float sizeFactor = 1.5f;
-    private boolean looping = false;
-
-    public ThrownSmokeGrenade(int id, String name, Node node) {
-        super(id, name, node);
-        if (mat == null) {
-            var a = Main.getInstance().getAssetManager();
+    
+    private static final float smokeLifetime = 15f;
+    private static final float smokeSpeed = 0.265f;
+    private static final ColorRGBA smokeColor = ColorRGBA.DarkGray;
+    private static final float sizeFactor = 1.5f;
+    private static final boolean looping = false;
+    
+    static {
+               var a = Main.getInstance().getAssetManager();
             mat = new Material(a, "Common/MatDefs/Misc/Particle.j3md");
             mat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
 
@@ -70,7 +67,10 @@ public class ThrownSmokeGrenade extends ThrownGrenade {
                             .addGradPoint(smokeColor.clone().setAlpha(0.8f), 0.65f)
                             .addGradPoint(smokeColor.clone().setAlpha(0), 1f)
             ));
-        }
+    }
+
+    public ThrownSmokeGrenade(int id, String name, Node node) {
+        super(id, name, node);
     }
 
     @Override
@@ -203,5 +203,6 @@ public class ThrownSmokeGrenade extends ThrownGrenade {
     public void move(float tpf) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+
 
 }

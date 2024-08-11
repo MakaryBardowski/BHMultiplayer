@@ -64,6 +64,8 @@ public class PlayerPosUpdateRequest extends EntityUpdateMessage {
                 
                 
                 Main.getInstance().enqueue(() -> {
+                    if( ! (p.isAbleToMove()  && ServerMain.getInstance().containsEntityWithId(id)) )
+                        return;
                     p.getNode().setLocalTranslation(getPos());
                     grid.insert(p);
                     MovementCollisionUtils.checkPassableCollisions(p, grid, passable);

@@ -4,6 +4,7 @@
  */
 package messages;
 
+import PlayerHud.LemurPlayerHud;
 import client.ClientGameAppState;
 import client.PlayerHUD;
 import com.jme3.math.Vector3f;
@@ -71,7 +72,7 @@ public class SetPlayerMessage extends TwoWayMessage {
         ClientGameAppState.getInstance().setPlayer(p);
         placeMyPlayer(nmsg, p);
         addInputListeners();
-        addPlayerHUD();
+        addPlayerHUD(p);
         p.setName(nmsg.getName());
     }
 
@@ -87,7 +88,9 @@ public class SetPlayerMessage extends TwoWayMessage {
         new InputController().createInputListeners(ClientGameAppState.getInstance());
     }
 
-    private void addPlayerHUD() {
+    private void addPlayerHUD(Player player) {
+        var LemurPlayerHud = new LemurPlayerHud(player);
+        ClientGameAppState.getInstance().getPlayer().setPlayerHud(LemurPlayerHud);
         ClientGameAppState.getInstance().getStateManager().attach(new PlayerHUD(ClientGameAppState.getInstance()));
 
     }

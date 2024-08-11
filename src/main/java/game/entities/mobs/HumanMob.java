@@ -166,7 +166,7 @@ public class HumanMob extends Mob {
     @Override
     public void receiveDamage(float damage) {
         health -= calculateDamage(damage);
-
+        System.out.println("receive damage "+damage);
         var notMe = this != ClientGameAppState.getInstance().getPlayer();
         ParticleEmitter blood = EmitterPooler.getBlood();
         Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 2, 0);

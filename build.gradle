@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.mygame'
-version '0.0.821'
+version '0.0.85'
 
 mainClassName = "client.Main"
 
@@ -68,6 +68,9 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok:1.18.28'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
 
+      implementation "com.simsilica:lemur:1.16.0"
+implementation 'org.codehaus.groovy:groovy-all:3.0.21'
+    
     // Assets sub-project
     runtimeOnly project(':assets')
 }

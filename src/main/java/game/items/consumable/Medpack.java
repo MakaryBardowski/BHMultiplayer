@@ -33,6 +33,7 @@ import com.jme3.network.Filters;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.items.Holdable;
+import messages.DestructibleHealReceiveMessage;
 import messages.SystemHealthUpdateMessage;
 import server.ServerMain;
 import static server.ServerMain.removeEntityByIdServer;
@@ -179,10 +180,10 @@ public class Medpack extends ThrowableWeapon {
         var hc = sm.getHostsByPlayerId().get(m.getId());
         Filters.notEqualTo(hc);
 
-        var healthAfterHeal = Math.min(m.getHealth() + 10, m.getMaxHealth());
-        m.setHealth(healthAfterHeal);
+        var heal = Math.min(healing, m.getMaxHealth()-m.getHealth());
+        m.setHealth(m.getHealth()+heal);
 
-        var msg = new SystemHealthUpdateMessage(m.getId(), healthAfterHeal);
+        var msg = new DestructibleHealReceiveMessage(m.getId(), heal);
         msg.setReliable(true);
         sm.getServer().broadcast(msg);
 

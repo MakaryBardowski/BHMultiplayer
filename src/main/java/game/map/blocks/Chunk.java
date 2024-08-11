@@ -55,12 +55,7 @@ public class Chunk {
 
         geometry.move(chunkPos.getX() * bw.getBLOCK_SIZE(), 0, chunkPos.getY() * bw.getBLOCK_SIZE());
 
-//        Material matVC = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
-//        Texture t = bw.getAsm().loadTexture(BlockType.STONE.textureName);
-//        t.setMagFilter(Texture.MagFilter.Nearest);
-//        matVC.setTexture("ColorMap", t);
-//        matVC.setBoolean("VertexColor", true);
-//        geometry.setMaterial(matVC);
+
         Material mat = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setTexture("ColorMap", bw.getTextureAtlas().getAtlasTexture("DiffuseMap"));
         mat.getTextureParam("ColorMap").getTextureValue().setMagFilter(Texture.MagFilter.Nearest);

@@ -4,34 +4,40 @@
  */
 package game.map;
 
-import game.map.proceduralGeneration.ProceduralMapGenerator;
-import game.map.proceduralGeneration.GenType;
 import com.jme3.asset.AssetManager;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import static game.map.MapType.ARMORY;
 import static game.map.MapType.BOSS;
 import static game.map.MapType.CASUAL;
+import game.map.proceduralGeneration.RandomMapGenerator;
+import game.map.proceduralGeneration.Room;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
+import jme3utilities.math.Vector3i;
 
 /**
  *
  * @author 48793
  */
 public class MapGenerator {
-    private long seed;
-    private MapType mapType;
-    
-    public MapGenerator(long seed, MapType mapType){
+
+    private final long seed;
+    private final MapType mapType;
+    private final int mapSize;
+
+    public MapGenerator(long seed, MapType mapType, int mapSize) {
         this.seed = seed;
         this.mapType = mapType;
+        this.mapSize = mapSize;
     }
 
     /**
      * this method returns a new map (allocates a new array for voxel data).
      * Recommended use is for first-time map generation
      *
-     * @param seed map generation seed
-     * @param type map generation type
      * @param blockSize size of 1 voxel
      * @param chunkSize chunk size is equal to chunkSize * chunkSize
      * @param mapSize map size is equal to mapSize * mapSize
@@ -42,7 +48,7 @@ public class MapGenerator {
      */
     public Level generateMap(int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
         byte[][][] logicMap = new byte[mapSize][mapSize][mapSize]; // blocks are added based on logicMap
-        return decideAndGenerateMap(logicMap, mapType, blockSize, chunkSize, mapSize, a, mapNode);
+        return decideAndGenerateMap(logicMap, blockSize, chunkSize, mapSize, a, mapNode);
     }
 
     /**
@@ -51,7 +57,7 @@ public class MapGenerator {
      *
      * @param map that will be cleaned up and reinitialized (allows to avoid new
      * memory allocation for map)
-
+     *
      * @param blockSize size of 1 voxel
      * @param chunkSize chunk size is equal to chunkSize * chunkSize
      * @param mapSize map size is equal to mapSize * mapSize
@@ -61,7 +67,7 @@ public class MapGenerator {
      * @return
      */
     public Level generateOnExistingMapNoMemoryAllocation(Level map, int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
-        return decideAndGenerateMapOnExistingMap(map, mapType, blockSize, chunkSize, mapSize, a, mapNode);
+        return decideAndGenerateMapOnExistingMap(map, blockSize, chunkSize, mapSize, a, mapNode);
     }
 
     public byte[][][] createBossLogicMap(byte[][][] logicMap) {
@@ -154,9 +160,9 @@ public class MapGenerator {
                 logicMap[x][2][z] = 0;
             }
         }
-        
-        logicMap[armorySizeX-4][1][armorySizeZ-1]= 0;
-        
+
+        logicMap[armorySizeX - 4][1][armorySizeZ - 1] = 0;
+
         for (int x = 5; x < 8; x++) {
             logicMap[x][1][4] = 1;
 
@@ -164,51 +170,74 @@ public class MapGenerator {
         return logicMap;
     }
 
-    private Level decideAndGenerateMapOnExistingMap(Level map, MapType type, int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
+    private Level decideAndGenerateMapOnExistingMap(Level map, int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
         var existingLogicMap = map.getBlockWorld().getLogicMap();
-        fillLogicMap(existingLogicMap, (byte) 0);
-        switch (type) {
-            case ARMORY ->
+        switch (mapType) {
+            case ARMORY:
+                fillLogicMap(existingLogicMap, (byte) 0); // armory is in an empty world
                 createArmoryLogicMap(existingLogicMap);
-//            case CASUAL ->
-//                createCasualLogicMap(mapSize);
-            case BOSS ->
+                break;
+            case CASUAL:
+                fillLogicMap(existingLogicMap, (byte) 1); // casual maps are carved out in a 
+                createCasualLogicMap(existingLogicMap);
+                break;
+            case BOSS:
                 createBossLogicMap(existingLogicMap);
-            default ->
+                break;
+            default:
                 createBossLogicMap(existingLogicMap);
+                break;
         }
 
         return map.updateAfterLogicMapChange();
     }
 
-    private Level decideAndGenerateMap(byte[][][] logicMap, MapType type, int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
-        var gameWorldLogicMap = switch (type) {
-            case ARMORY ->
+    private Level decideAndGenerateMap(byte[][][] logicMap, int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
+        switch (mapType) {
+            case ARMORY:
+                fillLogicMap(logicMap, (byte) 0); // armory is in an empty world
                 createArmoryLogicMap(logicMap);
-//            case CASUAL ->
-//                createCasualLogicMap(mapSize);
-            case BOSS ->
+                break;
+            case CASUAL:
+                fillLogicMap(logicMap, (byte) 1); // casual maps are carved out in a 
+                createCasualLogicMap(logicMap);
+                break;
+            case BOSS:
                 createBossLogicMap(logicMap);
-            default ->
+                break;
+            default:
                 createBossLogicMap(logicMap);
-        };
-        Level map = new Level(blockSize, chunkSize, mapSize, gameWorldLogicMap, a, mapNode);
+                break;
+        }
+
+        Level map = new Level(blockSize, chunkSize, mapSize, logicMap, a, mapNode);
 
         return map;
     }
-    
-    public byte[][][] decideAndGenerateMapServer(byte[][][] logicMap) {
-        var gameWorldLogicMap = switch (mapType) {
-            case ARMORY ->
+
+    public MapGenerationResult decideAndGenerateMapServer(byte[][][] logicMap) {
+        MapGenerationResult mapGenResult;
+        switch (mapType) {
+            case ARMORY:
+                fillLogicMap(logicMap, (byte) 0); // armory is in an empty world
                 createArmoryLogicMap(logicMap);
-//            case CASUAL ->
-//                createCasualLogicMap(mapSize);
-            case BOSS ->
+                mapGenResult = new MapGenerationResult(logicMap, null);
+                break;
+            case CASUAL:
+                fillLogicMap(logicMap, (byte) 1); // casual maps are carved out in a 
+                mapGenResult = createCasualLogicMapServer(logicMap);
+                break;
+            case BOSS:
                 createBossLogicMap(logicMap);
-            default ->
+                mapGenResult = new MapGenerationResult(logicMap, null);
+                break;
+            default:
                 createBossLogicMap(logicMap);
-        };
-        return gameWorldLogicMap;
+                mapGenResult = new MapGenerationResult(logicMap, null);
+                break;
+        }
+
+        return mapGenResult;
     }
 
     private void fillLogicMap(byte[][][] logicMap, byte value) {
@@ -222,4 +251,11 @@ public class MapGenerator {
 
     }
 
+    public byte[][][] createCasualLogicMap(byte[][][] logicMap) {
+        return new RandomMapGenerator(seed, mapSize).createRandomMap(logicMap).getMap();
+    }
+
+    public MapGenerationResult createCasualLogicMapServer(byte[][][] logicMap) {
+        return new RandomMapGenerator(seed, mapSize).createRandomMap(logicMap);
+    }
 }

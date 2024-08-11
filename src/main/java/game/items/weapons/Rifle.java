@@ -127,7 +127,7 @@ public class Rifle extends RangedWeapon {
 
             firerateControl = new FirerateControl(this);
             gunRecoil = new RecoilControl(.2f, -0.1f, .0f, .00f, 30, 3);
-            camRecoil = new NewGunRecoilControl(2, 0.85f, .35f, 60, 0.f);
+            camRecoil = new NewGunRecoilControl(4, 0.85f, .35f, 60, 0.f);
 
             model.addControl(firerateControl);
             p.getFirstPersonHands().getHandsNode().addControl(gunRecoil);

@@ -24,6 +24,7 @@ import game.entities.DestructibleUtils;
 import game.entities.mobs.playerClasses.PlayerClass;
 import java.util.HashSet;
 import java.util.Random;
+import statusEffects.EffectFactory;
 
 /**
  *
@@ -85,7 +86,12 @@ public class PlayerFactory extends MobFactory {
         SkinningControl skinningControl = getSkinningControl(playerNode);
         AnimComposer composer = getAnimComposer(playerNode);
         System.out.println("[PlayerFactory] create player id " + id);
-        return new Player(id, playerNode, name, mainCamera, skinningControl, composer, pc);
+        
+        var p = new Player(id, playerNode, name, mainCamera, skinningControl, composer, pc);
+        var procsEverySeconds = 10;
+        var regenEffect = EffectFactory.createRegenerationEffect(p,1,64*procsEverySeconds);
+        p.addEffect(regenEffect);
+        return p;
     }
 
     private void setupFirstPersonCamera(Player p) {

@@ -17,6 +17,7 @@ import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
 import messages.DeleteEntityMessage;
 import messages.DestructibleDamageReceiveMessage;
+import messages.DestructibleHealReceiveMessage;
 import messages.EntitySetFloatAttributeMessage;
 import messages.EntitySetIntegerAttributeMessage;
 import messages.GrenadePosUpdateMessage;
@@ -72,6 +73,8 @@ public class NetworkingInitialization {
 
         Serializer.registerClass(ServerMessageListener.class);
         Serializer.registerClass(NewChestMessage.class);
+        Serializer.registerClass(DestructibleHealReceiveMessage.class);
+
         Serializer.registerClass(DestructibleDamageReceiveMessage.class);
         Serializer.registerClass(GrenadePosUpdateMessage.class);
         Serializer.registerClass(EntitySetIntegerAttributeMessage.class);

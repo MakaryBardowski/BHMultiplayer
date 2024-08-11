@@ -166,10 +166,14 @@ public class BlockWorld {
         Random r = new Random();
 
         for (int x = 0; x < logicMap.length; x++) {
-            for (int y = 0; y < logicMap[x].length; y++) {
+//            for (int y = 0; y < logicMap[x].length; y++) {
+            for (int y = 0; y < MAP_HEIGHT; y++) {
+
                 for (int z = 0; z < logicMap[x][y].length; z++) {
 
                     if (logicMap[x][y][z] == 1 || logicMap[x][y][z] == 9) {
+
+
                         addBlockDataToChunk(x, y, z, BlockType.STONE);
                     } else if (logicMap[x][y][z] == 2) {
                         var bt = BlockType.DIRT;
@@ -238,5 +242,4 @@ public class BlockWorld {
 //        ClientGameAppState.getInstance().getGrid().insert(exit);
 //
 //    }
-
 }

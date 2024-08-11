@@ -40,15 +40,21 @@ import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.items.factories.ItemFactory;
 import game.items.weapons.Knife;
+import game.items.weapons.Rifle;
 import game.map.MapGenerator;
 import game.map.MapType;
+import game.map.MobGenerator;
 import lombok.Getter;
 import game.map.collision.WorldGrid;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import jme3utilities.math.Vector3i;
+import messages.InstantEntityPosCorrectionMessage;
 import messages.PlayerJoinedMessage;
 import messages.SetPlayerMessage;
 import messages.gameSetupMessages.NextLevelMessage;
@@ -118,16 +124,48 @@ public class ServerLevelManager extends LevelManager {
                 continue;
             }
 
-//            levelTypes[i] = MapType.CASUAL;
-            levelTypes[i] = MapType.BOSS;
+            levelTypes[i] = MapType.CASUAL;
         }
 
     }
 
     public void createMap(long seed, MapType mapType) {
-        map = new MapGenerator(seed, mapType).decideAndGenerateMapServer(new byte[MAP_SIZE][MAP_SIZE][MAP_SIZE]);
-        Main.getInstance().enqueue(()->{
-        registerLevelExit(mapType);
+        System.out.println("SERVER: generating map of type " + mapType);
+        System.out.println("grid is: " + grid);
+        Main.getInstance().enqueue(() -> {
+            var mapGenResult = new MapGenerator(seed, mapType, MAP_SIZE).decideAndGenerateMapServer(new byte[MAP_SIZE][MAP_SIZE][MAP_SIZE]);
+            map = mapGenResult.getMap();
+            registerLevelExit(mapType);
+
+            var rooms = mapGenResult.getRooms();
+            if (rooms != null) {
+                var rand = new Random(seed);
+                var roomAmount = rooms.size();
+                var startingRoom = rooms.get(rand.nextInt(roomAmount));
+
+                var spawnpoints = new ArrayList<Vector3i>(); // use list because hashset can have collisions
+                for (Player p : players) {
+                    Vector3i playerSpawnpoint;
+                    do {
+                        playerSpawnpoint = new Vector3i(
+                                rand.nextInt(startingRoom.getStartX() + 1, startingRoom.getEndX()- 1),
+                                startingRoom.getStartY(),
+                                rand.nextInt(startingRoom.getStartZ() + 1, startingRoom.getEndZ() - 1));
+                    } while (spawnpoints.contains(playerSpawnpoint));
+
+                    Vector3f playerSpawnpointInWorld = new Vector3f(
+                            playerSpawnpoint.x() * BLOCK_SIZE + 0.5f * BLOCK_SIZE,
+                            BLOCK_SIZE,
+                            playerSpawnpoint.z() * BLOCK_SIZE + 0.5f * BLOCK_SIZE
+                    );
+
+                    InstantEntityPosCorrectionMessage corrMsg = new InstantEntityPosCorrectionMessage(p, playerSpawnpointInWorld);
+                    corrMsg.setReliable(true);
+                    server.broadcast(corrMsg);
+
+                }
+
+            }
         });
     }
 
@@ -156,74 +194,16 @@ public class ServerLevelManager extends LevelManager {
         var newLevelType = levelTypes[levelIndex];
         createMap(newLevelSeed, newLevelType);
 
-        if (levelIndex == 0) { // so that weird stuff doesnt happen after swapping levels, armor is hardcoded anyway
-            populateMap();
-        }
-
-    }
-
-    private void populateMap() {
-        Random r = new Random();
-
-        int spawnpointOffset = 5 * BLOCK_SIZE;
-        for (int i = 0; i < 300; i++) {
-            registerRandomChest(new Vector3f(r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE) + BLOCK_SIZE));
-        }
-
-        for (int i = 0; i < 300; i++) {
-            var playerSpawnpointOffset = new Vector3f(spawnpointOffset * 2, 0, 0);
-            if (new Random().nextBoolean() == false) {
-                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset * 2);
-            }
-//
-            registerMob().setPositionServer(
-                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
-                            .addLocal(playerSpawnpointOffset)
-            );
-        }
-
-        for (int i = 0; i < 300; i++) {
-
-            var playerSpawnpointOffset = new Vector3f(spawnpointOffset, 0, 0);
-            if (new Random().nextBoolean() == false) {
-                playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset);
-            }
-
-            registerRandomDestructibleDecoration(
-                    new Vector3f(r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getX()) + BLOCK_SIZE, BLOCK_SIZE, r.nextInt(37 * BLOCK_SIZE - (int) playerSpawnpointOffset.getZ()) + BLOCK_SIZE)
-                            .addLocal(playerSpawnpointOffset)
-            );
-        }
-
-    }
-
-    private Item registerItemAndNotifyTCP(ItemTemplates.ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
-        Item i = registerItemLocal(template, droppable);
-        sendMessageTCP(i.createNewEntityMessage(), notificationFilter);
-        return i;
-    }
-
-    public Item registerItemLocal(ItemTemplates.ItemTemplate template, boolean droppable) {
-        ItemFactory ifa = new ItemFactory();
-        Item item = ifa.createItem(currentMaxId++, template, droppable);
-        return registerEntityLocal(item);
-    }
-
-    private <T extends InteractiveEntity> T registerEntityLocal(T entity) {
-        mobs.put(entity.getId(), entity);
-        return entity;
-    }
-
-    private void sendMessageTCP(AbstractMessage imsg, Filter<HostedConnection> filter) {
-        imsg.setReliable(true);
-        if (filter == null) {
-            server.broadcast(imsg);
-        } else {
-            server.broadcast(filter, imsg);
+        if (levelIndex != 0) { // so that weird stuff doesnt happen after swapping levels, armor is hardcoded anyway
+            MobGenerator mg = new MobGenerator();
+            Main.getInstance().enqueue(() -> {
+                mg.spawnMobs(map);
+                notifyPlayersAboutNewLevelEntities();
+            });
         }
     }
 
-    private void registerRandomDestructibleDecoration(Vector3f pos) {
+    public void registerRandomDestructibleDecoration(Vector3f pos) {
         int randomNumber = new Random().nextInt(3);
         DecorationTemplates.DecorationTemplate template = DecorationTemplates.TABLE;
         if (randomNumber == 0) {
@@ -327,15 +307,19 @@ public class ServerLevelManager extends LevelManager {
 //        randomValue = 12;
 
         if (randomValue == 12) {
-            var helmet = registerItemLocal(ItemTemplates.TRENCH_HELMET, true);
-
-            chest.addToEquipment(helmet);
+//            var helmet = registerItemLocal(ItemTemplates.TRENCH_HELMET, true);
+//            chest.addToEquipment(helmet);
+            var rifle = (Rifle) registerItemLocal(ItemTemplates.RIFLE_BORYSOV, true);
+            chest.addToEquipment(rifle);
         }
 //        randomValue = 13;
         if (randomValue == 12 || randomValue == 13) {
             var helmet = registerItemLocal(ItemTemplates.GAS_MASK, true);
 
             chest.addToEquipment(helmet);
+
+            var rifle = (Rifle) registerItemLocal(ItemTemplates.RIFLE_MANNLICHER_95, true);
+            chest.addToEquipment(rifle);
         }
         if (randomValue == 14) {
             var medpack = registerItemLocal(ItemTemplates.MEDPACK, true);
@@ -402,8 +386,65 @@ public class ServerLevelManager extends LevelManager {
 
     }
 
-    public void insertIntoCollisionGrid(Collidable c) {
-        grid.insert(c);
+    public void notifyPlayersAboutNewLevelEntities() {
+        var hostsByPlayerId = ServerMain.getInstance().getHostsByPlayerId();
+
+        List<Item> itemsInGame = mobs.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof Item)
+                .map(entity -> (Item) entity.getValue())
+                .toList();
+
+        List<Mob> mobsInGame = mobs.entrySet().stream()
+                .filter(entry -> {
+                    // temporary fix, because currently every mob is a player so you get a duplicate on players
+                    var notRealPlayer = hostsByPlayerId.get(entry.getValue().getId()) == null;
+                    return entry.getValue() instanceof Mob && notRealPlayer;
+                })
+                .map(entity -> (Mob) entity.getValue())
+                .toList();
+
+        List<Chest> chestsInGame = mobs.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof Chest)
+                .map(entity -> (Chest) entity.getValue())
+                .toList();
+
+        List<DestructibleDecoration> destructibleDecorationsInGame = mobs.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof DestructibleDecoration)
+                .map(entity -> (DestructibleDecoration) entity.getValue())
+                .toList();
+
+        itemsInGame.forEach(item -> {
+            AbstractMessage msg = item.createNewEntityMessage();
+            msg.setReliable(true);
+            server.broadcast(msg);
+        });
+
+        mobsInGame.forEach(mob -> {
+            AbstractMessage msg = mob.createNewEntityMessage();
+            server.broadcast(msg);
+        });
+
+        mobsInGame.forEach(mob -> {
+            sendNewEntityEquipmentInfo(mob, null);
+        });
+
+        destructibleDecorationsInGame.forEach(dd -> {
+            AbstractMessage msg = dd.createNewEntityMessage();
+            server.broadcast(msg);
+        });
+
+        chestsInGame.forEach(chest -> {
+            AbstractMessage chestMsg = chest.createNewEntityMessage();
+            server.broadcast(null, chestMsg);
+            for (Item item : chest.getEquipment()) {
+                if (item != null) {
+                    ChestItemInteractionMessage msg = new ChestItemInteractionMessage(item, chest, INSERT);
+                    msg.setReliable(true);
+                    server.broadcast(msg);
+                }
+            }
+        });
+
     }
 
     public void addPlayerToGame(HostedConnection hc) {
@@ -486,8 +527,7 @@ public class ServerLevelManager extends LevelManager {
     private void registerLevelExit(MapType mapType) {
         var exitPositionOnMapIntArray = new int[3];
         exitPositionOnMapIntArray[1] = 1;
-        while (map[exitPositionOnMapIntArray[0]][exitPositionOnMapIntArray[1]][exitPositionOnMapIntArray[2]] != 0) {
-
+        do {
             if (mapType == MapType.ARMORY) { // hardcoded - armory will be read from file
                 exitPositionOnMapIntArray[0] = 6;
                 exitPositionOnMapIntArray[2] = 8;
@@ -495,7 +535,7 @@ public class ServerLevelManager extends LevelManager {
                 exitPositionOnMapIntArray[0] = 4 + RANDOM.nextInt(MAP_SIZE - 4);
                 exitPositionOnMapIntArray[2] = 4 + RANDOM.nextInt(MAP_SIZE - 4);
             }
-        }
+        } while (canNotPlaceCar(exitPositionOnMapIntArray));
 
         var pos = new Vector3f(
                 exitPositionOnMapIntArray[0] * BLOCK_SIZE + 0.5f * BLOCK_SIZE,
@@ -503,13 +543,16 @@ public class ServerLevelManager extends LevelManager {
                 exitPositionOnMapIntArray[2] * BLOCK_SIZE + 0.5f * BLOCK_SIZE
         );
         var template = DecorationTemplates.EXIT_CAR;
-
+        System.out.println("posCAR " + pos);
         var id = DecorationFactory.createIndestructibleDecoration(currentMaxId++, rootNode, pos, template, assetManager);
         insertIntoCollisionGrid(id);
         registerEntityLocal(id);
-
         var idm = new NewIndestructibleDecorationMessage(id);
         server.broadcast(idm);
+    }
+
+    private boolean canNotPlaceCar(int[] exitPositionOnMapIntArray) {
+        return map[exitPositionOnMapIntArray[0]][exitPositionOnMapIntArray[1]][exitPositionOnMapIntArray[2]] != 0;
     }
 
     public int getAndIncreaseNextEntityId() {
@@ -524,7 +567,7 @@ public class ServerLevelManager extends LevelManager {
         var itemsToKeep = getItemsTokeep();
         mobs.forEach((id, entity) -> {
             if (isNotItemToKeep(entity, itemsToKeep) && isNotPlayer(entity)) { // if not an item to keep
-                    entity.destroyAndNotifyClients();
+                entity.destroyAndNotifyClients();
             }
         });
 
@@ -547,7 +590,34 @@ public class ServerLevelManager extends LevelManager {
     private boolean isNotPlayer(InteractiveEntity entity) {
         return !(entity instanceof Player);
     }
-    
 
+    public void insertIntoCollisionGrid(Collidable c) {
+        grid.insert(c);
+    }
 
+    private Item registerItemAndNotifyTCP(ItemTemplates.ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
+        Item i = registerItemLocal(template, droppable);
+        sendMessageTCP(i.createNewEntityMessage(), notificationFilter);
+        return i;
+    }
+
+    public Item registerItemLocal(ItemTemplates.ItemTemplate template, boolean droppable) {
+        ItemFactory ifa = new ItemFactory();
+        Item item = ifa.createItem(currentMaxId++, template, droppable);
+        return registerEntityLocal(item);
+    }
+
+    private <T extends InteractiveEntity> T registerEntityLocal(T entity) {
+        mobs.put(entity.getId(), entity);
+        return entity;
+    }
+
+    private void sendMessageTCP(AbstractMessage imsg, Filter<HostedConnection> filter) {
+        imsg.setReliable(true);
+        if (filter == null) {
+            server.broadcast(imsg);
+        } else {
+            server.broadcast(filter, imsg);
+        }
+    }
 }
