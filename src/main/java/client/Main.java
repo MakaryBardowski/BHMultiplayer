@@ -48,8 +48,8 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        setDisplayFps(false);      
-        setDisplayStatView(false);
+//        setDisplayFps(false);      
+//        setDisplayStatView(false);
         System.out.println("app camera" + cam);
         flyCam.setMoveSpeed(0); //30
         flyCam.setRotationSpeed(0); //1.0

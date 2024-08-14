@@ -18,7 +18,6 @@ MaterialDef Solid Color {
         WorldParameters {
             WorldViewProjectionMatrix
             WorldMatrix
-            Time
         }
 
         Defines {

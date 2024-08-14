@@ -12,7 +12,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import game.entities.DecorationTemplates;
 import game.entities.LevelExit;
-import static game.map.blocks.VoxelLighting.setupModelLight;
 import java.util.HashMap;
 import java.util.Random;
 import jme3tools.optimize.TextureAtlas;
@@ -57,10 +56,11 @@ public class BlockWorld {
         chunks = createChunks();
 
         worldNode = new Node("Block World Node");
-        textureAtlas = new TextureAtlas(128, 128);
+        textureAtlas = new TextureAtlas(32 * 16, 32 * 16);
         textureAtlas.addTexture(asm.loadTexture(BlockType.STONE.textureName), "DiffuseMap");
         textureAtlas.addTexture(asm.loadTexture(BlockType.DIRT_STONES.textureName), "DiffuseMap");
         textureAtlas.addTexture(asm.loadTexture(BlockType.DIRT.textureName), "DiffuseMap");
+        textureAtlas.addTexture(asm.loadTexture(BlockType.WATER.textureName), "DiffuseMap");
 
         initializeBlocks();
         rootNode.attachChild(worldNode);
@@ -95,7 +95,7 @@ public class BlockWorld {
         logicMap[x][y][z] = 1;
         Chunk c = chunks.get("" + (x / CHUNK_SIZE) * CHUNK_SIZE + (z / CHUNK_SIZE) * CHUNK_SIZE);
 //       Block   b = VoxelAdding.addBox((x * BLOCK_SIZE)-c.getChunkPos().getX()*BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE)-c.getChunkPos().getY()*BLOCK_SIZE, BLOCK_SIZE,  c.getBlocksCount(),  asm,  bt);
-        Block b = VoxelAdding.AddOptimizedBox(c, map, logicMap, x, y, z, BLOCK_SIZE, c.getBlocksCount(), asm, bt, (x * BLOCK_SIZE) - c.getChunkPos().getX() * BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE) - c.getChunkPos().getY() * BLOCK_SIZE);
+        Block b = VoxelAdding.AddOptimizedBox(c, map, logicMap, x, y, z, BLOCK_SIZE, asm, bt, (x * BLOCK_SIZE) - c.getChunkPos().getX() * BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE) - c.getChunkPos().getY() * BLOCK_SIZE);
         map[x][y][z] = b;
         c.attachBlock(b, asm.loadTexture(bt.textureName));
         return b;
@@ -112,7 +112,7 @@ public class BlockWorld {
     public Block addBlockDataToChunk(int x, int y, int z, BlockType bt) { // o
         Chunk c = chunks.get("" + (x / CHUNK_SIZE) * CHUNK_SIZE + (z / CHUNK_SIZE) * CHUNK_SIZE);
 //       Block   b = VoxelAdding.addBox((x * BLOCK_SIZE)-c.getChunkPos().getX()*BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE)-c.getChunkPos().getY()*BLOCK_SIZE, BLOCK_SIZE,  c.getBlocksCount(),  asm,  bt);
-        Block b = VoxelAdding.AddOptimizedBox(c, map, logicMap, x, y, z, BLOCK_SIZE, c.getBlocksCount(), asm, bt, (x * BLOCK_SIZE) - c.getChunkPos().getX() * BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE) - c.getChunkPos().getY() * BLOCK_SIZE);
+        Block b = VoxelAdding.AddOptimizedBox(c, map, logicMap, x, y, z, BLOCK_SIZE, asm, bt, (x * BLOCK_SIZE) - c.getChunkPos().getX() * BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE) - c.getChunkPos().getY() * BLOCK_SIZE);
         map[x][y][z] = b;
         c.addBlockData(b, asm.loadTexture(bt.textureName));
 
@@ -173,12 +173,14 @@ public class BlockWorld {
 
                     if (logicMap[x][y][z] == 1 || logicMap[x][y][z] == 9) {
 
-
                         addBlockDataToChunk(x, y, z, BlockType.STONE);
+
                     } else if (logicMap[x][y][z] == 2) {
                         var bt = BlockType.DIRT;
                         if (r.nextInt(5) == 1) {
                             bt = BlockType.DIRT_STONES;
+                        } else if (r.nextInt(10) == 2) {
+                            bt = BlockType.WATER;
                         }
 
                         addBlockDataToChunk(x, y, z, bt);
@@ -189,7 +191,7 @@ public class BlockWorld {
         }
 
         for (Chunk c : chunks.values()) {
-            c.generateGeometry(c.generateMesh());
+            c.attach();
         }
     }
 

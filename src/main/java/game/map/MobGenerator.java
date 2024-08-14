@@ -28,7 +28,7 @@ public class MobGenerator {
             serverLevelManager.registerRandomChest(pos);
         }
 
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 150; i++) {
             var playerSpawnpointOffset = new Vector3f(spawnpointOffset * 2, 0, 0);
             if (new Random().nextBoolean() == false) {
                 playerSpawnpointOffset = new Vector3f(0, 0, spawnpointOffset * 2);
@@ -39,7 +39,7 @@ public class MobGenerator {
             );
         }
 
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 50; i++) {
 
             var playerSpawnpointOffset = new Vector3f(spawnpointOffset, 0, 0);
             if (new Random().nextBoolean() == false) {

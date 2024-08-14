@@ -1,6 +1,8 @@
 plugins {
     id 'java'
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'  // Add the Shadow plugin
+    id 'org.beryx.jlink' version '2.26.0'  // Add the JLink plugin
 }
 
 group 'com.mygame'
@@ -39,39 +41,20 @@ project(":assets") {
 }
 
 dependencies {
-
-    // Core JME
     implementation "org.jmonkeyengine:jme3-core:$jmeVer"
     implementation "org.jmonkeyengine:jme3-desktop:$jmeVer"
     implementation "org.jmonkeyengine:jme3-lwjgl3:$jmeVer"
-
-    // Suppress errors / warnings building in SDK
     implementation "org.jmonkeyengine:jme3-jogg:$jmeVer"
     implementation "org.jmonkeyengine:jme3-plugins:$jmeVer"
-  
-    // GUI Library
     implementation "org.jmonkeyengine:jme3-niftygui:$jmeVer"
-  
-    // Networking Library
     implementation "org.jmonkeyengine:jme3-networking:$jmeVer"
-
-    // Additional Libraries
     implementation "org.jmonkeyengine:jme3-effects:$jmeVer"
     implementation "com.github.stephengold:Heart:8.6.0"
     implementation "com.epagagames:particlemonkey:1.1.0"
-   // implementation "com.github.polincdev:ShaderBlowEx:master-SNAPSHOT"
-    implementation "com.simsilica:zay-es-net:1.5.2"
-  
+    implementation "com.simsilica:lemur:1.16.0"
+    implementation 'org.codehaus.groovy:groovy-all:3.0.21'
     compileOnly 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.projectlombok:lombok:1.18.28'
-	
-    testCompileOnly 'org.projectlombok:lombok:1.18.28'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
-
-      implementation "com.simsilica:lemur:1.16.0"
-implementation 'org.codehaus.groovy:groovy-all:3.0.21'
-    
-    // Assets sub-project
     runtimeOnly project(':assets')
 }
 
@@ -89,4 +72,42 @@ java {
 
 wrapper {
     gradleVersion = '8.0'
+}
+
+// ShadowJar configuration
+shadowJar {
+    archiveClassifier.set('')
+    manifest {
+        attributes 'Main-Class': "$mainClassName"
+    }
+}
+
+// JLink configuration to bundle JRE
+jlink {
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    jlinkBasePath = "${buildDir}/jlinkbase"
+
+    launcher {
+        name = 'mygame'
+    }
+    imageDir = file("${buildDir}/image")
+    mergedModule {
+        additive = true
+    }
+}
+
+application {
+    mainClass.set(mainClassName)
+}
+
+// Task to create a distributable zip including the JRE
+task distZipJar(type: Zip) {
+    dependsOn shadowJar, jlink
+    from("$buildDir/image") {
+        into("/")
+    }
+    from(shadowJar.outputs) {
+        into("lib")
+    }
+    archiveFileName = "mygame-${version}.zip"
 }

@@ -4,7 +4,6 @@ uniform sampler2D m_fullHealthBarWithoutFrame;
 uniform vec2 m_healthPercent;
 
 in vec4 v_texCoord;
-in float timeSinceStartSeconds;
 in vec4 vertexPosition;
 out vec4 v_color;
 void main(){
