@@ -59,16 +59,21 @@ public class PlayerPosUpdateRequest extends EntityUpdateMessage {
             MovementCollisionUtils.sortByPassability(allCollidables, solid, passable);
 
             if (MovementCollisionUtils.isValidMobMovement(p, getPos(), serverApp.getGrid(), solid)) {
+                // this whole thing should be moved to moveServer override in player
                 WorldGrid grid = serverApp.getGrid();
                 grid.remove(p);
-                
-                
+
                 Main.getInstance().enqueue(() -> {
-                    if( ! (p.isAbleToMove()  && ServerMain.getInstance().containsEntityWithId(id)) )
+                    if (!(p.isAbleToMove() && ServerMain.getInstance().containsEntityWithId(id))) {
                         return;
-                    p.getNode().setLocalTranslation(getPos());
+                    }
+                    var newPos = getPos();
+                    p.getNode().setLocalTranslation(newPos);
                     grid.insert(p);
+                    
                     MovementCollisionUtils.checkPassableCollisions(p, grid, passable);
+                    p.getPositionChangedOnServer().set(true);
+
                 });
             } else {
                 InstantEntityPosCorrectionMessage corrMsg = new InstantEntityPosCorrectionMessage(p, p.getNode().getWorldTranslation());

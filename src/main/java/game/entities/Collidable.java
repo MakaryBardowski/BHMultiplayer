@@ -17,6 +17,7 @@ import game.map.collision.RectangleOBB;
 import game.map.collision.WorldGrid;
 import lombok.Getter;
 import lombok.Setter;
+import messages.MobPosRotUpdateMessage;
 import server.ServerMain;
 
 /**
@@ -26,6 +27,7 @@ import server.ServerMain;
 @Getter
 @Setter
 public abstract class Collidable extends Movable {
+
     private static final Spatial.CullHint HITBOX_CULLING = Spatial.CullHint.Always;
     protected CollisionShape collisionShape;
     protected Node hitboxNode = new Node(); // hitbox center is at this node
@@ -36,8 +38,11 @@ public abstract class Collidable extends Movable {
         node.attachChild(hitboxNode);
         hitboxNode.setCullHint(HITBOX_CULLING);
     }
-    
-    protected void createHitbox(){};
+
+    protected void createHitbox() {
+    }
+
+    ;
 
     public abstract void onCollisionClient(Collidable other);
 
@@ -73,7 +78,7 @@ public abstract class Collidable extends Movable {
         // above is wall collision
 
         for (Collidable m : ClientGameAppState.getInstance().getGrid().getNearbyAfterMove(this, moveVec)) {
-            if (isNotCollisionShapePassable(m) && this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
+            if (m.getClass() != this.getClass() && isNotCollisionShapePassable(m) && this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
                 return false;
             }
         }
@@ -111,7 +116,7 @@ public abstract class Collidable extends Movable {
         // above is wall collision
 
         for (Collidable m : ServerMain.getInstance().getGrid().getNearbyAfterMove(this, moveVec)) {
-            if (isNotCollisionShapePassable(m) && this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
+            if (m.getClass() != this.getClass() && isNotCollisionShapePassable(m) && this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
                 return false;
             }
         }
@@ -141,13 +146,14 @@ public abstract class Collidable extends Movable {
 
     @Override
     public void moveServer(Vector3f moveVec) {
-        if (isAbleToMove() && ServerMain.getInstance().containsEntityWithId(id)) { /*
+        if (isAbleToMove() && ServerMain.getInstance().containsEntityWithId(id)) {
+            /*
             if registered, then we can remove it from the grid and insert it again - this means we wont re-insert a mob that is deleted.
             Because list of mobs is a concurent hashmap, it means either deletion or the check will occur first (not at the same time meaning proper removal
-            */
+             */
             WorldGrid grid = ServerMain.getInstance().getGrid();
             grid.remove(this);
-       
+
             if (wouldNotCollideWithSolidEntitiesAfterMoveServer(new Vector3f(0, 0, moveVec.getZ()))) {
                 node.move(0, 0, moveVec.getZ());
             }
@@ -159,6 +165,7 @@ public abstract class Collidable extends Movable {
             grid.insert(this);
             checkCollisionWithPassableEntitiesServer();
 
+//            ServerMain.getInstance().getServer().broadcast(new MobPosRotUpdateMessage(id, node.getWorldTranslation(),node.getLocalRotation()));
         }
     }
 

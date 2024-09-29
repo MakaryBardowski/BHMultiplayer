@@ -192,6 +192,7 @@ public class InputController {
                     Main.getInstance().getFlyCam().setRotationSpeed(CAM_ROT_SPEED);
 
                     player.getMainCameraNode().removeFromParent();
+                    player.setPickupRange(10000f);
 
                     player.getFirstPersonHands().getHandsNode().setCullHint(Spatial.CullHint.Always);
                     player.getNode().setCullHint(Spatial.CullHint.Inherit);
@@ -370,7 +371,7 @@ public class InputController {
             if (hitName.matches("-?\\d+")) {
                 Integer hitId = Integer.valueOf(hitName);
                 InteractiveEntity mobHit = (InteractiveEntity) ClientGameAppState.getInstance().getMobs().get(hitId);
-                if (mobHit.getNode().getWorldTranslation().distance(p.getNode().getWorldTranslation()) <= Player.PICKUP_RANGE) {
+                if (mobHit.getNode().getWorldTranslation().distance(p.getNode().getWorldTranslation()) <= cs.getPlayer().getPickupRange()) {
                     mobHit.onInteract();
                 }
             }

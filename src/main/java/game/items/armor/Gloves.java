@@ -35,27 +35,33 @@ public class Gloves extends Armor {
 
     @Override
     public void playerEquip(Player m) {
-        m.setGloves(this);
-
+        humanMobEquip(m);
         m.getFirstPersonHands().setFpHands(this);
+    }
+
+    @Override
+    public void playerUnequip(Player m) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void humanMobEquip(HumanMob m) {
+        m.setGloves(this);
 
         Node r = m.getSkinningControl().getAttachmentsNode("HandR");
         r.detachAllChildren();
 
         Node gloveR = (Node) Main.getInstance().getAssetManager().loadModel(template.getFpPath().replace("?", "R"));
-        gloveR.move(0.449f,0,0);
+        gloveR.move(0.449f, 0, 0);
         setupModelLight(gloveR);
         setupModelShootability(gloveR, m.getId());
         r.attachChild(gloveR);
-
-        
-
 
         gloveR.getChild(0).rotate(0, -FastMath.DEG_TO_RAD * 180, 0);
     }
 
     @Override
-    public void playerUnequip(Player m) {
+    public void humanMobUnequip(HumanMob m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -97,4 +103,5 @@ public class Gloves extends Armor {
         builder.append(armorValue);
         return builder.toString();
     }
+
 }

@@ -57,11 +57,11 @@ public class ItemTemplates {
             null,
             ItemType.VEST, 6);
 
-    public static final ItemTemplate LEG_1 = new ItemTemplate("", ITEMS_PATH + "Bare/leg?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 0.75f),
+    public static final ItemTemplate LEG_1 = new ItemTemplate("", ITEMS_PATH + "Bare/leg?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1f),
             null,
             ItemType.BOOTS, 7);
 
-    public static final ItemTemplate HAND_1 = new ItemTemplate("", ITEMS_PATH + "Bare/hands.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 0.75f),
+    public static final ItemTemplate HAND_1 = new ItemTemplate("", ITEMS_PATH + "Bare/hands.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1f),
             null,
             ItemType.GLOVES, 8);
 

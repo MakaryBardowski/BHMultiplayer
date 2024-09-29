@@ -40,8 +40,7 @@ public class Helmet extends Armor {
     }
 
     @Override
-    public void playerEquip(Player m) {
-
+    public void humanMobEquip(HumanMob m) {
         Node bb = m.getSkinningControl().getAttachmentsNode("BackpackBone");
         Node ba = (Node) Main.getInstance().getAssetManager().loadModel("Models/backpack/backpack.j3o");
         bb.attachChild(ba);
@@ -59,7 +58,7 @@ public class Helmet extends Armor {
         setupModelLight(helmet);
         n.attachChild(helmet);
         setupModelShootability(helmet, m.getId());
-        
+
         if (!helmetTemplate.isReplacesHead()) {
             helmet.setLocalScale(HELMET_SCALE_ZBUFFER_FIGHTING);
             Node head = (Node) Main.getInstance().getAssetManager().loadModel(m.getDefaultHelmet().getTemplate().getFpPath());
@@ -68,6 +67,17 @@ public class Helmet extends Armor {
             setupModelShootability(head, m.getId());
             ((Geometry) head.getChild(0)).getMaterial().getAdditionalRenderState().setPolyOffset(5, 5);
         }
+    }
+
+    @Override
+    public void humanMobUnequip(HumanMob m) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void playerEquip(Player m) {
+        humanMobEquip(m);
+
     }
 
     @Override
@@ -113,4 +123,5 @@ public class Helmet extends Armor {
         builder.append(armorValue);
         return builder.toString();
     }
+
 }

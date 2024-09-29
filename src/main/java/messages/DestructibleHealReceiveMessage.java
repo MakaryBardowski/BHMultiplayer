@@ -45,7 +45,6 @@ public class DestructibleHealReceiveMessage extends EntityUpdateMessage {
 
                 Destructible d = (Destructible) getEntityByIdClient(id);
                 d.receiveHeal(heal);
-                System.out.println("healing.......");
             }
         }
         );

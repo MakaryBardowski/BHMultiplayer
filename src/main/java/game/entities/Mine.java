@@ -23,6 +23,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
+import data.DamageReceiveData;
 import game.effects.TimedSpatialRemoveControl;
 import game.entities.mobs.Mob;
 import game.map.collision.CollisionDebugUtils;
@@ -90,12 +91,24 @@ public class Mine extends DestructibleDecoration {
     }
 
     @Override
-    public void receiveDamage(float rawDamage) {
-        health = health - calculateDamage(rawDamage);
+    public void receiveDamage(DamageReceiveData damageData) {
+        health = health - calculateDamage(damageData.getRawDamage());
 
         if (health <= 0) {
             spawnExplosionVisuals();
             die();
+            destroyClient();
+            onDeathClient();
+        }
+    }
+
+    @Override
+    public void receiveDamageServer(DamageReceiveData damageData) {
+        health = health - calculateDamage(damageData.getRawDamage());
+
+        if (health <= 0) {
+            destroyServer();
+            onDeathServer();
         }
     }
 
@@ -112,19 +125,17 @@ public class Mine extends DestructibleDecoration {
     @Override
     public void onCollisionServer(Collidable other) {
         selfDestruct();
-        explode();
     }
 
     private void explode() {
-
         ServerMain serverApp = ServerMain.getInstance();
 
         RectangleAABB explosionHitbox = new RectangleAABB(node.getWorldTranslation(), explosionSize, explosionSize, explosionSize);
         for (Collidable c : serverApp.getGrid().getNearbyCollisionShapeAtPos(explosionHitbox.getPosition(), explosionHitbox)) {
             if (c instanceof Destructible de && c.getCollisionShape().wouldCollideAtPosition(explosionHitbox, c.getCollisionShape().getPosition())) {
                 if (c != this) {
-                    var emsg = new DestructibleDamageReceiveMessage(de.getId(), damage);
-                    emsg.handleDestructibleDamageReceive(de, serverApp);
+                    var emsg = new DestructibleDamageReceiveMessage(de.getId(),id, damage);
+                    emsg.applyDestructibleDamageAndNotifyClients(de, serverApp);
                 }
 
             }
@@ -135,17 +146,11 @@ public class Mine extends DestructibleDecoration {
         ServerMain serverApp = ServerMain.getInstance();
         Destructible d = this;
         float selfDestructDmg = 5000;
-        d.setHealth(d.getHealth() - d.calculateDamage(selfDestructDmg));
+        receiveDamageServer(new DamageReceiveData(id,id,selfDestructDmg));
 
-        var hmsg = new DestructibleDamageReceiveMessage(this.getId(), selfDestructDmg);
+        var hmsg = new DestructibleDamageReceiveMessage(id,id, selfDestructDmg);
         hmsg.setReliable(true);
         serverApp.getServer().broadcast(hmsg);
-
-        if (d.getHealth() <= 0) {
-            WorldGrid grid = serverApp.getGrid();
-            grid.remove(d);
-            serverApp.getLevelManagerMobs().remove(d.getId());
-        }
     }
 
     private void spawnExplosionVisuals() {

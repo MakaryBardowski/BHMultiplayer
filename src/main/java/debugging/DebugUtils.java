@@ -22,6 +22,7 @@ import com.jme3.scene.shape.Box;
  * @author 48793
  */
 public class DebugUtils {
+
     public static Geometry DEBUG_GEO = null;
 
     public static void drawGrid() {
@@ -38,7 +39,7 @@ public class DebugUtils {
                 Geometry g = new Geometry("wireframe grid", new Grid(2, 2, 1f));
 
                 g.setMaterial(mat);
-                g.center().move(cs.getGrid().getCellSize() * i + 0.5f, cs.getBLOCK_SIZE()+.01f, cs.getGrid().getCellSize() * j + 0.5f);
+                g.center().move(cs.getGrid().getCellSize() * i + 0.5f, cs.getBLOCK_SIZE() + .01f, cs.getGrid().getCellSize() * j + 0.5f);
                 g.scale(cs.getGrid().getCellSize());
                 cs.getDebugNode().attachChild(g);
             }
@@ -48,7 +49,13 @@ public class DebugUtils {
     public static void addArrow(Node node, AssetManager a) {
         Arrow arrow = new Arrow(Vector3f.UNIT_Z.mult(7f));
         putShape(node, arrow, ColorRGBA.Red, a).setLocalTranslation(new Vector3f(0, 0.01f, 0)); //x - czerwony
+    }
 
+    public static Geometry addArrow(Node node, Vector3f from, Vector3f to,ColorRGBA color) {
+        Arrow arrow = new Arrow(to.subtract(from));
+        var arrowGeom = putShape(node, arrow, color, Main.getInstance().getAssetManager());
+        arrowGeom.setLocalTranslation(from.add(new Vector3f(0, 0.01f, 0)));
+        return arrowGeom;
     }
 
     private static Geometry putShape(Node node, Mesh shape, ColorRGBA color, AssetManager a) {

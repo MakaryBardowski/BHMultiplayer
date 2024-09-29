@@ -7,6 +7,7 @@ package game.items.weapons;
 import com.jme3.scene.Node;
 import game.entities.Attribute;
 import game.entities.FloatAttribute;
+import game.entities.mobs.HumanMob;
 import game.items.Equippable;
 import game.items.Holdable;
 import game.items.Item;
@@ -27,7 +28,6 @@ public abstract class Weapon extends Item implements Attacks, Holdable {
 
     private static final DamageType DEFAULT_DAMAGE_TYPE = DamageType.PHYSICAL;
 
-
     @Getter
     @Setter
     protected float attackCooldown;
@@ -45,7 +45,7 @@ public abstract class Weapon extends Item implements Attacks, Holdable {
         super(id, template, name, node);
         attackCooldown = (1f / attacksPerSecond);
         damageType = DEFAULT_DAMAGE_TYPE;
-        
+
         attributes.put(DAMAGE_ATTRIBUTE, new FloatAttribute(damage));
         attributes.put(ATTACKS_PER_SEC_ATTRIBUTE, new FloatAttribute(attacksPerSecond));
     }
@@ -54,11 +54,10 @@ public abstract class Weapon extends Item implements Attacks, Holdable {
         super(id, template, name, node, droppable);
         attackCooldown = (1f / attacksPerSecond);
         damageType = DEFAULT_DAMAGE_TYPE;
-        
+
         attributes.put(DAMAGE_ATTRIBUTE, new FloatAttribute(damage));
         attributes.put(ATTACKS_PER_SEC_ATTRIBUTE, new FloatAttribute(attacksPerSecond));
     }
-
 
     public void setDamageType(DamageType damageType) {
         this.damageType = damageType;
@@ -67,9 +66,9 @@ public abstract class Weapon extends Item implements Attacks, Holdable {
     public DamageType getDamageType() {
         return damageType;
     }
-    
-    public float getAttacksPerSecond(){
-    return getFloatAttribute(ATTACKS_PER_SEC_ATTRIBUTE).getValue();
+
+    public float getAttacksPerSecond() {
+        return getFloatAttribute(ATTACKS_PER_SEC_ATTRIBUTE).getValue();
     }
 
     public float getDamage() {
@@ -79,11 +78,23 @@ public abstract class Weapon extends Item implements Attacks, Holdable {
     @Override
     public void attributeChangedNotification(int attributeId, Attribute copyOfAttribute) {
         super.attributeChangedNotification(attributeId, copyOfAttribute); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-        if(attributeId == ATTACKS_PER_SEC_ATTRIBUTE){
-                attackCooldown = (1f / ((FloatAttribute)copyOfAttribute).getValue() );
+        if (attributeId == ATTACKS_PER_SEC_ATTRIBUTE) {
+            attackCooldown = (1f / ((FloatAttribute) copyOfAttribute).getValue());
         }
     }
-    
-    
+
+    @Override
+    public void humanMobUnequip(HumanMob m) {
+        throw new UnsupportedOperationException("mob weapon equip not implemented yet");
+    }
+
+    ;
+
+    @Override
+    public void humanMobEquip(HumanMob m) {
+        throw new UnsupportedOperationException("mob weapon equip not implemented yet");
+
+    }
+;
 
 }

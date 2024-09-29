@@ -129,8 +129,8 @@ public class ClientLevelManager extends LevelManager {
         al.setColor(ColorRGBA.White.mult(0.7f));
         worldNode.addLight(al);
 
-//        DebugUtils.drawGrid();
         grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
+        DebugUtils.drawGrid();
 
     }
 
@@ -141,6 +141,7 @@ public class ClientLevelManager extends LevelManager {
 
         var levelSeed = levelSeeds[levelIndex];
         var levelType = levelTypes[levelIndex];
+        System.out.println("CLIENT: level seed "+levelSeed);
         System.out.println("CLIENT: generating map of type "+levelType);
         MapGenerator mg = new MapGenerator(levelSeed, levelType,MAP_SIZE);
 

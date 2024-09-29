@@ -1,41 +1,58 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package game.entities.mobs;
 
+import behaviorTree.BehaviorNode;
+import behaviorTree.BehaviorTree;
+import behaviorTree.LeafNode;
+import behaviorTree.actions.HumanMobActions;
+import behaviorTree.actions.HumanMobActions.AttackAction;
+import behaviorTree.actions.HumanMobActions.CheckForTargetAction;
+import behaviorTree.actions.HumanMobActions.GetCurrentTimestampAction;
+import behaviorTree.actions.HumanMobActions.IsPathfindingNeededAction;
+import behaviorTree.actions.HumanMobActions.MoveInRangeAction;
+import behaviorTree.actions.HumanMobActions.PathfindAction;
+import behaviorTree.actions.HumanMobActions.ResetPathAction;
+import behaviorTree.actions.HumanMobActions.RotateToDesiredRotationAction;
+import behaviorTree.actions.HumanMobActions.WalkAction;
+import behaviorTree.composite.ParallelNode;
+import behaviorTree.composite.SelectorNode;
+import behaviorTree.composite.SequenceNode;
+import behaviorTree.context.SimpleHumanMobContext;
 import game.effects.EmitterPooler;
 import game.items.Equippable;
 import game.items.Holdable;
 import game.items.Item;
 import game.map.collision.WorldGrid;
 import client.ClientGameAppState;
+import static client.ClientGameAppState.removeEntityByIdClient;
 import client.ClientSynchronizationUtils;
 import client.Main;
 import com.jme3.anim.AnimComposer;
-import com.jme3.anim.AnimationMask;
 import com.jme3.anim.ArmatureMask;
 import com.jme3.anim.SkinningControl;
 import com.jme3.effect.ParticleEmitter;
-import com.jme3.math.Quaternion;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.VertexBuffer;
+import data.DamageReceiveData;
+import debugging.Circle;
+import debugging.HumanPathDebugControl;
+import debugging.PathDebugUtils;
+import events.DamageReceivedEvent;
 import game.effects.ParticleUtils;
 import game.entities.Collidable;
-import game.entities.Destructible;
+import game.entities.FloatAttribute;
+import game.entities.InteractiveEntity;
 import static game.entities.factories.MobSpawnType.HUMAN;
+import static game.entities.mobs.Mob.SPEED_ATTRIBUTE;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.map.collision.RectangleAABB;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import lombok.Getter;
@@ -43,6 +60,7 @@ import lombok.Setter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewMobMessage;
 import server.ServerMain;
+import static server.ServerMain.removeEntityByIdServer;
 
 /**
  *
@@ -98,20 +116,37 @@ public class HumanMob extends Mob {
         modelComposer.setCurrentAction("Idle", "Legs");
 
         createHitbox();
+//        node.attachChild(Circle.createCircle(20, ColorRGBA.Red));
+
+        cachedSpeed = 9.25f;
+        attributes.put(SPEED_ATTRIBUTE, new FloatAttribute(cachedSpeed));
     }
 
     @Override
     public void onShot(Mob shooter, float damage) {
-        shooter.notifyServerAboutDealingDamage(damage, this);
+        notifyServerAboutDealingDamage(damage, shooter);
     }
 
     @Override
     public void onInteract() {
-        System.out.println(name + " says hi! ");
+        if (ServerMain.getInstance() == null) {
+            return;
+        }
+        if (node.getControl(HumanPathDebugControl.class) == null) {
+            node.addControl(new HumanPathDebugControl(this));
+        }
+        System.out.println(Arrays.toString(equipment));
+
+        System.out.println("helmet: " + helmet);
+        System.out.println("Armor: " + vest);
+        System.out.println("Gloves: " + gloves);
+        System.out.println("boots: " + boots);
+
+        System.out.println(name + " says hi! Im being debugged!");
     }
 
     @Override
-    public void move(float tpf ) {
+    public void move(float tpf) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -164,9 +199,8 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public void receiveDamage(float damage) {
-        health -= calculateDamage(damage);
-        System.out.println("receive damage "+damage);
+    public void receiveDamage(DamageReceiveData damageData) {
+        health -= calculateDamage(damageData.getRawDamage());
         var notMe = this != ClientGameAppState.getInstance().getPlayer();
         ParticleEmitter blood = EmitterPooler.getBlood();
         Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 2, 0);
@@ -176,6 +210,8 @@ public class HumanMob extends Mob {
                 blood.emitParticles(50);
             }
             die();
+            destroyClient();
+            onDeathClient();
         } else if (notMe) {
             blood.emitParticles(20);
         }
@@ -183,8 +219,22 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public void notifyServerAboutDealingDamage(float damage, Destructible mob) {
-        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(mob.getId(), damage);
+    public void receiveDamageServer(DamageReceiveData damageData) {
+        health -= calculateDamage(damageData.getRawDamage());
+        if (health <= 0) {
+            destroyServer();
+            onDeathServer();
+            return;
+        }
+        Main.getInstance().enqueue(() -> {
+            notifyEventSubscribers(new DamageReceivedEvent(damageData));
+        }
+        );
+    }
+
+    @Override
+    public void notifyServerAboutDealingDamage(float damage, InteractiveEntity attacker) {
+        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(id, attacker.getId(), damage);
         hpUpd.setReliable(true);
         ClientGameAppState.getInstance().getClient().send(hpUpd);
     }
@@ -214,20 +264,17 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public void equip(Item i) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void equip(Item item) {
+        if (item instanceof Equippable equippableItem) {
+            equippableItem.humanMobEquip(this);
+        }
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
-        NewMobMessage msg = new NewMobMessage(this, node.getWorldTranslation(), HUMAN);
-        msg.setReliable(true);
-        return msg;
-    }
-
-    @Override
-    public void unequip(Item e) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void unequip(Item item) {
+        if (item instanceof Equippable equippableItem) {
+            equippableItem.humanMobUnequip(this);
+        }
     }
 
     @Override
@@ -242,6 +289,13 @@ public class HumanMob extends Mob {
         if (e instanceof Equippable equippableItem) {
             equippableItem.playerServerUnequip(this);
         }
+    }
+
+    @Override
+    public AbstractMessage createNewEntityMessage() {
+        NewMobMessage msg = new NewMobMessage(this, node.getWorldTranslation(), HUMAN);
+        msg.setReliable(true);
+        return msg;
     }
 
     @Override
@@ -266,15 +320,17 @@ public class HumanMob extends Mob {
         hitboxNode.move(0, hitboxHeight, 0);
         collisionShape = new RectangleAABB(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
         showHitboxIndicator();
-        System.out.println(" hitbox " + collisionShape);
     }
 
     @Override
     public void setPosition(Vector3f newPos) {
+        setServerLocation(newPos);
+        setPosInterpolationValue(1.f);
         WorldGrid grid = ClientGameAppState.getInstance().getGrid();
         grid.remove(this);
         node.setLocalTranslation(newPos);
         grid.insert(this);
+        modelComposer.setCurrentAction("Idle", "Legs");
     }
 
     @Override
@@ -283,6 +339,12 @@ public class HumanMob extends Mob {
         grid.remove(this);
         node.setLocalTranslation(newPos);
         grid.insert(this);
+    }
+
+    @Override
+    public void moveServer(Vector3f moveVec) {
+        super.moveServer(moveVec);
+        positionChangedOnServer.set(true);
     }
 
     @Override
@@ -303,7 +365,7 @@ public class HumanMob extends Mob {
         skinningControl.getArmature().getJoint("HandR").getLocalRotation().nlerp(
                 ClientSynchronizationUtils.GetXAxisRotation(getServerRotation()), rotInterpolationValue
         );
-
+//
         var rot = skinningControl.getArmature().getJoint("HandR").getLocalRotation();
         skinningControl.getArmature().getJoint("HandL").setLocalRotation(rot);
         skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(rot);
@@ -313,14 +375,72 @@ public class HumanMob extends Mob {
     public void setPosInterpolationValue(float posInterpolationValue) {
         super.setPosInterpolationValue(posInterpolationValue);
 
-        System.out.println("posInterpolationValue " + posInterpolationValue);
-        System.out.println("modelComposer.getLayer(\"Legs\").getTime() " + modelComposer.getLayer("Legs").getTime());
-
+//        System.out.println("posInterpolationValue " + posInterpolationValue);
+//        System.out.println("modelComposer.getLayer(\"Legs\").getTime() " + modelComposer.getLayer("Legs").getTime());
         if (!modelComposer.getLayer("Legs").getCurrentActionName().equals("Run")) {
             modelComposer.setCurrentAction("Run", "Legs");
             modelComposer.getLayer("Legs").getCurrentAction().setSpeed(2);
-        }  
+        }
 
+    }
+
+    public void addAi() {
+        List<BehaviorNode> children = Arrays.asList(
+                new LeafNode(new GetCurrentTimestampAction()),
+                new LeafNode(new RotateToDesiredRotationAction())
+                ,
+                new SequenceNode(Arrays.asList(
+                        new LeafNode(new CheckForTargetAction()),
+                        new LeafNode(new ResetPathAction()),
+                        new SelectorNode(Arrays.asList(
+                                new LeafNode(new AttackAction()),
+                                new SequenceNode(Arrays.asList(
+                                        new LeafNode(new MoveInRangeAction()),
+                                        new LeafNode(new AttackAction())
+                                ))
+                        ))
+                ))
+                ,
+                new SelectorNode(Arrays.asList(
+                        new SequenceNode(Arrays.asList(
+                                new LeafNode(new IsPathfindingNeededAction())
+                                ,
+                                new LeafNode(new PathfindAction())
+                        )),
+                        new SequenceNode(Arrays.asList(
+                                new LeafNode(new WalkAction()),
+                                new LeafNode(new ResetPathAction())
+                        ))
+                ))
+        );
+
+        var rootNode = new ParallelNode(children);
+        var context = new SimpleHumanMobContext(this);
+        addEventSubscriber(context);
+        behaviorTree = new BehaviorTree(rootNode, context);
+
+    }
+
+    @Override
+    public void destroyServer() {
+        removeEntityByIdServer(id);
+        var server = ServerMain.getInstance();
+        server.getGrid().remove(this);
+        if (node.getParent() != null) {
+            Main.getInstance().enqueue(() -> {
+                node.removeFromParent();
+            });
+        }
+    }
+
+    @Override
+    public void destroyClient() {
+        var client = ClientGameAppState.getInstance();
+        client.getGrid().remove(this);
+        Main.getInstance().enqueue(() -> {
+            node.removeFromParent();
+        });
+        removeEntityByIdClient(id);
     }
 
 }

@@ -28,13 +28,15 @@ import server.ServerMain;
  * @author 48793
  */
 public abstract class Mob extends StatusEffectContainer implements CollidableInterface, MobInterface {
+
+    @Getter
     protected BehaviorTree behaviorTree;
-    
+
     protected static final float MOB_ROTATION_RATE = 6f;
 
     public static final int SPEED_ATTRIBUTE = 2;
 
-    private static final float DEFAULT_SPEED = 11.25f; //10, 13.25f for knife
+    private static final float DEFAULT_SPEED = 8.75f; //10, 13.25f for knife
     protected static final int EQUIPMENT_SIZE = 18;
 
     protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
@@ -45,7 +47,11 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 
     //mob ai variables
     protected Destructible currentTarget;
-
+    
+    
+    
+    
+    
 
     @Getter
     protected Vector3f serverLocation; // updated by the server
@@ -159,16 +165,19 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
     }
 
     @Override
-    public void updateAi(){
-        if(behaviorTree != null)
-    behaviorTree.update();
-    };
+    public void updateAi() {
+        System.out.println("trying to update "+this);
+        if (behaviorTree != null) {
+            System.out.println("suc");
+            behaviorTree.update();
+        }
+    }
+
+    ;
 
     @Override
     public boolean isAbleToMove() {
         return !isDead();
     }
     
-    
-
 }

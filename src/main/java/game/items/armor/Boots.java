@@ -34,7 +34,7 @@ public class Boots extends Armor {
     }
 
     @Override
-    public void playerEquip(Player m) {
+    public void humanMobEquip(HumanMob m) {
         var verticalOffset = 0.44f;
         m.setBoots(this);
         Node r = m.getSkinningControl().getAttachmentsNode("LegR");
@@ -58,6 +58,16 @@ public class Boots extends Armor {
         l.attachChild(bootL);
         bootR.rotate(0, -FastMath.DEG_TO_RAD * 90, 0);
         bootL.rotate(0, -FastMath.DEG_TO_RAD * 90, 0);
+    }
+
+    @Override
+    public void humanMobUnequip(HumanMob m) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void playerEquip(Player m) {
+        humanMobEquip(m);
     }
 
     @Override

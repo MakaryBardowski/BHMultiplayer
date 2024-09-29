@@ -4,8 +4,7 @@ import client.Main;
 import com.jme3.app.Application;
 import game.entities.mobs.Mob;
 import messages.messageListeners.ServerMessageListener;
-import messages.MobPosUpdateMessage;
-import messages.MobRotUpdateMessage;
+import messages.MobPosRotUpdateMessage;
 
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
@@ -22,11 +21,14 @@ import game.entities.InteractiveEntity;
 import game.entities.StatusEffectContainer;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.AiSteerable;
+import game.entities.mobs.Player;
 import game.items.Item;
 import game.map.collision.WorldGrid;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -65,11 +67,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
     public static ScheduledThreadPoolExecutor pathfindingExecutor = new ScheduledThreadPoolExecutor(1);
 
     @Getter
-    public static ScheduledThreadPoolExecutor mobAiExecutor = new ScheduledThreadPoolExecutor(1);
-
-    @Getter
     private static float timePerFrame;
-    private AtomicBoolean update = new AtomicBoolean(false);
     private boolean serverTick = false;
     private boolean serverPaused = true;
 
@@ -95,7 +93,37 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
         timePerFrame = tpf;
 
         if (!serverPaused) {
-            update.set(true);
+            tickTimer += timePerFrame;
+            serverTick = tickTimer >= TIME_PER_TICK;
+            for (var i : getLevelManagerMobs().values()) {
+                if (i instanceof AiSteerable agent) {
+                    agent.updateAi();
+                }
+
+                if (serverTick) {
+                    if (i instanceof Destructible d) {
+                        if (d instanceof StatusEffectContainer c) {
+                            c.updateTemporaryEffectsServer();
+                        }
+                        if (d instanceof Mob x) {
+                            if (x.getPositionChangedOnServer().get() == true) {
+                                server.broadcast(new MobPosRotUpdateMessage(x.getId(), x.getNode().getWorldTranslation(), x.getNode().getLocalRotation()));
+                                x.getPositionChangedOnServer().set(false);
+                            }
+                        }
+
+                    } else if (i instanceof ThrownGrenade x) {
+                        server.broadcast(new GrenadePosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
+                    }
+
+                }
+
+            }
+
+            if (serverTick) {
+                tickTimer = 0;
+            }
+
         } else {
             System.out.println("server is PAUSED");
         }
@@ -103,49 +131,6 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
 
     public void startGame() {
         currentGamemode.startGame();
-
-        Runnable r = () -> {
-            while (true) {
-                if (update.get() == true) {
-                    update.set(false);
-
-                    tickTimer += timePerFrame;
-
-                    serverTick = tickTimer >= TIME_PER_TICK;
-
-                    for (var i : getLevelManagerMobs().values()) {
-                        if (i instanceof AiSteerable agent) {
-
-                            agent.updateAi();
-
-                        }
-
-                        if (serverTick) {
-                            if (i instanceof Destructible d) {
-                                if (d instanceof StatusEffectContainer c) {
-                                    c.updateTemporaryEffectsServer();
-                                }
-                                if (d instanceof Mob x) {
-
-                                    server.broadcast(new MobPosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
-                                    server.broadcast(new MobRotUpdateMessage(x.getId(), x.getNode().getLocalRotation()));
-                                }
-                            } else if (i instanceof ThrownGrenade x) {
-                                server.broadcast(new GrenadePosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
-                            }
-
-                        }
-
-                    }
-
-                    if (serverTick) {
-                        tickTimer = 0;
-                    }
-
-                }
-            }
-        };
-        mobAiExecutor.schedule(r, 0, TimeUnit.MILLISECONDS);
 
         // notify players about game starting
         server.getConnections().stream().forEach(hc -> currentGamemode.levelManager.addPlayerToGame(hc));

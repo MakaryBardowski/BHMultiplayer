@@ -8,6 +8,7 @@ import client.ClientGameAppState;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import game.map.collision.WorldGrid;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Getter;
 import lombok.Setter;
 import server.ServerMain;
@@ -17,6 +18,8 @@ import server.ServerMain;
  * @author 48793
  */
 public abstract class Movable extends InteractiveEntity {
+    @Getter
+    protected AtomicBoolean positionChangedOnServer = new AtomicBoolean(true);
 
     @Getter
     @Setter

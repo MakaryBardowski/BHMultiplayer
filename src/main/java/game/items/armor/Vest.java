@@ -34,7 +34,7 @@ public class Vest extends Armor {
     }
 
     @Override
-    public void playerEquip(Player m) {
+    public void humanMobEquip(HumanMob m) {
         m.setVest(this);
         Node n = m.getSkinningControl().getAttachmentsNode("Spine");
         n.detachAllChildren();
@@ -42,6 +42,16 @@ public class Vest extends Armor {
         setupModelLight(vest);
         n.attachChild(vest);
         setupModelShootability(vest, m.getId());
+    }
+
+    @Override
+    public void humanMobUnequip(HumanMob m) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void playerEquip(Player m) {
+        humanMobEquip(m);
     }
 
     @Override
@@ -89,4 +99,5 @@ public class Vest extends Armor {
         builder.append(armorValue);
         return builder.toString();
     }
+
 }

@@ -510,7 +510,7 @@ public class PlayerHUD extends BaseAppState {
                         }
 
                     }
-                } else if (entityHit instanceof Item itemHit && distanceToFirstTarget <= Player.IDENTIFY_RANGE) {
+                } else if (entityHit instanceof Item itemHit && distanceToFirstTarget <= gs.getPlayer().getPickupRange()) {
                     boolean switched = gs.getPlayer().getLastTargetedItem() != itemHit;
                     gs.getPlayer().setLastTargetedItem(itemHit);
                     if (switched) {

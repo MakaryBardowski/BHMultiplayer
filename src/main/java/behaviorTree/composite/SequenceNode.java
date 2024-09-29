@@ -3,7 +3,6 @@ package behaviorTree.composite;
 import behaviorTree.BehaviorNode;
 import behaviorTree.LeafNode;
 import behaviorTree.NodeCompletionStatus;
-import behaviorTree.actions.humanActions.IsPathfindingNeededAction;
 
 import java.util.List;
 import java.util.Map;

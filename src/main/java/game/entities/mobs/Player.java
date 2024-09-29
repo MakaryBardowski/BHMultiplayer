@@ -7,7 +7,6 @@ package game.entities.mobs;
 import game.items.Equippable;
 import game.items.Item;
 
-import messages.MobRotUpdateMessage;
 import client.ClientGameAppState;
 import com.jme3.anim.SkinningControl;
 import com.jme3.math.Vector3f;
@@ -25,6 +24,7 @@ import static client.Main.CAM_ROT_SPEED;
 import static client.Main.CAM__MOVE_SPEED;
 import com.jme3.anim.AnimComposer;
 import com.jme3.network.AbstractMessage;
+import data.DamageReceiveData;
 import game.entities.mobs.playerClasses.PlayerClass;
 import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
 import game.map.collision.WorldGrid;
@@ -41,8 +41,13 @@ import static server.ServerMain.removeEntityByIdServer;
  */
 public class Player extends HumanMob {
 
-    public static final float IDENTIFY_RANGE = 8;
-    public static final float PICKUP_RANGE = 8;
+    @Getter
+    @Setter
+    public float identifyRange = 8;
+    
+    @Getter
+    @Setter
+    private float pickupRange = 8;
 
     private static final int HOTBAR_SIZE = 10;
 
@@ -92,9 +97,22 @@ public class Player extends HumanMob {
 
     @Override
     public void unequip(Item item) {
-
         if (item instanceof Equippable equippableItem) {
             equippableItem.playerUnequip(this);
+        }
+    }
+
+    @Override
+    public void equipServer(Item e) {
+        if (e instanceof Equippable equippableItem) {
+            equippableItem.playerServerEquip(this);
+        }
+    }
+
+    @Override
+    public void unequipServer(Item e) {
+        if (e instanceof Equippable equippableItem) {
+            equippableItem.playerServerUnequip(this);
         }
     }
 
@@ -108,14 +126,18 @@ public class Player extends HumanMob {
         this.mainCamera = mainCamera;
         firstPersonHands = new FirstPersonHands(this);
         hotbar = new Item[HOTBAR_SIZE];
-        health = 15;
-        maxHealth = 15;
+        health = 15*999;
+        maxHealth = 15*999;
+
+        cachedSpeed = 11.25f;
+        attributes.put(SPEED_ATTRIBUTE, new FloatAttribute(cachedSpeed));
+
     }
 
     @Override
-    public void receiveDamage(float damage) {
+    public void receiveDamage(DamageReceiveData damageData) {
         float previousHealth = getHealth();
-        super.receiveDamage(damage);
+        super.receiveDamage(damageData);
         if (playerHud != null) {
             float normalizedPercentHealth = getHealth() / getMaxHealth();
             float normalizedChange = (previousHealth - getHealth()) / getMaxHealth();
@@ -212,11 +234,10 @@ public class Player extends HumanMob {
             if (wouldNotCollideWithSolidEntitiesAfterMove(new Vector3f(movementVector.getX(), 0, 0))) {
                 node.move(movementVector.getX(), 0, 0);
             }
-
-            if (node.getWorldTranslation().distance(serverLocation) > cachedSpeed * tpf) {
-                PlayerPosUpdateRequest posu = new PlayerPosUpdateRequest(id, node.getWorldTranslation());
-                cm.getClient().send(posu);
-            }
+//            if (node.getWorldTranslation().distance(serverLocation) > cachedSpeed * tpf) {
+            PlayerPosUpdateRequest posu = new PlayerPosUpdateRequest(id, node.getWorldTranslation());
+            cm.getClient().send(posu);
+//            }
 
             checkCollisionWithPassableEntitiesClient();
 
