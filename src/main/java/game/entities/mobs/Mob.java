@@ -22,6 +22,7 @@ import java.util.Random;
 import lombok.Getter;
 import lombok.Setter;
 import server.ServerMain;
+import settings.GlobalSettings;
 
 /**
  *
@@ -47,11 +48,6 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 
     //mob ai variables
     protected Destructible currentTarget;
-    
-    
-    
-    
-    
 
     @Getter
     protected Vector3f serverLocation; // updated by the server
@@ -166,9 +162,11 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 
     @Override
     public void updateAi() {
-        System.out.println("trying to update "+this);
+        if (GlobalSettings.isAiDebug) {
+            System.out.println("trying to update " + this);
+        }
         if (behaviorTree != null) {
-            System.out.println("suc");
+//            System.out.println("suc");
             behaviorTree.update();
         }
     }
@@ -179,5 +177,5 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
     public boolean isAbleToMove() {
         return !isDead();
     }
-    
+
 }

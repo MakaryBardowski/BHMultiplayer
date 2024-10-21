@@ -11,7 +11,9 @@ import com.jme3.anim.SkinningControl;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
+import com.jme3.network.Filter;
 import com.jme3.network.Filters;
+import com.jme3.network.HostedConnection;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -25,12 +27,14 @@ import game.entities.mobs.Player;
 import game.entities.mobs.TrainingDummy;
 import game.items.Item;
 import game.items.ItemTemplates;
+import game.items.ItemTemplates.VestTemplate;
 import game.items.armor.Armor;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import java.util.List;
+import java.util.Random;
 import server.ServerMain;
 import statusEffects.EffectFactory;
 
@@ -38,13 +42,13 @@ import statusEffects.EffectFactory;
  *
  * @author 48793
  */
-public class AnimalMobFactory extends MobFactory {
+public class AllMobFactory extends MobFactory {
 
-    public AnimalMobFactory(int id, AssetManager assetManager, Node mobNode) {
+    public AllMobFactory(int id, AssetManager assetManager, Node mobNode) {
         super(id, assetManager, mobNode);
     }
 
-    public AnimalMobFactory(int id, Node mobNode) {
+    public AllMobFactory(int id, Node mobNode) {
         super(id, mobNode);
 
     }
@@ -90,6 +94,35 @@ public class AnimalMobFactory extends MobFactory {
             p.equipServer(defaultVest);
             p.equipServer(defaultGloves);
             p.equipServer(defaultBoots);
+
+            var random = new Random();
+            var randomNumber = random.nextFloat();
+
+            if (randomNumber > 0.95f) {
+                Item item = ServerMain.getInstance().getCurrentGamemode().getLevelManager().registerItemAndNotifyTCP(ItemTemplates.GAS_MASK, true, null);
+                p.addToEquipment(item);
+                p.equipServer(item);
+            }
+            if (randomNumber > 0.9f) {
+                Item item = ServerMain.getInstance().getCurrentGamemode().getLevelManager().registerItemAndNotifyTCP(ItemTemplates.VEST_TRENCH, true, null);
+                p.addToEquipment(item);
+                p.equipServer(item);
+            }
+            if (randomNumber > 0.85f) {
+                Item item = ServerMain.getInstance().getCurrentGamemode().getLevelManager().registerItemAndNotifyTCP(ItemTemplates.BOOTS_TRENCH, true, null);
+                p.addToEquipment(item);
+                p.equipServer(item);
+            }
+
+            if (randomNumber < 0.5f) {
+                Item item = ServerMain.getInstance().getCurrentGamemode().getLevelManager().registerItemAndNotifyTCP(ItemTemplates.KNIFE, true, null);
+                p.addToEquipment(item);
+                p.equipServer(item);
+            } else {
+                Item item = ServerMain.getInstance().getCurrentGamemode().getLevelManager().registerItemAndNotifyTCP(ItemTemplates.PISTOL_C96, true, null);
+                p.addToEquipment(item);
+                p.equipServer(item);
+            }
 
             var procsEverySeconds = 1; //10
             var regenEffect = EffectFactory.createRegenerationEffect(p, 1, 64 * procsEverySeconds);
@@ -141,7 +174,7 @@ public class AnimalMobFactory extends MobFactory {
         Node node = (Node) assetManager.loadModel("Models/testSkeleton/testSkeleton.j3o");
         return node;
     }
-    
+
     private Node loadDummyModel() {
         Node node = (Node) assetManager.loadModel("Models/Mobs/Dummy.j3o");
         return node;
@@ -154,5 +187,4 @@ public class AnimalMobFactory extends MobFactory {
     private AnimComposer getAnimComposer(Node node) {
         return node.getChild(0).getControl(AnimComposer.class);
     }
-
 }

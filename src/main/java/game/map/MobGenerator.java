@@ -5,10 +5,12 @@
 package game.map;
 
 import Utils.GridUtils;
+import client.ClientGameAppState;
 import com.jme3.math.Vector3f;
 import game.entities.factories.MobSpawnType;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.MudBeetle;
+import game.entities.mobs.Player;
 import java.util.Random;
 import server.ServerMain;
 
@@ -53,9 +55,6 @@ public class MobGenerator {
     }
 
     public void spawnRandomMobs(byte[][][] logicMap) {
-        if(levelIndex == 5){
-        return;
-        }
         var server = ServerMain.getInstance();
         var serverLevelManager = server.getCurrentGamemode().getLevelManager();
         var blockSize = server.getBLOCK_SIZE();
@@ -71,7 +70,7 @@ public class MobGenerator {
 
 
 //if(levelIndex == 1){
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 30; i++) {
             var mobPos = new Vector3f(random.nextInt(37 * blockSize) + 0.5f * blockSize, blockSize, random.nextInt(37 * blockSize) + 0.5f * blockSize);
             while (!GridUtils.isSpotEmpty(mobPos,logicMap)) {
                 mobPos = new Vector3f(random.nextInt(37 * blockSize) + 0.5f * blockSize, blockSize, random.nextInt(37 * blockSize) + 0.5f * blockSize);

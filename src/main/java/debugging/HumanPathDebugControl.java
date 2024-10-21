@@ -85,7 +85,7 @@ public class HumanPathDebugControl extends AbstractControl {
             return;
         }
         var behaviorTree = human.getBehaviorTree();
-        System.err.println(human + " behaviorTree = " + behaviorTree);
+//        System.err.println(human + " behaviorTree = " + behaviorTree);
         if (behaviorTree == null) {
             return;
         }

@@ -33,10 +33,12 @@ public class Helmet extends Armor {
 
     public Helmet(int id, HelmetTemplate template, String name, Node node) {
         super(id, template, name, node);
+        armorValue = template.getDefaultStats().getArmorValue();
     }
 
     public Helmet(int id, HelmetTemplate template, String name, Node node, boolean droppable) {
         super(id, template, name, node, droppable);
+        armorValue = template.getDefaultStats().getArmorValue();
     }
 
     @Override

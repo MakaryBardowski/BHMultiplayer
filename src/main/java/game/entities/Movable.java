@@ -18,9 +18,12 @@ import server.ServerMain;
  * @author 48793
  */
 public abstract class Movable extends InteractiveEntity {
+
     @Getter
     protected AtomicBoolean positionChangedOnServer = new AtomicBoolean(true);
-
+    @Getter
+    protected AtomicBoolean rotationChangedOnServer = new AtomicBoolean(true);
+    
     @Getter
     @Setter
     protected Vector3f movementVector = new Vector3f(0, 0, 0);
@@ -32,8 +35,9 @@ public abstract class Movable extends InteractiveEntity {
     public abstract void move(float tpf);
 
     public abstract void moveServer(Vector3f moveVec);
-    
-    public boolean isAbleToMove(){
-    return true;
-    };
+
+    public boolean isAbleToMove() {
+        return true;
+    }
+;
 }

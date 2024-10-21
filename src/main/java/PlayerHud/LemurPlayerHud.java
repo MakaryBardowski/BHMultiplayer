@@ -28,8 +28,8 @@ import java.util.Random;
  */
 public class LemurPlayerHud {
 
-    private Vector2f normalizedHealthPercentAndChange = new Vector2f();
-    private Player player;
+    private final Vector2f normalizedHealthPercentAndChange = new Vector2f();
+    private final Player player;
 
     float timeSinceLastHealthbarChange = 0;
     float waitTimeForHealthbarColorUpdate = 0.65f;

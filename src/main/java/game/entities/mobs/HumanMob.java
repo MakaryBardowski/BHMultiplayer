@@ -3,16 +3,7 @@ package game.entities.mobs;
 import behaviorTree.BehaviorNode;
 import behaviorTree.BehaviorTree;
 import behaviorTree.LeafNode;
-import behaviorTree.actions.HumanMobActions;
-import behaviorTree.actions.HumanMobActions.AttackAction;
-import behaviorTree.actions.HumanMobActions.CheckForTargetAction;
-import behaviorTree.actions.HumanMobActions.GetCurrentTimestampAction;
-import behaviorTree.actions.HumanMobActions.IsPathfindingNeededAction;
-import behaviorTree.actions.HumanMobActions.MoveInRangeAction;
-import behaviorTree.actions.HumanMobActions.PathfindAction;
-import behaviorTree.actions.HumanMobActions.ResetPathAction;
-import behaviorTree.actions.HumanMobActions.RotateToDesiredRotationAction;
-import behaviorTree.actions.HumanMobActions.WalkAction;
+import behaviorTree.actions.simpleHumanActions.*;
 import behaviorTree.composite.ParallelNode;
 import behaviorTree.composite.SelectorNode;
 import behaviorTree.composite.SequenceNode;
@@ -38,7 +29,6 @@ import com.jme3.scene.Node;
 import data.DamageReceiveData;
 import debugging.Circle;
 import debugging.HumanPathDebugControl;
-import debugging.PathDebugUtils;
 import events.DamageReceivedEvent;
 import game.effects.ParticleUtils;
 import game.entities.Collidable;
@@ -98,7 +88,7 @@ public class HumanMob extends Mob {
     protected Gloves defaultGloves;
 
     @Getter
-    private AnimComposer modelComposer;
+    private final AnimComposer modelComposer;
 
     private Geometry hitboxDebug;
 
@@ -118,8 +108,9 @@ public class HumanMob extends Mob {
         createHitbox();
 //        node.attachChild(Circle.createCircle(20, ColorRGBA.Red));
 
-        cachedSpeed = 9.25f;
+        cachedSpeed = 7.5f;
         attributes.put(SPEED_ATTRIBUTE, new FloatAttribute(cachedSpeed));
+        onInteract();
     }
 
     @Override
@@ -385,31 +376,37 @@ public class HumanMob extends Mob {
     }
 
     public void addAi() {
+
+        var attack = new LeafNode(new Attack());
+
         List<BehaviorNode> children = Arrays.asList(
-                new LeafNode(new GetCurrentTimestampAction()),
-                new LeafNode(new RotateToDesiredRotationAction())
-                ,
-                new SequenceNode(Arrays.asList(
-                        new LeafNode(new CheckForTargetAction()),
-                        new LeafNode(new ResetPathAction()),
-                        new SelectorNode(Arrays.asList(
-                                new LeafNode(new AttackAction()),
-                                new SequenceNode(Arrays.asList(
-                                        new LeafNode(new MoveInRangeAction()),
-                                        new LeafNode(new AttackAction())
-                                ))
-                        ))
-                ))
-                ,
+                new LeafNode(new GetCurrentTimestamp()),
+                new LeafNode(new RotateToDesiredRotation()),
                 new SelectorNode(Arrays.asList(
                         new SequenceNode(Arrays.asList(
-                                new LeafNode(new IsPathfindingNeededAction())
-                                ,
-                                new LeafNode(new PathfindAction())
+                                new LeafNode(new CheckForTarget()),
+                                new LeafNode(new ResetPath()),
+                                new SelectorNode(Arrays.asList(
+                                        attack,
+                                        new SequenceNode(Arrays.asList(
+                                                new LeafNode(new MoveInRange()),
+                                                attack
+                                        ))
+                                ))
+                        ))
+                )),
+                new SelectorNode(Arrays.asList(
+                        new SequenceNode(Arrays.asList(
+                                new LeafNode(new IsPathfindingNeeded()),
+                                new LeafNode(new Pathfind())
+                        )),
+                        new SequenceNode(Arrays.asList(
+                                new LeafNode(new ShouldLookIntoRandomDirection()),
+                                new LeafNode(new SetRandomLookDirection())
                         )),
                         new SequenceNode(Arrays.asList(
                                 new LeafNode(new WalkAction()),
-                                new LeafNode(new ResetPathAction())
+                                new LeafNode(new ResetPath())
                         ))
                 ))
         );
@@ -424,6 +421,7 @@ public class HumanMob extends Mob {
     @Override
     public void destroyServer() {
         removeEntityByIdServer(id);
+//        System.out.println("destroying "+this);
         var server = ServerMain.getInstance();
         server.getGrid().remove(this);
         if (node.getParent() != null) {

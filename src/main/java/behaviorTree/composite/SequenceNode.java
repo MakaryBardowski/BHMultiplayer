@@ -24,19 +24,14 @@ public class SequenceNode extends CompositeNode {
             var childStatus = child.execute(context);
             if (childStatus == NodeCompletionStatus.FAILURE || childStatus == NodeCompletionStatus.STOP_TREE_EXECUTION) {
                 lastExecutedRunningChildIndex = -1;
-//        debug("FAIL SEQ");
-
                 return childStatus;
             }
             if (childStatus == NodeCompletionStatus.RUNNING) {
                 lastExecutedRunningChildIndex = i;
-//        debug("RUNNING SEQ");
-
                 return NodeCompletionStatus.RUNNING;
             }
         }
         lastExecutedRunningChildIndex = -1;
-//        debug("SUCCESS SEQ");
         return NodeCompletionStatus.SUCCESS;
     }
 

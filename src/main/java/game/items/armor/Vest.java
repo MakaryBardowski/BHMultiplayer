@@ -14,6 +14,7 @@ import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
+import game.items.ItemTemplates.VestTemplate;
 import java.util.Arrays;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewHelmetMessage;
@@ -25,12 +26,14 @@ import messages.items.NewVestMessage;
  */
 public class Vest extends Armor {
 
-    public Vest(int id, ItemTemplates.ItemTemplate template, String name, Node node) {
+    public Vest(int id, VestTemplate template, String name, Node node) {
         super(id, template, name, node);
+        this.armorValue = template.getDefaultStats().getArmorValue();
     }
 
-    public Vest(int id, ItemTemplates.ItemTemplate template, String name, Node node, boolean droppable) {
+    public Vest(int id, VestTemplate template, String name, Node node, boolean droppable) {
         super(id, template, name, node, droppable);
+        this.armorValue = template.getDefaultStats().getArmorValue();
     }
 
     @Override
@@ -52,6 +55,7 @@ public class Vest extends Armor {
     @Override
     public void playerEquip(Player m) {
         humanMobEquip(m);
+
     }
 
     @Override

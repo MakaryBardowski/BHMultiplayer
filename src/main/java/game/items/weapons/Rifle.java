@@ -212,12 +212,11 @@ public class Rifle extends RangedWeapon {
         GradientParticleEmitter trail = createTrail();
         bullet.attachChild(trail);
         bullet.addControl(new BulletTracerControl(bullet, destination, BULLET_SPEED, trail));
-        
+
 //        Emitter blood = EmitterPooler.getShotSmoke();
 //        Vector3f bloodPos = destination;
 //        blood.setLocalTranslation(bloodPos);
 //            blood.emitNextParticle();
-
     }
 
     private static GradientParticleEmitter createTrail() {
@@ -372,5 +371,39 @@ public class Rifle extends RangedWeapon {
     public float calculateDamage(float distance) {
         float damageDropoff = 0.75f;
         return getDamage() * (float) (Math.pow(damageDropoff, distance / 20));
+    }
+
+    @Override
+    public void humanMobUnequip(HumanMob m) {
+        if (m.getEquippedRightHand() == this) {
+            m.setEquippedRightHand(null);
+        }
+    }
+
+    @Override
+    public void humanMobEquip(HumanMob m) {
+        Holdable unequippedItem = m.getEquippedRightHand();
+        if (unequippedItem != null) {
+            unequippedItem.humanMobUnequip(m);
+        }
+        m.setEquippedRightHand(this);
+        humanEquipInThirdPerson(m, Main.getInstance().getAssetManager());
+    }
+
+    private void humanEquipInThirdPerson(HumanMob humanMob, AssetManager assetManager) {
+        Node model = (Node) assetManager.loadModel(template.getDropPath());
+        model.move(0, -0.43f, 0.37f);
+        Geometry ge = (Geometry) (model.getChild(0));
+        Material originalMaterial = ge.getMaterial();
+        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+        ge.setMaterial(newMaterial);
+        float length = 1.3f;
+        float width = 1.3f;
+        float height = 1.3f;
+        model.scale(length, width, height);
+        humanMob.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
+        setupModelShootability(model, humanMob.getId());
+        thirdPersonModelParentIndex = humanMob.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
     }
 }

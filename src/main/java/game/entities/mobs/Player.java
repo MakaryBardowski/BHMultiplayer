@@ -44,7 +44,7 @@ public class Player extends HumanMob {
     @Getter
     @Setter
     public float identifyRange = 8;
-    
+
     @Getter
     @Setter
     private float pickupRange = 8;
@@ -126,8 +126,8 @@ public class Player extends HumanMob {
         this.mainCamera = mainCamera;
         firstPersonHands = new FirstPersonHands(this);
         hotbar = new Item[HOTBAR_SIZE];
-        health = 15*999;
-        maxHealth = 15*999;
+        health = 15 * 1;
+        maxHealth = 15 * 1;
 
         cachedSpeed = 11.25f;
         attributes.put(SPEED_ATTRIBUTE, new FloatAttribute(cachedSpeed));
@@ -196,10 +196,12 @@ public class Player extends HumanMob {
     @Override
     public void move(float tpf) {
         var cm = ClientGameAppState.getInstance();
+
         if ((forward || backward || left || right) && !isMovementControlLocked()) {
             movementVector.set(0, 0, 0);
 
             WorldGrid collisionGrid = cm.getGrid();
+
             collisionGrid.remove(this);
 
             if (forward) {
@@ -240,10 +242,10 @@ public class Player extends HumanMob {
 //            }
 
             checkCollisionWithPassableEntitiesClient();
-
             collisionGrid.insert(this);
-        }
 
+            
+        }
     }
 
     @Override

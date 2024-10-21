@@ -15,6 +15,7 @@ import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
+import game.items.ItemTemplates.GlovesTemplate;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewBootsMessage;
 import messages.items.NewGlovesMessage;
@@ -25,12 +26,14 @@ import messages.items.NewGlovesMessage;
  */
 public class Gloves extends Armor {
 
-    public Gloves(int id, ItemTemplates.ItemTemplate template, String name, Node node) {
+    public Gloves(int id, GlovesTemplate template, String name, Node node) {
         super(id, template, name, node);
+        this.armorValue = template.getDefaultStats().getArmorValue();
     }
 
-    public Gloves(int id, ItemTemplates.ItemTemplate template, String name, Node node, boolean droppable) {
+    public Gloves(int id, GlovesTemplate template, String name, Node node, boolean droppable) {
         super(id, template, name, node, droppable);
+        this.armorValue = template.getDefaultStats().getArmorValue();
     }
 
     @Override

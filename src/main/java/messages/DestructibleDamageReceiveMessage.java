@@ -44,7 +44,7 @@ public class DestructibleDamageReceiveMessage extends EntityUpdateMessage {
         InteractiveEntity i = getEntityByIdServer(id);
         if (i != null) { // if the mob doesnt exist, it means the 
             // info was sent from a lagged user - dont forward it to others
-            System.err.println(id);
+//            System.err.println(id);
             Destructible d = ((Destructible) i);
             applyDestructibleDamageAndNotifyClients(d, ServerMain.getInstance());
 

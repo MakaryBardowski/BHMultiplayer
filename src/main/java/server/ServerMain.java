@@ -106,9 +106,10 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
                             c.updateTemporaryEffectsServer();
                         }
                         if (d instanceof Mob x) {
-                            if (x.getPositionChangedOnServer().get() == true) {
+                            if (x.getRotationChangedOnServer().get() == true || x.getPositionChangedOnServer().get() == true) {
                                 server.broadcast(new MobPosRotUpdateMessage(x.getId(), x.getNode().getWorldTranslation(), x.getNode().getLocalRotation()));
                                 x.getPositionChangedOnServer().set(false);
+                                x.getRotationChangedOnServer().set(false);
                             }
                         }
 

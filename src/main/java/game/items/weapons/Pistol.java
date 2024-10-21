@@ -13,36 +13,26 @@ import game.entities.mobs.Player;
 import projectiles.controls.BulletTracerControl;
 import client.ClientGameAppState;
 import client.Main;
-import com.jme3.anim.AnimComposer;
 import com.jme3.anim.SkinningControl;
 import com.jme3.asset.AssetManager;
-import com.jme3.collision.CollisionResult;
-import com.jme3.collision.CollisionResults;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.effect.ParticleMesh;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
 import de.lessvoid.nifty.controls.label.LabelControl;
-import game.entities.Destructible;
 import static game.entities.DestructibleUtils.setupModelShootability;
-import game.entities.InteractiveEntity;
 import game.entities.mobs.HumanMob;
 import game.items.AmmoPack;
 import game.items.Holdable;
 import game.items.Item;
-import game.items.ItemTemplates;
 import game.items.ItemTemplates.ItemType;
-import messages.EntitySetFloatAttributeMessage;
 import messages.EntitySetIntegerAttributeMessage;
 import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
@@ -121,14 +111,13 @@ public class Pistol extends RangedWeapon {
 
             firerateControl = new FirerateControl(this);
             gunRecoil = new RecoilControl(.2f, -.3f, .0f, .00f, 20, 0.4f);
-            
+
 //            gunRecoil = new GunRecoilControl(-6f, -0.07f, 0.0425f, 0.04f, 40, 1f);
 //            
 //            gunRecoil.setRotationReturnSpeed(0.02f);
 //            gunRecoil.setRotationSpeed(3);
 //            gunRecoil.setTranslationSpeed(0);
 //            gunRecoil.setTranslationReturnSpeed(0.0f);
-            
             camRecoil = new CameraRecoilControl(0.3f, -.05f, .1f, .05f, 20, 0.5f);
 
             model.addControl(firerateControl);
@@ -145,25 +134,8 @@ public class Pistol extends RangedWeapon {
             p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimationData.HOLD_PISTOL);
 
         }
-
-        Node model = (Node) assetManager.loadModel(template.getDropPath());
-        model.move(0, -0.43f, 0.37f);
-        Geometry ge = (Geometry) (model.getChild(0));
-        Material originalMaterial = ge.getMaterial();
-        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
-        ge.setMaterial(newMaterial);
-        float length = 1f;
-        float width = 1.4f;
-        float height = 1f;
-        model.scale(length, width, height);
-        System.out.println("p.getSkinningControl().getAttachmentsNode(\"HandR\") " + p.getSkinningControl().getAttachmentsNode("HandR"));
-        p.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
-        setupModelShootability(model, p.getId());
-        thirdPersonModelParentIndex = p.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
-
-        System.out.println("name " + p.getName());
-        System.out.println(" EQUIPPED A PISTOL! (pos = " + model.getWorldTranslation());
+        
+        humanEquipInThirdPerson(p, assetManager);
     }
 
     @Override
@@ -368,5 +340,39 @@ public class Pistol extends RangedWeapon {
     public float calculateDamage(float distance) {
         float damageDropoff = 0.75f;
         return getDamage() * (float) (Math.pow(damageDropoff, distance / 20));
+    }
+
+    @Override
+    public void humanMobUnequip(HumanMob m) {
+        if (m.getEquippedRightHand() == this) {
+            m.setEquippedRightHand(null);
+        }
+    }
+
+    @Override
+    public void humanMobEquip(HumanMob m) {
+        Holdable unequippedItem = m.getEquippedRightHand();
+        if (unequippedItem != null) {
+            unequippedItem.humanMobUnequip(m);
+        }
+        m.setEquippedRightHand(this);
+        humanEquipInThirdPerson(m, Main.getInstance().getAssetManager());
+    }
+
+    private void humanEquipInThirdPerson(HumanMob humanMob, AssetManager assetManager) {
+        Node model = (Node) assetManager.loadModel(template.getDropPath());
+        model.move(0, -0.43f, 0.37f);
+        Geometry ge = (Geometry) (model.getChild(0));
+        Material originalMaterial = ge.getMaterial();
+        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+        ge.setMaterial(newMaterial);
+        float length = 1f;
+        float width = 1.4f;
+        float height = 1f;
+        model.scale(length, width, height);
+        humanMob.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
+        setupModelShootability(model, humanMob.getId());
+        thirdPersonModelParentIndex = humanMob.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
     }
 }

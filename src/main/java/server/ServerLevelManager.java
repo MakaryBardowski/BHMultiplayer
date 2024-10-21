@@ -21,7 +21,7 @@ import game.entities.DecorationTemplates;
 import game.entities.DestructibleDecoration;
 import game.entities.InteractiveEntity;
 import game.entities.LevelExit;
-import game.entities.factories.AnimalMobFactory;
+import game.entities.factories.AllMobFactory;
 import game.entities.factories.DecorationFactory;
 import game.entities.factories.MobSpawnType;
 import game.entities.factories.PlayerFactory;
@@ -225,7 +225,7 @@ public class ServerLevelManager extends LevelManager {
     }
 
     public Mob registerMob(MobSpawnType spawnType) {
-        Mob mob = new AnimalMobFactory(currentMaxId++, assetManager, rootNode).createServerSide(spawnType);
+        Mob mob = new AllMobFactory(currentMaxId++, assetManager, rootNode).createServerSide(spawnType);
 
         insertIntoCollisionGrid(mob);
 
@@ -281,7 +281,7 @@ public class ServerLevelManager extends LevelManager {
         int randomValue = r.nextInt(16);
         if (randomValue < 2) {
             Vest playerVest = (Vest) registerItemLocal(ItemTemplates.VEST_TRENCH, true);
-            playerVest.setArmorValue(1.05f + r.nextFloat(0f, 0.25f));
+            playerVest.setArmorValue(  1.05f + r.nextFloat(0f, 0.25f)   );
             chest.addToEquipment(playerVest);
         }
         if (randomValue >= 1 && randomValue <= 4) {
@@ -605,7 +605,7 @@ public class ServerLevelManager extends LevelManager {
         grid.insert(c);
     }
 
-    private Item registerItemAndNotifyTCP(ItemTemplates.ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
+    public Item registerItemAndNotifyTCP(ItemTemplates.ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
         Item i = registerItemLocal(template, droppable);
         sendMessageTCP(i.createNewEntityMessage(), notificationFilter);
         return i;

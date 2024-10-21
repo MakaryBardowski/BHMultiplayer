@@ -16,6 +16,7 @@ import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
+import game.items.ItemTemplates.BootsTemplate;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewBootsMessage;
 
@@ -25,12 +26,14 @@ import messages.items.NewBootsMessage;
  */
 public class Boots extends Armor {
 
-    public Boots(int id, ItemTemplates.ItemTemplate template, String name, Node node) {
+    public Boots(int id, BootsTemplate template, String name, Node node) {
         super(id, template, name, node);
+        this.armorValue = template.getDefaultStats().getArmorValue();
     }
 
-    public Boots(int id, ItemTemplates.ItemTemplate template, String name, Node node, boolean droppable) {
+    public Boots(int id, BootsTemplate template, String name, Node node, boolean droppable) {
         super(id, template, name, node, droppable);
+        this.armorValue = template.getDefaultStats().getArmorValue();
     }
 
     @Override

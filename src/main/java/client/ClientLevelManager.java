@@ -20,7 +20,7 @@ import com.jme3.scene.Node;
 import com.jme3.ui.Picture;
 import debugging.DebugUtils;
 import game.entities.InteractiveEntity;
-import game.entities.factories.AnimalMobFactory;
+import game.entities.factories.AllMobFactory;
 import game.entities.factories.MobSpawnType;
 import game.entities.factories.PlayerFactory;
 import game.entities.grenades.ThrownGrenade;
@@ -141,8 +141,8 @@ public class ClientLevelManager extends LevelManager {
 
         var levelSeed = levelSeeds[levelIndex];
         var levelType = levelTypes[levelIndex];
-        System.out.println("CLIENT: level seed "+levelSeed);
-        System.out.println("CLIENT: generating map of type "+levelType);
+//        System.out.println("CLIENT: level seed "+levelSeed);
+//        System.out.println("CLIENT: generating map of type "+levelType);
         MapGenerator mg = new MapGenerator(levelSeed, levelType,MAP_SIZE);
 
         MAIN_INSTANCE.enqueue(() -> {
@@ -166,7 +166,7 @@ public class ClientLevelManager extends LevelManager {
     }
 
     public Mob registerMob(Integer id, MobSpawnType spawnType) {
-        var mobFactory = new AnimalMobFactory(id,
+        var mobFactory = new AllMobFactory(id,
                 assetManager,
                 destructibleNode);
 

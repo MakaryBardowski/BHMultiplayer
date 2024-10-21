@@ -111,9 +111,4 @@ public abstract class Item extends InteractiveEntity {
         removeEntityByIdClient(id);
     }
 
-//    @Override
-//    protected void finalize() throws Throwable {
-//        System.out.println("deleting ITEEEEEEEEm "+name);
-//        super.finalize(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-//    }
 }

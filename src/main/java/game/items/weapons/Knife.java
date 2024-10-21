@@ -10,15 +10,12 @@ import game.entities.mobs.Mob;
 import game.entities.mobs.Player;
 import client.ClientGameAppState;
 import client.Main;
-import com.jme3.anim.AnimComposer;
 import com.jme3.anim.tween.Tween;
 import com.jme3.anim.tween.Tweens;
 import com.jme3.anim.tween.action.Action;
 import com.jme3.anim.tween.action.ClipAction;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
-import com.jme3.math.FastMath;
-import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -101,24 +98,7 @@ public class Knife extends MeleeWeapon {
 
         }
 
-        Node model = (Node) assetManager.loadModel(template.getDropPath());
-        model.move(0, -0.33f, 0.2f);
-        
-        Geometry ge = (Geometry) (model.getChild(0));
-        Material originalMaterial = ge.getMaterial();
-        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
-        ge.setMaterial(newMaterial);
-        float length = 1f;
-        float width = 1f;
-        float height = 1f;
-        model.scale(length, width, height);
-        p.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
-        setupModelShootability(model, p.getId());
-        thirdPersonModelParentIndex = p.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
-        System.out.println("name " + p.getName());
-        System.out.println(" EQUIPPED A KNIFE! (pos = " + model.getWorldTranslation());
-
+        humanEquipInThirdPerson(p, assetManager);
     }
 
     @Override
@@ -249,5 +229,39 @@ public class Knife extends MeleeWeapon {
         builder.append(getDamage());
         builder.append("]");
         return builder.toString();
+    }
+
+    @Override
+    public void humanMobUnequip(HumanMob m) {
+        if (m.getEquippedRightHand() == this) {
+            m.setEquippedRightHand(null);
+        }
+    }
+
+    @Override
+    public void humanMobEquip(HumanMob m) {
+        Holdable unequippedItem = m.getEquippedRightHand();
+        if (unequippedItem != null) {
+            unequippedItem.humanMobUnequip(m);
+        }
+        m.setEquippedRightHand(this);
+        humanEquipInThirdPerson(m, Main.getInstance().getAssetManager());
+    }
+
+    private void humanEquipInThirdPerson(HumanMob humanMob, AssetManager assetManager) {
+        Node model = (Node) assetManager.loadModel(template.getDropPath());
+        model.move(0, -0.33f, 0.2f);
+        Geometry ge = (Geometry) (model.getChild(0));
+        Material originalMaterial = ge.getMaterial();
+        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+        ge.setMaterial(newMaterial);
+        float length = 1f;
+        float width = 1f;
+        float height = 1f;
+        model.scale(length, width, height);
+        humanMob.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
+        setupModelShootability(model, humanMob.getId());
+        thirdPersonModelParentIndex = humanMob.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
     }
 }

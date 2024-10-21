@@ -36,7 +36,7 @@ public class NewHelmetMessage extends NewArmorMessage {
     @Override
     public void handleClient(ClientGameAppState client) {
         Helmet i = (Helmet) ifa.createItem(id, getTemplate(), droppable);
-        i.setArmorValue(armorValue);
+        i.setArmorValue(armorValue); // so we set the params
         client.registerEntity(i);
 
     }

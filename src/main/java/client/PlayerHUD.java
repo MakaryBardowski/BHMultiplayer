@@ -5,6 +5,7 @@
  */
 package client;
 
+import behaviorTree.context.SimpleHumanMobContext;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -46,9 +47,11 @@ import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.tools.Color;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
+import game.entities.mobs.HumanMob;
 import game.entities.mobs.Player;
 import game.items.Item;
 import java.util.Random;
+import server.ServerMain;
 
 /**
  *
@@ -122,8 +125,7 @@ public class PlayerHUD extends BaseAppState {
 
     @Override
     protected void onEnable() {
-        
-        
+
         NiftyJmeDisplay niftyDisplay = NiftyJmeDisplay.newNiftyJmeDisplay(
                 getApplication().getAssetManager(),
                 getApplication().getInputManager(),
@@ -176,7 +178,6 @@ public class PlayerHUD extends BaseAppState {
                         });
                     }
                 });
-
 
                 layer(new LayerBuilder("ammo") {
                     {
@@ -429,7 +430,7 @@ public class PlayerHUD extends BaseAppState {
 
                                 control(new LabelBuilder("TooltipLabelControl", "") {
                                     {
-                                        
+
                                         wrap(true);
 //                         filename("Textures/GUI/tooltipFrame.png");
                                         childLayoutVertical(); // layer properties, add more...
@@ -508,6 +509,17 @@ public class PlayerHUD extends BaseAppState {
                         if (switched) {
                             updateTargetHealthbar();
                         }
+
+//                        try {
+//                            if (enemyHit instanceof HumanMob hm) {
+//
+//                                hm = (HumanMob) ServerMain.getInstance().getLevelManagerMobs().get(hm.getId());
+//                                var newCell = gs.getGrid().getNearbyInRadius(hm.getNode().getWorldTranslation(), 20f);
+//                                System.out.println(hm + " " + ((SimpleHumanMobContext) hm.getBehaviorTree().getContext()).canAcquireNewTarget() + " sees " + newCell);
+//                            }
+//
+//                        } catch (Exception e) {
+//                        };
 
                     }
                 } else if (entityHit instanceof Item itemHit && distanceToFirstTarget <= gs.getPlayer().getPickupRange()) {
@@ -589,8 +601,9 @@ public class PlayerHUD extends BaseAppState {
     }
 
     private void updateItemDropTooltipMaterial(Item itemHit) {
-        if(itemHit.getDroppedItemNode() == null)
+        if (itemHit.getDroppedItemNode() == null) {
             return;
+        }
         itemHit.getDroppedItemNode().attachChild(itemDropTooltipNode);
 
         Element textElement = tooltipNifty.getCurrentScreen().findElementByName("itemName");

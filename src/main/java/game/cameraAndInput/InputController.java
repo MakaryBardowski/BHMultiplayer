@@ -41,7 +41,7 @@ import java.util.Random;
 import messages.MobRotUpdateMessage;
 import messages.gameSetupMessages.NextLevelMessage;
 import server.ServerMain;
-
+import settings.GlobalSettings;
 /**
  *
  * @author 48793
@@ -181,6 +181,7 @@ public class InputController {
 //                }
 
                 if (name.equals("K") && !keyPressed) {
+//                    GlobalSettings.isAiDebug = !GlobalSettings.isAiDebug;
                     System.gc();
                     player.setRight(false);
                     player.setLeft(false);

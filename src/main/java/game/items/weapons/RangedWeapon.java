@@ -99,7 +99,6 @@ public abstract class RangedWeapon extends Weapon {
                 InteractiveEntity mobHit = cs.getMobs().get(hitId);
                 
                 if (mobHit instanceof Destructible destructible) {
-                    System.out.println("destructible "+destructible+ " id = "+destructible.getId());
                     destructible.onShot(p, calculateDamage(distanceToFirstTarget));
                 }
             }

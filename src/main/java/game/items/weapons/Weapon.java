@@ -85,16 +85,12 @@ public abstract class Weapon extends Item implements Attacks, Holdable {
 
     @Override
     public void humanMobUnequip(HumanMob m) {
-        throw new UnsupportedOperationException("mob weapon equip not implemented yet");
-    }
-
-    ;
+        throw new UnsupportedOperationException("mob weapon "+this+" equip not implemented yet");
+    };
 
     @Override
     public void humanMobEquip(HumanMob m) {
-        throw new UnsupportedOperationException("mob weapon equip not implemented yet");
-
-    }
-;
+        throw new UnsupportedOperationException("mob "+this+" equip not implemented yet");
+    };
 
 }
