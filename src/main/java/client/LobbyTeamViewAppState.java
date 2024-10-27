@@ -25,6 +25,7 @@ import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.tools.SizeValue;
 import de.lessvoid.nifty.tools.SizeValueType;
 import static game.entities.DestructibleUtils.setupModelShootability;
+import game.entities.mobs.HumanMob;
 import game.items.ItemTemplates;
 import game.items.ItemTemplates.HelmetTemplate;
 import game.items.ItemTemplates.ItemTemplate;
@@ -232,12 +233,10 @@ public class LobbyTeamViewAppState extends BaseAppState {
         }
 
         // attach hands
-        Node hand = skinningControl.getAttachmentsNode("HandR");
         Node gloveR = (Node) Main.getInstance().getAssetManager().loadModel(glovesTemplate.getFpPath());
-        gloveR.rotate(0, -FastMath.DEG_TO_RAD * 90, 0);
-        gloveR.move(0, 0, -0.449f);
         setupModelLight(gloveR);
-        hand.attachChild(gloveR);
+        gloveR.move(HumanMob.THIRD_PERSON_HANDS_NODE_OFFSET);
+        skeleton.attachChild(gloveR);
 
         // attach boots
         var verticalOffset = 0.44f;

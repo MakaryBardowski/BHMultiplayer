@@ -20,17 +20,25 @@ import client.Main;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.ArmatureMask;
 import com.jme3.anim.SkinningControl;
+import com.jme3.animation.AnimControl;
 import com.jme3.effect.ParticleEmitter;
+import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.SceneGraphVisitorAdapter;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.debug.SkeletonDebugger;
+import com.jme3.scene.debug.custom.ArmatureDebugger;
 import data.DamageReceiveData;
 import debugging.Circle;
 import debugging.HumanPathDebugControl;
 import events.DamageReceivedEvent;
 import game.effects.ParticleUtils;
+import game.entities.Animation;
+import static game.entities.Animation.HUMAN_ATTACK_MELEE;
 import game.entities.Collidable;
 import game.entities.FloatAttribute;
 import game.entities.InteractiveEntity;
@@ -57,10 +65,14 @@ import static server.ServerMain.removeEntityByIdServer;
  * @author 48793
  */
 public class HumanMob extends Mob {
-
+    public static final Vector3f THIRD_PERSON_HANDS_NODE_OFFSET = new Vector3f(0, 1.5f, 0);
+    public static final Vector3f WEIGHTED_THIRD_PERSON_HANDS_NODE_OFFSET = THIRD_PERSON_HANDS_NODE_OFFSET.add(0,0,-1.5f);
     protected Holdable equippedRightHand;
     protected Holdable equippedLeftHand;
     protected SkinningControl skinningControl;
+
+    @Getter
+    protected final Node thirdPersonHandsNode;
 
     @Getter
     @Setter
@@ -94,15 +106,27 @@ public class HumanMob extends Mob {
 
     public HumanMob(int id, Node node, String name, SkinningControl skinningControl, AnimComposer modelComposer) {
         super(id, node, name);
+        thirdPersonHandsNode = new Node();
+        thirdPersonHandsNode.setLocalTranslation(WEIGHTED_THIRD_PERSON_HANDS_NODE_OFFSET);
+        ((Node) node.getChild(0)).attachChild(thirdPersonHandsNode); // attach it to the Node holding the base mesh
+        
         this.skinningControl = skinningControl;
         this.modelComposer = modelComposer;
 
         var armature = skinningControl.getArmature();
-        ArmatureMask mask = new ArmatureMask();
-        mask.addBones(armature, "LegL");
-        mask.addBones(armature, "LegR");
-        mask.addBones(armature, "Spine");
-        modelComposer.makeLayer("Legs", mask);
+        ArmatureMask legsMask = new ArmatureMask();
+        legsMask.addBones(armature, "LegL");
+        legsMask.addBones(armature, "LegR");
+        legsMask.addBones(armature, "Spine");
+        modelComposer.makeLayer("Legs", legsMask);
+
+        ArmatureMask handsMask = new ArmatureMask();
+        handsMask.addBones(armature, "HandR");
+        handsMask.addBones(armature, "HandL");
+
+        modelComposer.makeLayer("Hands", handsMask);
+        modelComposer.setCurrentAction("Windup", "Hands");
+        modelComposer.getCurrentAction("Hands").setSpeed(2f);
         modelComposer.setCurrentAction("Idle", "Legs");
 
         createHitbox();
@@ -111,6 +135,9 @@ public class HumanMob extends Mob {
         cachedSpeed = 7.5f;
         attributes.put(SPEED_ATTRIBUTE, new FloatAttribute(cachedSpeed));
         onInteract();
+
+//        debugSkeleton(node);
+
     }
 
     @Override
@@ -353,13 +380,11 @@ public class HumanMob extends Mob {
         node.getLocalRotation().nlerp(ClientSynchronizationUtils.GetYAxisRotation(serverRotation), rotInterpolationValue);
         node.setLocalRotation(node.getLocalRotation());
 
-        skinningControl.getArmature().getJoint("HandR").getLocalRotation().nlerp(
+        getThirdPersonHandsNode().getLocalRotation().nlerp(
                 ClientSynchronizationUtils.GetXAxisRotation(getServerRotation()), rotInterpolationValue
         );
-//
-        var rot = skinningControl.getArmature().getJoint("HandR").getLocalRotation();
-        skinningControl.getArmature().getJoint("HandL").setLocalRotation(rot);
-        skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(rot);
+
+        skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(getThirdPersonHandsNode().getLocalRotation());
     }
 
     @Override
@@ -441,4 +466,34 @@ public class HumanMob extends Mob {
         removeEntityByIdClient(id);
     }
 
+    @Override
+    public void playAnimation(Animation animation) {
+        switch (animation) {
+            case HUMAN_ATTACK_MELEE:
+                modelComposer.setCurrentAction("Attack00", "Default");
+                System.out.println("model " + modelComposer.getAnimClipsNames());
+
+                System.out.println("PLAYING ANIMATION " + HUMAN_ATTACK_MELEE);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void debugSkeleton(Node player) {
+        player.depthFirstTraversal(new SceneGraphVisitorAdapter() {
+            @Override
+            public void visit(Node node) {
+                ArmatureDebugger skeletonDebug = new ArmatureDebugger("skeleton",
+                        skinningControl.getArmature(), skinningControl.getArmature().getJointList());
+                Material mat = new Material(Main.getInstance().getAssetManager(),
+                        "Common/MatDefs/Misc/Unshaded.j3md");
+                mat.setColor("Color", ColorRGBA.Green);
+                mat.getAdditionalRenderState().setDepthTest(false);
+                skeletonDebug.setMaterial(mat);
+                player.attachChild(skeletonDebug);
+
+            }
+        });
+    }
 }

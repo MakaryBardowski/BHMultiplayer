@@ -114,12 +114,20 @@ public class AllMobFactory extends MobFactory {
                 p.equipServer(item);
             }
 
-            if (randomNumber < 0.5f) {
+            if (randomNumber < 0.58f) {
                 Item item = ServerMain.getInstance().getCurrentGamemode().getLevelManager().registerItemAndNotifyTCP(ItemTemplates.KNIFE, true, null);
                 p.addToEquipment(item);
                 p.equipServer(item);
-            } else {
+            } else if (randomNumber < 0.78f) {
+                Item item = ServerMain.getInstance().getCurrentGamemode().getLevelManager().registerItemAndNotifyTCP(ItemTemplates.AXE, true, null);
+                p.addToEquipment(item);
+                p.equipServer(item);
+            } else if (randomNumber < 0.98f) {
                 Item item = ServerMain.getInstance().getCurrentGamemode().getLevelManager().registerItemAndNotifyTCP(ItemTemplates.PISTOL_C96, true, null);
+                p.addToEquipment(item);
+                p.equipServer(item);
+            } else if (randomNumber < 0.1f) {
+                Item item = ServerMain.getInstance().getCurrentGamemode().getLevelManager().registerItemAndNotifyTCP(ItemTemplates.LMG_HOTCHKISS, true, null);
                 p.addToEquipment(item);
                 p.equipServer(item);
             }

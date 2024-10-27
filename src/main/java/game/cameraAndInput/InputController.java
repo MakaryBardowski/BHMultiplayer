@@ -26,6 +26,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
@@ -199,6 +200,7 @@ public class InputController {
                     player.getNode().setCullHint(Spatial.CullHint.Inherit);
 
                     player.setMovementControlLocked(true);
+                    player.setCameraMovementLocked(true);
                     updatePlayersThirdPersonHandsRot = true;
 //                    ServerMain.getInstance().getGrid().getContents().forEach((i,set)->{
 //                    if(!set.isEmpty()){
@@ -269,11 +271,10 @@ public class InputController {
                         var handsRot = player.getRotationNode().getLocalRotation();
 
                         var skinningControl = player.getSkinningControl();
-                        skinningControl.getArmature().getJoint("HandR").setLocalRotation(handsRot);
+                        
+//                        player.getThirdPersonHandsNode().setLocalRotation(handsRot);
 
-                        var rot = skinningControl.getArmature().getJoint("HandR").getLocalRotation();
-                        skinningControl.getArmature().getJoint("HandL").setLocalRotation(rot);
-                        skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(rot);
+                        skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(handsRot);
                     }
                 }
 

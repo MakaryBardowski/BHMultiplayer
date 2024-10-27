@@ -14,28 +14,34 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MobWeaponUsageData {
-
+    private float weaponRange;
     private float minimumRangeToUse;
 
-    public MobWeaponUsageData(float minimumRangeToUse) {
+    public MobWeaponUsageData(float weaponRange, float minimumRangeToUse) {
+        this.weaponRange = weaponRange;
         this.minimumRangeToUse = minimumRangeToUse;
     }
 
     @Getter
     @Setter
     public static class MobMeleeWeaponUsageData extends MobWeaponUsageData {
-
-        public MobMeleeWeaponUsageData(float minimumRangeToUse) {
-            super(minimumRangeToUse);
+        public static MobMeleeWeaponUsageData AXE_DEFAULT_STATS = new MobMeleeWeaponUsageData(0.8f, 2.3f);
+        public static MobMeleeWeaponUsageData KNIFE_DEFAULT_STATS = new MobMeleeWeaponUsageData(0.7f,1.45f);
+        public MobMeleeWeaponUsageData(float weaponRange,float minimumRangeToUse) {
+            super(weaponRange,minimumRangeToUse);
         }
     }
 
     @Getter
     @Setter
     public static class MobRangedWeaponUsageData extends MobWeaponUsageData {
+        public static MobRangedWeaponUsageData RIFLE_MANNLICHER_95_MOB_USAGE_DATA = new MobRangedWeaponUsageData(20f,20f);
+        public static MobRangedWeaponUsageData PISTOL_C96_MOB_USAGE_DATA = new MobRangedWeaponUsageData(20f,20f);
+        public static MobRangedWeaponUsageData RIFLE_BORYSOV_MOB_USAGE_DATA = new MobRangedWeaponUsageData(20f,20f);
+        public static MobRangedWeaponUsageData LMG_HOTCHKISS_MOB_USAGE_DATA = new MobRangedWeaponUsageData(20f,20f);
 
-        public MobRangedWeaponUsageData(float minimumRangeToUse) {
-            super(minimumRangeToUse);
+        public MobRangedWeaponUsageData(float weaponRange,float minimumRangeToUse) {
+            super(weaponRange,minimumRangeToUse);
         }
     }
 }

@@ -126,8 +126,8 @@ public class Player extends HumanMob {
         this.mainCamera = mainCamera;
         firstPersonHands = new FirstPersonHands(this);
         hotbar = new Item[HOTBAR_SIZE];
-        health = 15 * 1;
-        maxHealth = 15 * 1;
+        health = 15 * 100;
+        maxHealth = 15 * 100;
 
         cachedSpeed = 11.25f;
         attributes.put(SPEED_ATTRIBUTE, new FloatAttribute(cachedSpeed));

@@ -15,6 +15,7 @@ import messages.SetPlayerMessage;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
+import messages.AnimationPlayedMessage;
 import messages.DeleteEntityMessage;
 import messages.DestructibleDamageReceiveMessage;
 import messages.DestructibleHealReceiveMessage;
@@ -82,6 +83,7 @@ public class NetworkingInitialization {
         Serializer.registerClass(EntitySetFloatAttributeMessage.class);
         Serializer.registerClass(NextLevelMessage.class);
         Serializer.registerClass(BulkMessage.class);
+        Serializer.registerClass(AnimationPlayedMessage.class);
 
         Serializer.registerClass(NewItemMessage.class);
         Serializer.registerClass(NewHelmetMessage.class);

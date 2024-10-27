@@ -16,20 +16,26 @@ import com.jme3.anim.tween.action.Action;
 import com.jme3.anim.tween.action.ClipAction;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import de.lessvoid.nifty.controls.label.LabelControl;
+import static game.entities.Animation.HUMAN_ATTACK_MELEE;
 import game.entities.Collidable;
 import game.entities.Destructible;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import game.items.Holdable;
+import game.items.ItemTemplates;
+import game.map.collision.CollisionDebugUtils;
 import game.map.collision.RectangleOBB;
 import java.util.ArrayList;
+import messages.AnimationPlayedMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewMeleeWeaponMessage;
+import server.ServerMain;
 
 /**
  *
@@ -217,13 +223,60 @@ public class Axe extends MeleeWeapon {
     }
 
     @Override
-    public void slashMob(Mob wielder) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void slashMob(Mob p) {
+        var thisTemplate = (ItemTemplates.MeleeWeaponTemplate) template;
+
+        var playerPos = p.getNode().getWorldTranslation();
+        var cs = ClientGameAppState.getInstance();
+        var hitboxLength = thisTemplate.getMobUsageData().getWeaponRange();
+
+        var hitboxHeight = 1f;
+        var hitboxWidth = 1f;
+
+        float[] mobRot = new float[3];
+        p.getNode().getLocalRotation().toAngles(mobRot);
+
+        var mobHandsHeight = p.getNode().getWorldTranslation().add(0, 1f, 0);
+        var mobDir = p.getNode().getLocalRotation().getRotationColumn(2);
+
+        var hitboxPos = playerPos.add(0, mobHandsHeight.getY() - playerPos.getY(), 0);
+        hitboxPos.addLocal(mobDir.normalize().multLocal(
+                hitboxLength,
+                hitboxLength,
+                hitboxLength
+        ));
+
+        var hitbox = new RectangleOBB(hitboxPos.clone(), hitboxWidth, hitboxHeight, hitboxLength, mobRot[0]);
+//        Geometry hitboxDebug = CollisionDebugUtils.createHitboxGeometry(hitbox.getWidth(), hitbox.getHeight(), hitbox.getLength(), ColorRGBA.Red);
+//        hitboxDebug.rotate(0, mobRot[1], 0);
+//        hitboxDebug.setName("" + id);
+//        cs.getDebugNode().attachChild(hitboxDebug);
+//        hitboxDebug.setLocalTranslation(hitboxPos);
+
+        var hit = new ArrayList<Destructible>();
+        for (Collidable c : cs.getGrid().getNearbyCollisionShapeAtPos(hitbox.getPosition(), hitbox)) {
+            if (c instanceof Destructible de && p != c && c.getClass() != p.getClass() && c.getCollisionShape().wouldCollideAtPosition(hitbox, c.getCollisionShape().getPosition())) {
+                hit.add(de);
+            }
+        }
+
+        hit.sort((a, b) -> {
+            Float aVal = a.getCollisionShape().getPosition().distanceSquared(hitbox.getPosition());
+            Float bVal = b.getCollisionShape().getPosition().distanceSquared(hitbox.getPosition());
+            return aVal.compareTo(bVal);
+        }
+        );
+
+        if (!hit.isEmpty()) {
+            hit.get(0).onShot(p, getDamage());
+        }
     }
 
     @Override
     public void attack(Mob m) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        var apm = new AnimationPlayedMessage(m.getId(), HUMAN_ATTACK_MELEE);
+        ServerMain.getInstance().getServer().broadcast(apm);
+        slashMob(m);
     }
 
     @Override

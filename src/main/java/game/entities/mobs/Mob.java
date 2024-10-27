@@ -12,6 +12,8 @@ import game.map.collision.CollidableInterface;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import game.entities.Animated;
+import game.entities.Animation;
 import game.entities.Collidable;
 import game.entities.FloatAttribute;
 import game.entities.StatusEffectContainer;
@@ -28,7 +30,7 @@ import settings.GlobalSettings;
  *
  * @author 48793
  */
-public abstract class Mob extends StatusEffectContainer implements CollidableInterface, MobInterface {
+public abstract class Mob extends StatusEffectContainer implements CollidableInterface, MobInterface, Animated {
 
     @Getter
     protected BehaviorTree behaviorTree;
@@ -171,11 +173,14 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
         }
     }
 
-    ;
 
     @Override
     public boolean isAbleToMove() {
         return !isDead();
     }
 
+    @Override
+    public void playAnimation(Animation anim){
+    
+    }
 }

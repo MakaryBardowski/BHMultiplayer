@@ -8,6 +8,7 @@ import behaviorTree.context.SimpleHumanMobContext;
 import client.Main;
 import game.entities.Destructible;
 import game.entities.mobs.HumanMob;
+import game.items.weapons.MeleeWeapon;
 import messages.DestructibleDamageReceiveMessage;
 import server.ServerMain;
 
@@ -19,7 +20,7 @@ public class Attack extends NodeAction {
 
     private long lastAttackedTimestamp = System.currentTimeMillis();
     private float WEAPON_COOLDOWN_SECONDS = 2.5f;
-    private float TEST_GUN_COOLDOWN = WEAPON_COOLDOWN_SECONDS*1000;
+    private float TEST_GUN_COOLDOWN = WEAPON_COOLDOWN_SECONDS * 1000;
     private float TEST_GUN_RANGE = 2;
     private float TEST_DAMAGE = 3.75f;
     private HumanMob human;
@@ -45,16 +46,14 @@ public class Attack extends NodeAction {
         if (distance > TEST_GUN_RANGE) {
             return NodeCompletionStatus.FAILURE;
         }
-        
-        System.out.println(human+" dealing damage "+ (hc.getCurrentUpdateTimestamp() - lastAttackedTimestamp));
+
         Main.getInstance().enqueue(() -> {
-            var emsg = new DestructibleDamageReceiveMessage(target.getId(), human.getId(), TEST_DAMAGE);
-            emsg.applyDestructibleDamageAndNotifyClients(target, ServerMain.getInstance());
+            if (human.getEquippedRightHand() instanceof MeleeWeapon mw) { // can be changed to Weapon after i implement ranged weaps
+                mw.attack(human);
+            }
         });
         lastAttackedTimestamp = hc.getCurrentUpdateTimestamp();
-        System.out.println("timestamp now is "+hc.getCurrentUpdateTimestamp());
-        System.out.println("cooldown is now "+(hc.getCurrentUpdateTimestamp() - lastAttackedTimestamp ));
-        System.out.println("this "+this);
+
 //        System.out.println("Attacking!");
         return NodeCompletionStatus.SUCCESS;
     }

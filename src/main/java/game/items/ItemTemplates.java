@@ -9,6 +9,8 @@ import com.jme3.math.Vector3f;
 import game.items.ArmorItemStatTemplate.*;
 import game.items.WeaponItemStatTemplate.MeleeWeaponStatTemplate;
 import game.items.WeaponItemStatTemplate.RangedWeaponStatTemplate;
+import game.items.weapons.MobWeaponUsageData.MobMeleeWeaponUsageData;
+import game.items.weapons.MobWeaponUsageData.MobRangedWeaponUsageData;
 import java.util.ArrayList;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,7 +32,8 @@ public class ItemTemplates {
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.RIFLE, 0,
-            RangedWeaponStatTemplate.RIFLE_MANNLICHER_95_DEFAULT_STATS
+            RangedWeaponStatTemplate.RIFLE_MANNLICHER_95_DEFAULT_STATS,
+            MobRangedWeaponUsageData.RIFLE_MANNLICHER_95_MOB_USAGE_DATA
     );
 
     public static final ItemTemplate VEST_TRENCH = new VestTemplate("Trench Jacket [Vest]", ITEMS_PATH + "TrenchSet/officersCoat.j3o", ICON_PATH + "equipmentTrenchCoat.png", ITEMS_PATH + "TrenchSet/officersCoatDrop.j3o",
@@ -58,7 +61,8 @@ public class ItemTemplates {
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(90 * FastMath.DEG_TO_RAD, 0, 90 * FastMath.DEG_TO_RAD), 1),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.KNIFE, 4,
-            MeleeWeaponStatTemplate.KNIFE_DEFAULT_STATS
+            MeleeWeaponStatTemplate.KNIFE_DEFAULT_STATS,
+            MobMeleeWeaponUsageData.KNIFE_DEFAULT_STATS
     );
 
     //bare    
@@ -90,7 +94,8 @@ public class ItemTemplates {
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.PISTOL, 9,
-            RangedWeaponStatTemplate.PISTOL_C96_DEFAULT_STATS
+            RangedWeaponStatTemplate.PISTOL_C96_DEFAULT_STATS,
+            MobRangedWeaponUsageData.PISTOL_C96_MOB_USAGE_DATA
     );
 
     public static final ItemTemplate SMOKE_GRENADE = new ItemTemplate("Smoke Grenade [Throwable]", ITEMS_PATH + "Throwable/smokeGrenade.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "Throwable/smokeGrenadeDrop.j3o",
@@ -127,7 +132,8 @@ public class ItemTemplates {
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 0.8f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.LMG, 16,
-            RangedWeaponStatTemplate.LMG_HOTCHKISS_DEFAULT_STATS
+            RangedWeaponStatTemplate.LMG_HOTCHKISS_DEFAULT_STATS,
+            MobRangedWeaponUsageData.LMG_HOTCHKISS_MOB_USAGE_DATA
     );
 
     public static final ItemTemplate TRENCH_HELMET = new HelmetTemplate("Trench Helmet", ITEMS_PATH + "TrenchSet/trenchHelmet.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "TrenchSet/trenchHelmet.j3o",
@@ -153,14 +159,16 @@ public class ItemTemplates {
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0 * FastMath.DEG_TO_RAD, 0, 0 * FastMath.DEG_TO_RAD), 1),
             new ThirdPersonOffsetData(new Vector3f(0, -0.33f, 0.3f), new Vector3f(0 * FastMath.DEG_TO_RAD, -90 * FastMath.DEG_TO_RAD, -210 * FastMath.DEG_TO_RAD), 1),
             ItemType.AXE, 20,
-            MeleeWeaponStatTemplate.AXE_DEFAULT_STATS
+            MeleeWeaponStatTemplate.AXE_DEFAULT_STATS,
+            MobMeleeWeaponUsageData.AXE_DEFAULT_STATS
     );
 
     public static final ItemTemplate RIFLE_BORYSOV = new RangedWeaponTemplate("Borysov [Rifle]", WEAPONS_PATH + "borysov/borysovFP.j3o", ICON_PATH + "equipmentMannlicher95.png", WEAPONS_PATH + "borysov/borysovDrop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.RIFLE, 21,
-            RangedWeaponStatTemplate.RIFLE_BORYSOV_DEFAULT_STATS
+            RangedWeaponStatTemplate.RIFLE_BORYSOV_DEFAULT_STATS,
+            MobRangedWeaponUsageData.RIFLE_BORYSOV_MOB_USAGE_DATA
     );
 
     static {
@@ -256,10 +264,12 @@ public class ItemTemplates {
     public static class RangedWeaponTemplate extends ItemTemplate {
 
         private final RangedWeaponStatTemplate defaultStats;
+        private final MobRangedWeaponUsageData mobUsageData;
 
-        public RangedWeaponTemplate(String name, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, RangedWeaponStatTemplate defaultStats) {
+        public RangedWeaponTemplate(String name, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, RangedWeaponStatTemplate defaultStats, MobRangedWeaponUsageData mobUsageData) {
             super(name, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
             this.defaultStats = defaultStats;
+            this.mobUsageData = mobUsageData;
         }
     }
 
@@ -267,10 +277,12 @@ public class ItemTemplates {
     public static class MeleeWeaponTemplate extends ItemTemplate {
 
         private final MeleeWeaponStatTemplate defaultStats;
+        private final MobMeleeWeaponUsageData mobUsageData;
 
-        public MeleeWeaponTemplate(String name, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, MeleeWeaponStatTemplate defaultStats) {
+        public MeleeWeaponTemplate(String name, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, MeleeWeaponStatTemplate defaultStats,MobMeleeWeaponUsageData mobUsageData) {
             super(name, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
             this.defaultStats = defaultStats;
+            this.mobUsageData = mobUsageData;
         }
     }
 
