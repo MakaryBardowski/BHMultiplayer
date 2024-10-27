@@ -272,7 +272,7 @@ public class InputController {
 
                         var skinningControl = player.getSkinningControl();
                         
-//                        player.getThirdPersonHandsNode().setLocalRotation(handsRot);
+                        player.getThirdPersonHandsNode().setLocalRotation(handsRot);
 
                         skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(handsRot);
                     }

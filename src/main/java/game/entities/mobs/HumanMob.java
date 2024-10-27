@@ -66,7 +66,6 @@ import static server.ServerMain.removeEntityByIdServer;
  */
 public class HumanMob extends Mob {
     public static final Vector3f THIRD_PERSON_HANDS_NODE_OFFSET = new Vector3f(0, 1.5f, 0);
-    public static final Vector3f WEIGHTED_THIRD_PERSON_HANDS_NODE_OFFSET = THIRD_PERSON_HANDS_NODE_OFFSET.add(0,0,-1.5f);
     protected Holdable equippedRightHand;
     protected Holdable equippedLeftHand;
     protected SkinningControl skinningControl;
@@ -107,7 +106,7 @@ public class HumanMob extends Mob {
     public HumanMob(int id, Node node, String name, SkinningControl skinningControl, AnimComposer modelComposer) {
         super(id, node, name);
         thirdPersonHandsNode = new Node();
-        thirdPersonHandsNode.setLocalTranslation(WEIGHTED_THIRD_PERSON_HANDS_NODE_OFFSET);
+        thirdPersonHandsNode.setLocalTranslation(THIRD_PERSON_HANDS_NODE_OFFSET);
         ((Node) node.getChild(0)).attachChild(thirdPersonHandsNode); // attach it to the Node holding the base mesh
         
         this.skinningControl = skinningControl;
@@ -125,8 +124,12 @@ public class HumanMob extends Mob {
         handsMask.addBones(armature, "HandL");
 
         modelComposer.makeLayer("Hands", handsMask);
+        
+        if(new Random().nextFloat() < 0.5f){
         modelComposer.setCurrentAction("Windup", "Hands");
         modelComposer.getCurrentAction("Hands").setSpeed(2f);
+        }
+        
         modelComposer.setCurrentAction("Idle", "Legs");
 
         createHitbox();

@@ -56,14 +56,11 @@ public class Gloves extends Armor {
     @Override
     public void humanMobEquip(HumanMob m) {
         m.setGloves(this);
-//        Node test = m.getSkinningControl().getAttachmentsNode("HandR");
-//        var debugNode = DebugUtils.createUnshadedBoxNode();
-//        debugNode.scale(1,4f,1);
-//        test.attachChild(debugNode);
+
+        
         var r = (Node) m.getThirdPersonHandsNode();
         r.detachAllChildren();
 
-//        var gloveR = debugNode;
         Node gloveR = (Node) Main.getInstance().getAssetManager().loadModel(template.getFpPath().replace("?", "R"));
         Mesh gloveMesh = ((Geometry) gloveR.getChild(0)).getMesh();
         byte leftHandIndex = (byte) m.getSkinningControl().getArmature().getJointIndex("HandL");
@@ -124,6 +121,9 @@ public class Gloves extends Armor {
         if (leftHandBoneIndex == -1 || rightHandBoneIndex == -1) {
             return;
         }
+        if (mesh.getBuffer(VertexBuffer.Type.BindPosePosition) != null) {
+            return;
+        }
 
         var posBuffer = (FloatBuffer) (mesh.getBuffer(VertexBuffer.Type.Position).getData());
         int posBufferLimit = posBuffer.limit();
@@ -133,12 +133,12 @@ public class Gloves extends Armor {
         byte[] boneIndex = new byte[boneIndexCount];
         float[] boneWeight = new float[boneIndexCount];
         var temp = new Vector3f();
-        System.out.println("vertex count " + vertexCount);
+
         for (int i = 0; i < posBufferLimit; i += 3) { // for each vertex position
             temp.set(posBuffer.get(i), posBuffer.get(i + 1), posBuffer.get(i + 2));
 
             var vertexIndex = i / 3;
-            posBuffer.put(i + 1, posBuffer.get(i + 1) + 1.5f); // set blender Y to higher = jmonkey Z
+//            posBuffer.put(i + 1, posBuffer.get(i + 1) + 1.5f); // set blender Y to higher = jmonkey Z axis
 
             if (temp.getX() < 0) {
                 // weight paint for right hand bone
@@ -156,9 +156,7 @@ public class Gloves extends Armor {
         mesh.setBuffer(VertexBuffer.Type.BoneWeight, 1, boneWeight);
         mesh.setBuffer(VertexBuffer.Type.HWBoneIndex, 1, boneIndex);
         mesh.setBuffer(VertexBuffer.Type.HWBoneWeight, 1, boneWeight);
-        if (mesh.getBuffer(VertexBuffer.Type.BindPosePosition) == null) {
-            mesh.generateBindPose();
-        }
+        mesh.generateBindPose();
     }
 
 }
