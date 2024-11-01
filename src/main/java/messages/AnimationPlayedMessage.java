@@ -8,6 +8,7 @@ import client.ClientGameAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.Filters;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.Animated;
 import game.entities.Animation;
@@ -40,8 +41,8 @@ public class AnimationPlayedMessage extends EntityUpdateMessage {
 
 
     @Override
-    public void handleServer(ServerMain server) {
-        
+    public void handleServer(ServerMain server,HostedConnection hc) {
+        server.getServer().broadcast(Filters.notEqualTo(hc),this);
     }
 
     @Override

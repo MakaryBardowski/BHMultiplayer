@@ -136,6 +136,11 @@ public class Axe extends MeleeWeapon {
 
         var slashDelay = 0.23f / getAttacksPerSecond();
         slashControl.setSlashDelay(slashDelay);
+        
+        var animPlayed = HUMAN_ATTACK_MELEE;
+        p.playAnimation(animPlayed);
+        var apm = new AnimationPlayedMessage(p.getId(), animPlayed);
+        ClientGameAppState.getInstance().getClient().send(apm);
     }
 
     @Override
@@ -308,15 +313,20 @@ public class Axe extends MeleeWeapon {
 
     private void humanEquipInThirdPerson(HumanMob humanMob, AssetManager assetManager) {
         Node model = (Node) assetManager.loadModel(template.getDropPath());
+
+        model.setLocalTranslation(template.getThirdPersonOffsetData().getOffset());
+        model.rotate(
+                template.getThirdPersonOffsetData().getRotation().x,
+                template.getThirdPersonOffsetData().getRotation().y,
+                template.getThirdPersonOffsetData().getRotation().z
+        );
+
         Geometry ge = (Geometry) (model.getChild(0));
         Material originalMaterial = ge.getMaterial();
         Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
         newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
         ge.setMaterial(newMaterial);
         model.scale(template.getThirdPersonOffsetData().getScale());
-        var rot = template.getThirdPersonOffsetData().getRotation();
-        ge.rotate(rot.x, rot.y, rot.z);
-        model.move(template.getThirdPersonOffsetData().getOffset());
         humanMob.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
         setupModelShootability(model, humanMob.getId());
         thirdPersonModelParentIndex = humanMob.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);

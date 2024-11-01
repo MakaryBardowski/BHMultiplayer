@@ -7,6 +7,7 @@ package messages;
 import client.ClientGameAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.InteractiveEntity;
 import server.ServerMain;
@@ -37,7 +38,7 @@ public class InstantEntityPosCorrectionMessage extends EntityUpdateMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

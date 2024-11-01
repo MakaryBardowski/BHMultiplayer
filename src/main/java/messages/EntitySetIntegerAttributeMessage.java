@@ -6,6 +6,7 @@ package messages;
 
 import client.ClientGameAppState;
 import com.jme3.network.AbstractMessage;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.IntegerAttribute;
 import game.entities.InteractiveEntity;
@@ -38,7 +39,7 @@ public class EntitySetIntegerAttributeMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         var entity = server.getLevelManagerMobs().get(entityId);
         entity.setIntegerAttributeAndNotifyClients(attributeId, attributeValue);
         server.getServer().broadcast(this);

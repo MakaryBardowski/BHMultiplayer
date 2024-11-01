@@ -20,6 +20,9 @@ import client.Main;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.ArmatureMask;
 import com.jme3.anim.SkinningControl;
+import com.jme3.anim.tween.Tweens;
+import com.jme3.anim.tween.action.Action;
+import com.jme3.anim.tween.action.ClipAction;
 import com.jme3.animation.AnimControl;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.material.Material;
@@ -42,6 +45,7 @@ import static game.entities.Animation.HUMAN_ATTACK_MELEE;
 import game.entities.Collidable;
 import game.entities.FloatAttribute;
 import game.entities.InteractiveEntity;
+import game.entities.InvokeMethodTween;
 import static game.entities.factories.MobSpawnType.HUMAN;
 import static game.entities.mobs.Mob.SPEED_ATTRIBUTE;
 import game.items.armor.Boots;
@@ -65,13 +69,17 @@ import static server.ServerMain.removeEntityByIdServer;
  * @author 48793
  */
 public class HumanMob extends Mob {
-    public static final Vector3f THIRD_PERSON_HANDS_NODE_OFFSET = new Vector3f(0, 1.5f, 0);
+
+    public static final String HUMAN_SKELETON_RIG_PATH = "Models/HumanSkeleton/HumanSkeleton.j3o";
     protected Holdable equippedRightHand;
     protected Holdable equippedLeftHand;
     protected SkinningControl skinningControl;
 
     @Getter
     protected final Node thirdPersonHandsNode;
+
+    @Getter
+    protected final Node armatureNode;
 
     @Getter
     @Setter
@@ -105,9 +113,10 @@ public class HumanMob extends Mob {
 
     public HumanMob(int id, Node node, String name, SkinningControl skinningControl, AnimComposer modelComposer) {
         super(id, node, name);
+
+        armatureNode = (Node) node.getChild("Armature");
         thirdPersonHandsNode = new Node();
-        thirdPersonHandsNode.setLocalTranslation(THIRD_PERSON_HANDS_NODE_OFFSET);
-        ((Node) node.getChild(0)).attachChild(thirdPersonHandsNode); // attach it to the Node holding the base mesh
+        armatureNode.attachChild(thirdPersonHandsNode); // attach it to the Node holding the base mesh
         
         this.skinningControl = skinningControl;
         this.modelComposer = modelComposer;
@@ -124,12 +133,12 @@ public class HumanMob extends Mob {
         handsMask.addBones(armature, "HandL");
 
         modelComposer.makeLayer("Hands", handsMask);
-        
-        if(new Random().nextFloat() < 0.5f){
-        modelComposer.setCurrentAction("Windup", "Hands");
-        modelComposer.getCurrentAction("Hands").setSpeed(2f);
-        }
-        
+        modelComposer.getLayer("Hands").setLooping(false);
+
+//        if(new Random().nextFloat() < 0.5f){
+//        modelComposer.setCurrentAction("AttackSwipe1H", "Hands");
+//        modelComposer.getCurrentAction("Hands").setSpeed(0.2f);
+//        }
         modelComposer.setCurrentAction("Idle", "Legs");
 
         createHitbox();
@@ -140,7 +149,6 @@ public class HumanMob extends Mob {
         onInteract();
 
 //        debugSkeleton(node);
-
     }
 
     @Override
@@ -383,11 +391,12 @@ public class HumanMob extends Mob {
         node.getLocalRotation().nlerp(ClientSynchronizationUtils.GetYAxisRotation(serverRotation), rotInterpolationValue);
         node.setLocalRotation(node.getLocalRotation());
 
-        getThirdPersonHandsNode().getLocalRotation().nlerp(
+        var handsJoint = skinningControl.getArmature().getJoint("HandsRotationBone");
+        handsJoint.getLocalRotation().nlerp(
                 ClientSynchronizationUtils.GetXAxisRotation(getServerRotation()), rotInterpolationValue
         );
 
-        skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(getThirdPersonHandsNode().getLocalRotation());
+        skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(handsJoint.getLocalRotation());
     }
 
     @Override
@@ -473,11 +482,20 @@ public class HumanMob extends Mob {
     public void playAnimation(Animation animation) {
         switch (animation) {
             case HUMAN_ATTACK_MELEE:
-                modelComposer.setCurrentAction("Attack00", "Default");
-                System.out.println("model " + modelComposer.getAnimClipsNames());
+                var setNotLoopingAndSpeedUp = new InvokeMethodTween(() -> {
+                    modelComposer.getCurrentAction("Hands").setSpeed(2f);
+                    modelComposer.getLayer("Hands").setLooping(false);
+                });
 
-                System.out.println("PLAYING ANIMATION " + HUMAN_ATTACK_MELEE);
+                modelComposer.actionSequence("fullSwing",
+                        Tweens.parallel(modelComposer.action("WindupSwipe1H"), setNotLoopingAndSpeedUp),
+                         Tweens.parallel(modelComposer.action("AttackSwipe1H"), setNotLoopingAndSpeedUp)
+                );
+
+                modelComposer.setCurrentAction("fullSwing", "Hands");
+//                modelComposer.getCurrentAction().setSpeed(1.25f);
                 break;
+
             default:
                 break;
         }

@@ -7,6 +7,7 @@ package messages;
 import client.ClientGameAppState;
 import client.Main;
 import com.jme3.network.AbstractMessage;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
@@ -34,7 +35,7 @@ public class DestructibleHealReceiveMessage extends EntityUpdateMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         throw new UnsupportedOperationException("not implemented yet.");
     }
 

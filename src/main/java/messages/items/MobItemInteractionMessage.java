@@ -7,6 +7,7 @@ package messages.items;
 import client.ClientGameAppState;
 import static client.ClientGameAppState.removeEntityByIdClient;
 import client.Main;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.mobs.Mob;
 import game.items.Item;
@@ -45,7 +46,7 @@ public class MobItemInteractionMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         if (getInteractionType() == ItemInteractionType.PICK_UP) {
             var mob = getMobByIdServer(mobId);
             var newItem = getItemByIdServer(itemId);

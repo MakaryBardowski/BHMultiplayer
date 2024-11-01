@@ -26,7 +26,7 @@ import server.ServerMain;
 @Serializable
 public abstract class TwoWayMessage extends AbstractMessage {
 
-    public abstract void handleServer(ServerMain server);
+    public abstract void handleServer(ServerMain server,HostedConnection sender);
 
     public abstract void handleClient(ClientGameAppState client);
 

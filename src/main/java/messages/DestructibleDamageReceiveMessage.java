@@ -7,6 +7,7 @@ package messages;
 import client.ClientGameAppState;
 import client.Main;
 import com.jme3.network.AbstractMessage;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import data.DamageReceiveData;
 import game.entities.Destructible;
@@ -40,7 +41,7 @@ public class DestructibleDamageReceiveMessage extends EntityUpdateMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         InteractiveEntity i = getEntityByIdServer(id);
         if (i != null) { // if the mob doesnt exist, it means the 
             // info was sent from a lagged user - dont forward it to others

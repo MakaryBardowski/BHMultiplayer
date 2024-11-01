@@ -43,12 +43,12 @@ public class Helmet extends Armor {
 
     @Override
     public void humanMobEquip(HumanMob m) {
-        Node bb = m.getSkinningControl().getAttachmentsNode("BackpackBone");
-        Node ba = (Node) Main.getInstance().getAssetManager().loadModel("Models/backpack/backpack.j3o");
-        bb.attachChild(ba);
-        setupModelLight(ba);
-        setupModelShootability(ba, m.getId());
-        ba.move(0, 0.3f, 0);
+//        Node bb = m.getSkinningControl().getAttachmentsNode("BackpackBone");
+//        Node ba = (Node) Main.getInstance().getAssetManager().loadModel("Models/backpack/backpack.j3o");
+//        bb.attachChild(ba);
+//        setupModelLight(ba);
+//        setupModelShootability(ba, m.getId());
+//        ba.move(0, 0.3f, 0);
 
         var helmetTemplate = (HelmetTemplate) template;
         m.setHelmet(this);

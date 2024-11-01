@@ -23,13 +23,13 @@ public class Main extends SimpleApplication {
 
     private static Main instance;
 
-    private static final short STARTING_RESOLUTION_WIDTH = 1920;
-    private static final short STARTING_RESOLUTION_HEIGHT = 1080;
-    private static final boolean FULLSCREEN = true;
+//    private static final short STARTING_RESOLUTION_WIDTH = 1920;
+//    private static final short STARTING_RESOLUTION_HEIGHT = 1080;
+//    private static final boolean FULLSCREEN = true;
 
-//    private static final short STARTING_RESOLUTION_WIDTH = 1000;
-//    private static final short STARTING_RESOLUTION_HEIGHT = 800;
-//    private static final boolean FULLSCREEN = false;
+    private static final short STARTING_RESOLUTION_WIDTH = 1000;
+    private static final short STARTING_RESOLUTION_HEIGHT = 800;
+    private static final boolean FULLSCREEN = false;
     public static final boolean WIREFRAME = false;
     public static final float CAM__MOVE_SPEED = 30;
     public static final float CAM_ROT_SPEED = 1.0f;

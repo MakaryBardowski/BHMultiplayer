@@ -16,11 +16,13 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer;
+import com.jme3.util.BufferUtils;
 import debugging.DebugUtils;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
 import game.items.ItemTemplates.GlovesTemplate;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewBootsMessage;
@@ -56,21 +58,21 @@ public class Gloves extends Armor {
     @Override
     public void humanMobEquip(HumanMob m) {
         m.setGloves(this);
+        System.out.println(m.getNode().getChildren());
 
-        
-        var r = (Node) m.getThirdPersonHandsNode();
-        r.detachAllChildren();
-
+//        r.detachAllChildren();
         Node gloveR = (Node) Main.getInstance().getAssetManager().loadModel(template.getFpPath().replace("?", "R"));
-        Mesh gloveMesh = ((Geometry) gloveR.getChild(0)).getMesh();
         byte leftHandIndex = (byte) m.getSkinningControl().getArmature().getJointIndex("HandL");
         byte righHandIndex = (byte) m.getSkinningControl().getArmature().getJointIndex("HandR");
-
+        var glovesGeom = (Geometry) gloveR.getChild(0);
+        
+        var gloveMesh = glovesGeom.getMesh();
         Gloves.weightPaint(gloveMesh, leftHandIndex, righHandIndex);
+//        gloveR.move(0,-1.5f,0);
         setupModelLight(gloveR);
         setupModelShootability(gloveR, m.getId());
 
-        r.attachChild((Geometry) gloveR.getChild(0));
+        m.getThirdPersonHandsNode().attachChild(gloveR);
     }
 
     @Override
@@ -121,42 +123,36 @@ public class Gloves extends Armor {
         if (leftHandBoneIndex == -1 || rightHandBoneIndex == -1) {
             return;
         }
-        if (mesh.getBuffer(VertexBuffer.Type.BindPosePosition) != null) {
-            return;
-        }
+        var boneIndexBuffer = (ByteBuffer) (mesh.getBuffer(VertexBuffer.Type.BoneIndex).getData());
 
+//        if (mesh.getBuffer(VertexBuffer.Type.BindPosePosition) != null) {
+//            return;
+//        }
         var posBuffer = (FloatBuffer) (mesh.getBuffer(VertexBuffer.Type.Position).getData());
         int posBufferLimit = posBuffer.limit();
-        int vertexCount = posBufferLimit / 3;// by default
 
-        int boneIndexCount = vertexCount;
-        byte[] boneIndex = new byte[boneIndexCount];
-        float[] boneWeight = new float[boneIndexCount];
         var temp = new Vector3f();
+
+        System.out.println("bone " + boneIndexBuffer.limit() + " pos " + posBufferLimit);
 
         for (int i = 0; i < posBufferLimit; i += 3) { // for each vertex position
             temp.set(posBuffer.get(i), posBuffer.get(i + 1), posBuffer.get(i + 2));
-
             var vertexIndex = i / 3;
-//            posBuffer.put(i + 1, posBuffer.get(i + 1) + 1.5f); // set blender Y to higher = jmonkey Z axis
 
-            if (temp.getX() < 0) {
-                // weight paint for right hand bone
-                boneIndex[vertexIndex] = rightHandBoneIndex;
-                boneWeight[vertexIndex] = 100f;
+            if (temp.getX() > 0) {
+                boneIndexBuffer.put(vertexIndex * 4, leftHandBoneIndex);
+                boneIndexBuffer.put(vertexIndex * 4 + 1, leftHandBoneIndex);
+                boneIndexBuffer.put(vertexIndex * 4 + 2, leftHandBoneIndex);
+                boneIndexBuffer.put(vertexIndex * 4 + 3, leftHandBoneIndex);
+
             } else {
-                // weight paint for left hand bone
-                boneIndex[vertexIndex] = leftHandBoneIndex;
-                boneWeight[vertexIndex] = 100f;
+                boneIndexBuffer.put(vertexIndex * 4, rightHandBoneIndex);
+                boneIndexBuffer.put(vertexIndex * 4 + 1, rightHandBoneIndex);
+                boneIndexBuffer.put(vertexIndex * 4 + 2, rightHandBoneIndex);
+                boneIndexBuffer.put(vertexIndex * 4 + 3, rightHandBoneIndex);
             }
         }
 
-        mesh.setMaxNumWeights(1);
-        mesh.setBuffer(VertexBuffer.Type.BoneIndex, 1, boneIndex);
-        mesh.setBuffer(VertexBuffer.Type.BoneWeight, 1, boneWeight);
-        mesh.setBuffer(VertexBuffer.Type.HWBoneIndex, 1, boneIndex);
-        mesh.setBuffer(VertexBuffer.Type.HWBoneWeight, 1, boneWeight);
-        mesh.generateBindPose();
     }
 
 }

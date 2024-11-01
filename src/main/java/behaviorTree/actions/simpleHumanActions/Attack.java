@@ -8,7 +8,9 @@ import behaviorTree.context.SimpleHumanMobContext;
 import client.Main;
 import game.entities.Destructible;
 import game.entities.mobs.HumanMob;
+import game.items.ItemTemplates.MeleeWeaponTemplate;
 import game.items.weapons.MeleeWeapon;
+import game.items.weapons.MobWeaponUsageData.MobMeleeWeaponUsageData;
 import messages.DestructibleDamageReceiveMessage;
 import server.ServerMain;
 
@@ -18,9 +20,8 @@ import server.ServerMain;
  */
 public class Attack extends NodeAction {
 
-    private long lastAttackedTimestamp = System.currentTimeMillis();
-    private float WEAPON_COOLDOWN_SECONDS = 2.5f;
-    private float TEST_GUN_COOLDOWN = WEAPON_COOLDOWN_SECONDS * 1000;
+    private static final float SECONDS_TO_MILLIS = 1000;
+    private long lastAttackedTimestamp = 0;
     private float TEST_GUN_RANGE = 2;
     private float TEST_DAMAGE = 3.75f;
     private HumanMob human;
@@ -34,25 +35,26 @@ public class Attack extends NodeAction {
 //        System.out.println("current gun cooldown before for "+human+" is "+currentGunCooldown);
 
 //        System.out.println("current gun cooldown for "+human+" is "+currentGunCooldown);
-        if (hc.getCurrentUpdateTimestamp() - lastAttackedTimestamp < TEST_GUN_COOLDOWN) {
-            return FAILURE;
-        }
+        if (human.getEquippedRightHand() instanceof MeleeWeapon mw) { // can be changed to Weapon after i implement ranged weaps
 
-        if (target == null) {
-            return FAILURE;
-        }
-
-        var distance = human.getNode().getWorldTranslation().distance(target.getNode().getWorldTranslation());
-        if (distance > TEST_GUN_RANGE) {
-            return NodeCompletionStatus.FAILURE;
-        }
-
-        Main.getInstance().enqueue(() -> {
-            if (human.getEquippedRightHand() instanceof MeleeWeapon mw) { // can be changed to Weapon after i implement ranged weaps
-                mw.attack(human);
+            if (hc.getCurrentUpdateTimestamp() - lastAttackedTimestamp < ((MeleeWeaponTemplate)mw.getTemplate()).getMobUsageData().getCooldown()*SECONDS_TO_MILLIS ) {
+                return FAILURE;
             }
-        });
-        lastAttackedTimestamp = hc.getCurrentUpdateTimestamp();
+
+            if (target == null) {
+                return FAILURE;
+            }
+
+            var distance = human.getNode().getWorldTranslation().distance(target.getNode().getWorldTranslation());
+            if (distance > TEST_GUN_RANGE) {
+                return NodeCompletionStatus.FAILURE;
+            }
+
+            Main.getInstance().enqueue(() -> {
+                mw.attack(human);
+            });
+            lastAttackedTimestamp = hc.getCurrentUpdateTimestamp();
+        }
 
 //        System.out.println("Attacking!");
         return NodeCompletionStatus.SUCCESS;

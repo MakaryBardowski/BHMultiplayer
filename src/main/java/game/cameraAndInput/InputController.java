@@ -43,6 +43,7 @@ import messages.MobRotUpdateMessage;
 import messages.gameSetupMessages.NextLevelMessage;
 import server.ServerMain;
 import settings.GlobalSettings;
+
 /**
  *
  * @author 48793
@@ -74,7 +75,7 @@ public class InputController {
         m = gs.getInputManager();
         initKeys(m, initActionListener(gs), initAnalogListener(gs));
         var rotationNode = gs.getPlayer().getRotationNode();
-        headBob = new HeadBobControl(gs.getPlayer(),rotationNode.getLocalTranslation());
+        headBob = new HeadBobControl(gs.getPlayer(), rotationNode.getLocalTranslation());
         rotationNode.addControl(headBob);
     }
 
@@ -180,7 +181,6 @@ public class InputController {
 //                if (name.equals("4") && !keyPressed) {
 //                    DEBUG_GEO.rotate(0, 10 * FastMath.DEG_TO_RAD, 0);
 //                }
-
                 if (name.equals("K") && !keyPressed) {
 //                    GlobalSettings.isAiDebug = !GlobalSettings.isAiDebug;
                     System.gc();
@@ -271,8 +271,11 @@ public class InputController {
                         var handsRot = player.getRotationNode().getLocalRotation();
 
                         var skinningControl = player.getSkinningControl();
-                        
-                        player.getThirdPersonHandsNode().setLocalRotation(handsRot);
+
+//                        player.getThirdPersonHandsNode().setLocalRotation(handsRot);
+//                        var curr = ((Node) player.getThirdPersonHandsNode().getChild(0)).getChild(0).getLocalRotation();
+//                        curr.set(handsRot.getX(), handsRot.getY(), handsRot.getZ(), handsRot.getW());
+                        skinningControl.getArmature().getJoint("HandsRotationBone").getLocalTransform().setRotation(handsRot);
 
                         skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(handsRot);
                     }

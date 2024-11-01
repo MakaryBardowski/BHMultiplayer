@@ -235,7 +235,6 @@ public class LobbyTeamViewAppState extends BaseAppState {
         // attach hands
         Node gloveR = (Node) Main.getInstance().getAssetManager().loadModel(glovesTemplate.getFpPath());
         setupModelLight(gloveR);
-        gloveR.move(HumanMob.THIRD_PERSON_HANDS_NODE_OFFSET);
         skeleton.attachChild(gloveR);
 
         // attach boots
@@ -264,7 +263,7 @@ public class LobbyTeamViewAppState extends BaseAppState {
     }
 
     private static Node loadPlayerSkeleton() {
-        Node node = (Node) assetManager.loadModel("Models/testSkeleton/testSkeleton.j3o");
+        Node node = (Node) assetManager.loadModel(HumanMob.HUMAN_SKELETON_RIG_PATH);
         return node;
     }
 

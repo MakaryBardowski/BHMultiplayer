@@ -9,6 +9,7 @@ import client.Main;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.Filters;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.Collidable;
 import game.entities.mobs.Player;
@@ -75,7 +76,7 @@ public class MobPosRotUpdateMessage extends EntityUpdateMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         if (entityExistsLocallyServer(id)) {
             Main.getInstance().enqueue(() -> {
                 if (ServerMain.getInstance().getLevelManagerMobs().get(id) != null) {

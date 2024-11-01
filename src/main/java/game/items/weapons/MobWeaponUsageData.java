@@ -25,10 +25,12 @@ public class MobWeaponUsageData {
     @Getter
     @Setter
     public static class MobMeleeWeaponUsageData extends MobWeaponUsageData {
-        public static MobMeleeWeaponUsageData AXE_DEFAULT_STATS = new MobMeleeWeaponUsageData(0.8f, 2.3f);
-        public static MobMeleeWeaponUsageData KNIFE_DEFAULT_STATS = new MobMeleeWeaponUsageData(0.7f,1.45f);
-        public MobMeleeWeaponUsageData(float weaponRange,float minimumRangeToUse) {
+        public static MobMeleeWeaponUsageData AXE_DEFAULT_STATS = new MobMeleeWeaponUsageData(0.8f, 2.3f,2f);
+        public static MobMeleeWeaponUsageData KNIFE_DEFAULT_STATS = new MobMeleeWeaponUsageData(0.7f,1.45f,1.2f);
+        private float cooldown;
+        public MobMeleeWeaponUsageData(float weaponRange,float minimumRangeToUse,float cooldown) {
             super(weaponRange,minimumRangeToUse);
+            this.cooldown = cooldown;
         }
     }
 

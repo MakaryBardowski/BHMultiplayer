@@ -179,7 +179,7 @@ public class AllMobFactory extends MobFactory {
     }
 
     private Node loadHumanModel() {
-        Node node = (Node) assetManager.loadModel("Models/testSkeleton/testSkeleton.j3o");
+        Node node = (Node) assetManager.loadModel(HumanMob.HUMAN_SKELETON_RIG_PATH);
         return node;
     }
 

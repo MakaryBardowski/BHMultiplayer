@@ -9,6 +9,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.Filters;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.mobs.Player;
 import game.items.consumable.Medpack;
@@ -32,7 +33,7 @@ public class EntityConsumableUse extends EntityUpdateMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         Player p = (Player) getEntityByIdServer(id);
         var consumable = ((Medpack)getEntityByIdServer(consumableId));
         consumable.playerServerEquip(p);

@@ -7,6 +7,7 @@ package messages.gameSetupMessages;
 import client.ClientGameAppState;
 import client.ClientGameManager;
 import client.ClientStoryGameManager;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.map.MapType;
 import java.util.Arrays;
@@ -33,7 +34,7 @@ public class NextLevelMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         // ensure that lagged player doesnt try to invoke the method again skipping 2 levels
         var levelManager = server.getCurrentGamemode().getLevelManager();
         nextLevelIndex = levelManager.getCurrentLevelIndex()+1;

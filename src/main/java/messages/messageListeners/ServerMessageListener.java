@@ -32,7 +32,7 @@ public class ServerMessageListener implements MessageListener<HostedConnection> 
     @Override
     public void messageReceived(HostedConnection s, Message msg) {
         if (msg instanceof TwoWayMessage tm) {
-            tm.handleServer(serverApp);
+            tm.handleServer(serverApp,s);
         }
     }
 

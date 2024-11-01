@@ -59,7 +59,7 @@ public class ItemTemplates {
 
     public static final ItemTemplate KNIFE = new MeleeWeaponTemplate("Trench Knife [Melee]", WEAPONS_PATH + "trenchKnife/trenchKnife.j3o", ICON_PATH + "equipmentTrenchKnife.png", WEAPONS_PATH + "trenchKnife/trenchKnifeDrop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(90 * FastMath.DEG_TO_RAD, 0, 90 * FastMath.DEG_TO_RAD), 1),
-            new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
+            new ThirdPersonOffsetData(new Vector3f(-0.23f,          0.25f,    0f), new Vector3f(200 * FastMath.DEG_TO_RAD, 90 * FastMath.DEG_TO_RAD, 0), 1),
             ItemType.KNIFE, 4,
             MeleeWeaponStatTemplate.KNIFE_DEFAULT_STATS,
             MobMeleeWeaponUsageData.KNIFE_DEFAULT_STATS
@@ -157,7 +157,8 @@ public class ItemTemplates {
 
     public static final ItemTemplate AXE = new MeleeWeaponTemplate("Fireaxe [Melee]", WEAPONS_PATH + "Fireaxe/fireaxe.j3o", ICON_PATH + "equipmentTrenchKnife.png", WEAPONS_PATH + "Fireaxe/fireaxeDrop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0 * FastMath.DEG_TO_RAD, 0, 0 * FastMath.DEG_TO_RAD), 1),
-            new ThirdPersonOffsetData(new Vector3f(0, -0.33f, 0.3f), new Vector3f(0 * FastMath.DEG_TO_RAD, -90 * FastMath.DEG_TO_RAD, -210 * FastMath.DEG_TO_RAD), 1),
+            //                                   lewo/prawo  przod/tyl   gora/dol
+            new ThirdPersonOffsetData(new Vector3f(-0.22f,          0.2f,    0f), new Vector3f(-90 * FastMath.DEG_TO_RAD, 0 * FastMath.DEG_TO_RAD, -110 * FastMath.DEG_TO_RAD), 1),
             ItemType.AXE, 20,
             MeleeWeaponStatTemplate.AXE_DEFAULT_STATS,
             MobMeleeWeaponUsageData.AXE_DEFAULT_STATS
