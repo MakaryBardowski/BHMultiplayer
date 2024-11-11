@@ -127,7 +127,7 @@ public class MapGenerator {
         int floorLevel = 0;
         for (int x = 0; x < armorySizeX; x++) {
             for (int z = 0; z < armorySizeZ; z++) {
-                logicMap[x][floorLevel][z] = 1;
+                logicMap[x][floorLevel][z] = 2;
             }
         }
 
@@ -146,7 +146,7 @@ public class MapGenerator {
             }
         }
 
-        logicMap[armorySizeX - 4][1][armorySizeZ - 1] = 0;
+//        logicMap[armorySizeX - 4][1][armorySizeZ - 1] = 0;
 
         for (int x = 5; x < 8; x++) {
             logicMap[x][1][4] = 1;

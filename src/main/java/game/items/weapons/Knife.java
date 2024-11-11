@@ -65,11 +65,12 @@ public class Knife extends MeleeWeapon {
 
     @Override
     public void playerUnequip(Player p) {
+        if (p.getEquippedRightHand() != this) {
+            return;
+        }
         p.setEquippedRightHand(null);
         p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
         p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
-        System.out.println("unequipping KNIFE!");
-
     }
 
     @Override

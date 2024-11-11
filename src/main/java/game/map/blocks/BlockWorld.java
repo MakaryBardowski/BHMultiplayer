@@ -179,9 +179,10 @@ public class BlockWorld {
                         var bt = BlockType.DIRT;
                         if (r.nextInt(5) == 1) {
                             bt = BlockType.DIRT_STONES;
-                        } else if (r.nextInt(10) == 2) {
-                            bt = BlockType.WATER;
                         }
+//else if (r.nextInt(10) == 2) {
+//                            bt = BlockType.WATER;
+//                        }
 
                         addBlockDataToChunk(x, y, z, bt);
 

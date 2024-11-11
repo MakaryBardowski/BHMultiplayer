@@ -64,11 +64,12 @@ public class Axe extends MeleeWeapon {
 
     @Override
     public void playerUnequip(Player p) {
+        if (p.getEquippedRightHand() != this) {
+            return;
+        }
         p.setEquippedRightHand(null);
         p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
         p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
-        System.out.println("unequipping KNIFE!");
-
     }
 
     @Override
@@ -136,7 +137,7 @@ public class Axe extends MeleeWeapon {
 
         var slashDelay = 0.23f / getAttacksPerSecond();
         slashControl.setSlashDelay(slashDelay);
-        
+
         var animPlayed = HUMAN_ATTACK_MELEE;
         p.playAnimation(animPlayed);
         var apm = new AnimationPlayedMessage(p.getId(), animPlayed);

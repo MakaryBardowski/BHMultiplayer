@@ -17,7 +17,8 @@ import com.jme3.scene.Node;
 import game.entities.Attribute;
 import game.entities.FloatAttribute;
 import FirstPersonHands.FirstPersonHands;
-import PlayerHud.LemurPlayerHud;
+import LemurGUI.LemurPlayerEquipment;
+import LemurGUI.LemurPlayerHealthbar;
 import static client.ClientGameAppState.removeEntityByIdClient;
 import client.Main;
 import static client.Main.CAM_ROT_SPEED;
@@ -25,6 +26,8 @@ import static client.Main.CAM__MOVE_SPEED;
 import com.jme3.anim.AnimComposer;
 import com.jme3.network.AbstractMessage;
 import data.DamageReceiveData;
+import game.entities.mobs.playerClasses.AssaultClass;
+import game.entities.mobs.playerClasses.MedicClass;
 import game.entities.mobs.playerClasses.PlayerClass;
 import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
 import game.map.collision.WorldGrid;
@@ -82,11 +85,15 @@ public class Player extends HumanMob {
     protected FirstPersonHands firstPersonHands;
 
     @Getter
-    private PlayerClass playerClass;
+    private final PlayerClass playerClass;
 
     @Getter
     @Setter
-    private LemurPlayerHud playerHud;
+    private LemurPlayerHealthbar playerHud;
+
+    @Getter
+    @Setter
+    private LemurPlayerEquipment playerEquipmentGui;
 
     @Override
     public void equip(Item item) {
@@ -126,8 +133,17 @@ public class Player extends HumanMob {
         this.mainCamera = mainCamera;
         firstPersonHands = new FirstPersonHands(this);
         hotbar = new Item[HOTBAR_SIZE];
-        health = 15 * 100;
-        maxHealth = 15 * 100;
+
+        if (playerClass instanceof AssaultClass) {
+            health = 115;
+            maxHealth = 115;
+        } else if (playerClass instanceof MedicClass) {
+            health = 90;
+            maxHealth = 90;
+        } else {
+            health = 140;
+            maxHealth = 140;
+        }
 
         cachedSpeed = 11.25f;
         attributes.put(SPEED_ATTRIBUTE, new FloatAttribute(cachedSpeed));
@@ -244,7 +260,6 @@ public class Player extends HumanMob {
             checkCollisionWithPassableEntitiesClient();
             collisionGrid.insert(this);
 
-            
         }
     }
 

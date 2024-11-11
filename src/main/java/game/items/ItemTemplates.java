@@ -30,7 +30,7 @@ public class ItemTemplates {
 
     public static final ItemTemplate RIFLE_MANNLICHER_95 = new RangedWeaponTemplate("Mannlicher 95 [Rifle]", WEAPONS_PATH + "Mannlicher95/mannlicher95.j3o", ICON_PATH + "equipmentMannlicher95.png", WEAPONS_PATH + "Mannlicher95/Mannlicher95Drop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f),
-            new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
+            new ThirdPersonOffsetData(new Vector3f(-0.37f,          0.33f,    0f), new Vector3f(0 * FastMath.DEG_TO_RAD, -90 * FastMath.DEG_TO_RAD, 180 * FastMath.DEG_TO_RAD), 1),
             ItemType.RIFLE, 0,
             RangedWeaponStatTemplate.RIFLE_MANNLICHER_95_DEFAULT_STATS,
             MobRangedWeaponUsageData.RIFLE_MANNLICHER_95_MOB_USAGE_DATA
@@ -57,7 +57,7 @@ public class ItemTemplates {
             GlovesStatTemplate.TRENCH_GLOVES_DEFAULT_STATS
     );
 
-    public static final ItemTemplate KNIFE = new MeleeWeaponTemplate("Trench Knife [Melee]", WEAPONS_PATH + "trenchKnife/trenchKnife.j3o", ICON_PATH + "equipmentTrenchKnife.png", WEAPONS_PATH + "trenchKnife/trenchKnifeDrop.j3o",
+    public static final ItemTemplate KNIFE = new MeleeWeaponTemplate("Knife [Melee]", WEAPONS_PATH + "trenchKnife/trenchKnife.j3o", ICON_PATH + "equipmentTrenchKnife.png", WEAPONS_PATH + "trenchKnife/trenchKnifeDrop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(90 * FastMath.DEG_TO_RAD, 0, 90 * FastMath.DEG_TO_RAD), 1),
             new ThirdPersonOffsetData(new Vector3f(-0.23f,          0.25f,    0f), new Vector3f(200 * FastMath.DEG_TO_RAD, 90 * FastMath.DEG_TO_RAD, 0), 1),
             ItemType.KNIFE, 4,
@@ -92,7 +92,7 @@ public class ItemTemplates {
 
     public static final ItemTemplate PISTOL_C96 = new RangedWeaponTemplate("C96 [Pistol]", WEAPONS_PATH + "C96/c96.j3o", ICON_PATH + "equipmentC96.png", WEAPONS_PATH + "C96/c96drop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f),
-            new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
+            new ThirdPersonOffsetData(new Vector3f(-0.37f,          0.33f,    0f), new Vector3f(180 * FastMath.DEG_TO_RAD, 90 * FastMath.DEG_TO_RAD, 0), 1),
             ItemType.PISTOL, 9,
             RangedWeaponStatTemplate.PISTOL_C96_DEFAULT_STATS,
             MobRangedWeaponUsageData.PISTOL_C96_MOB_USAGE_DATA

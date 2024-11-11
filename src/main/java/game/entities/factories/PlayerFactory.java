@@ -89,8 +89,8 @@ public class PlayerFactory extends MobFactory {
         System.out.println("[PlayerFactory] create player id " + id);
         
         var p = new Player(id, playerNode, name, mainCamera, skinningControl, composer, pc);
-        var procsEverySeconds = 1;
-        var regenEffect = EffectFactory.createRegenerationEffect(p,2,64*procsEverySeconds);
+        var procsEverySeconds = 10;
+        var regenEffect = EffectFactory.createRegenerationEffect(p,1,64*procsEverySeconds);
         p.addEffect(regenEffect);
         return p;
     }

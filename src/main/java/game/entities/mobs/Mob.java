@@ -6,6 +6,7 @@ package game.entities.mobs;
 
 import behaviorTree.BehaviorTree;
 import client.ClientGameAppState;
+import client.Main;
 import game.entities.Destructible;
 import game.items.Item;
 import game.map.collision.CollidableInterface;
@@ -40,7 +41,7 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
     public static final int SPEED_ATTRIBUTE = 2;
 
     private static final float DEFAULT_SPEED = 8.75f; //10, 13.25f for knife
-    protected static final int EQUIPMENT_SIZE = 18;
+    protected static final int EQUIPMENT_SIZE = 20;
 
     protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
 
@@ -173,14 +174,19 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
         }
     }
 
-
     @Override
     public boolean isAbleToMove() {
         return !isDead();
     }
 
     @Override
-    public void playAnimation(Animation anim){
-    
+    public void playAnimation(Animation anim) {
+
+    }
+
+    public void equipmentSwapItems(int index, int otherIndex) {
+        var item = equipment[index];
+        equipment[index] = equipment[otherIndex];
+        equipment[otherIndex] = item;
     }
 }

@@ -70,17 +70,18 @@ public class LightMachineGun extends RangedWeapon {
 
     @Override
     public void playerUnequip(Player p) {
-        if (p.getEquippedRightHand() == this) {
-
-            p.setEquippedRightHand(null);
-            if (PlayerEqualsMyPlayer(p)) {
-                p.getGunNode().removeControl(gunRecoil);
-                p.getMainCameraNode().removeControl(camRecoil);
-                p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
-            }
-            System.out.println("unequipping LMG!");
-            p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
+        if (p.getEquippedRightHand() != this) {
+            return;
         }
+
+        p.setEquippedRightHand(null);
+        if (PlayerEqualsMyPlayer(p)) {
+            p.getGunNode().removeControl(gunRecoil);
+            p.getMainCameraNode().removeControl(camRecoil);
+            p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+        }
+        p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
+
     }
 
     @Override

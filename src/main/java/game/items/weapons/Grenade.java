@@ -140,7 +140,7 @@ public class Grenade extends ThrowableWeapon {
         var cs = ClientGameAppState.getInstance();
         var grenadeInitialPosition = cs.getCamera().getLocation();
         var throwDirection = cs.getCamera().getDirection().normalize();
-        
+
         var gtm = new GrenadeThrownMessage(p.getId(), id, grenadeInitialPosition, throwDirection);
         gtm.setReliable(true);
 
@@ -164,13 +164,12 @@ public class Grenade extends ThrowableWeapon {
 
     @Override
     public void playerUnequip(Player p) {
-        if (p.getEquippedRightHand() == this) {
-            p.setEquippedRightHand(null);
-            p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
-            p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
-            System.out.println("unequipping GRENADE!");
+        if (p.getEquippedRightHand() != this) {
+            return;
         }
-
+        p.setEquippedRightHand(null);
+        p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+        p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
     }
 
     @Override
@@ -194,7 +193,7 @@ public class Grenade extends ThrowableWeapon {
         builder.append("-Creates smoke screen");
         return builder.toString();
     }
-    
+
     @Override
     public void humanMobUnequip(HumanMob m) {
         if (m.getEquippedRightHand() == this) {

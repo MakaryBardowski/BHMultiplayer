@@ -71,16 +71,18 @@ public class Pistol extends RangedWeapon {
 
     @Override
     public void playerUnequip(Player p) {
-        if (p.getEquippedRightHand() == this) {
-
-            p.setEquippedRightHand(null);
-            if (PlayerEqualsMyPlayer(p)) {
-                p.getGunNode().removeControl(gunRecoil);
-                p.getMainCameraNode().removeControl(camRecoil);
-                p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
-            }
-            p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
+        if (p.getEquippedRightHand() != this) {
+            return;
         }
+
+        p.setEquippedRightHand(null);
+        if (PlayerEqualsMyPlayer(p)) {
+            p.getGunNode().removeControl(gunRecoil);
+            p.getMainCameraNode().removeControl(camRecoil);
+            p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+        }
+        p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
+
     }
 
     @Override
@@ -134,7 +136,7 @@ public class Pistol extends RangedWeapon {
             p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimationData.HOLD_PISTOL);
 
         }
-        
+
         humanEquipInThirdPerson(p, assetManager);
     }
 
@@ -361,7 +363,13 @@ public class Pistol extends RangedWeapon {
 
     private void humanEquipInThirdPerson(HumanMob humanMob, AssetManager assetManager) {
         Node model = (Node) assetManager.loadModel(template.getDropPath());
-        model.move(0, -0.43f, 0.37f);
+        model.setLocalTranslation(template.getThirdPersonOffsetData().getOffset());
+        model.rotate(
+                template.getThirdPersonOffsetData().getRotation().x,
+                template.getThirdPersonOffsetData().getRotation().y,
+                template.getThirdPersonOffsetData().getRotation().z
+        );
+
         Geometry ge = (Geometry) (model.getChild(0));
         Material originalMaterial = ge.getMaterial();
         Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");

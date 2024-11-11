@@ -134,7 +134,7 @@ public class Main extends SimpleApplication {
 //        settings1.setResolution(1680, 1050);
         settings1.setFullscreen(FULLSCREEN);
         settings1.setVSync(true);
-        settings1.setFrameRate(2000);
+        settings1.setFrameRate(60);
         settings1.setResizable(true);
         settings1.setRenderer(AppSettings.LWJGL_OPENGL45);
 //        settings1.setVSync(false);

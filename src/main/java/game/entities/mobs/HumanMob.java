@@ -158,18 +158,18 @@ public class HumanMob extends Mob {
 
     @Override
     public void onInteract() {
-        if (ServerMain.getInstance() == null) {
-            return;
-        }
-        if (node.getControl(HumanPathDebugControl.class) == null) {
-            node.addControl(new HumanPathDebugControl(this));
-        }
-        System.out.println(Arrays.toString(equipment));
-
-        System.out.println("helmet: " + helmet);
-        System.out.println("Armor: " + vest);
-        System.out.println("Gloves: " + gloves);
-        System.out.println("boots: " + boots);
+//        if (ServerMain.getInstance() == null) {
+//            return;
+//        }
+//        if (node.getControl(HumanPathDebugControl.class) == null) {
+//            node.addControl(new HumanPathDebugControl(this));
+//        }
+//        System.out.println(Arrays.toString(equipment));
+//
+//        System.out.println("helmet: " + helmet);
+//        System.out.println("Armor: " + vest);
+//        System.out.println("Gloves: " + gloves);
+//        System.out.println("boots: " + boots);
 
         System.out.println(name + " says hi! Im being debugged!");
     }

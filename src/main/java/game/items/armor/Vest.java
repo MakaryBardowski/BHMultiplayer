@@ -14,6 +14,7 @@ import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
+import game.items.Holdable;
 import game.items.ItemTemplates.VestTemplate;
 import java.util.Arrays;
 import messages.items.MobItemInteractionMessage;
@@ -53,14 +54,16 @@ public class Vest extends Armor {
     }
 
     @Override
-    public void playerEquip(Player m) {
-        humanMobEquip(m);
-
+    public void playerEquip(Player p) {
+        Vest unequippedItem = p.getVest();
+        if (unequippedItem != null) {
+            unequippedItem.playerUnequip(p);
+        }
+        humanMobEquip(p);
     }
 
     @Override
-    public void playerUnequip(Player m) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void playerUnequip(Player p) {
     }
 
     @Override

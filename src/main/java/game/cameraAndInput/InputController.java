@@ -28,6 +28,7 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.simsilica.lemur.GuiGlobals;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
 import static debugging.DebugUtils.DEBUG_GEO;
@@ -122,8 +123,9 @@ public class InputController {
 
                 }
 
-                if (!player.isDead() && name.equals("1") && !keyPressed) {
-                    Item equippedItem = player.getEquipment()[Integer.parseInt(name) - 1];
+                if (!player.isDead() && isHotbarName(name) && !keyPressed) {
+                    System.out.println("hotbar name ======== "+name);
+                    Item equippedItem = player.getHotbar()[Integer.parseInt(name)];
                     player.equip(equippedItem);
                     PlayerHUDController.sendEquipMessageToServer(equippedItem);
                 }
@@ -142,22 +144,8 @@ public class InputController {
                 }
 
                 if (name.equals("I") && !gs.getPlayer().isDead() && !keyPressed) {
-                    gs.getFlyCam().setDragToRotate(!gs.getFlyCam().isDragToRotate());
                     Player p = gs.getPlayer();
-                    p.setViewingEquipment(!p.isViewingEquipment());
-                    p.setHoldsTrigger(false);
-
-                    for (int eqSlot = 0; eqSlot < p.getEquipment().length; eqSlot++) {
-                        String iconString = "Textures/GUI/EquipmentIcons/equipmentSlotEmpty.png";
-                        if (p.getEquipment()[eqSlot] != null && p.getEquipment()[eqSlot].getTemplate().getIconPath() != null) {
-                            iconString = gs.getPlayer().getEquipment()[eqSlot].getTemplate().getIconPath();
-                        }
-
-                        guiElement = gs.getNifty().getRenderEngine().createImage(gs.getNifty().getCurrentScreen(), iconString, false);
-                        gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).getRenderer(ImageRenderer.class).setImage(guiElement);
-
-                        gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).setVisible(!gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).isVisible());
-                    }
+                    p.getPlayerEquipmentGui().toggle();
                 }
 
                 if (name.equals(
@@ -290,6 +278,10 @@ public class InputController {
         return analogListener;
     }
 
+    private boolean isHotbarName(String s) {
+        return s == "1" || s == "2" || s == "3" || s == "4" || s == "5" || s == "6" || s == "7" || s == "8" || s == "9" || s == "0";
+    }
+
     private void initKeys(InputManager inputManager, ActionListener actionListener, AnalogListener analogListener) {
 
         inputManager.addMapping("W", new KeyTrigger(KeyInput.KEY_W)); // forward
@@ -311,7 +303,13 @@ public class InputController {
         inputManager.addMapping("2", new KeyTrigger(KeyInput.KEY_2)); // hotbar 2
         inputManager.addMapping("3", new KeyTrigger(KeyInput.KEY_3)); // hotbar 3
         inputManager.addMapping("4", new KeyTrigger(KeyInput.KEY_4)); // hotbar 4
-
+        inputManager.addMapping("5", new KeyTrigger(KeyInput.KEY_5)); // hotbar 5
+        inputManager.addMapping("6", new KeyTrigger(KeyInput.KEY_6)); // hotbar 6
+        inputManager.addMapping("7", new KeyTrigger(KeyInput.KEY_7)); // hotbar 7
+        inputManager.addMapping("8", new KeyTrigger(KeyInput.KEY_8)); // hotbar 8
+        inputManager.addMapping("9", new KeyTrigger(KeyInput.KEY_9)); // hotbar 9
+        inputManager.addMapping("0", new KeyTrigger(KeyInput.KEY_0)); // hotbar 0
+        
         inputManager.addMapping("MouseMovedX",
                 new MouseAxisTrigger(MouseInput.AXIS_X, false),
                 new MouseAxisTrigger(MouseInput.AXIS_X, true)
@@ -339,10 +337,15 @@ public class InputController {
         inputManager.addListener(actionListener, "I");
 
         inputManager.addListener(actionListener, "1");
-
         inputManager.addListener(actionListener, "2");
         inputManager.addListener(actionListener, "3");
         inputManager.addListener(actionListener, "4");
+        inputManager.addListener(actionListener, "5");
+        inputManager.addListener(actionListener, "6");
+        inputManager.addListener(actionListener, "7");
+        inputManager.addListener(actionListener, "8");
+        inputManager.addListener(actionListener, "9");
+        inputManager.addListener(actionListener, "0");
 
     }
 
@@ -376,7 +379,7 @@ public class InputController {
             if (hitName.matches("-?\\d+")) {
                 Integer hitId = Integer.valueOf(hitName);
                 InteractiveEntity mobHit = (InteractiveEntity) ClientGameAppState.getInstance().getMobs().get(hitId);
-                if (mobHit.getNode().getWorldTranslation().distance(p.getNode().getWorldTranslation()) <= cs.getPlayer().getPickupRange()) {
+                if (closest.getContactPoint().distance(p.getNode().getWorldTranslation()) <= cs.getPlayer().getPickupRange()) {
                     mobHit.onInteract();
                 }
             }

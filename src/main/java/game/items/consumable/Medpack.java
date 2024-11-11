@@ -165,13 +165,14 @@ public class Medpack extends ThrowableWeapon {
 
     @Override
     public void playerUnequip(Player p) {
-//        if (p.getEquippedRightHand() == this) {
+        if (p.getEquippedRightHand() != this) {
+            return;
+        }
 //            p.setEquippedRightHand(null);
 //            p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
 //            p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
 //            System.out.println("unequipping GRENADE!");
-//        }
-
+//        
     }
 
     @Override
@@ -180,8 +181,8 @@ public class Medpack extends ThrowableWeapon {
         var hc = sm.getHostsByPlayerId().get(m.getId());
         Filters.notEqualTo(hc);
 
-        var heal = Math.min(healing, m.getMaxHealth()-m.getHealth());
-        m.setHealth(m.getHealth()+heal);
+        var heal = Math.min(healing, m.getMaxHealth() - m.getHealth());
+        m.setHealth(m.getHealth() + heal);
 
         var msg = new DestructibleHealReceiveMessage(m.getId(), heal);
         msg.setReliable(true);

@@ -132,7 +132,7 @@ public class AllMobFactory extends MobFactory {
                 p.equipServer(item);
             }
 
-            var procsEverySeconds = 1; //10
+            var procsEverySeconds = 10; //10
             var regenEffect = EffectFactory.createRegenerationEffect(p, 1, 64 * procsEverySeconds);
             p.addEffect(regenEffect);
             return p;

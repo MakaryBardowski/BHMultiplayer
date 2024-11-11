@@ -4,7 +4,7 @@
  */
 package client;
 
-import PlayerHud.LemurPlayerHud;
+import LemurGUI.LemurPlayerHealthbar;
 import static client.ClientSynchronizationUtils.interpolateGrenadePosition;
 import static client.ClientSynchronizationUtils.interpolateMobPosition;
 import com.jme3.app.state.AppStateManager;
@@ -120,7 +120,7 @@ public class ClientLevelManager extends LevelManager {
         rootNode.attachChild(worldNode);
 
         float renderDistance = 700f;
-        MAIN_INSTANCE.getCamera().setFrustumPerspective(60, (float) GAME_APP_STATE.getSettings().getWidth() / GAME_APP_STATE.getSettings().getHeight(), 0.01f, renderDistance);
+        MAIN_INSTANCE.getCamera().setFrustumPerspective(70, (float) GAME_APP_STATE.getSettings().getWidth() / GAME_APP_STATE.getSettings().getHeight(), 0.01f, renderDistance);
 
         MAIN_INSTANCE.getViewPort().setBackgroundColor(ColorRGBA.Cyan.clone());
         MAIN_INSTANCE.getViewPort().setClearColor(true);
@@ -130,7 +130,7 @@ public class ClientLevelManager extends LevelManager {
         worldNode.addLight(al);
 
         grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
-        DebugUtils.drawGrid();
+//        DebugUtils.drawGrid();
 
     }
 

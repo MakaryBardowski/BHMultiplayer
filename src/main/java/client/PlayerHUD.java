@@ -5,7 +5,6 @@
  */
 package client;
 
-import behaviorTree.context.SimpleHumanMobContext;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -23,35 +22,24 @@ import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.control.BillboardControl;
-import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.FrameBuffer;
 import com.jme3.texture.Image.Format;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.builder.ElementBuilder;
-import de.lessvoid.nifty.builder.HoverEffectBuilder;
 import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
-import de.lessvoid.nifty.controls.dragndrop.builder.DraggableBuilder;
-import de.lessvoid.nifty.controls.dragndrop.builder.DroppableBuilder;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
-import de.lessvoid.nifty.controls.textfield.TextFieldControl;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
-import de.lessvoid.nifty.tools.Color;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
-import game.entities.mobs.HumanMob;
-import game.entities.mobs.Player;
 import game.items.Item;
-import java.util.Random;
-import server.ServerMain;
 
 /**
  *
@@ -60,19 +48,12 @@ import server.ServerMain;
 public class PlayerHUD extends BaseAppState {
 
     private static final int HP_BAR_TOP_MARGIN = -92;
-    private final double EQ_MARGIN = 0;
-    private final int ROWS = 6;
 
     private Nifty nifty;
     private ClientGameAppState gs;
-    private int cnt = 0;
-    private int hotBarCnt = 0;
-    private double eqSlotSizePx;
-    private int equipmentSlotAdded = 0;
 
-    private float percentMobHealthbarLength = 0.33f;
-    private float percentMobHealthbarHeight = 0.01f;
-    private float playerHealthbarWidth = 0.15f;
+    private final float percentMobHealthbarLength = 0.33f;
+    private final float percentMobHealthbarHeight = 0.01f;
 
     // item drop tooltip
     public static Node itemDropTooltipNode = new Node();
@@ -134,6 +115,7 @@ public class PlayerHUD extends BaseAppState {
 
         nifty = niftyDisplay.getNifty();
         gs.setNifty(nifty);
+        System.out.println(gs+" GS--");
         getApplication().getGuiViewPort().addProcessor(niftyDisplay);
         ((SimpleApplication) getApplication()).getFlyByCamera().setDragToRotate(true);
 
@@ -144,40 +126,6 @@ public class PlayerHUD extends BaseAppState {
         nifty.addScreen("Screen_ID", new ScreenBuilder("Hello Nifty Screen") {
             {
                 controller(new PlayerHUDController(gs)); // Screen properties
-
-                layer(new LayerBuilder("Chat") {
-                    {
-                        childLayoutHorizontal();
-                        paddingTop("75%");
-//                        paddingLeft("1%");
-
-                        paddingLeft("" + ((nifty.getRenderEngine().getNativeWidth() - (0.08 * nifty.getRenderEngine().getNativeHeight() * gs.getPlayer().getHotbar().length)) / 2) + "px");
-
-                        control(new LabelBuilder("Chat", "") {
-                            {
-                                alignCenter();
-                                valignCenter();
-                                height("85%");
-//                                width("25%");
-                                width(gs.getPlayer().getHotbar().length * nifty.getRenderEngine().getNativeHeight() * 0.08 + gs.getPlayer().getHotbar().length * 2 + "px");
-//                                backgroundColor("#A30000");
-                                visibleToMouse(false);
-                                textVAlign(ElementBuilder.VAlign.Top);
-                                textHAlign(ElementBuilder.Align.Left);
-                                this.font("Interface/Fonts/pixelCC0_noOutline.fnt");
-
-                                wrap(true);
-
-//                                 onActiveEffect(new EffectBuilder("textSize") {
-//                                    {
-//                                        effectParameter("endSize", "0.8");
-//
-//                                    }
-//                                });
-                            }
-                        });
-                    }
-                });
 
                 layer(new LayerBuilder("ammo") {
                     {
@@ -285,8 +233,7 @@ public class PlayerHUD extends BaseAppState {
                                 alignCenter();
                                 valignCenter();
                                 height("1%");
-                                this.font("Interface/Fonts/pixelCC0_noOutline.fnt");
-
+                                this.font("Interface/Fonts/pixelCC0_noOutline14.fnt");
                                 width("" + length + "px");
 //                                backgroundColor("#A30000");
                                 visibleToMouse(false);
@@ -296,98 +243,6 @@ public class PlayerHUD extends BaseAppState {
                     }
                 });
 
-                // DRAW HOTBAR
-                layer(new LayerBuilder("hotbar") {
-                    {
-                        childLayoutHorizontal();
-                        paddingLeft("" + ((nifty.getRenderEngine().getNativeWidth() - (0.08 * nifty.getRenderEngine().getNativeHeight() * gs.getPlayer().getHotbar().length)) / 2) + "px");
-                        paddingTop("60%");
-
-                        for (int slotNumber = 0; slotNumber < gs.getPlayer().getHotbar().length; slotNumber++) {
-                            final int i = slotNumber;
-                            image(new ImageBuilder("hotbarslot" + i) {
-                                {
-                                    visible(true);
-                                    filename("Textures/GUI/equipmentSlotEmpty.png");
-//      
-
-                                    height(nifty.getRenderEngine().getNativeHeight() * 0.08 + "px");
-                                    width(nifty.getRenderEngine().getNativeHeight() * 0.08 + "px");
-                                    visibleToMouse(true);
-                                    // kod od ustawianai okienek
-                                    marginLeft("" + (EQ_MARGIN + 2) + "px");
-                                    marginTop("80%");
-
-                                    // kod od ustawiania okienek
-                                }
-                            });
-
-                        }
-
-                    }
-                });
-
-                // DRAW EQUIPPED SLOTS
-                layer(new LayerBuilder("equippedLayer") {
-                    {
-                        childLayoutHorizontal();
-                        paddingTop("10%");
-                        paddingLeft("2%");
-
-                    }
-                });
-
-                // DRAW EQUIPMENT SLOTS
-                eqSlotSizePx = nifty.getRenderEngine().getNativeHeight() * 0.08;
-
-                for (int j = 0; j < ROWS; j++) {
-
-                    layer(new LayerBuilder("playerEquipmentLayer") {
-                        {
-
-                            childLayoutHorizontal();
-                            paddingLeft("80%");
-                            paddingTop("30%");
-
-                            cnt++;
-                            final double marginTop = cnt * eqSlotSizePx;
-                            for (int slotNumber = 0; slotNumber < gs.getPlayer().getEquipment().length / ROWS; slotNumber++) {
-                                final int i = slotNumber;
-//                                cnt = slotNumber;
-
-                                image(new ImageBuilder("slot" + equipmentSlotAdded) {
-                                    {
-                                        visible(false);
-                                        filename("Textures/GUI/equipmentSlotEmpty.png");
-                                        height(nifty.getRenderEngine().getNativeHeight() * 0.08 + "px");
-                                        width(nifty.getRenderEngine().getNativeHeight() * 0.08 + "px");
-                                        visibleToMouse(true);
-//                                        interactOnClick("playerEquipItem(" + equipmentSlotAdded++ + ")");
-                                        interactOnRelease("playerEquipItem(" + equipmentSlotAdded++ + ")");
-                                        onStartHoverEffect(new HoverEffectBuilder("border") {
-                                            {
-                                                effectParameter("hoverHeight", "100%");
-                                                effectParameter("hoverWidth", "100%");
-                                                effectParameter("color", "#000");
-                                                effectParameter("border", "3px");
-                                                effectParameter("onStartEffect", "getItemInfo(" + equipmentSlotAdded + ")");
-
-                                            }
-                                        });
-                                        // kod od ustawianai okienek
-                                        marginLeft("" + (EQ_MARGIN + 2) + "px");
-                                        marginTop("" + marginTop + "px");
-
-                                        // kod od ustawiania okienek
-                                    }
-                                });
-
-                            }
-
-                        }
-                    });
-
-                }
 
                 // <layer>
                 layer(new LayerBuilder("staticLayer") {

@@ -84,17 +84,18 @@ public class Rifle extends RangedWeapon {
 
     @Override
     public void playerUnequip(Player p) {
-        if (p.getEquippedRightHand() == this) {
-
-            p.setEquippedRightHand(null);
-            if (PlayerEqualsMyPlayer(p)) {
-                p.getGunNode().removeControl(gunRecoil);
-                p.getMainCameraNode().removeControl(camRecoil);
-                p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
-            }
-
-            p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
+        if (p.getEquippedRightHand() != this) {
+            return;
         }
+        p.setEquippedRightHand(null);
+        if (PlayerEqualsMyPlayer(p)) {
+            p.getGunNode().removeControl(gunRecoil);
+            p.getMainCameraNode().removeControl(camRecoil);
+            p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+        }
+
+        p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
+
     }
 
     @Override
@@ -148,23 +149,7 @@ public class Rifle extends RangedWeapon {
 
         }
 
-        Node model = (Node) assetManager.loadModel(template.getDropPath());
-        model.move(0, -0.43f, 0.37f);
-        Geometry ge = (Geometry) (model.getChild(0));
-        Material originalMaterial = ge.getMaterial();
-        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
-        ge.setMaterial(newMaterial);
-        float length = 1.3f;
-        float width = 1.3f;
-        float height = 1.3f;
-        model.scale(length, width, height);
-        p.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
-        setupModelShootability(model, p.getId());
-        thirdPersonModelParentIndex = p.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
-
-        System.out.println("name " + p.getName());
-        System.out.println(" EQUIPPED A RIFLE! (pos = " + model.getWorldTranslation());
+        humanEquipInThirdPerson(p, assetManager);
     }
 
     @Override
@@ -392,7 +377,13 @@ public class Rifle extends RangedWeapon {
 
     private void humanEquipInThirdPerson(HumanMob humanMob, AssetManager assetManager) {
         Node model = (Node) assetManager.loadModel(template.getDropPath());
-        model.move(0, -0.43f, 0.37f);
+        model.setLocalTranslation(template.getThirdPersonOffsetData().getOffset());
+        model.rotate(
+                template.getThirdPersonOffsetData().getRotation().x,
+                template.getThirdPersonOffsetData().getRotation().y,
+                template.getThirdPersonOffsetData().getRotation().z
+        );
+
         Geometry ge = (Geometry) (model.getChild(0));
         Material originalMaterial = ge.getMaterial();
         Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");

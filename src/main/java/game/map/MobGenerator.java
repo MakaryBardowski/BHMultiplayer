@@ -52,6 +52,10 @@ public class MobGenerator {
                         )
                 );
 
+        for (int i = 0; i < 4; i++) {
+            serverLevelManager.registerRandomChest(new Vector3f(random.nextInt(8 * blockSize) + 2*blockSize, blockSize, random.nextInt(8 * blockSize) + 2*blockSize)
+            );
+        }
     }
 
     public void spawnRandomMobs(byte[][][] logicMap) {
@@ -66,13 +70,10 @@ public class MobGenerator {
 ////            }
 //            serverLevelManager.registerRandomChest(pos);
 //        }
-
-
-
 //if(levelIndex == 1){
         for (int i = 0; i < 30; i++) {
             var mobPos = new Vector3f(random.nextInt(37 * blockSize) + 0.5f * blockSize, blockSize, random.nextInt(37 * blockSize) + 0.5f * blockSize);
-            while (!GridUtils.isSpotEmpty(mobPos,logicMap)) {
+            while (!GridUtils.isSpotEmpty(mobPos, logicMap)) {
                 mobPos = new Vector3f(random.nextInt(37 * blockSize) + 0.5f * blockSize, blockSize, random.nextInt(37 * blockSize) + 0.5f * blockSize);
             }
 
@@ -82,13 +83,12 @@ public class MobGenerator {
 //                mob.addAi();
 //                mob.setPositionServer(mobPos);
 //            } else {
-                HumanMob mob = (HumanMob) serverLevelManager.registerMob(MobSpawnType.HUMAN);
-                mob.addAi();
-                mob.setPositionServer(mobPos);
-            }
+            HumanMob mob = (HumanMob) serverLevelManager.registerMob(MobSpawnType.HUMAN);
+            mob.addAi();
+            mob.setPositionServer(mobPos);
+        }
 //        }
 //}
-
 
 //        for (int i = 0; i < 50; i++) {
 //
