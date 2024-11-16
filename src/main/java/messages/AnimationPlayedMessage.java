@@ -13,7 +13,7 @@ import com.jme3.network.serializing.Serializable;
 import game.entities.Animated;
 import game.entities.Animation;
 import game.entities.Collidable;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.map.collision.MovementCollisionUtils;
 import game.map.collision.WorldGrid;
 import java.util.ArrayList;

@@ -25,7 +25,7 @@ import com.simsilica.lemur.Label;
 import com.simsilica.lemur.component.BoxLayout;
 import com.simsilica.lemur.component.IconComponent;
 import com.simsilica.lemur.event.MouseEventControl;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.items.Item;
 import game.items.armor.Armor;
 import game.items.weapons.Weapon;
@@ -141,7 +141,7 @@ public class LemurPlayerEquipment {
             if (equipmentButtonSource.isClickDisabled()) {
                 return;
             }
-            var item = player.getEquipment()[buttonIndex];
+            var item = player.getEquipment().getItemAt(buttonIndex);
 //            if (item instanceof Armor) {
 //                return;
 //            }
@@ -238,10 +238,10 @@ public class LemurPlayerEquipment {
     }
 
     public void setEquipmentTileIcon(int buttonIndex, EquipmentButton button, float sizePx) {
-        var itemInSlot = player.getEquipment()[buttonIndex];
+        var itemInSlot = player.getEquipment().getItemAt(buttonIndex);
         var path = "Textures/GUI/equipmentSlotEmpty.png";
         if (itemInSlot != null) {
-            path = player.getEquipment()[buttonIndex].getTemplate().getIconPath();
+            path = itemInSlot.getTemplate().getIconPath();
         }
         var c = new IconComponent(path);
         c.setIconSize(new Vector2f(sizePx, sizePx));

@@ -9,7 +9,7 @@ import game.effects.GradientParticleEmitter;
 import game.effects.GradientParticleMesh;
 import game.items.ItemTemplates.ItemTemplate;
 import game.entities.mobs.Mob;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import projectiles.controls.BulletTracerControl;
 import client.ClientGameAppState;
 import client.Main;
@@ -311,8 +311,8 @@ public class Rifle extends RangedWeapon {
         int localAmmo = getAmmo();
         int maxAmmo = getMaxAmmo();
 
-        for (int i = 0; i < wielder.getEquipment().length; i++) {
-            Item item = wielder.getEquipment()[i];
+
+        for (var item : wielder.getEquipment().getAllItems()) {
             if (item instanceof AmmoPack pack && pack.getTemplate().getType().equals(ItemTemplates.ItemType.RIFLE_AMMO)) {
                 int initialPackAmmo = pack.getAmmo();
                 ammoFromPack = Math.min(ammoToFullClip, initialPackAmmo);

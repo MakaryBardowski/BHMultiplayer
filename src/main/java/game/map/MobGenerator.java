@@ -10,7 +10,7 @@ import com.jme3.math.Vector3f;
 import game.entities.factories.MobSpawnType;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.MudBeetle;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import java.util.Random;
 import server.ServerMain;
 

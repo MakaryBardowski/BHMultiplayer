@@ -28,7 +28,7 @@ import game.entities.factories.PlayerFactory;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
 import game.entities.mobs.MudBeetle;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.items.AmmoPack;
 import game.items.Item;
 import game.items.ItemTemplates;
@@ -261,7 +261,7 @@ public class ServerLevelManager extends LevelManager {
             var otherPlayersFilter = Filters.notIn(hc);
             Item item = registerItemAndNotifyTCP(template, true, otherPlayersFilter);
 
-            player.addToEquipment(item);
+            player.getEquipment().addItem(item);
 
             if (item instanceof Armor) {
                 player.equipServer(item);
@@ -382,12 +382,10 @@ public class ServerLevelManager extends LevelManager {
             }
         }
 
-        for (Item i : mob.getEquipment()) {
-            if (i != null) {
-                MobItemInteractionMessage pmsg = new MobItemInteractionMessage(i, mob, MobItemInteractionMessage.ItemInteractionType.PICK_UP);
-                sendMessageTCP(pmsg, filter);
-            }
-        }
+        mob.getEquipment().getAllItems().forEach(item -> {
+            MobItemInteractionMessage pmsg = new MobItemInteractionMessage(item, mob, MobItemInteractionMessage.ItemInteractionType.PICK_UP);
+            sendMessageTCP(pmsg, filter);
+        });
 
     }
 
@@ -582,9 +580,8 @@ public class ServerLevelManager extends LevelManager {
     private List<Item> getItemsTokeep() {
         List<Item> itemsToKeep = new ArrayList<>();
         for (Player player : players) {
-            for (var itemInPlayerEquipment : player.getEquipment()) {
-                itemsToKeep.add(itemInPlayerEquipment);
-            }
+            itemsToKeep.addAll(player.getEquipment().getAllItems());
+
             itemsToKeep.add(player.getDefaultHelmet());
             itemsToKeep.add(player.getDefaultVest());
             itemsToKeep.add(player.getDefaultGloves());

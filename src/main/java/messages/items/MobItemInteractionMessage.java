@@ -52,15 +52,8 @@ public class MobItemInteractionMessage extends TwoWayMessage {
         if (getInteractionType() == ItemInteractionType.PICK_UP) {
             var mob = getMobByIdServer(mobId);
             var newItem = getItemByIdServer(itemId);
-            boolean doesntHaveItem = true;
-            for (var item : mob.getEquipment()) {
-                if (item == newItem) {
-                    doesntHaveItem = false;
-                }
-            }
 
-            if (doesntHaveItem) {
-                mob.addToEquipment(newItem);
+            if (mob.getEquipment().addItem(newItem)) {
                 server.getServer().broadcast(this);
             }
 
@@ -100,7 +93,7 @@ public class MobItemInteractionMessage extends TwoWayMessage {
                         });
                     }
 
-                    getMobByIdClient(mobId).addToEquipment(pickedUp);
+                    getMobByIdClient(mobId).getEquipment().addItem(pickedUp);
                     break;
                 case DROP:
                     removeItemFromMobEquipmentClient(mobId, itemId);

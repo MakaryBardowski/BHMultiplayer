@@ -2,8 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package game.entities.mobs;
+package game.entities.mobs.player;
 
+import game.entities.inventory.Hotbar;
 import game.items.Equippable;
 import game.items.Item;
 
@@ -26,6 +27,7 @@ import static client.Main.CAM__MOVE_SPEED;
 import com.jme3.anim.AnimComposer;
 import com.jme3.network.AbstractMessage;
 import data.DamageReceiveData;
+import game.entities.mobs.HumanMob;
 import game.entities.mobs.playerClasses.AssaultClass;
 import game.entities.mobs.playerClasses.MedicClass;
 import game.entities.mobs.playerClasses.PlayerClass;
@@ -64,7 +66,7 @@ public class Player extends HumanMob {
     private Node rotationNode = new Node();
 
     private Camera mainCamera;
-    private final Item[] hotbar;
+    private final Hotbar hotbar;
     private final Node gunNode = new Node("gun node");
 
     //controlling player actions
@@ -132,7 +134,7 @@ public class Player extends HumanMob {
         this.playerClass = playerClass;
         this.mainCamera = mainCamera;
         firstPersonHands = new FirstPersonHands(this);
-        hotbar = new Item[HOTBAR_SIZE];
+        hotbar = new Hotbar(new Item[HOTBAR_SIZE]);
 
         if (playerClass instanceof AssaultClass) {
             health = 115;
@@ -173,7 +175,7 @@ public class Player extends HumanMob {
         }
     }
 
-    public Item[] getHotbar() {
+    public Hotbar getHotbar() {
         return hotbar;
     }
 

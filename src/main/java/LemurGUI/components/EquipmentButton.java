@@ -33,7 +33,7 @@ public class EquipmentButton extends DraggableButton {
     @Override
     public void onDragStart(CursorButtonEvent event, CollisionResult collision, Spatial capture) {
         clickDisabled = true;
-        var item = lemurPlayerEquipment.getPlayer().getEquipment()[Integer.parseInt(capture.getName())];
+        var item = lemurPlayerEquipment.getPlayer().getEquipment().getItemAt(Integer.parseInt(capture.getName()));
         if (item == null) {
             return;
         }
@@ -66,7 +66,7 @@ public class EquipmentButton extends DraggableButton {
     public void onDragStop(CursorButtonEvent event, CursorMotionEvent lastMotion, Spatial dragTarget, Spatial draggedSpatial) {
         clickDisabled = false;
         var draggedItemIndexInEquipment = Integer.parseInt(this.getName());
-        var item = lemurPlayerEquipment.getPlayer().getEquipment()[draggedItemIndexInEquipment];
+        var item = lemurPlayerEquipment.getPlayer().getEquipment().getItemAt(draggedItemIndexInEquipment);
         if (item == null) {
             return;
         }
@@ -79,7 +79,7 @@ public class EquipmentButton extends DraggableButton {
 
             var miim = new MobItemInteractionMessage(item.getId(), lemurPlayerEquipment.getPlayer().getId(), MobItemInteractionMessage.ItemInteractionType.DROP);
             ClientGameAppState.getInstance().getClient().send(miim);
-            lemurPlayerEquipment.getPlayer().getHotbar()[Integer.parseInt(draggedSpatial.getName())] = null;
+            lemurPlayerEquipment.getPlayer().getHotbar().removeItemAt(Integer.parseInt(draggedSpatial.getName()));
 
             return;
         }
@@ -98,7 +98,7 @@ public class EquipmentButton extends DraggableButton {
             dragTargetEquipmentButton.setIcon(captureIcon);
             this.setIcon(targetIcon);
 
-            lemurPlayerEquipment.getPlayer().equipmentSwapItems(Integer.parseInt(dragTargetEquipmentButton.getName()), draggedItemIndexInEquipment);
+            lemurPlayerEquipment.getPlayer().getEquipment().swapItems(Integer.parseInt(dragTargetEquipmentButton.getName()), draggedItemIndexInEquipment);
             System.out.println("event "+event.getX() + " "+event.getY());
             tooltipListener.mouseEntered(new MouseMotionEvent((int) event.getX(), (int) event.getY(), 0, 0, 0, 0), dragTarget, dragTarget);
         }
@@ -108,7 +108,7 @@ public class EquipmentButton extends DraggableButton {
             dragTargetHotbarButton.setIcon(captureIcon);
 
             var hotbarIndex = Integer.parseInt(dragTarget.getName());
-            lemurPlayerEquipment.getPlayer().getHotbar()[hotbarIndex] = lemurPlayerEquipment.getPlayer().getEquipment()[draggedItemIndexInEquipment];
+            lemurPlayerEquipment.getPlayer().getHotbar().addItemAt(lemurPlayerEquipment.getPlayer().getEquipment().getItemAt(draggedItemIndexInEquipment),hotbarIndex);
             dragTargetHotbarButton.getTooltipListener().mouseEntered(new MouseMotionEvent((int) event.getX(), (int) event.getY(), 0, 0, 0, 0), dragTarget, dragTarget);
 
         }

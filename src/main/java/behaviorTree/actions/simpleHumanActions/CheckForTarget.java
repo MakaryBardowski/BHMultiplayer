@@ -12,7 +12,7 @@ import com.jme3.scene.Spatial;
 import game.entities.Destructible;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.MudBeetle;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;

@@ -7,7 +7,7 @@ package game.items.armor;
 import client.ClientGameAppState;
 import game.items.ItemTemplates;
 import static game.map.blocks.VoxelLighting.setupModelLight;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import client.Main;
 import com.jme3.math.Quaternion;
 import com.jme3.network.AbstractMessage;

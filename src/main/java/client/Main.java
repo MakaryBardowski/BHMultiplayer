@@ -8,12 +8,13 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 import game.map.blocks.VoxelLighting;
+import generators.PercentageRandomGenerator;
 import java.awt.DisplayMode;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import networkingUtils.NetworkingInitialization;
 
-/**
+/** 
  * This is the Main Class of your Game. You should only do initialization here.
  * Move your Logic into AppStates or Controls
  *
@@ -52,6 +53,7 @@ public class Main extends SimpleApplication {
         setDisplayFps(false);
         setDisplayStatView(false);
         System.out.println("app camera" + cam);
+        
         flyCam.setMoveSpeed(0); //30
         flyCam.setRotationSpeed(0); //1.0
         speed = 1f;

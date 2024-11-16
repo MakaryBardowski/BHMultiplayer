@@ -21,7 +21,7 @@ import game.entities.InteractiveEntity;
 import game.entities.StatusEffectContainer;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.AiSteerable;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.items.Item;
 import game.map.collision.WorldGrid;
 import java.io.IOException;
@@ -177,11 +177,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
         var mob = (Mob) instance.getLevelManagerMobs().get(mobId);
         var item = (Item) instance.getLevelManagerMobs().get(itemId);
         var mobEquipment = mob.getEquipment();
-        for (int i = 0; i < mobEquipment.length; i++) {
-            if (mobEquipment[i] != null && mobEquipment[i].getId() == item.getId()) {
-                mobEquipment[i] = null;
-            }
-        }
+        mobEquipment.removeItem(item);
     }
 
     public ConcurrentHashMap<Integer, InteractiveEntity> getLevelManagerMobs() {

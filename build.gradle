@@ -2,11 +2,10 @@ plugins {
     id 'java'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '7.1.2'  // Add the Shadow plugin
-    id 'org.beryx.jlink' version '2.26.0'  // Add the JLink plugin
 }
 
 group 'com.mygame'
-version '0.0.86'
+version '0.0.87'
 
 mainClassName = "client.Main"
 
@@ -41,6 +40,11 @@ project(":assets") {
 }
 
 dependencies {
+    implementation  ('org.example:McCurryRandom:0.1') {
+        version {
+            branch = "master"
+        }
+    }
     implementation "org.jmonkeyengine:jme3-core:$jmeVer"
     implementation "org.jmonkeyengine:jme3-desktop:$jmeVer"
     implementation "org.jmonkeyengine:jme3-lwjgl3:$jmeVer"
@@ -71,7 +75,7 @@ java {
 }
 
 wrapper {
-    gradleVersion = '8.0'
+    gradleVersion = '8.11'
 }
 
 // ShadowJar configuration
@@ -82,32 +86,15 @@ shadowJar {
     }
 }
 
-// JLink configuration to bundle JRE
-jlink {
-    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
-    jlinkBasePath = "${buildDir}/jlinkbase"
-
-    launcher {
-        name = 'mygame'
-    }
-    imageDir = file("${buildDir}/image")
-    mergedModule {
-        additive = true
-    }
-}
-
 application {
     mainClass.set(mainClassName)
 }
 
-// Task to create a distributable zip including the JRE
+// Task to create a distributable ZIP containing just the JAR
 task distZipJar(type: Zip) {
-    dependsOn shadowJar, jlink
-    from("$buildDir/image") {
+    dependsOn shadowJar
+    from("$buildDir/libs") {
         into("/")
-    }
-    from(shadowJar.outputs) {
-        into("lib")
     }
     archiveFileName = "mygame-${version}.zip"
 }

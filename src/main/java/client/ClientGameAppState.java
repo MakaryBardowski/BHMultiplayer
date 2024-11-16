@@ -26,7 +26,7 @@ import de.lessvoid.nifty.Nifty;
 import game.entities.InteractiveEntity;
 import game.entities.factories.MobSpawnType;
 import game.entities.mobs.Mob;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.map.Level;
 import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.map.collision.WorldGrid;

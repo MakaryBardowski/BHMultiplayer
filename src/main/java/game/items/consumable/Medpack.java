@@ -5,36 +5,18 @@
 package game.items.consumable;
 
 import game.items.weapons.*;
-import FirstPersonHands.FirstPersonHandAnimationData;
 import client.ClientGameAppState;
-import client.Main;
-import com.jme3.anim.SkinningControl;
-import com.jme3.asset.AssetManager;
-import com.jme3.material.Material;
-import com.jme3.math.FastMath;
-import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.items.ItemTemplates;
-import lombok.Getter;
-import messages.GrenadeThrownMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewGrenadeMessage;
 import static client.ClientGameAppState.removeEntityByIdClient;
-import com.jme3.anim.tween.Tween;
-import com.jme3.anim.tween.Tweens;
-import com.jme3.anim.tween.action.Action;
-import com.jme3.anim.tween.action.ClipAction;
 import com.jme3.network.Filters;
-import de.lessvoid.nifty.controls.label.LabelControl;
-import static game.entities.DestructibleUtils.setupModelShootability;
-import game.items.Holdable;
 import messages.DestructibleHealReceiveMessage;
-import messages.SystemHealthUpdateMessage;
 import server.ServerMain;
 import static server.ServerMain.removeEntityByIdServer;
 
@@ -159,7 +141,7 @@ public class Medpack extends ThrowableWeapon {
 //        }
 //        p.setHoldsTrigger(false);
 //        playerHoldInRightHand(p);
-        p.removeFromEquipment(this);
+        p.getEquipment().removeItem(this);
         removeEntityByIdClient(id);
     }
 

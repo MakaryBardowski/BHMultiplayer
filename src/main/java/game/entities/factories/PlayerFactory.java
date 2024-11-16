@@ -5,7 +5,7 @@
 package game.entities.factories;
 
 import client.ClientGameAppState;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import client.Main;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.SkinningControl;

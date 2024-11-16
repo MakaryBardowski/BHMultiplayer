@@ -19,7 +19,7 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.style.BaseStyles;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import java.util.Random;
 
 /**

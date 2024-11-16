@@ -4,7 +4,7 @@
  */
 package game.effects;
 
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import client.ClientGameAppState;
 import client.Main;
 import com.epagagames.particles.Emitter;

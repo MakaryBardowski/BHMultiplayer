@@ -17,7 +17,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.items.ItemTemplates;
 import lombok.Getter;
 import messages.GrenadeThrownMessage;
@@ -146,7 +146,7 @@ public class Grenade extends ThrowableWeapon {
 
         cs.getClient().send(gtm);
 
-        p.removeFromEquipment(this);
+        p.getEquipment().removeItem(this);
         p.unequip(this);
         removeEntityByIdClient(id);
 

@@ -13,7 +13,7 @@ import game.items.Holdable;
 import game.items.Item;
 import game.items.ItemTemplates.ItemTemplate;
 import game.entities.mobs.Mob;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.items.ItemTemplates;
 import lombok.Getter;
 import lombok.Setter;

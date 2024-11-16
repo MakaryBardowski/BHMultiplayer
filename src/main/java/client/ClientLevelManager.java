@@ -25,7 +25,7 @@ import game.entities.factories.MobSpawnType;
 import game.entities.factories.PlayerFactory;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.Mob;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.map.MapGenerator;
 import game.map.MapType;
 import game.map.collision.WorldGrid;

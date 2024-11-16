@@ -21,6 +21,7 @@ import com.simsilica.lemur.VAlignment;
 import com.simsilica.lemur.component.BoxLayout;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.event.MouseListener;
+import game.entities.inventory.Equipment;
 import game.items.Item;
 
 /**
@@ -119,12 +120,28 @@ public class TooltipMouseListener implements MouseListener {
             return;
         }
 
-        Item[] itemSource = lemurPlayerEquipmentGui.getPlayer().getEquipment();
-        if (tooltipSource == TooltipSource.HOTBAR) {
-            itemSource = lemurPlayerEquipmentGui.getPlayer().getHotbar();
+        var equipmentItemSource = lemurPlayerEquipmentGui.getPlayer().getEquipment();
+        var hotbarItemSource = lemurPlayerEquipmentGui.getPlayer().getHotbar();
+        if (tooltipSource == TooltipSource.EQUIPMENT) {
+            var item =  equipmentItemSource.getItemAt(Integer.parseInt(sptl.getName()));
+            if (item == null) {
+                return;
+            }
+            String description = item.getDescription();
+            String label = item.getName();
+            getTooltipDescription().setText(description);
+            getTooltipLabel().setText(label);
+
+            if (lemurPlayerEquipmentGui.getTooltipContainer().getChildren().isEmpty()) {
+                lemurPlayerEquipmentGui.getTooltipContainer().addChild(getTooltipInnerContainer());
+            }
+            var tooltipPos = getTooltipPosition(mme.getX(), mme.getY());
+
+            lemurPlayerEquipmentGui.getTooltipContainer().setLocalTranslation(tooltipPos);
+            return;
         }
 
-        var item = itemSource[Integer.parseInt(sptl.getName())];
+        var item = hotbarItemSource.getItemAt(Integer.parseInt(sptl.getName()));
         if (item == null) {
             return;
         }

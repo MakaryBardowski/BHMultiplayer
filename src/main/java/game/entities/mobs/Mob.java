@@ -8,6 +8,7 @@ import behaviorTree.BehaviorTree;
 import client.ClientGameAppState;
 import client.Main;
 import game.entities.Destructible;
+import game.entities.inventory.Equipment;
 import game.items.Item;
 import game.map.collision.CollidableInterface;
 import com.jme3.math.Quaternion;
@@ -43,7 +44,7 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
     private static final float DEFAULT_SPEED = 8.75f; //10, 13.25f for knife
     protected static final int EQUIPMENT_SIZE = 20;
 
-    protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
+    protected Equipment equipment = new Equipment(new Item[EQUIPMENT_SIZE]); // 6 rows 3 cols
 
     //mob stats
     protected float cachedSpeed = DEFAULT_SPEED; // speed is very frequently accessed
@@ -110,7 +111,7 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
         this.currentTarget = currentTarget;
     }
 
-    public Item[] getEquipment() {
+    public Equipment getEquipment() {
         return equipment;
     }
 
@@ -132,35 +133,9 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 //        System.err.println("player " + this + " equipment:\n" + Arrays.toString(this.getEquipment()) + "\n\n");
 
 //        System.out.println("eq to be dropped: " + Arrays.toString(equipment));
-        for (int i = 0; i < equipment.length; i++) {
-            Item item = equipment[i];
-            if (item != null) {
-//                System.out.println("dropping " + item + " its node " + item.getNode() + " its position " + item.getNode().getWorldTranslation());
-                item.drop(node.getWorldTranslation().add(r.nextFloat(-0.25f, 0.25f), 2 + r.nextFloat(-1, 1), r.nextFloat(-0.25f, 0.25f)));
-                equipment[i] = null;
-            }
-        }
-    }
-
-    public Item addToEquipment(Item item) {
-        for (int i = 0; i < equipment.length; i++) {
-            if (equipment[i] == null) {
-                equipment[i] = item;
-                break;
-            }
-        }
-        return item;
-    }
-
-    public Item removeFromEquipment(Item item) {
-        for (int i = 0; i < equipment.length; i++) {
-            if (equipment[i] == item) {
-                equipment[i] = null;
-                break;
-            }
-        }
-
-        return item;
+        equipment.removeAllItems().forEach(item -> {
+            item.drop(node.getWorldTranslation().add(r.nextFloat(-0.25f, 0.25f), 2 + r.nextFloat(-1, 1), r.nextFloat(-0.25f, 0.25f)));
+        });
     }
 
     @Override
@@ -182,11 +157,5 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
     @Override
     public void playAnimation(Animation anim) {
 
-    }
-
-    public void equipmentSwapItems(int index, int otherIndex) {
-        var item = equipment[index];
-        equipment[index] = equipment[otherIndex];
-        equipment[otherIndex] = item;
     }
 }

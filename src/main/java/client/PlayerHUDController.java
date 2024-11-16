@@ -42,7 +42,7 @@ public class PlayerHUDController implements ScreenController {
 
     public static void playerEquipItem(String strIndex) {
         int i = Integer.parseInt(strIndex);
-        Item item = gs.getPlayer().getEquipment()[i];
+        Item item = gs.getPlayer().getEquipment().getItemAt(i);
         gs.getPlayer().equip(item);
         sendEquipMessageToServer(item);
 

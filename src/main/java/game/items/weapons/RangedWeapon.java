@@ -16,7 +16,7 @@ import game.entities.Destructible;
 import game.entities.IntegerAttribute;
 import game.entities.InteractiveEntity;
 import game.entities.mobs.Mob;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.items.ItemTemplates.ItemTemplate;
 import lombok.Getter;
 import lombok.Setter;

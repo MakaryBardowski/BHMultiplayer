@@ -9,7 +9,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import lombok.Getter;
 import server.ServerMain;
 

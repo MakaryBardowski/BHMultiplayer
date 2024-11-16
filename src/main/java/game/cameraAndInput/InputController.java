@@ -5,7 +5,7 @@
  */
 package game.cameraAndInput;
 
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import client.ClientGameAppState;
 import client.Main;
 import static client.Main.CAM_ROT_SPEED;
@@ -125,7 +125,7 @@ public class InputController {
 
                 if (!player.isDead() && isHotbarName(name) && !keyPressed) {
                     System.out.println("hotbar name ======== "+name);
-                    Item equippedItem = player.getHotbar()[Integer.parseInt(name)];
+                    Item equippedItem = player.getHotbar().getItemAt(Integer.parseInt(name));
                     player.equip(equippedItem);
                     PlayerHUDController.sendEquipMessageToServer(equippedItem);
                 }

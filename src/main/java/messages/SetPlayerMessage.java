@@ -15,7 +15,7 @@ import com.jme3.network.serializing.Serializable;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.cameraAndInput.InputController;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import lombok.Getter;
 import server.ServerMain;
 

@@ -12,7 +12,7 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.items.consumable.Medpack;
 import lombok.Getter;
 import server.ServerMain;

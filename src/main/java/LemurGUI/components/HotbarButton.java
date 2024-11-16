@@ -35,7 +35,7 @@ public class HotbarButton extends DraggableButton {
     @Override
     public void onDragStart(CursorButtonEvent event, CollisionResult collision, Spatial capture) {
         clickDisabled = true;
-        var item = lemurPlayerEquipment.getPlayer().getHotbar()[Integer.parseInt(capture.getName())];
+        var item = lemurPlayerEquipment.getPlayer().getHotbar().getItemAt(Integer.parseInt(capture.getName()));
         if (item == null) {
             return;
         }
@@ -71,7 +71,7 @@ public class HotbarButton extends DraggableButton {
             return;
         }
         if (dragTarget == null) {
-            lemurPlayerEquipment.getPlayer().getHotbar()[Integer.parseInt(draggedSpatial.getName())] = null;
+            lemurPlayerEquipment.getPlayer().getHotbar().removeItemAt(Integer.parseInt(draggedSpatial.getName()));
             var currentIconSize = ((IconComponent) this.getIcon()).getIconSize();
             var emptyIcon = new IconComponent("Textures/GUI/equipmentSlotEmpty.png");
             emptyIcon.setIconSize(currentIconSize);
@@ -80,7 +80,7 @@ public class HotbarButton extends DraggableButton {
         }
 
         var draggedItemIndexInHotbar = Integer.parseInt(this.getName());
-        if (lemurPlayerEquipment.getPlayer().getHotbar()[draggedItemIndexInHotbar] == null) {
+        if (lemurPlayerEquipment.getPlayer().getHotbar().isEmptySlot(draggedItemIndexInHotbar)) {
             return;
         }
 
@@ -98,9 +98,9 @@ public class HotbarButton extends DraggableButton {
             this.setIcon(targetIcon);
 
             var hotbarIndex = Integer.parseInt(dragTarget.getName());
-            var itemInTargetSlot = lemurPlayerEquipment.getPlayer().getHotbar()[hotbarIndex];
-            lemurPlayerEquipment.getPlayer().getHotbar()[hotbarIndex] = lemurPlayerEquipment.getPlayer().getHotbar()[draggedItemIndexInHotbar];
-            lemurPlayerEquipment.getPlayer().getHotbar()[draggedItemIndexInHotbar] = itemInTargetSlot;
+            lemurPlayerEquipment.getPlayer().getHotbar().swapItems(hotbarIndex,draggedItemIndexInHotbar);
+
+
             tooltipListener.mouseEntered(new MouseMotionEvent((int) event.getX(), (int) event.getY(), 0, 0, 0, 0), dragTarget, dragTarget);
 
         }
