@@ -10,6 +10,7 @@ import client.Main;
 import client.MainMenuAppState;
 import client.MainMenuController;
 import com.jme3.network.Filters;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import de.lessvoid.nifty.controls.Button;
 import de.lessvoid.nifty.controls.Label;
@@ -35,7 +36,7 @@ public class GameStartedMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerMain serverMain) {
+    public void handleServer(ServerMain serverMain,HostedConnection hc) {
     }
 
     @Override

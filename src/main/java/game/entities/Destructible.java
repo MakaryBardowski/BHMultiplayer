@@ -5,6 +5,7 @@
 package game.entities;
 
 import com.jme3.scene.Node;
+import data.DamageReceiveData;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,8 +32,11 @@ public abstract class Destructible extends Collidable {
     public void onDeathServer() {};
     public void onDeathClient() {};
 
-    public abstract void receiveDamage(float rawDamage);
+    public abstract void receiveDamage(DamageReceiveData damageData);
+    public abstract void receiveDamageServer(DamageReceiveData damageData);
     
+    public abstract void notifyServerAboutDealingDamage(float damage, InteractiveEntity attackingEntity); // notify about receiving!!!!
+
     public void receiveHeal(float heal) {
         health += heal;
     }

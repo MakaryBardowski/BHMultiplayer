@@ -9,6 +9,7 @@ import client.Main;
 import com.jme3.math.Vector3f;
 import messages.items.*;
 import com.jme3.network.AbstractMessage;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.DecorationTemplates;
 import game.entities.DestructibleDecoration;
@@ -56,7 +57,7 @@ public class NewDestructibleDecorationMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

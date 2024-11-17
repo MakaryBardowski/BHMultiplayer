@@ -5,7 +5,7 @@
  */
 package game.cameraAndInput;
 
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import client.ClientGameAppState;
 import client.Main;
 import static client.Main.CAM_ROT_SPEED;
@@ -26,7 +26,9 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.simsilica.lemur.GuiGlobals;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
 import static debugging.DebugUtils.DEBUG_GEO;
@@ -41,6 +43,7 @@ import java.util.Random;
 import messages.MobRotUpdateMessage;
 import messages.gameSetupMessages.NextLevelMessage;
 import server.ServerMain;
+import settings.GlobalSettings;
 
 /**
  *
@@ -73,7 +76,7 @@ public class InputController {
         m = gs.getInputManager();
         initKeys(m, initActionListener(gs), initAnalogListener(gs));
         var rotationNode = gs.getPlayer().getRotationNode();
-        headBob = new HeadBobControl(gs.getPlayer(),rotationNode.getLocalTranslation());
+        headBob = new HeadBobControl(gs.getPlayer(), rotationNode.getLocalTranslation());
         rotationNode.addControl(headBob);
     }
 
@@ -120,8 +123,9 @@ public class InputController {
 
                 }
 
-                if (!player.isDead() && name.equals("1") && !keyPressed) {
-                    Item equippedItem = player.getEquipment()[Integer.parseInt(name) - 1];
+                if (!player.isDead() && isHotbarName(name) && !keyPressed) {
+                    System.out.println("hotbar name ======== "+name);
+                    Item equippedItem = player.getHotbar().getItemAt(Integer.parseInt(name));
                     player.equip(equippedItem);
                     PlayerHUDController.sendEquipMessageToServer(equippedItem);
                 }
@@ -140,22 +144,8 @@ public class InputController {
                 }
 
                 if (name.equals("I") && !gs.getPlayer().isDead() && !keyPressed) {
-                    gs.getFlyCam().setDragToRotate(!gs.getFlyCam().isDragToRotate());
                     Player p = gs.getPlayer();
-                    p.setViewingEquipment(!p.isViewingEquipment());
-                    p.setHoldsTrigger(false);
-
-                    for (int eqSlot = 0; eqSlot < p.getEquipment().length; eqSlot++) {
-                        String iconString = "Textures/GUI/EquipmentIcons/equipmentSlotEmpty.png";
-                        if (p.getEquipment()[eqSlot] != null && p.getEquipment()[eqSlot].getTemplate().getIconPath() != null) {
-                            iconString = gs.getPlayer().getEquipment()[eqSlot].getTemplate().getIconPath();
-                        }
-
-                        guiElement = gs.getNifty().getRenderEngine().createImage(gs.getNifty().getCurrentScreen(), iconString, false);
-                        gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).getRenderer(ImageRenderer.class).setImage(guiElement);
-
-                        gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).setVisible(!gs.getNifty().getCurrentScreen().findElementById("slot" + eqSlot).isVisible());
-                    }
+                    p.getPlayerEquipmentGui().toggle();
                 }
 
                 if (name.equals(
@@ -179,8 +169,8 @@ public class InputController {
 //                if (name.equals("4") && !keyPressed) {
 //                    DEBUG_GEO.rotate(0, 10 * FastMath.DEG_TO_RAD, 0);
 //                }
-
                 if (name.equals("K") && !keyPressed) {
+//                    GlobalSettings.isAiDebug = !GlobalSettings.isAiDebug;
                     System.gc();
                     player.setRight(false);
                     player.setLeft(false);
@@ -192,11 +182,13 @@ public class InputController {
                     Main.getInstance().getFlyCam().setRotationSpeed(CAM_ROT_SPEED);
 
                     player.getMainCameraNode().removeFromParent();
+                    player.setPickupRange(10000f);
 
                     player.getFirstPersonHands().getHandsNode().setCullHint(Spatial.CullHint.Always);
                     player.getNode().setCullHint(Spatial.CullHint.Inherit);
 
                     player.setMovementControlLocked(true);
+                    player.setCameraMovementLocked(true);
                     updatePlayersThirdPersonHandsRot = true;
 //                    ServerMain.getInstance().getGrid().getContents().forEach((i,set)->{
 //                    if(!set.isEmpty()){
@@ -267,11 +259,13 @@ public class InputController {
                         var handsRot = player.getRotationNode().getLocalRotation();
 
                         var skinningControl = player.getSkinningControl();
-                        skinningControl.getArmature().getJoint("HandR").setLocalRotation(handsRot);
 
-                        var rot = skinningControl.getArmature().getJoint("HandR").getLocalRotation();
-                        skinningControl.getArmature().getJoint("HandL").setLocalRotation(rot);
-                        skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(rot);
+//                        player.getThirdPersonHandsNode().setLocalRotation(handsRot);
+//                        var curr = ((Node) player.getThirdPersonHandsNode().getChild(0)).getChild(0).getLocalRotation();
+//                        curr.set(handsRot.getX(), handsRot.getY(), handsRot.getZ(), handsRot.getW());
+                        skinningControl.getArmature().getJoint("HandsRotationBone").getLocalTransform().setRotation(handsRot);
+
+                        skinningControl.getArmature().getJoint("Head").getLocalTransform().setRotation(handsRot);
                     }
                 }
 
@@ -282,6 +276,10 @@ public class InputController {
         gs.setAnalogListener(analogListener);
 
         return analogListener;
+    }
+
+    private boolean isHotbarName(String s) {
+        return s == "1" || s == "2" || s == "3" || s == "4" || s == "5" || s == "6" || s == "7" || s == "8" || s == "9" || s == "0";
     }
 
     private void initKeys(InputManager inputManager, ActionListener actionListener, AnalogListener analogListener) {
@@ -305,7 +303,13 @@ public class InputController {
         inputManager.addMapping("2", new KeyTrigger(KeyInput.KEY_2)); // hotbar 2
         inputManager.addMapping("3", new KeyTrigger(KeyInput.KEY_3)); // hotbar 3
         inputManager.addMapping("4", new KeyTrigger(KeyInput.KEY_4)); // hotbar 4
-
+        inputManager.addMapping("5", new KeyTrigger(KeyInput.KEY_5)); // hotbar 5
+        inputManager.addMapping("6", new KeyTrigger(KeyInput.KEY_6)); // hotbar 6
+        inputManager.addMapping("7", new KeyTrigger(KeyInput.KEY_7)); // hotbar 7
+        inputManager.addMapping("8", new KeyTrigger(KeyInput.KEY_8)); // hotbar 8
+        inputManager.addMapping("9", new KeyTrigger(KeyInput.KEY_9)); // hotbar 9
+        inputManager.addMapping("0", new KeyTrigger(KeyInput.KEY_0)); // hotbar 0
+        
         inputManager.addMapping("MouseMovedX",
                 new MouseAxisTrigger(MouseInput.AXIS_X, false),
                 new MouseAxisTrigger(MouseInput.AXIS_X, true)
@@ -333,10 +337,15 @@ public class InputController {
         inputManager.addListener(actionListener, "I");
 
         inputManager.addListener(actionListener, "1");
-
         inputManager.addListener(actionListener, "2");
         inputManager.addListener(actionListener, "3");
         inputManager.addListener(actionListener, "4");
+        inputManager.addListener(actionListener, "5");
+        inputManager.addListener(actionListener, "6");
+        inputManager.addListener(actionListener, "7");
+        inputManager.addListener(actionListener, "8");
+        inputManager.addListener(actionListener, "9");
+        inputManager.addListener(actionListener, "0");
 
     }
 
@@ -370,7 +379,7 @@ public class InputController {
             if (hitName.matches("-?\\d+")) {
                 Integer hitId = Integer.valueOf(hitName);
                 InteractiveEntity mobHit = (InteractiveEntity) ClientGameAppState.getInstance().getMobs().get(hitId);
-                if (mobHit.getNode().getWorldTranslation().distance(p.getNode().getWorldTranslation()) <= Player.PICKUP_RANGE) {
+                if (closest.getContactPoint().distance(p.getNode().getWorldTranslation()) <= cs.getPlayer().getPickupRange()) {
                     mobHit.onInteract();
                 }
             }

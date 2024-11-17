@@ -11,6 +11,8 @@ import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
+import data.DamageReceiveData;
+import events.DamageReceivedEvent;
 import game.entities.DecorationTemplates.DecorationTemplate;
 import static game.entities.DestructibleUtils.attachDestructibleToNode;
 import static game.entities.DestructibleUtils.setupModelShootability;
@@ -53,7 +55,7 @@ public class DestructibleDecoration extends Destructible {
 
     @Override
     public void onShot(Mob shooter, float damage) {
-        notifyServerAboutDealingDamage(damage, this);
+        notifyServerAboutDealingDamage(damage, shooter);
     }
 
     @Override
@@ -81,12 +83,30 @@ public class DestructibleDecoration extends Destructible {
     }
 
     @Override
-    public void receiveDamage(float rawDamage) {
-        health = health - rawDamage;
+    public void receiveDamage(DamageReceiveData damageData) {
+        health = health - damageData.getRawDamage();
 
         if (health <= 0) {
             die();
+            destroyClient();
+            onDeathClient();
         }
+    }
+
+    @Override
+    public void receiveDamageServer(DamageReceiveData damageData) {
+        health = health - damageData.getRawDamage();
+
+        if (health <= 0) {
+            System.out.println("\n\n\n\n mine died");
+            destroyServer();
+            onDeathServer();
+            return;
+        }
+        Main.getInstance().enqueue(() -> {
+            notifyEventSubscribers(new DamageReceivedEvent(damageData));
+        }
+        );
     }
 
     @Override
@@ -107,8 +127,9 @@ public class DestructibleDecoration extends Destructible {
         return reducedDmg > 0 ? reducedDmg : 0;
     }
 
-    public void notifyServerAboutDealingDamage(float damage, DestructibleDecoration mob) {
-        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(mob.getId(), damage);
+    @Override
+    public void notifyServerAboutDealingDamage(float damage, InteractiveEntity attacker) {
+        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(id, attacker.id, damage);
         hpUpd.setReliable(true);
         ClientGameAppState.getInstance().getClient().send(hpUpd);
     }
@@ -131,8 +152,8 @@ public class DestructibleDecoration extends Destructible {
         var server = ServerMain.getInstance();
         server.getGrid().remove(this);
         if (node.getParent() != null) {
-            Main.getInstance().enqueue(() ->{
-            node.removeFromParent();
+            Main.getInstance().enqueue(() -> {
+                node.removeFromParent();
             });
         }
         removeEntityByIdServer(id);
@@ -147,7 +168,5 @@ public class DestructibleDecoration extends Destructible {
         });
         removeEntityByIdClient(id);
     }
-
-
 
 }

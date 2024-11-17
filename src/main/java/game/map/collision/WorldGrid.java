@@ -5,20 +5,9 @@
  */
 package game.map.collision;
 
-import com.jme3.material.Material;
-import com.jme3.material.RenderState;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 import game.entities.Collidable;
-import game.entities.InteractiveEntity;
-import game.entities.LevelExit;
-import game.entities.mobs.MudBeetle;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -81,9 +70,9 @@ public class WorldGrid {
         for (float[] corner : corners) {
             Vector3f v = new Vector3f(corner[0], corner[1], corner[2]);
             var cellContents = contents.get(hash(v));
-                if (!cellContents.contains(entity)) {
-                    cellContents.add(entity);
-                }
+            if (!cellContents.contains(entity)) {
+                cellContents.add(entity);
+            }
         }
     }
 
@@ -92,8 +81,9 @@ public class WorldGrid {
         var temp = new Vector3f(0, 0, 0);
 
         Set<Collidable> cellContents;
-        for (float i = pos.x - radius; i < pos.x + radius; i += cellSize) {
-            for (float k = pos.z - radius; k < pos.z + radius; k += cellSize) {
+        int radiusClampedToCellSize = (int) Math.ceil(radius / cellSize) * cellSize;
+        for (float i = pos.x - radiusClampedToCellSize; i < pos.x + radiusClampedToCellSize; i += cellSize) {
+            for (float k = pos.z - radiusClampedToCellSize; k < pos.z + radiusClampedToCellSize; k += cellSize) {
 
                 cellContents = contents.get(
                         hash(
@@ -103,7 +93,12 @@ public class WorldGrid {
                 if (cellContents == null) {
                     continue;
                 }
-                results.addAll(cellContents);
+
+                for (var collidable : cellContents) {
+                    if (collidable.getNode().getWorldTranslation().distanceSquared(pos) <= radius * radius) {
+                        results.add(collidable);
+                    }
+                }
 
             }
         }

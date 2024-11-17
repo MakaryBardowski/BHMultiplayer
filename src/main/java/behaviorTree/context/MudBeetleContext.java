@@ -5,6 +5,7 @@
 package behaviorTree.context;
 
 import com.jme3.math.Vector3f;
+import events.GameEvent;
 import game.entities.Destructible;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.MudBeetle;
@@ -122,6 +123,18 @@ public class MudBeetleContext extends Context {
 
     public Destructible getTargetDestructible(){
     return (Destructible) blackboard.get(MudBeetleContext.TARGET_DESTRUCTIBLE);
+    }
+
+    @Override
+    public void receiveEventNotification(GameEvent gameEvent) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void shutdown() {
+        if(getPathfindingFuture() != null){
+            getPathfindingFuture().cancel(true);
+        }
     }
     
 }

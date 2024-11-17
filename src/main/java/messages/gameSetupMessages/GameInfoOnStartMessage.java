@@ -7,6 +7,7 @@ package messages.gameSetupMessages;
 import client.ClientGameAppState;
 import client.ClientGameManager;
 import client.ClientStoryGameManager;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.map.MapType;
 import java.util.Arrays;
@@ -35,7 +36,7 @@ public class GameInfoOnStartMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

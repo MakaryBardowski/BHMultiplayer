@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ParticleUtils {
+
     private static float finalY = 3;
 
     private static final Random RANDOM = new Random();
@@ -32,6 +33,14 @@ public class ParticleUtils {
         attachParticleNode(particleNode, ClientGameAppState.getInstance().getPickableNode());
         moveParticleToSpawnpoint(particleNode, initialPos);
         DroppedItem strategy = createDroppedItemParticleStrategy(particleNode, generateRandomVelocity(), generateRandomRotationalVelocity(), finalY, i);
+        createParticle(particleNode, strategy);
+    }
+
+    public static void spawnItemPhysicalParticleShadedWithVelocity(Node particleNode, Vector3f initialPos, Item i, Vector3f velocity) {
+        setMaterialForShadedParticles(particleNode);
+        attachParticleNode(particleNode, ClientGameAppState.getInstance().getPickableNode());
+        moveParticleToSpawnpoint(particleNode, initialPos);
+        DroppedItem strategy = createDroppedItemParticleStrategy(particleNode, velocity, generateRandomRotationalVelocity(), finalY, i);
         createParticle(particleNode, strategy);
     }
 

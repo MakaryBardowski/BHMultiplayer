@@ -9,6 +9,7 @@ import client.Main;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -76,7 +77,7 @@ public class GrenadeThrownMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         System.out.println("got id "+id);
         int grenadeId = server.getAndIncreaseNextEntityId();
                 System.out.println("new grenade id "+grenadeId);

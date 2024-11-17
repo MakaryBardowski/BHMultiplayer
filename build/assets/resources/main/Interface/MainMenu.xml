@@ -8,23 +8,134 @@
     <screen id="MainMenu" controller="client.MainMenuController">
         <layer childLayout="center">
 
-<!--backgroundColor="#55a5"-->
+            <!--backgroundColor="#55a5"-->
             <panel childLayout="vertical" align="right" valign="center" width="30%" height="100%"  padding="10">
-                <control id="single" name="button" label="Play" width = "100%" height = "10%" marginTop = "10%" />
-                <control id="host" name="button" label="Host (LAN)" width = "100%" height = "10%" marginTop = "10%">
-                    <interact onClick="startServer()"/>  
+                <control id="single" name="button" label="create Lobby" width = "100%" height = "10%" marginTop = "10%">
+                    <interact onClick="createLobby()"/>  
                 </control>
-                
-                <control id="join" name="button" label="Join (LAN)" width = "100%" height = "10%" marginTop = "10%">
-                    <interact onClick="joinGame()"/>
+
+                <control id="join" name="button" label="Join" width = "100%" height = "10%" marginTop = "10%">
+                    <interact onClick="joinLobby()"/>
                 </control>
                 <control id="ip-textfield" name="textfield" text="IP" width = "100%" height = "5%" marginTop = "10%" />
-                <control id="name-textfield" name="textfield" text="NICK" width = "100%" height = "5%" marginTop = "10%" />
-
-                <!--                <control id="sliderV" name="verticalSlider" height="200px" />
-                <panel width="10" />
-                <control id="sliderH" name="horizontalSlider" width="200px" />-->
             </panel>
         </layer>
     </screen>
+    
+    
+    
+    
+    
+    
+    
+    
+    <screen id="LobbyHost" controller="client.MainMenuController" >
+        <layer childLayout="center" >
+            <panel id = "classRow1" childLayout="horizontal" width="${CALL.getClassPanelWidth()}" height="${CALL.getClassPanelHeight()}" marginTop="30%" marginLeft = "-25%">
+                <image name="image" id="button1" label="Button 1" width="33.33%" height="100%" filename="Interface/Icons/assault.png">
+                    <interact onClick="chooseAssault()"/>  
+                    <effect>
+                        <onStartHover name="border"/>
+                    </effect>
+                </image>
+                <image name="button" id="button2" label="Button 2" width="33.33%" height="100%" filename="Interface/Icons/medic.png">
+                    <interact onClick="chooseMedic()"/>  
+                    <effect>
+                        <onStartHover name="border"/>
+                    </effect>
+                </image>
+                <image name="button" id="button3" label="Button 3" width="33.33%" height="100%" filename="Interface/Icons/engineer.png">
+                    <interact onClick="chooseCombatEngineer()"/>  
+                    <effect>
+                        <onStartHover name="border"/>
+                    </effect>
+                </image>
+            </panel>
+
+            <!-- Second Row -->
+            <panel id = "classRow2" childLayout="horizontal" width="${CALL.getClassPanelWidth()}" height="${CALL.getClassPanelHeight()}" marginTop = "37.5%" marginLeft = "-25%">
+                <image name="image" id="button4" label="Button 4" width="33.33%" height="100%" filename="Interface/Icons/empty.png"/>
+                <image name="image" id="button5" label="Button 5" width="33.33%" height="100%" filename="Interface/Icons/empty.png" />
+                <image name="image" id="button6" label="Button 6" width="33.33%" height="100%" filename="Interface/Icons/empty.png"/>
+            </panel>
+            
+            <panel childLayout="vertical" align="right" valign="center" width="30%" height="100%"  padding="10">
+                <!-- First Row -->
+
+                <!--<control id="players" name="window" title = "players" width = "30%" height = "20%" marginTop = "10%" visibleToMouse = "false" closeable="false"/>-->
+                <control name="label" id = "playerSlot0" text="EMPTY PLAYER SLOT" width = "100%" height = "5%" marginTop = "10%" backgroundColor="#36454F"/>
+                <control name="label" id = "playerSlot1" text="EMPTY PLAYER SLOT" width = "100%" height = "5%" marginTop = "1%" backgroundColor="#36454F"/>
+                <control name="label" id = "playerSlot2" text="EMPTY PLAYER SLOT" width = "100%" height = "5%" marginTop = "1%" backgroundColor="#36454F"/>
+                <control name="label" id = "playerSlot3" text="EMPTY PLAYER SLOT" width = "100%" height = "5%" marginTop = "1%" backgroundColor="#36454F"/>
+
+                <control id="start" name="button" label="Start" width = "100%" height = "10%" marginTop = "10%" backgroundColor="#36454F">
+                    <interact onClick="startGame()"/>  
+                </control>
+                
+
+                <control id="name-textfield" maxLength = "12"  name="textfield" text="" width = "100%" height = "5%" marginTop = "10%" backgroundColor="#36454F">
+                    <interact onClick="print()"/>  
+
+                </control>
+            </panel>
+        </layer>
+    </screen>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <screen id="LobbyClient" controller="client.MainMenuController">
+        <layer childLayout="center">
+                        <panel id = "classRow1" childLayout="horizontal" width="${CALL.getClassPanelWidth()}" height="${CALL.getClassPanelHeight()}" marginTop="30%" marginLeft = "-25%">
+                <image name="image" id="button1" label="Button 1" width="33.33%" height="100%" filename="Interface/Icons/assault.png">
+                    <interact onClick="chooseAssault()"/>  
+                    <effect>
+                        <onStartHover name="border"/>
+                    </effect>
+                </image>
+                <image name="button" id="button2" label="Button 2" width="33.33%" height="100%" filename="Interface/Icons/medic.png">
+                    <interact onClick="chooseMedic()"/>  
+                    <effect>
+                        <onStartHover name="border"/>
+                    </effect>
+                </image>
+                <image name="button" id="button3" label="Button 3" width="33.33%" height="100%" filename="Interface/Icons/engineer.png">
+                    <interact onClick="chooseCombatEngineer()"/>  
+                    <effect>
+                        <onStartHover name="border"/>
+                    </effect>
+                </image>
+            </panel>
+
+            <!-- Second Row -->
+            <panel id = "classRow2" childLayout="horizontal" width="${CALL.getClassPanelWidth()}" height="${CALL.getClassPanelHeight()}" marginTop = "37.5%" marginLeft = "-25%">
+                <image name="image" id="button4" label="Button 4" width="33.33%" height="100%" filename="Interface/Icons/empty.png"/>
+                <image name="image" id="button5" label="Button 5" width="33.33%" height="100%" filename="Interface/Icons/empty.png" />
+                <image name="image" id="button6" label="Button 6" width="33.33%" height="100%" filename="Interface/Icons/empty.png"/>
+            </panel>
+            
+            <panel childLayout="vertical" align="right" valign="center" width="30%" height="100%"  padding="10">
+                <!--<control id="players" name="window" title = "players" width = "30%" height = "20%" marginTop = "10%" visibleToMouse = "false" closeable="false"/>-->
+                <control name="label" id = "playerSlot0" text="EMPTY PLAYER SLOT" width = "100%" height = "5%" marginTop = "10%" backgroundColor="#36454F"/>
+                <control name="label" id = "playerSlot1" text="EMPTY PLAYER SLOT" width = "100%" height = "5%" marginTop = "1%" backgroundColor="#36454F"/>
+                <control name="label" id = "playerSlot2" text="EMPTY PLAYER SLOT" width = "100%" height = "5%" marginTop = "1%" backgroundColor="#36454F"/>
+                <control name="label" id = "playerSlot3" text="EMPTY PLAYER SLOT" width = "100%" height = "5%" marginTop = "1%" backgroundColor="#36454F"/>
+
+                
+
+                <control id="name-textfield" maxLength = "12" name="textfield" text="" width = "100%" height = "5%" marginTop = "30%" backgroundColor="#36454F">
+                    
+                </control>
+            </panel>
+        </layer>
+    </screen>
+    
+    
 </nifty>

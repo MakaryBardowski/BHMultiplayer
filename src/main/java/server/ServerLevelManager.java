@@ -21,14 +21,14 @@ import game.entities.DecorationTemplates;
 import game.entities.DestructibleDecoration;
 import game.entities.InteractiveEntity;
 import game.entities.LevelExit;
-import game.entities.factories.AnimalMobFactory;
+import game.entities.factories.AllMobFactory;
 import game.entities.factories.DecorationFactory;
 import game.entities.factories.MobSpawnType;
 import game.entities.factories.PlayerFactory;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
 import game.entities.mobs.MudBeetle;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.items.AmmoPack;
 import game.items.Item;
 import game.items.ItemTemplates;
@@ -63,6 +63,7 @@ import static messages.items.ChestItemInteractionMessage.ChestItemInteractionTyp
 import messages.items.MobItemInteractionMessage;
 import messages.items.SetDefaultItemMessage;
 import messages.NewIndestructibleDecorationMessage;
+import pathfinding.AStar;
 import static server.ServerMain.MAX_PLAYERS;
 
 /**
@@ -130,43 +131,47 @@ public class ServerLevelManager extends LevelManager {
     }
 
     public void createMap(long seed, MapType mapType) {
-        System.out.println("SERVER: generating map of type " + mapType);
+        System.out.println("SERVER: generating map of type " + mapType + " seed " + seed);
         System.out.println("grid is: " + grid);
-        Main.getInstance().enqueue(() -> {
-            var mapGenResult = new MapGenerator(seed, mapType, MAP_SIZE).decideAndGenerateMapServer(new byte[MAP_SIZE][MAP_SIZE][MAP_SIZE]);
-            map = mapGenResult.getMap();
-            registerLevelExit(mapType);
+        var mapGenResult = new MapGenerator(seed, mapType, MAP_SIZE).decideAndGenerateMapServer(new byte[MAP_SIZE][MAP_SIZE][MAP_SIZE]);
 
-            var rooms = mapGenResult.getRooms();
-            if (rooms != null) {
-                var rand = new Random(seed);
-                var roomAmount = rooms.size();
-                var startingRoom = rooms.get(rand.nextInt(roomAmount));
+        map = mapGenResult.getMap();
+        registerLevelExit(mapType);
 
-                var spawnpoints = new ArrayList<Vector3i>(); // use list because hashset can have collisions
-                for (Player p : players) {
-                    Vector3i playerSpawnpoint;
-                    do {
-                        playerSpawnpoint = new Vector3i(
-                                rand.nextInt(startingRoom.getStartX() + 1, startingRoom.getEndX()- 1),
-                                startingRoom.getStartY(),
-                                rand.nextInt(startingRoom.getStartZ() + 1, startingRoom.getEndZ() - 1));
-                    } while (spawnpoints.contains(playerSpawnpoint));
+        var rooms = mapGenResult.getRooms();
+        if (rooms != null) {
+            var rand = new Random(seed);
+            var roomAmount = rooms.size();
+            var startingRoom = rooms.get(rand.nextInt(roomAmount));
 
-                    Vector3f playerSpawnpointInWorld = new Vector3f(
-                            playerSpawnpoint.x() * BLOCK_SIZE + 0.5f * BLOCK_SIZE,
-                            BLOCK_SIZE,
-                            playerSpawnpoint.z() * BLOCK_SIZE + 0.5f * BLOCK_SIZE
-                    );
+            var spawnpoints = new ArrayList<Vector3i>(); // use list because hashset can have collisions
+            for (Player p : players) {
+                Vector3i playerSpawnpoint;
+                do {
+                    playerSpawnpoint = new Vector3i(
+                            rand.nextInt(startingRoom.getStartX() + 1, startingRoom.getEndX() - 1),
+                            startingRoom.getStartY(),
+                            rand.nextInt(startingRoom.getStartZ() + 1, startingRoom.getEndZ() - 1));
+                } while (spawnpoints.contains(playerSpawnpoint));
 
-                    InstantEntityPosCorrectionMessage corrMsg = new InstantEntityPosCorrectionMessage(p, playerSpawnpointInWorld);
-                    corrMsg.setReliable(true);
-                    server.broadcast(corrMsg);
+                spawnpoints.add(playerSpawnpoint);
 
-                }
+                Vector3f playerSpawnpointInWorld = new Vector3f(
+                        playerSpawnpoint.x() * BLOCK_SIZE + 0.5f * BLOCK_SIZE,
+                        BLOCK_SIZE,
+                        playerSpawnpoint.z() * BLOCK_SIZE + 0.5f * BLOCK_SIZE
+                );
+
+                grid.remove(p);
+                p.getNode().setLocalTranslation(playerSpawnpointInWorld);
+                grid.insert(p);
+                InstantEntityPosCorrectionMessage corrMsg = new InstantEntityPosCorrectionMessage(p, playerSpawnpointInWorld);
+                corrMsg.setReliable(true);
+                server.broadcast(corrMsg);
 
             }
-        });
+
+        }
     }
 
     private void initializeCollisionGrid() {
@@ -192,15 +197,15 @@ public class ServerLevelManager extends LevelManager {
 
         var newLevelSeed = levelSeeds[levelIndex];
         var newLevelType = levelTypes[levelIndex];
-        createMap(newLevelSeed, newLevelType);
+        System.out.println("SERVER: level seed " + newLevelSeed);
+        Main.getInstance().enqueue(() -> {
 
-        if (levelIndex != 0) { // so that weird stuff doesnt happen after swapping levels, armor is hardcoded anyway
-            MobGenerator mg = new MobGenerator();
-            Main.getInstance().enqueue(() -> {
-                mg.spawnMobs(map);
-                notifyPlayersAboutNewLevelEntities();
-            });
-        }
+            createMap(newLevelSeed, newLevelType);
+            AStar.setPathfindingMap(map);
+            MobGenerator mg = new MobGenerator(newLevelSeed, levelIndex);
+            mg.spawnMobs(map);
+            notifyPlayersAboutNewLevelEntities();
+        });
     }
 
     public void registerRandomDestructibleDecoration(Vector3f pos) {
@@ -219,12 +224,12 @@ public class ServerLevelManager extends LevelManager {
         insertIntoCollisionGrid(d);
     }
 
-    public Mob registerMob() {
-        var player = new AnimalMobFactory(currentMaxId++, assetManager, rootNode).createServerSide(MobSpawnType.MUD_BEETLE);
-        ((MudBeetle) player).addAi();
-        insertIntoCollisionGrid(player);
+    public Mob registerMob(MobSpawnType spawnType) {
+        Mob mob = new AllMobFactory(currentMaxId++, assetManager, rootNode).createServerSide(spawnType);
 
-        return registerEntityLocal(player);
+        insertIntoCollisionGrid(mob);
+
+        return registerEntityLocal(mob);
     }
 
     public Player registerPlayer(HostedConnection hc) {
@@ -256,7 +261,7 @@ public class ServerLevelManager extends LevelManager {
             var otherPlayersFilter = Filters.notIn(hc);
             Item item = registerItemAndNotifyTCP(template, true, otherPlayersFilter);
 
-            player.addToEquipment(item);
+            player.getEquipment().addItem(item);
 
             if (item instanceof Armor) {
                 player.equipServer(item);
@@ -276,7 +281,7 @@ public class ServerLevelManager extends LevelManager {
         int randomValue = r.nextInt(16);
         if (randomValue < 2) {
             Vest playerVest = (Vest) registerItemLocal(ItemTemplates.VEST_TRENCH, true);
-            playerVest.setArmorValue(1.05f + r.nextFloat(0f, 0.25f));
+            playerVest.setArmorValue(  1.05f + r.nextFloat(0f, 0.25f)   );
             chest.addToEquipment(playerVest);
         }
         if (randomValue >= 1 && randomValue <= 4) {
@@ -377,12 +382,10 @@ public class ServerLevelManager extends LevelManager {
             }
         }
 
-        for (Item i : mob.getEquipment()) {
-            if (i != null) {
-                MobItemInteractionMessage pmsg = new MobItemInteractionMessage(i, mob, MobItemInteractionMessage.ItemInteractionType.PICK_UP);
-                sendMessageTCP(pmsg, filter);
-            }
-        }
+        mob.getEquipment().getAllItems().forEach(item -> {
+            MobItemInteractionMessage pmsg = new MobItemInteractionMessage(item, mob, MobItemInteractionMessage.ItemInteractionType.PICK_UP);
+            sendMessageTCP(pmsg, filter);
+        });
 
     }
 
@@ -567,6 +570,7 @@ public class ServerLevelManager extends LevelManager {
         var itemsToKeep = getItemsTokeep();
         mobs.forEach((id, entity) -> {
             if (isNotItemToKeep(entity, itemsToKeep) && isNotPlayer(entity)) { // if not an item to keep
+                System.out.println("destroying " + entity);
                 entity.destroyAndNotifyClients();
             }
         });
@@ -576,9 +580,12 @@ public class ServerLevelManager extends LevelManager {
     private List<Item> getItemsTokeep() {
         List<Item> itemsToKeep = new ArrayList<>();
         for (Player player : players) {
-            for (var itemInPlayerEquipment : player.getEquipment()) {
-                itemsToKeep.add(itemInPlayerEquipment);
-            }
+            itemsToKeep.addAll(player.getEquipment().getAllItems());
+
+            itemsToKeep.add(player.getDefaultHelmet());
+            itemsToKeep.add(player.getDefaultVest());
+            itemsToKeep.add(player.getDefaultGloves());
+            itemsToKeep.add(player.getDefaultBoots());
         }
         return itemsToKeep;
     }
@@ -595,7 +602,7 @@ public class ServerLevelManager extends LevelManager {
         grid.insert(c);
     }
 
-    private Item registerItemAndNotifyTCP(ItemTemplates.ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
+    public Item registerItemAndNotifyTCP(ItemTemplates.ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
         Item i = registerItemLocal(template, droppable);
         sendMessageTCP(i.createNewEntityMessage(), notificationFilter);
         return i;

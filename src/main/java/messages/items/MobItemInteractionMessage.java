@@ -7,12 +7,14 @@ package messages.items;
 import client.ClientGameAppState;
 import static client.ClientGameAppState.removeEntityByIdClient;
 import client.Main;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.mobs.Mob;
 import game.items.Item;
 import lombok.Getter;
 import messages.TwoWayMessage;
 import server.ServerMain;
+import static server.ServerMain.removeItemFromMobEquipmentServer;
 
 /**
  *
@@ -34,30 +36,24 @@ public class MobItemInteractionMessage extends TwoWayMessage {
     }
 
     public MobItemInteractionMessage(Item item, Mob mob, ItemInteractionType type) {
-        this(item.getId(),mob.getId(),type);
+        this(item.getId(), mob.getId(), type);
+        this.setReliable(true);
     }
-    
-    
-        public MobItemInteractionMessage(int itemId, int mobId, ItemInteractionType type) {
+
+    public MobItemInteractionMessage(int itemId, int mobId, ItemInteractionType type) {
         this.itemId = itemId;
         this.mobId = mobId;
         this.interactionTypeIndex = type.ordinal();
+        this.setReliable(true);
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server, HostedConnection hc) {
         if (getInteractionType() == ItemInteractionType.PICK_UP) {
             var mob = getMobByIdServer(mobId);
             var newItem = getItemByIdServer(itemId);
-            boolean doesntHaveItem = true;
-            for (var item : mob.getEquipment()) {
-                if (item == newItem) {
-                    doesntHaveItem = false;
-                }
-            }
 
-            if (doesntHaveItem) {
-                mob.addToEquipment(newItem);
+            if (mob.getEquipment().addItem(newItem)) {
                 server.getServer().broadcast(this);
             }
 
@@ -68,7 +64,8 @@ public class MobItemInteractionMessage extends TwoWayMessage {
 //            getMobById(imsg.getMobId()).unequip(getItemById(imsg.getItemId()));
             server.getServer().broadcast(this);
         } else if (getInteractionType() == ItemInteractionType.DROP) {
-
+            removeItemFromMobEquipmentServer(mobId, itemId);
+            server.getServer().broadcast(this);
         }
     }
 
@@ -91,19 +88,23 @@ public class MobItemInteractionMessage extends TwoWayMessage {
                     Item pickedUp = getItemByIdClient(itemId);
 
                     if (pickedUp.getDroppedItemNode() != null) {
-                        Main.getInstance().enqueue( () -> {
-                        pickedUp.getDroppedItemNode().removeFromParent();
+                        Main.getInstance().enqueue(() -> {
+                            pickedUp.getDroppedItemNode().removeFromParent();
                         });
                     }
 
-                    getMobByIdClient(mobId).addToEquipment(pickedUp);
-                    System.out.println(getMobByIdClient(mobId) + " podniosl item " + pickedUp);
+                    getMobByIdClient(mobId).getEquipment().addItem(pickedUp);
                     break;
                 case DROP:
+                    removeItemFromMobEquipmentClient(mobId, itemId);
+                    Item dropped = getItemByIdClient(itemId);
+                    var mobDroppingItem = getMobByIdClient(mobId);
+                    dropped.drop(mobDroppingItem.getNode().getWorldTranslation().add(0, 2, 0), mobDroppingItem.getNode().getLocalRotation().getRotationColumn(2).normalize().multLocal(8), 4);
                     break;
                 case DESTROY:
                     removeItemFromMobEquipmentClient(mobId, itemId);
                     removeEntityByIdClient(itemId);
+                    break;
                 default:
                     break;
             }

@@ -4,16 +4,18 @@
  */
 package messages;
 
-import PlayerHud.LemurPlayerHud;
+import LemurGUI.LemurPlayerEquipment;
+import LemurGUI.LemurPlayerHealthbar;
 import client.ClientGameAppState;
 import client.PlayerHUD;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.cameraAndInput.InputController;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import lombok.Getter;
 import server.ServerMain;
 
@@ -31,14 +33,14 @@ public class SetPlayerMessage extends TwoWayMessage {
     private float z;
     @Getter
     private String name;
-    
+
     @Getter
     private int classIndex;
 
     public SetPlayerMessage() {
     }
 
-    public SetPlayerMessage(int id, Vector3f pos, String name,int classIndex) {
+    public SetPlayerMessage(int id, Vector3f pos, String name, int classIndex) {
         this.id = id;
         this.x = pos.getX();
         this.y = pos.getY();
@@ -52,7 +54,7 @@ public class SetPlayerMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server, HostedConnection hc) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -89,14 +91,18 @@ public class SetPlayerMessage extends TwoWayMessage {
     }
 
     private void addPlayerHUD(Player player) {
-        var LemurPlayerHud = new LemurPlayerHud(player);
+        var LemurPlayerHud = new LemurPlayerHealthbar(player);
+        var LemurPlayerEquipment = new LemurPlayerEquipment(player);
+
+        player.setPlayerHud(LemurPlayerHud);
+        player.setPlayerEquipmentGui(LemurPlayerEquipment);
         ClientGameAppState.getInstance().getPlayer().setPlayerHud(LemurPlayerHud);
         ClientGameAppState.getInstance().getStateManager().attach(new PlayerHUD(ClientGameAppState.getInstance()));
 
     }
 
     private Player registerMyPlayer(SetPlayerMessage nmsg) {
-        return ClientGameAppState.getInstance().registerPlayer(nmsg.getId(), true,classIndex);
+        return ClientGameAppState.getInstance().registerPlayer(nmsg.getId(), true, classIndex);
     }
 
 }

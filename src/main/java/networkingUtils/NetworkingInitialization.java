@@ -7,7 +7,7 @@ package networkingUtils;
 import messages.messageListeners.ServerMessageListener;
 import messages.SystemHealthUpdateMessage;
 import messages.EntityUpdateMessage;
-import messages.MobPosUpdateMessage;
+import messages.MobPosRotUpdateMessage;
 import messages.MobRotUpdateMessage;
 import messages.NewMobMessage;
 import messages.PlayerJoinedMessage;
@@ -15,6 +15,7 @@ import messages.SetPlayerMessage;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
+import messages.AnimationPlayedMessage;
 import messages.DeleteEntityMessage;
 import messages.DestructibleDamageReceiveMessage;
 import messages.DestructibleHealReceiveMessage;
@@ -29,6 +30,7 @@ import messages.InstantEntityPosCorrectionMessage;
 import messages.NewDestructibleDecorationMessage;
 import messages.NewIndestructibleDecorationMessage;
 import messages.ThrownGrenadeExplodedMessage;
+import messages.bulkMessages.BulkMessage;
 import messages.gameSetupMessages.GameInfoOnStartMessage;
 import messages.gameSetupMessages.NextLevelMessage;
 import messages.items.ChestItemInteractionMessage;
@@ -64,7 +66,7 @@ public class NetworkingInitialization {
         Serializer.registerClass(GameInfoOnStartMessage.class);
 
         Serializer.registerClass(EntityUpdateMessage.class);
-        Serializer.registerClass(MobPosUpdateMessage.class);
+        Serializer.registerClass(MobPosRotUpdateMessage.class);
         Serializer.registerClass(MobRotUpdateMessage.class);
         Serializer.registerClass(SystemHealthUpdateMessage.class);
         Serializer.registerClass(PlayerJoinedMessage.class);
@@ -80,6 +82,8 @@ public class NetworkingInitialization {
         Serializer.registerClass(EntitySetIntegerAttributeMessage.class);
         Serializer.registerClass(EntitySetFloatAttributeMessage.class);
         Serializer.registerClass(NextLevelMessage.class);
+        Serializer.registerClass(BulkMessage.class);
+        Serializer.registerClass(AnimationPlayedMessage.class);
 
         Serializer.registerClass(NewItemMessage.class);
         Serializer.registerClass(NewHelmetMessage.class);

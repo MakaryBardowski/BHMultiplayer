@@ -6,12 +6,16 @@ package game.entities.mobs;
 
 import behaviorTree.BehaviorTree;
 import client.ClientGameAppState;
+import client.Main;
 import game.entities.Destructible;
+import game.entities.inventory.Equipment;
 import game.items.Item;
 import game.map.collision.CollidableInterface;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import game.entities.Animated;
+import game.entities.Animation;
 import game.entities.Collidable;
 import game.entities.FloatAttribute;
 import game.entities.StatusEffectContainer;
@@ -22,22 +26,25 @@ import java.util.Random;
 import lombok.Getter;
 import lombok.Setter;
 import server.ServerMain;
+import settings.GlobalSettings;
 
 /**
  *
  * @author 48793
  */
-public abstract class Mob extends StatusEffectContainer implements CollidableInterface, MobInterface {
+public abstract class Mob extends StatusEffectContainer implements CollidableInterface, MobInterface, Animated {
+
+    @Getter
     protected BehaviorTree behaviorTree;
-    
+
     protected static final float MOB_ROTATION_RATE = 6f;
 
     public static final int SPEED_ATTRIBUTE = 2;
 
-    private static final float DEFAULT_SPEED = 11.25f; //10, 13.25f for knife
-    protected static final int EQUIPMENT_SIZE = 18;
+    private static final float DEFAULT_SPEED = 8.75f; //10, 13.25f for knife
+    protected static final int EQUIPMENT_SIZE = 20;
 
-    protected Item[] equipment = new Item[EQUIPMENT_SIZE]; // 6 rows 3 cols
+    protected Equipment equipment = new Equipment(new Item[EQUIPMENT_SIZE]); // 6 rows 3 cols
 
     //mob stats
     protected float cachedSpeed = DEFAULT_SPEED; // speed is very frequently accessed
@@ -45,7 +52,6 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 
     //mob ai variables
     protected Destructible currentTarget;
-
 
     @Getter
     protected Vector3f serverLocation; // updated by the server
@@ -105,7 +111,7 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
         this.currentTarget = currentTarget;
     }
 
-    public Item[] getEquipment() {
+    public Equipment getEquipment() {
         return equipment;
     }
 
@@ -127,48 +133,29 @@ public abstract class Mob extends StatusEffectContainer implements CollidableInt
 //        System.err.println("player " + this + " equipment:\n" + Arrays.toString(this.getEquipment()) + "\n\n");
 
 //        System.out.println("eq to be dropped: " + Arrays.toString(equipment));
-        for (int i = 0; i < equipment.length; i++) {
-            Item item = equipment[i];
-            if (item != null) {
-//                System.out.println("dropping " + item + " its node " + item.getNode() + " its position " + item.getNode().getWorldTranslation());
-                item.drop(node.getWorldTranslation().add(r.nextFloat(-0.25f, 0.25f), 2 + r.nextFloat(-1, 1), r.nextFloat(-0.25f, 0.25f)));
-                equipment[i] = null;
-            }
-        }
-    }
-
-    public Item addToEquipment(Item item) {
-        for (int i = 0; i < equipment.length; i++) {
-            if (equipment[i] == null) {
-                equipment[i] = item;
-                break;
-            }
-        }
-        return item;
-    }
-
-    public Item removeFromEquipment(Item item) {
-        for (int i = 0; i < equipment.length; i++) {
-            if (equipment[i] == item) {
-                equipment[i] = null;
-                break;
-            }
-        }
-
-        return item;
+        equipment.removeAllItems().forEach(item -> {
+            item.drop(node.getWorldTranslation().add(r.nextFloat(-0.25f, 0.25f), 2 + r.nextFloat(-1, 1), r.nextFloat(-0.25f, 0.25f)));
+        });
     }
 
     @Override
-    public void updateAi(){
-        if(behaviorTree != null)
-    behaviorTree.update();
-    };
+    public void updateAi() {
+        if (GlobalSettings.isAiDebug) {
+            System.out.println("trying to update " + this);
+        }
+        if (behaviorTree != null) {
+//            System.out.println("suc");
+            behaviorTree.update();
+        }
+    }
 
     @Override
     public boolean isAbleToMove() {
         return !isDead();
     }
-    
-    
 
+    @Override
+    public void playAnimation(Animation anim) {
+
+    }
 }

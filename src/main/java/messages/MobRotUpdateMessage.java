@@ -8,7 +8,9 @@ import client.ClientGameAppState;
 import client.Main;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
+import game.entities.Movable;
 import server.ServerMain;
 
 /**
@@ -44,11 +46,16 @@ public class MobRotUpdateMessage extends EntityUpdateMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         if (entityExistsLocallyServer(id)) {
             Main.getInstance().enqueue(() -> {
-                if (ServerMain.getInstance().getLevelManagerMobs().get(id) != null) {
-                    ServerMain.getInstance().getLevelManagerMobs().get(id).getNode().setLocalRotation(getRot());
+                var entity = ServerMain.getInstance().getLevelManagerMobs().get(id);
+                if (entity != null) {
+                    entity.getNode().setLocalRotation(getRot());
+                    if (entity instanceof Movable movable) {
+                        movable.getPositionChangedOnServer().set(true); // we set to true so both position AND ROTATION are broadcast
+                    }
+
                 }
             });
         }

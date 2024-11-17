@@ -5,7 +5,7 @@
 package game.entities.factories;
 
 import client.ClientGameAppState;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import client.Main;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.SkinningControl;
@@ -21,6 +21,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.custom.ArmatureDebugger;
 import game.entities.DestructibleUtils;
+import game.entities.mobs.HumanMob;
 import game.entities.mobs.playerClasses.PlayerClass;
 import java.util.HashSet;
 import java.util.Random;
@@ -100,7 +101,7 @@ public class PlayerFactory extends MobFactory {
     }
 
     private Node loadPlayerModel() {
-        Node node = (Node) assetManager.loadModel("Models/testSkeleton/testSkeleton.j3o");
+        Node node = (Node) assetManager.loadModel(HumanMob.HUMAN_SKELETON_RIG_PATH);
         return node;
     }
 

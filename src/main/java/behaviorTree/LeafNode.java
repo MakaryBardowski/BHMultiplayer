@@ -1,6 +1,7 @@
 package behaviorTree;
 
 import java.util.Map;
+import java.util.function.Function;
 
 public class LeafNode extends BehaviorNode{
     private NodeAction nodeAction;

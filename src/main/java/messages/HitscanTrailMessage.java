@@ -44,8 +44,8 @@ public class HitscanTrailMessage extends EntityUpdateMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
-            HostedConnection hc = ServerMain.getInstance().getServer().getConnection(clientId);
+    public void handleServer(ServerMain server,HostedConnection hc) {
+//            HostedConnection hc = ServerMain.getInstance().getServer().getConnection(clientId);
             ServerMain.getInstance().getServer().broadcast(Filters.notIn(hc), this);
     }
 

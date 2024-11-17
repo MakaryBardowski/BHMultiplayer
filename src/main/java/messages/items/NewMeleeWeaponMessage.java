@@ -6,6 +6,7 @@ package messages.items;
 
 import client.ClientGameAppState;
 import com.jme3.network.AbstractMessage;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.IntegerAttribute;
 import game.items.Item;
@@ -32,7 +33,7 @@ public class NewMeleeWeaponMessage extends NewItemMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

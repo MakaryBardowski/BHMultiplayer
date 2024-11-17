@@ -6,6 +6,7 @@ package messages.items;
 
 import client.ClientGameAppState;
 import com.jme3.network.AbstractMessage;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.items.Item;
 import game.items.armor.Helmet;
@@ -29,14 +30,14 @@ public class NewHelmetMessage extends NewArmorMessage {
     }
 
     @Override
-    public void handleServer(ServerMain server) {
+    public void handleServer(ServerMain server,HostedConnection hc) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public void handleClient(ClientGameAppState client) {
         Helmet i = (Helmet) ifa.createItem(id, getTemplate(), droppable);
-        i.setArmorValue(armorValue);
+        i.setArmorValue(armorValue); // so we set the params
         client.registerEntity(i);
 
     }

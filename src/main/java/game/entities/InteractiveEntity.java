@@ -8,6 +8,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import events.EventPublisher;
 import game.entities.mobs.Mob;
 import game.map.collision.WorldGrid;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +26,7 @@ import server.ServerMain;
  * @author 48793
  */
 @Getter
-public abstract class InteractiveEntity {
+public abstract class InteractiveEntity extends EventPublisher{
     private static final DeleteEntityMessage dem = new DeleteEntityMessage();
     @Getter
     protected ConcurrentHashMap<Integer, Attribute> attributes = new ConcurrentHashMap<>(0);
@@ -92,4 +93,10 @@ public abstract class InteractiveEntity {
     public IntegerAttribute getIntegerAttribute(int attributeId) {
         return ((IntegerAttribute) attributes.get(attributeId));
     }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
+    
 }

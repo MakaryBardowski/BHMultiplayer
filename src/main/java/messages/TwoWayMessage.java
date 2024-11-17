@@ -14,7 +14,7 @@ import game.entities.Chest;
 import game.entities.Destructible;
 import game.entities.InteractiveEntity;
 import game.entities.mobs.Mob;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.items.Equippable;
 import game.items.Item;
 import server.ServerMain;
@@ -26,7 +26,7 @@ import server.ServerMain;
 @Serializable
 public abstract class TwoWayMessage extends AbstractMessage {
 
-    public abstract void handleServer(ServerMain server);
+    public abstract void handleServer(ServerMain server,HostedConnection sender);
 
     public abstract void handleClient(ClientGameAppState client);
 
@@ -73,16 +73,8 @@ public abstract class TwoWayMessage extends AbstractMessage {
     protected void removeItemFromMobEquipmentClient(int mobId, int itemId) {
         var mob = getMobByIdClient(mobId);
         var item = getItemByIdClient(itemId);
-        if (item == null) {
-            return;
-        }
         var mobEquipment = mob.getEquipment();
-        for (int i = 0; i < mobEquipment.length; i++) {
-            if (mobEquipment[i] != null && mobEquipment[i].getId() == item.getId()) {
-                mob.unequip(item);
-                mobEquipment[i] = null;
-            }
-        }
+        mobEquipment.removeItem(item);
     }
 
     protected boolean entityExistsLocallyClient(int mobId) {

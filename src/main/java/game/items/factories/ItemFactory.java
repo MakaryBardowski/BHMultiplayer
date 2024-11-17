@@ -15,6 +15,11 @@ import game.items.ItemTemplates.ItemTemplate;
 import static game.items.ItemTemplates.ItemType.PISTOL;
 import static game.items.ItemTemplates.ItemType.PISTOL_AMMO;
 import static game.items.ItemTemplates.ItemType.SMG_AMMO;
+import game.items.ItemTemplates.VestTemplate;
+import game.items.ItemTemplates.BootsTemplate;
+import game.items.ItemTemplates.GlovesTemplate;
+import game.items.ItemTemplates.MeleeWeaponTemplate;
+import game.items.ItemTemplates.RangedWeaponTemplate;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
@@ -43,25 +48,25 @@ public class ItemFactory {
         if (null != template.getType()) {
             switch (template.getType()) {
                 case HELMET:
-                    return createHelmet(id, template, droppable);
+                    return createHelmet(id, (HelmetTemplate) template, droppable);
                 case VEST:
-                    return createVest(id, template, droppable);
+                    return createVest(id, (VestTemplate) template, droppable);
                 case GLOVES:
-                    return createGloves(id, template, droppable);
+                    return createGloves(id, (GlovesTemplate) template, droppable);
                 case BOOTS:
-                    return createBoots(id, template, droppable);
+                    return createBoots(id, (BootsTemplate) template, droppable);
                 case RIFLE:
-                    return createRifle(id, template, droppable);
+                    return createRifle(id, (RangedWeaponTemplate) template, droppable);
                 case PISTOL:
-                    return createPistol(id, template, droppable);
+                    return createPistol(id, (RangedWeaponTemplate)template, droppable);
                 case LMG:
-                    return createLmg(id, template, droppable);
+                    return createLmg(id, (RangedWeaponTemplate)template, droppable);
                 case GRENADE:
                     return createGrenade(id, template, droppable);
                 case KNIFE:
-                    return createKnife(id, template, droppable);
+                    return createKnife(id, (MeleeWeaponTemplate)template, droppable);
                 case AXE:
-                    return createAxe(id, template, droppable);
+                    return createAxe(id, (MeleeWeaponTemplate)template, droppable);
                 case PISTOL_AMMO:
                     return createPistolAmmoPack(id, template, droppable);
                 case RIFLE_AMMO:
@@ -81,54 +86,45 @@ public class ItemFactory {
         return null;
     }
 
-    private Helmet createHelmet(int id, ItemTemplate template, boolean droppable) {
+    private Helmet createHelmet(int id, HelmetTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        Helmet helmet = new Helmet(id, (HelmetTemplate) template, "Helmet", dropNode, droppable);
+        Helmet helmet = new Helmet(id, template, "Helmet", dropNode, droppable);
         return helmet;
     }
 
-    private Vest createVest(int id, ItemTemplate template, boolean droppable) {
+    private Vest createVest(int id, VestTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
         Vest vest = new Vest(id, template, "Vest", dropNode, droppable);
         return vest;
     }
 
-    private Gloves createGloves(int id, ItemTemplate template, boolean droppable) {
+    private Gloves createGloves(int id, GlovesTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
         Gloves gloves = new Gloves(id, template, "Gloves", dropNode, droppable);
         return gloves;
     }
 
-    private Boots createBoots(int id, ItemTemplate template, boolean droppable) {
+    private Boots createBoots(int id, BootsTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
         Boots boots = new Boots(id, template, "Boots", dropNode, droppable);
         return boots;
     }
 
-    private Rifle createRifle(int id, ItemTemplate template, boolean droppable) {
+    private Rifle createRifle(int id, RangedWeaponTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-//        int maxAmmo = 15;
-//        float roundsPerSecond = 3f;
-        int maxAmmo = 30;
-        float roundsPerSecond = 6f;
-
-        Rifle rifle = new Rifle(id, 6f, template, "Rifle", dropNode, droppable, maxAmmo, roundsPerSecond);
+        Rifle rifle = new Rifle(id, template.getDefaultStats().getDamage(), template, "Rifle", dropNode, droppable, template.getDefaultStats().getMaxAmmo(), template.getDefaultStats().getAttacksPerSecond());
         return rifle;
     }
 
-    private LightMachineGun createLmg(int id, ItemTemplate template, boolean droppable) {
+    private LightMachineGun createLmg(int id, RangedWeaponTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        int maxAmmo = 150;
-        float roundsPerSecond = 10f;
-        LightMachineGun rifle = new LightMachineGun(id, 3.65f, template, "Lmg", dropNode, droppable, maxAmmo, roundsPerSecond);
+        LightMachineGun rifle = new LightMachineGun(id, template.getDefaultStats().getDamage(), template, "Lmg", dropNode, droppable, template.getDefaultStats().getMaxAmmo(), template.getDefaultStats().getAttacksPerSecond());
         return rifle;
     }
 
-    private Item createPistol(int id, ItemTemplate template, boolean droppable) {
+    private Item createPistol(int id, RangedWeaponTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        int maxAmmo = 10;
-        float roundsPerSecond = 4.43f;
-        Pistol pistol = new Pistol(id, 4.5f, template, "Pistol", dropNode, droppable, maxAmmo, roundsPerSecond);
+        Pistol pistol = new Pistol(id, template.getDefaultStats().getDamage(), template, "Pistol", dropNode, droppable, template.getDefaultStats().getMaxAmmo(), template.getDefaultStats().getAttacksPerSecond());
         return pistol;
     }
 
@@ -138,17 +134,15 @@ public class ItemFactory {
         return grenade;
     }
 
-    private Item createKnife(int id, ItemTemplate template, boolean droppable) {
+    private Item createKnife(int id, MeleeWeaponTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        float attacksPerSec = 2;
-        Knife pistol = new Knife(id, 6f, template, "Trench Knife", dropNode, droppable, attacksPerSec);
+        Knife pistol = new Knife(id, template.getDefaultStats().getDamage(), template, "Trench Knife", dropNode, droppable, template.getDefaultStats().getAttacksPerSecond());
         return pistol;
     }
 
-    private Item createAxe(int id, ItemTemplate template, boolean droppable) {
+    private Item createAxe(int id, MeleeWeaponTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        float attacksPerSec = 1.25f;
-        Axe pistol = new Axe(id, 6f, template, "Fireaxe", dropNode, droppable, attacksPerSec);
+        Axe pistol = new Axe(id, template.getDefaultStats().getDamage(), template, "Fireaxe", dropNode, droppable, template.getDefaultStats().getAttacksPerSecond());
         return pistol;
     }
 
@@ -194,7 +188,7 @@ public class ItemFactory {
 
     private Item createMedpack(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        Medpack medpack = new Medpack(id, 0f, template, "Smoke Grenade", dropNode, droppable);
+        Medpack medpack = new Medpack(id, 0f, template, "Medpack", dropNode, droppable);
         return medpack;
     }
 

@@ -7,13 +7,13 @@ package game.entities.mobs;
 import behaviorTree.BehaviorNode;
 import behaviorTree.BehaviorTree;
 import behaviorTree.LeafNode;
-import behaviorTree.actions.humanActions.AttackAction;
-import behaviorTree.actions.humanActions.CheckForTargetAction;
-import behaviorTree.actions.humanActions.IsPathfindingNeededAction;
-import behaviorTree.actions.humanActions.MoveInRangeAction;
-import behaviorTree.actions.humanActions.PathfindAction;
-import behaviorTree.actions.humanActions.ResetPathAction;
-import behaviorTree.actions.humanActions.WalkAction;
+import behaviorTree.actions.MudBeetleActions.AttackAction;
+import behaviorTree.actions.MudBeetleActions.CheckForTargetAction;
+import behaviorTree.actions.MudBeetleActions.IsPathfindingNeededAction;
+import behaviorTree.actions.MudBeetleActions.MoveInRangeAction;
+import behaviorTree.actions.MudBeetleActions.PathfindAction;
+import behaviorTree.actions.MudBeetleActions.ResetPathAction;
+import behaviorTree.actions.MudBeetleActions.WalkAction;
 import behaviorTree.composite.ParallelNode;
 import behaviorTree.composite.SelectorNode;
 import behaviorTree.composite.SequenceNode;
@@ -39,11 +39,13 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
+import data.DamageReceiveData;
 import static game.effects.DecalProjector.projectFromTo;
 import game.effects.ParticleUtils;
 import game.entities.Collidable;
 import game.entities.Destructible;
 import game.entities.FloatAttribute;
+import game.entities.InteractiveEntity;
 import game.entities.factories.MobSpawnType;
 import static game.entities.mobs.Mob.MOB_ROTATION_RATE;
 import static game.entities.mobs.Mob.SPEED_ATTRIBUTE;
@@ -56,6 +58,7 @@ import java.util.List;
 import java.util.Random;
 import lombok.Getter;
 import messages.DestructibleDamageReceiveMessage;
+import messages.MobPosRotUpdateMessage;
 import messages.NewMobMessage;
 import server.ServerMain;
 import static server.ServerMain.removeEntityByIdServer;
@@ -76,7 +79,7 @@ public class MudBeetle extends Mob {
 
         maxHealth = 8;
         health = 8;
-
+        
         cachedSpeed = 6;
         attributes.put(SPEED_ATTRIBUTE, new FloatAttribute(cachedSpeed));
 
@@ -162,7 +165,7 @@ public class MudBeetle extends Mob {
 
     @Override
     public void onShot(Mob shooter, float damage) {
-        shooter.notifyServerAboutDealingDamage(damage, this);
+        notifyServerAboutDealingDamage(damage, shooter);
     }
 
     @Override
@@ -172,6 +175,8 @@ public class MudBeetle extends Mob {
 
     @Override
     public void setPosition(Vector3f newPos) {
+        setServerLocation(newPos);
+        setPosInterpolationValue(1.f);
         WorldGrid grid = ClientGameAppState.getInstance().getGrid();
         grid.remove(this);
         node.setLocalTranslation(newPos);
@@ -184,6 +189,7 @@ public class MudBeetle extends Mob {
         grid.remove(this);
         node.setLocalTranslation(newPos);
         grid.insert(this);
+        positionChangedOnServer.set(true);
     }
 
     @Override
@@ -194,8 +200,8 @@ public class MudBeetle extends Mob {
     }
 
     @Override
-    public void receiveDamage(float damage) {
-        health -= calculateDamage(damage);
+    public void receiveDamage(DamageReceiveData damageData) {
+        health -= calculateDamage(damageData.getRawDamage());
 
         ParticleEmitter blood = EmitterPooler.getBlood();
         Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 1, 0);
@@ -208,10 +214,21 @@ public class MudBeetle extends Mob {
 
             });
             die();
+            destroyClient();
+            onDeathClient();
         } else {
             blood.emitParticles(2);
         }
+    }
+    
+    @Override
+    public void receiveDamageServer(DamageReceiveData damageData) {
+        health -= calculateDamage(damageData.getRawDamage());
 
+        if (health <= 0) {
+            destroyServer();
+            onDeathServer();
+        }
     }
 
     @Override
@@ -250,8 +267,8 @@ public class MudBeetle extends Mob {
     }
 
     @Override
-    public void notifyServerAboutDealingDamage(float damage, Destructible mob) {
-        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(mob.getId(), damage);
+    public void notifyServerAboutDealingDamage(float damage, InteractiveEntity shooter) {
+        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(id,shooter.getId(), damage);
         hpUpd.setReliable(true);
         ClientGameAppState.getInstance().getClient().send(hpUpd);
     }
@@ -282,6 +299,12 @@ public class MudBeetle extends Mob {
     }
 
     @Override
+    public void moveServer(Vector3f moveVec) {
+        super.moveServer(moveVec);
+        positionChangedOnServer.set(true);
+    }
+
+    @Override
     public void destroyServer() {
         removeEntityByIdServer(id);
         var server = ServerMain.getInstance();
@@ -302,136 +325,4 @@ public class MudBeetle extends Mob {
         });
         removeEntityByIdClient(id);
     }
-
-    //-----------------------------TEST
-    private static Geometry createCircle(float radius, ColorRGBA color) {
-        Circle b = new Circle(radius, 60);
-        Geometry geom = new Geometry("Box", b);
-
-        Material mat = new Material(Main.getInstance().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setColor("Color", color);
-        geom.setMaterial(mat);
-
-        return geom;
-    }
-
-    public static class Circle
-            extends Mesh {
-
-        /**
-         * The center.
-         *
-         */
-        private Vector3f center;
-
-        /**
-         * The radius.
-         *
-         */
-        private float radius;
-
-        /**
-         * The samples.
-         *
-         */
-        private int samples;
-
-        /**
-         * Constructs a new instance of this class.
-         *
-         *
-         * @param radius
-         *
-         */
-        public Circle(float radius) {
-
-            this(Vector3f.ZERO, radius, 16);
-
-        }
-
-        /**
-         * Constructs a new instance of this class.
-         *
-         *
-         * @param radius
-         * @param samples
-         *
-         */
-        public Circle(float radius, int samples) {
-
-            this(Vector3f.ZERO, radius, samples);
-
-        }
-
-        /**
-         * Constructs a new instance of this class.
-         *
-         *
-         * @param center
-         * @param radius
-         * @param samples
-         *
-         */
-        public Circle(Vector3f center, float radius, int samples) {
-
-            super();
-
-            this.center = center;
-
-            this.radius = radius;
-
-            this.samples = samples;
-
-            setMode(Mesh.Mode.Lines);
-
-            updateGeometry();
-
-        }
-
-        protected void updateGeometry() {
-
-            FloatBuffer positions = BufferUtils.createFloatBuffer(samples * 3);
-
-            FloatBuffer normals = BufferUtils.createFloatBuffer(samples * 3);
-
-            short[] indices = new short[samples * 2];
-
-            float rate = FastMath.TWO_PI / (float) samples;
-
-            float angle = 0;
-
-            for (int i = 0; i < samples; i++) {
-
-                float x = FastMath.cos(angle) + center.x;
-
-                float z = FastMath.sin(angle) + center.z;
-
-                positions.put(x * radius).put(center.y).put(z * radius);
-
-                normals.put(new float[]{0, 1, 0});
-
-                indices[i] = (short) i;
-
-                if (i < samples - 1) {
-                    indices[i] = (short) (i + 1);
-                } else {
-                    indices[i] = 0;
-                }
-
-                angle += rate;
-
-            }
-
-            setBuffer(VertexBuffer.Type.Position, 3, positions);
-
-            setBuffer(VertexBuffer.Type.Normal, 3, normals);
-
-            setBuffer(VertexBuffer.Type.Index, 2, indices);
-
-            setBuffer(VertexBuffer.Type.TexCoord, 2, new float[]{0, 0, 1, 1});
-
-            updateBound();
-        }
-    }
-
 }

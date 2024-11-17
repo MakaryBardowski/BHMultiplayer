@@ -10,13 +10,15 @@ import com.jme3.math.Vector3f;
 import com.jme3.math.Vector4f;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 
 /**
  *
  * @author 48793
  */
 public class Block {
-
+    @Getter
+    private final BlockType blockType;
     private List<Vector3f> positions = new ArrayList<>();
     private List<Vector2f> uvs = new ArrayList<>();
     private List<Vector3f> normals = new ArrayList<>();
@@ -29,7 +31,8 @@ public class Block {
     private float lightLevel;
     private final float[] faceOffsetIndexes;
 
-    public Block() {
+    public Block(BlockType blockType) {
+        this.blockType = blockType;
         faceOffsetIndexes = new float[6];
 
         for (int i = 0; i < faceOffsetIndexes.length; i++) {

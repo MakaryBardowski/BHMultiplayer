@@ -9,5 +9,5 @@ package game.entities.factories;
  * @author 48793
  */
 public enum MobSpawnType {
-    HUMAN, MUD_BEETLE
+    HUMAN, MUD_BEETLE, TRAINING_DUMMY
 }

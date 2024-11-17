@@ -4,7 +4,7 @@
  */
 package client;
 
-import PlayerHud.LemurPlayerHud;
+import LemurGUI.LemurPlayerHealthbar;
 import static client.ClientSynchronizationUtils.interpolateGrenadePosition;
 import static client.ClientSynchronizationUtils.interpolateMobPosition;
 import com.jme3.app.state.AppStateManager;
@@ -20,12 +20,12 @@ import com.jme3.scene.Node;
 import com.jme3.ui.Picture;
 import debugging.DebugUtils;
 import game.entities.InteractiveEntity;
-import game.entities.factories.AnimalMobFactory;
+import game.entities.factories.AllMobFactory;
 import game.entities.factories.MobSpawnType;
 import game.entities.factories.PlayerFactory;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.Mob;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.map.MapGenerator;
 import game.map.MapType;
 import game.map.collision.WorldGrid;
@@ -120,7 +120,7 @@ public class ClientLevelManager extends LevelManager {
         rootNode.attachChild(worldNode);
 
         float renderDistance = 700f;
-        MAIN_INSTANCE.getCamera().setFrustumPerspective(60, (float) GAME_APP_STATE.getSettings().getWidth() / GAME_APP_STATE.getSettings().getHeight(), 0.01f, renderDistance);
+        MAIN_INSTANCE.getCamera().setFrustumPerspective(70, (float) GAME_APP_STATE.getSettings().getWidth() / GAME_APP_STATE.getSettings().getHeight(), 0.01f, renderDistance);
 
         MAIN_INSTANCE.getViewPort().setBackgroundColor(ColorRGBA.Cyan.clone());
         MAIN_INSTANCE.getViewPort().setClearColor(true);
@@ -129,8 +129,8 @@ public class ClientLevelManager extends LevelManager {
         al.setColor(ColorRGBA.White.mult(0.7f));
         worldNode.addLight(al);
 
-//        DebugUtils.drawGrid();
         grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
+//        DebugUtils.drawGrid();
 
     }
 
@@ -141,7 +141,8 @@ public class ClientLevelManager extends LevelManager {
 
         var levelSeed = levelSeeds[levelIndex];
         var levelType = levelTypes[levelIndex];
-        System.out.println("CLIENT: generating map of type "+levelType);
+//        System.out.println("CLIENT: level seed "+levelSeed);
+//        System.out.println("CLIENT: generating map of type "+levelType);
         MapGenerator mg = new MapGenerator(levelSeed, levelType,MAP_SIZE);
 
         MAIN_INSTANCE.enqueue(() -> {
@@ -165,7 +166,7 @@ public class ClientLevelManager extends LevelManager {
     }
 
     public Mob registerMob(Integer id, MobSpawnType spawnType) {
-        var mobFactory = new AnimalMobFactory(id,
+        var mobFactory = new AllMobFactory(id,
                 assetManager,
                 destructibleNode);
 

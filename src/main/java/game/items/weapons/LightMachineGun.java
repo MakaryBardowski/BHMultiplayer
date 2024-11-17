@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package game.items.weapons;
 
 import FirstPersonHands.FirstPersonHandAnimationData;
@@ -9,22 +5,18 @@ import game.effects.GradientParticleEmitter;
 import game.effects.GradientParticleMesh;
 import game.items.ItemTemplates.ItemTemplate;
 import game.entities.mobs.Mob;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import projectiles.controls.BulletTracerControl;
 import client.ClientGameAppState;
 import client.Main;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.SkinningControl;
 import com.jme3.asset.AssetManager;
-import com.jme3.collision.CollisionResult;
-import com.jme3.collision.CollisionResults;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.effect.ParticleMesh;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.renderer.queue.RenderQueue;
@@ -32,17 +24,13 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
 import de.lessvoid.nifty.controls.label.LabelControl;
-import game.entities.Destructible;
 import static game.entities.DestructibleUtils.setupModelShootability;
-import game.entities.InteractiveEntity;
 import game.entities.mobs.HumanMob;
-import static game.entities.mobs.Mob.SPEED_ATTRIBUTE;
 import game.items.AmmoPack;
 import game.items.Holdable;
 import game.items.Item;
 import game.items.ItemTemplates;
 import static game.items.weapons.RangedWeapon.AMMO_ATTRIBUTE;
-import messages.EntitySetFloatAttributeMessage;
 import messages.EntitySetIntegerAttributeMessage;
 import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
@@ -82,17 +70,18 @@ public class LightMachineGun extends RangedWeapon {
 
     @Override
     public void playerUnequip(Player p) {
-        if (p.getEquippedRightHand() == this) {
-
-            p.setEquippedRightHand(null);
-            if (PlayerEqualsMyPlayer(p)) {
-                p.getGunNode().removeControl(gunRecoil);
-                p.getMainCameraNode().removeControl(camRecoil);
-                p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
-            }
-            System.out.println("unequipping LMG!");
-            p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
+        if (p.getEquippedRightHand() != this) {
+            return;
         }
+
+        p.setEquippedRightHand(null);
+        if (PlayerEqualsMyPlayer(p)) {
+            p.getGunNode().removeControl(gunRecoil);
+            p.getMainCameraNode().removeControl(camRecoil);
+            p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+        }
+        p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
+
     }
 
     @Override
@@ -144,23 +133,7 @@ public class LightMachineGun extends RangedWeapon {
             p.getFirstPersonHands().setHandsAnim(FirstPersonHandAnimationData.HOLD_LMG);
 
         }
-
-        Node model = (Node) assetManager.loadModel(template.getDropPath());
-        model.move(0, -0.43f, 0.52f);
-        Geometry ge = (Geometry) (model.getChild(0));
-        Material originalMaterial = ge.getMaterial();
-        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
-        ge.setMaterial(newMaterial);
-        float length = 0.75f;
-        float width = 0.75f;
-        float height = 0.75f;
-        model.scale(length, width, height);
-        p.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
-        setupModelShootability(model, p.getId());
-        thirdPersonModelParentIndex = p.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
-        System.out.println("name " + p.getName());
-        System.out.println(" EQUIPPED A LMG! (pos = " + model.getWorldTranslation());
+        humanEquipInThirdPerson(p, assetManager);
     }
 
     @Override
@@ -318,8 +291,7 @@ public class LightMachineGun extends RangedWeapon {
         int localAmmo = getAmmo();
         int maxAmmo = getMaxAmmo();
 
-        for (int i = 0; i < wielder.getEquipment().length; i++) {
-            Item item = wielder.getEquipment()[i];
+        for (var item : wielder.getEquipment().getAllItems()) {
             if (item instanceof AmmoPack pack && pack.getTemplate().getType().equals(ItemTemplates.ItemType.LMG_AMMO)) {
                 int initialPackAmmo = pack.getAmmo();
                 ammoFromPack = Math.min(ammoToFullClip, initialPackAmmo);
@@ -363,6 +335,40 @@ public class LightMachineGun extends RangedWeapon {
     public float calculateDamage(float distance) {
         float damageDropoff = 0.86f;
         return getDamage() * (float) (Math.pow(damageDropoff, distance / 20));
+    }
+
+    @Override
+    public void humanMobUnequip(HumanMob m) {
+        if (m.getEquippedRightHand() == this) {
+            m.setEquippedRightHand(null);
+        }
+    }
+
+    @Override
+    public void humanMobEquip(HumanMob m) {
+        Holdable unequippedItem = m.getEquippedRightHand();
+        if (unequippedItem != null) {
+            unequippedItem.humanMobUnequip(m);
+        }
+        m.setEquippedRightHand(this);
+        humanEquipInThirdPerson(m, Main.getInstance().getAssetManager());
+    }
+
+    private void humanEquipInThirdPerson(HumanMob humanMob, AssetManager assetManager) {
+        Node model = (Node) assetManager.loadModel(template.getDropPath());
+        model.move(0, -0.43f, 0.52f);
+        Geometry ge = (Geometry) (model.getChild(0));
+        Material originalMaterial = ge.getMaterial();
+        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+        ge.setMaterial(newMaterial);
+        float length = 0.75f;
+        float width = 0.75f;
+        float height = 0.75f;
+        model.scale(length, width, height);
+        humanMob.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
+        setupModelShootability(model, humanMob.getId());
+        thirdPersonModelParentIndex = humanMob.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
     }
 
 }

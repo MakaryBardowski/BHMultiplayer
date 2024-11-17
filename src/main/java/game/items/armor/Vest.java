@@ -7,13 +7,15 @@ package game.items.armor;
 import client.ClientGameAppState;
 import game.items.ItemTemplates;
 import static game.map.blocks.VoxelLighting.setupModelLight;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import client.Main;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
+import game.items.Holdable;
+import game.items.ItemTemplates.VestTemplate;
 import java.util.Arrays;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewHelmetMessage;
@@ -25,16 +27,18 @@ import messages.items.NewVestMessage;
  */
 public class Vest extends Armor {
 
-    public Vest(int id, ItemTemplates.ItemTemplate template, String name, Node node) {
+    public Vest(int id, VestTemplate template, String name, Node node) {
         super(id, template, name, node);
+        this.armorValue = template.getDefaultStats().getArmorValue();
     }
 
-    public Vest(int id, ItemTemplates.ItemTemplate template, String name, Node node, boolean droppable) {
+    public Vest(int id, VestTemplate template, String name, Node node, boolean droppable) {
         super(id, template, name, node, droppable);
+        this.armorValue = template.getDefaultStats().getArmorValue();
     }
 
     @Override
-    public void playerEquip(Player m) {
+    public void humanMobEquip(HumanMob m) {
         m.setVest(this);
         Node n = m.getSkinningControl().getAttachmentsNode("Spine");
         n.detachAllChildren();
@@ -45,8 +49,21 @@ public class Vest extends Armor {
     }
 
     @Override
-    public void playerUnequip(Player m) {
+    public void humanMobUnequip(HumanMob m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void playerEquip(Player p) {
+        Vest unequippedItem = p.getVest();
+        if (unequippedItem != null) {
+            unequippedItem.playerUnequip(p);
+        }
+        humanMobEquip(p);
+    }
+
+    @Override
+    public void playerUnequip(Player p) {
     }
 
     @Override
@@ -89,4 +106,5 @@ public class Vest extends Armor {
         builder.append(armorValue);
         return builder.toString();
     }
+
 }

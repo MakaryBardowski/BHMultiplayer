@@ -51,21 +51,6 @@ public class MapGenerator {
         return decideAndGenerateMap(logicMap, blockSize, chunkSize, mapSize, a, mapNode);
     }
 
-    /**
-     * this method returns a new map (allocates a new array for voxel data).
-     * Recommended use is for first-time map generation
-     *
-     * @param map that will be cleaned up and reinitialized (allows to avoid new
-     * memory allocation for map)
-     *
-     * @param blockSize size of 1 voxel
-     * @param chunkSize chunk size is equal to chunkSize * chunkSize
-     * @param mapSize map size is equal to mapSize * mapSize
-     * @param a assetManager to be used for node attachment and creating the
-     * texture atlas
-     * @param mapNode a node that the map should be attached to
-     * @return
-     */
     public Level generateOnExistingMapNoMemoryAllocation(Level map, int blockSize, int chunkSize, int mapSize, AssetManager a, Node mapNode) {
         return decideAndGenerateMapOnExistingMap(map, blockSize, chunkSize, mapSize, a, mapNode);
     }
@@ -142,7 +127,7 @@ public class MapGenerator {
         int floorLevel = 0;
         for (int x = 0; x < armorySizeX; x++) {
             for (int z = 0; z < armorySizeZ; z++) {
-                logicMap[x][floorLevel][z] = 1;
+                logicMap[x][floorLevel][z] = 2;
             }
         }
 
@@ -161,7 +146,7 @@ public class MapGenerator {
             }
         }
 
-        logicMap[armorySizeX - 4][1][armorySizeZ - 1] = 0;
+//        logicMap[armorySizeX - 4][1][armorySizeZ - 1] = 0;
 
         for (int x = 5; x < 8; x++) {
             logicMap[x][1][4] = 1;

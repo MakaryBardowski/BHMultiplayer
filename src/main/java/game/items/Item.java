@@ -61,10 +61,29 @@ public abstract class Item extends InteractiveEntity {
         parentNode.scale(template.getDropData().getScale());
         parentNode.setLocalTranslation(itemSpawnpoint);
         droppedItemNode = parentNode;
-        System.out.println("dropping: " + this);
-        System.out.println("droppedItem node " + droppedItemNode);
         ClientGameAppState.getInstance().getPickableNode().attachChild(parentNode);
         ParticleUtils.spawnItemPhysicalParticleShaded(parentNode, itemSpawnpoint, this);
+    }
+
+    public void drop(Vector3f itemSpawnpoint, Vector3f dropeVelocity, float dropSpeed) {
+        if (!droppable) {
+            return;
+        }
+
+        Node parentNode = createUnshadedBoxNode();
+        var invisibleHitbox = parentNode.getChild("Box");
+        invisibleHitbox.scale(2);
+        invisibleHitbox.setCullHint(Spatial.CullHint.Always);
+        setupModelShootability(parentNode, id);
+        setupModelShootability(node, id);
+
+        applyInitialDropRotation(node);
+        parentNode.attachChild(node);
+        parentNode.scale(template.getDropData().getScale());
+        parentNode.setLocalTranslation(itemSpawnpoint);
+        droppedItemNode = parentNode;
+        ClientGameAppState.getInstance().getPickableNode().attachChild(parentNode);
+        ParticleUtils.spawnItemPhysicalParticleShadedWithVelocity(parentNode, itemSpawnpoint, this, dropeVelocity);
     }
 
     private void applyInitialDropRotation(Node childNode) {
@@ -111,9 +130,4 @@ public abstract class Item extends InteractiveEntity {
         removeEntityByIdClient(id);
     }
 
-//    @Override
-//    protected void finalize() throws Throwable {
-//        System.out.println("deleting ITEEEEEEEEm "+name);
-//        super.finalize(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-//    }
 }

@@ -29,7 +29,4 @@ public abstract class Armor extends Item implements Equippable {
     public Armor(int id, ItemTemplate template,String name,Node node, boolean droppable) {
         super(id,template,name,node,droppable);
     }
-
-
-
 }

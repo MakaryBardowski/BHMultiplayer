@@ -21,6 +21,12 @@ public class Node {
         this.y = y;
         this.z = z;
     }
+    
+    public void setPosition(int x,int y, int z){
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    }
 
     public int getF() {
         return g + h;

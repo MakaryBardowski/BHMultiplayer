@@ -57,7 +57,6 @@ public class HealOverTimeEffect extends RepeatedTemporaryEffect {
             
             var healingDone = Math.min(heal, target.getMaxHealth() - target.getHealth());
             target.setHealth(target.getHealth() + healingDone);
-            System.out.println(target.getName()+ " regens for "+healingDone+"!");
 
             DestructibleHealReceiveMessage hpUpd = new DestructibleHealReceiveMessage(target.getId(), healingDone);
             hpUpd.setReliable(true);

@@ -60,7 +60,7 @@ public class DamageOverTimeEffect extends RepeatedTemporaryEffect {
 
             }
 
-            DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(target.getId(), damage);
+            DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(target.getId(),target.getId(), damage);
             hpUpd.setReliable(true);
             ServerMain.getInstance().getServer().broadcast(hpUpd);
         }

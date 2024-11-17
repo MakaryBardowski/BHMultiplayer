@@ -17,7 +17,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
-import game.entities.mobs.Player;
+import game.entities.mobs.player.Player;
 import game.items.ItemTemplates;
 import lombok.Getter;
 import messages.GrenadeThrownMessage;
@@ -111,23 +111,7 @@ public class Grenade extends ThrowableWeapon {
             p.getFirstPersonHands().getHandsComposer().setGlobalSpeed(1f);
         }
 
-        Node model = (Node) assetManager.loadModel(template.getDropPath());
-        model.move(0, -0.33f, 0.2f);
-
-        Geometry ge = (Geometry) (model.getChild(0));
-        Material originalMaterial = ge.getMaterial();
-        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
-        ge.setMaterial(newMaterial);
-        float length = 1f;
-        float width = 1f;
-        float height = 1f;
-        model.scale(length, width, height);
-        p.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
-        setupModelShootability(model, p.getId());
-        thirdPersonModelParentIndex = p.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
-        System.out.println("name " + p.getName());
-        System.out.println(" EQUIPPED A GRENADE! (pos = " + model.getWorldTranslation());
+        humanEquipInThirdPerson(p, assetManager);
 
     }
 
@@ -156,13 +140,13 @@ public class Grenade extends ThrowableWeapon {
         var cs = ClientGameAppState.getInstance();
         var grenadeInitialPosition = cs.getCamera().getLocation();
         var throwDirection = cs.getCamera().getDirection().normalize();
-        
+
         var gtm = new GrenadeThrownMessage(p.getId(), id, grenadeInitialPosition, throwDirection);
         gtm.setReliable(true);
 
         cs.getClient().send(gtm);
 
-        p.removeFromEquipment(this);
+        p.getEquipment().removeItem(this);
         p.unequip(this);
         removeEntityByIdClient(id);
 
@@ -180,13 +164,12 @@ public class Grenade extends ThrowableWeapon {
 
     @Override
     public void playerUnequip(Player p) {
-        if (p.getEquippedRightHand() == this) {
-            p.setEquippedRightHand(null);
-            p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
-            p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
-            System.out.println("unequipping GRENADE!");
+        if (p.getEquippedRightHand() != this) {
+            return;
         }
-
+        p.setEquippedRightHand(null);
+        p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+        p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
     }
 
     @Override
@@ -209,5 +192,40 @@ public class Grenade extends ThrowableWeapon {
         builder.append("-Throwable\n");
         builder.append("-Creates smoke screen");
         return builder.toString();
+    }
+
+    @Override
+    public void humanMobUnequip(HumanMob m) {
+        if (m.getEquippedRightHand() == this) {
+            m.setEquippedRightHand(null);
+        }
+    }
+
+    @Override
+    public void humanMobEquip(HumanMob m) {
+        Holdable unequippedItem = m.getEquippedRightHand();
+        if (unequippedItem != null) {
+            unequippedItem.humanMobUnequip(m);
+        }
+        m.setEquippedRightHand(this);
+        humanEquipInThirdPerson(m, Main.getInstance().getAssetManager());
+    }
+
+    private void humanEquipInThirdPerson(HumanMob humanMob, AssetManager assetManager) {
+        Node model = (Node) assetManager.loadModel(template.getDropPath());
+        model.move(0, -0.33f, 0.2f);
+
+        Geometry ge = (Geometry) (model.getChild(0));
+        Material originalMaterial = ge.getMaterial();
+        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+        ge.setMaterial(newMaterial);
+        float length = 1f;
+        float width = 1f;
+        float height = 1f;
+        model.scale(length, width, height);
+        humanMob.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
+        setupModelShootability(model, humanMob.getId());
+        thirdPersonModelParentIndex = humanMob.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
     }
 }

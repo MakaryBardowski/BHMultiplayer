@@ -14,6 +14,7 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import data.DamageReceiveData;
 import game.entities.DecorationTemplates.DecorationTemplate;
 import static game.entities.DestructibleUtils.attachDestructibleToNode;
 import static game.entities.DestructibleUtils.setupModelShootability;
@@ -91,7 +92,7 @@ public class Chest extends Destructible {
 
     @Override
     public void onShot(Mob shooter, float damage) {
-        notifyServerAboutDealingDamage(damage, this);
+        notifyServerAboutDealingDamage(damage, shooter);
     }
 
     @Override
@@ -99,18 +100,24 @@ public class Chest extends Destructible {
         System.out.println("This " + name + " might contain valuable loot.");
     }
 
-    public void notifyServerAboutDealingDamage(float damage, Chest mob) {
-        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(mob.getId(), damage);
-        hpUpd.setReliable(true);
-        ClientGameAppState.getInstance().getClient().send(hpUpd);
-    }
-
     @Override
-    public void receiveDamage(float damage) {
-        health = health - damage;
+    public void receiveDamage(DamageReceiveData damageData) {
+        health = health - damageData.getRawDamage();
 
         if (health <= 0) {
             die();
+            destroyClient();
+            onDeathClient();
+        }
+    }
+
+    @Override
+    public void receiveDamageServer(DamageReceiveData damageData) {
+        health = health - damageData.getRawDamage();
+
+        if (health <= 0) {
+            destroyServer();
+            onDeathServer();
         }
     }
 
@@ -176,6 +183,13 @@ public class Chest extends Destructible {
     @Override
     public void move(float tpf) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void notifyServerAboutDealingDamage(float damage, InteractiveEntity attackingEntity) {
+        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(id, attackingEntity.id, damage);
+        hpUpd.setReliable(true);
+        ClientGameAppState.getInstance().getClient().send(hpUpd);
     }
 
     enum ChestType {

@@ -25,13 +25,13 @@ public class RandomMapGenerator {
     }
 
     public MapGenerationResult createRandomMap(byte[][][] logicMap) {
-        int numRooms = random.nextInt(8, 12);
+        int numRooms = random.nextInt(3, 4);
 //        int numRooms = 2;
         List<Room> rooms = new ArrayList<>();
         for (int roomCounter = 0; roomCounter < numRooms; roomCounter++) {
-            var randomRoomSizeX = random.nextInt(5, 10);
-            var randomRoomSizeY = random.nextInt(4, 7);
-            var randomRoomSizeZ = random.nextInt(5, 10);
+            var randomRoomSizeX = random.nextInt(7, 9);
+            var randomRoomSizeY = random.nextInt(5, 6);
+            var randomRoomSizeZ = random.nextInt(7, 9);
 
             var room = addRandomRoom(logicMap, randomRoomSizeX, randomRoomSizeY, randomRoomSizeZ, rooms);
             rooms.add(room);

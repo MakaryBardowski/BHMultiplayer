@@ -22,8 +22,8 @@ import java.util.List;
  */
 public class VoxelAdding {
 
-    public static Block AddOptimizedBox(Chunk chunk, Block[][][] map, byte[][][] logicMap, int vmX, int vmY, int vmZ, float voxelSize, int index, AssetManager asm, BlockType bt, float x, float y, float z) {
-        Block b = new Block();
+    public static Block AddOptimizedBox(Chunk chunk, Block[][][] map, byte[][][] logicMap, int vmX, int vmY, int vmZ, float voxelSize, AssetManager asm, BlockType bt, float x, float y, float z) {
+        Block b = new Block(bt);
         map[vmX][vmY][vmZ] = b;
 
         boolean top = false;
@@ -238,7 +238,7 @@ public class VoxelAdding {
         Integer[] indexes = new Integer[inds.length];
 
         for (int i = 0; i < indexes.length; i++) {
-            indexes[i] = (int) inds[i] + chunk.getVertexCount();  // + index*24 pobawic sie indeksacja i bedzie dzialac
+            indexes[i] = (int) inds[i] + chunk.getLayerByBlock(bt).getVertexCount();
 
         }
 
