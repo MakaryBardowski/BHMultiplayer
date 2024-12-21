@@ -68,6 +68,29 @@ public class DecorationFactory {
         return d;
     }
 
+    public static DestructibleDecoration createWeaponRack(int id, Node parentNode, Vector3f pos, AssetManager a) {
+        DecorationTemplate template = DecorationTemplates.WEAPON_RACK;
+        Node node = (Node) a.loadModel(template.getModelPath());
+        node.scale(template.getScale());
+        DestructibleDecoration d = new DestructibleDecoration(id, "Weapon rack " + id, node, template);
+        attachDestructibleToNode(d, parentNode, pos);
+        setupModelShootability(node, id);
+        setupModelLight(node);
+        return d;
+    }
+
+    public static DestructibleDecoration createOfficeTable(int id, Node parentNode, Vector3f pos, AssetManager a) {
+        DecorationTemplate template = DecorationTemplates.OFFICE_TABLE;
+        System.out.println("office table!");
+        Node node = (Node) a.loadModel(template.getModelPath());
+        node.scale(template.getScale());
+        DestructibleDecoration d = new DestructibleDecoration(id, "Table " + id, node, template);
+        attachDestructibleToNode(d, parentNode, pos);
+        setupModelShootability(node, id);
+        setupModelLight(node);
+        return d;
+    }
+
     public static DestructibleDecoration createDestructibleDecoration(int id, Node parentNode, Vector3f pos, DecorationTemplate template, AssetManager a) {
         if (template.equals(DecorationTemplates.TABLE)) {
             return createTable(id, parentNode, pos, a);
@@ -77,6 +100,10 @@ public class DecorationFactory {
             return createMine(id, parentNode, pos, a);
         } else if (template.equals(DecorationTemplates.CRATE)) {
             return createCrate(id, parentNode, pos, a);
+        } else if (template.equals(DecorationTemplates.WEAPON_RACK)) {
+            return createWeaponRack(id, parentNode, pos, a);
+        } else if (template.equals(DecorationTemplates.OFFICE_TABLE)) {
+            return createOfficeTable(id, parentNode, pos, a);
         }
 
         return null;

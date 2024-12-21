@@ -25,6 +25,7 @@ import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.items.consumable.Medpack;
+import game.items.misc.Report;
 import game.items.weapons.Axe;
 import game.items.weapons.Grenade;
 import game.items.weapons.Knife;
@@ -79,6 +80,8 @@ public class ItemFactory {
                     return createShotgunAmmoPack(id, template, droppable);
                 case MEDPACK:
                     return createMedpack(id, template, droppable);
+                case REPORT:
+                    return createReport(id,template,droppable);
                 default:
                     break;
             }
@@ -190,6 +193,12 @@ public class ItemFactory {
         Node dropNode = createItemDropNode(template);
         Medpack medpack = new Medpack(id, 0f, template, "Medpack", dropNode, droppable);
         return medpack;
+    }
+
+    private Item createReport(int id, ItemTemplate template, boolean droppable) {
+        Node dropNode = createItemDropNode(template);
+        Report report = new Report(id, template, "Report", dropNode, droppable);
+        return report;
     }
 
     /**

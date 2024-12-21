@@ -98,7 +98,6 @@ public class DestructibleDecoration extends Destructible {
         health = health - damageData.getRawDamage();
 
         if (health <= 0) {
-            System.out.println("\n\n\n\n mine died");
             destroyServer();
             onDeathServer();
             return;

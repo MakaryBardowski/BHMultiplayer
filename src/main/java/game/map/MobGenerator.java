@@ -4,14 +4,21 @@
  */
 package game.map;
 
+import LevelLoadSystem.EntitySpawnData;
 import Utils.GridUtils;
 import client.ClientGameAppState;
 import com.jme3.math.Vector3f;
+import game.entities.DecorationTemplates;
+import game.entities.DecorationTemplates.DecorationTemplate;
 import game.entities.factories.MobSpawnType;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.MudBeetle;
 import game.entities.mobs.player.Player;
+
+import java.util.List;
 import java.util.Random;
+
+import game.items.ItemTemplates;
 import server.ServerMain;
 
 /**
@@ -38,19 +45,48 @@ public class MobGenerator {
         }
     }
 
+    public void spawnMobs(List<EntitySpawnData> entitySpawnData){
+        for(var entitySpawnInfo : entitySpawnData){
+            var server = ServerMain.getInstance();
+            var serverLevelManager = server.getCurrentGamemode().getLevelManager();
+            if(entitySpawnInfo.isDestructibleDecoration()){
+                serverLevelManager.registerDestructibleDecoration(DecorationTemplates.getTemplateByIndex(entitySpawnInfo.getTemplateIndex()),entitySpawnInfo.getPosition());
+            } else if(entitySpawnInfo.isIndestructibleDecoration()){
+
+            } else if (entitySpawnInfo.isMob()){
+
+            } else if (entitySpawnInfo.isItem()){
+                serverLevelManager.registerItemAndNotifyTCP(ItemTemplates.getTemplateByIndex(entitySpawnInfo.getTemplateIndex()),true,null);
+            }
+        }
+    }
+
     public void spawnArmoryMobs(byte[][][] logicMap) {
         var server = ServerMain.getInstance();
         var serverLevelManager = server.getCurrentGamemode().getLevelManager();
         var blockSize = server.getBLOCK_SIZE();
 
-        serverLevelManager.registerMob(MobSpawnType.TRAINING_DUMMY)
-                .setPositionServer(
-                        new Vector3f(
-                                5 * blockSize + blockSize,
-                                blockSize,
-                                5 * blockSize + blockSize
-                        )
-                );
+        serverLevelManager.registerDestructibleDecoration(DecorationTemplates.WEAPON_RACK, new Vector3f(
+                4.5f * blockSize + blockSize,
+                blockSize,
+                4.25f * blockSize + blockSize
+        ));
+        serverLevelManager.registerDestructibleDecoration(DecorationTemplates.WEAPON_RACK, new Vector3f(
+                5.5f * blockSize + blockSize,
+                blockSize,
+                4.25f * blockSize + blockSize
+        ));
+        serverLevelManager.registerDestructibleDecoration(DecorationTemplates.WEAPON_RACK, new Vector3f(
+                6.5f * blockSize + blockSize,
+                blockSize,
+                4.25f * blockSize + blockSize
+        ));
+
+        serverLevelManager.registerDestructibleDecoration(DecorationTemplates.OFFICE_TABLE, new Vector3f(
+                2.5f * blockSize + blockSize,
+                blockSize,
+                8.5f * blockSize + blockSize
+        ));
 
         for (int i = 0; i < 4; i++) {
             serverLevelManager.registerRandomChest(new Vector3f(random.nextInt(8 * blockSize) + 2*blockSize, blockSize, random.nextInt(8 * blockSize) + 2*blockSize)

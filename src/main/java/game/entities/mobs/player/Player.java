@@ -18,24 +18,21 @@ import com.jme3.scene.Node;
 import game.entities.Attribute;
 import game.entities.FloatAttribute;
 import FirstPersonHands.FirstPersonHands;
-import LemurGUI.LemurPlayerEquipment;
+import LemurGUI.LemurPlayerInventoryGui;
 import LemurGUI.LemurPlayerHealthbar;
 import static client.ClientGameAppState.removeEntityByIdClient;
 import client.Main;
 import static client.Main.CAM_ROT_SPEED;
 import static client.Main.CAM__MOVE_SPEED;
 import com.jme3.anim.AnimComposer;
-import com.jme3.network.AbstractMessage;
 import data.DamageReceiveData;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.playerClasses.AssaultClass;
 import game.entities.mobs.playerClasses.MedicClass;
 import game.entities.mobs.playerClasses.PlayerClass;
-import static game.map.collision.MovementCollisionUtils.collisionCheckWithMap;
 import game.map.collision.WorldGrid;
 import lombok.Getter;
 import lombok.Setter;
-import messages.NewMobMessage;
 import messages.PlayerPosUpdateRequest;
 import server.ServerMain;
 import static server.ServerMain.removeEntityByIdServer;
@@ -91,11 +88,10 @@ public class Player extends HumanMob {
 
     @Getter
     @Setter
-    private LemurPlayerHealthbar playerHud;
+    private LemurPlayerHealthbar playerHealthbar;
 
     @Getter
-    @Setter
-    private LemurPlayerEquipment playerEquipmentGui;
+    private LemurPlayerInventoryGui playerinventoryGui;
 
     @Override
     public void equip(Item item) {
@@ -156,10 +152,10 @@ public class Player extends HumanMob {
     public void receiveDamage(DamageReceiveData damageData) {
         float previousHealth = getHealth();
         super.receiveDamage(damageData);
-        if (playerHud != null) {
+        if (playerHealthbar != null) {
             float normalizedPercentHealth = getHealth() / getMaxHealth();
             float normalizedChange = (previousHealth - getHealth()) / getMaxHealth();
-            playerHud.setHealthbarParams(normalizedPercentHealth, normalizedChange);
+            playerHealthbar.setHealthbarParams(normalizedPercentHealth, normalizedChange);
         }
     }
 
@@ -168,10 +164,10 @@ public class Player extends HumanMob {
         float previousHealth = getHealth();
         super.receiveHeal(heal);
 
-        if (playerHud != null) {
+        if (playerHealthbar != null) {
             float normalizedPercentHealth = getHealth() / getMaxHealth();
             float normalizedChange = (previousHealth - getHealth()) / getMaxHealth();
-            playerHud.setHealthbarParams(normalizedPercentHealth, normalizedChange);
+            playerHealthbar.setHealthbarParams(normalizedPercentHealth, normalizedChange);
         }
     }
 
@@ -263,6 +259,12 @@ public class Player extends HumanMob {
             collisionGrid.insert(this);
 
         }
+    }
+
+    public void setPlayerinventoryGui(LemurPlayerInventoryGui gui){
+        this.playerinventoryGui = gui;
+        this.getEquipment().setInventoryGui(gui);
+        this.getHotbar().setInventoryGui(gui);
     }
 
     @Override

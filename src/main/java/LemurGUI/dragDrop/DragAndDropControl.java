@@ -1,6 +1,6 @@
 package LemurGUI.dragDrop;
 
-import LemurGUI.LemurPlayerEquipment;
+import LemurGUI.LemurPlayerInventoryGui;
 import LemurGUI.components.DraggableButton;
 import java.util.*;
 
@@ -11,8 +11,6 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import com.jme3.util.SafeArrayList;
-import com.simsilica.lemur.Button;
-import com.simsilica.lemur.component.IconComponent;
 
 import com.simsilica.lemur.event.*;
 
@@ -33,9 +31,9 @@ public class DragAndDropControl extends AbstractControl {
 
     private static boolean isCurrentlyDragging;
 
-    private final LemurPlayerEquipment lemurPlayerEquipment;
+    private final LemurPlayerInventoryGui lemurPlayerEquipment;
 
-    public DragAndDropControl(LemurPlayerEquipment lemurPlayerEquipment, DragAndDropListener... initialListeners) {
+    public DragAndDropControl(LemurPlayerInventoryGui lemurPlayerEquipment, DragAndDropListener... initialListeners) {
         this.lemurPlayerEquipment = lemurPlayerEquipment;
         listeners.addAll(Arrays.asList(initialListeners));
     }

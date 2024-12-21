@@ -1,5 +1,6 @@
 package game.map;
 
+import game.map.blocks.Map;
 import game.map.proceduralGeneration.Room;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,6 @@ import lombok.AllArgsConstructor;
 @Getter
 @AllArgsConstructor
 public class MapGenerationResult {
-    private byte[][][] map;
+    private Map map;
     private List<Room> rooms;
 }

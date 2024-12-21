@@ -4,7 +4,7 @@
  */
 package LemurGUI.components;
 
-import LemurGUI.LemurPlayerEquipment;
+import LemurGUI.LemurPlayerInventoryGui;
 import LemurGUI.dragDrop.DragAndDropControl;
 import com.jme3.collision.CollisionResult;
 import com.jme3.input.event.MouseMotionEvent;
@@ -21,14 +21,14 @@ import lombok.Getter;
  */
 public class HotbarButton extends DraggableButton {
 
-    private final LemurPlayerEquipment lemurPlayerEquipment;
+    private final LemurPlayerInventoryGui lemurPlayerEquipment;
 
     @Getter
     private final TooltipMouseListener tooltipListener;
 
-    public HotbarButton(String s, LemurPlayerEquipment lemurPlayerEquipment, DragAndDropControl dragAndDropControl, TooltipMouseListener tooltipListener) {
+    public HotbarButton(String s, LemurPlayerInventoryGui lemurPlayerHud, DragAndDropControl dragAndDropControl, TooltipMouseListener tooltipListener) {
         super(s, dragAndDropControl, tooltipListener);
-        this.lemurPlayerEquipment = lemurPlayerEquipment;
+        this.lemurPlayerEquipment = lemurPlayerHud;
         this.tooltipListener = tooltipListener;
     }
 
@@ -72,10 +72,6 @@ public class HotbarButton extends DraggableButton {
         }
         if (dragTarget == null) {
             lemurPlayerEquipment.getPlayer().getHotbar().removeItemAt(Integer.parseInt(draggedSpatial.getName()));
-            var currentIconSize = ((IconComponent) this.getIcon()).getIconSize();
-            var emptyIcon = new IconComponent("Textures/GUI/equipmentSlotEmpty.png");
-            emptyIcon.setIconSize(currentIconSize);
-            this.setIcon(emptyIcon);
             return;
         }
 
@@ -84,19 +80,7 @@ public class HotbarButton extends DraggableButton {
             return;
         }
 
-        if (dragTarget instanceof HotbarButton dragTargetHotbarButton) {
-            var targetIcon = (IconComponent) dragTargetHotbarButton.getIcon();
-            var targetIconSize = targetIcon.getIconSize();
-
-            var captureIcon = (IconComponent) this.getIcon();
-            var captureIconSize = captureIcon.getIconSize();
-
-            captureIcon.setIconSize(targetIconSize);
-            targetIcon.setIconSize(captureIconSize);
-
-            dragTargetHotbarButton.setIcon(captureIcon);
-            this.setIcon(targetIcon);
-
+        if (dragTarget instanceof HotbarButton) {
             var hotbarIndex = Integer.parseInt(dragTarget.getName());
             lemurPlayerEquipment.getPlayer().getHotbar().swapItems(hotbarIndex,draggedItemIndexInHotbar);
 

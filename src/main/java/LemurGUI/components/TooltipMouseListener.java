@@ -4,7 +4,7 @@
  */
 package LemurGUI.components;
 
-import LemurGUI.LemurPlayerEquipment;
+import LemurGUI.LemurPlayerInventoryGui;
 import static LemurGUI.components.LemurUtils.getHeightRatio;
 import static LemurGUI.components.LemurUtils.getWidthRatio;
 import LemurGUI.dragDrop.DragAndDropControl;
@@ -21,8 +21,6 @@ import com.simsilica.lemur.VAlignment;
 import com.simsilica.lemur.component.BoxLayout;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.event.MouseListener;
-import game.entities.inventory.Equipment;
-import game.items.Item;
 
 /**
  *
@@ -35,11 +33,11 @@ public class TooltipMouseListener implements MouseListener {
     private static Container tooltipInnerContainer;
     private static final int HORIZONTAL_OFFSET_PX = 10;
     private static final int VERTICAL_OFFSET_PX = -30;
-    private final LemurPlayerEquipment lemurPlayerEquipmentGui;
+    private final LemurPlayerInventoryGui lemurPlayerEquipmentGui;
 
     private final TooltipSource tooltipSource;
 
-    public TooltipMouseListener(LemurPlayerEquipment lemurPlayerEquipmentGui, TooltipSource tooltipSource) {
+    public TooltipMouseListener(LemurPlayerInventoryGui lemurPlayerEquipmentGui, TooltipSource tooltipSource) {
         this.lemurPlayerEquipmentGui = lemurPlayerEquipmentGui;
         this.tooltipSource = tooltipSource;
     }

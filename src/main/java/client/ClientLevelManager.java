@@ -4,7 +4,6 @@
  */
 package client;
 
-import LemurGUI.LemurPlayerHealthbar;
 import static client.ClientSynchronizationUtils.interpolateGrenadePosition;
 import static client.ClientSynchronizationUtils.interpolateMobPosition;
 import com.jme3.app.state.AppStateManager;
@@ -14,11 +13,8 @@ import com.jme3.input.InputManager;
 import com.jme3.light.AmbientLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.network.Client;
-import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
-import com.jme3.ui.Picture;
-import debugging.DebugUtils;
 import game.entities.InteractiveEntity;
 import game.entities.factories.AllMobFactory;
 import game.entities.factories.MobSpawnType;
@@ -27,9 +23,9 @@ import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
 import game.map.MapGenerator;
-import game.map.MapType;
 import game.map.collision.WorldGrid;
-import java.util.Arrays;
+
+import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.Setter;
@@ -79,7 +75,10 @@ public class ClientLevelManager extends LevelManager {
     private final int CHUNK_SIZE = 16;
 
     @Getter
-    private final int MAP_SIZE = 39;
+    private final int MAP_SIZE_XZ = 39;
+
+    @Getter
+    private final int MAP_SIZE_Y = 20;
 
     @Getter
     private final Node rootNode = new Node("ROOT NODE");
@@ -126,10 +125,10 @@ public class ClientLevelManager extends LevelManager {
         MAIN_INSTANCE.getViewPort().setClearColor(true);
 
         AmbientLight al = new AmbientLight();
-        al.setColor(ColorRGBA.White.mult(0.7f));
+        al.setColor(ColorRGBA.White.mult(0.5f));
         worldNode.addLight(al);
 
-        grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
+        grid = new WorldGrid(MAP_SIZE_XZ, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
 //        DebugUtils.drawGrid();
 
     }
@@ -143,23 +142,20 @@ public class ClientLevelManager extends LevelManager {
         var levelType = levelTypes[levelIndex];
 //        System.out.println("CLIENT: level seed "+levelSeed);
 //        System.out.println("CLIENT: generating map of type "+levelType);
-        MapGenerator mg = new MapGenerator(levelSeed, levelType,MAP_SIZE);
+        MapGenerator mg = new MapGenerator(levelSeed, levelType);
 
         MAIN_INSTANCE.enqueue(() -> {
-            if (map == null) {
+            try {
                 map = mg.generateMap(
                         BLOCK_SIZE,
                         CHUNK_SIZE,
-                        MAP_SIZE,
+                        MAP_SIZE_XZ,
+                        MAP_SIZE_Y,
+                        MAP_SIZE_XZ,
                         assetManager,
                         mapNode);
-            } else {
-                mg.generateOnExistingMapNoMemoryAllocation(map,
-                        BLOCK_SIZE,
-                        CHUNK_SIZE,
-                        MAP_SIZE,
-                        assetManager,
-                        mapNode);
+            } catch (IOException exception){
+                System.err.println("Client could not load level of type "+levelType +" with seed "+levelSeed+". Reason: "+exception.getMessage());
             }
         });
 
@@ -177,8 +173,8 @@ public class ClientLevelManager extends LevelManager {
 
     public void updateLoop(float tpf) {
         if (player != null) {
-            if(player.getPlayerHud() != null){
-                player.getPlayerHud().updateHealthbar(tpf);
+            if(player.getPlayerHealthbar() != null){
+                player.getPlayerHealthbar().updateHealthbar(tpf);
             }
             player.move(tpf);
             player.updateTemporaryEffectsClient();

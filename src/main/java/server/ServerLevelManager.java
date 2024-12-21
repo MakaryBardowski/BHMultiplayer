@@ -20,19 +20,16 @@ import game.entities.Collidable;
 import game.entities.DecorationTemplates;
 import game.entities.DestructibleDecoration;
 import game.entities.InteractiveEntity;
-import game.entities.LevelExit;
 import game.entities.factories.AllMobFactory;
 import game.entities.factories.DecorationFactory;
 import game.entities.factories.MobSpawnType;
 import game.entities.factories.PlayerFactory;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
-import game.entities.mobs.MudBeetle;
 import game.entities.mobs.player.Player;
 import game.items.AmmoPack;
 import game.items.Item;
 import game.items.ItemTemplates;
-import static game.items.ItemTemplates.SMOKE_GRENADE;
 import game.items.armor.Armor;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
@@ -41,23 +38,24 @@ import game.items.armor.Vest;
 import game.items.factories.ItemFactory;
 import game.items.weapons.Knife;
 import game.items.weapons.Rifle;
+import game.map.LevelGenerator;
 import game.map.MapGenerator;
 import game.map.MapType;
 import game.map.MobGenerator;
+import game.map.blocks.Map;
 import lombok.Getter;
 import game.map.collision.WorldGrid;
+
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+
 import jme3utilities.math.Vector3i;
 import messages.InstantEntityPosCorrectionMessage;
 import messages.PlayerJoinedMessage;
 import messages.SetPlayerMessage;
-import messages.gameSetupMessages.NextLevelMessage;
 import messages.items.ChestItemInteractionMessage;
 import static messages.items.ChestItemInteractionMessage.ChestItemInteractionType.INSERT;
 import messages.items.MobItemInteractionMessage;
@@ -91,13 +89,16 @@ public class ServerLevelManager extends LevelManager {
     private final int COLLISION_GRID_CELL_SIZE = 18;
 
     @Getter
-    private final int MAP_SIZE = 39;
+    private final int MAP_SIZE_XZ = 39;
+
+    @Getter
+    private final int MAP_SIZE_Y = 20;
 
     @Getter
     private WorldGrid grid;
 
     @Getter
-    private byte[][][] map;
+    private Map map;
 
     @Getter
     private final ConcurrentHashMap<Integer, InteractiveEntity> mobs = new ConcurrentHashMap<>();
@@ -130,10 +131,14 @@ public class ServerLevelManager extends LevelManager {
 
     }
 
-    public void createMap(long seed, MapType mapType) {
+    public void createMap(long seed, MapType mapType) throws IOException {
         System.out.println("SERVER: generating map of type " + mapType + " seed " + seed);
-        System.out.println("grid is: " + grid);
-        var mapGenResult = new MapGenerator(seed, mapType, MAP_SIZE).decideAndGenerateMapServer(new byte[MAP_SIZE][MAP_SIZE][MAP_SIZE]);
+        Map logicMap = null;
+        if(!mapType.equals(MapType.ARMORY)){
+            logicMap = new Map( new byte[MAP_SIZE_XZ*MAP_SIZE_Y*MAP_SIZE_XZ], MAP_SIZE_XZ,MAP_SIZE_Y,MAP_SIZE_XZ,BLOCK_SIZE);
+        }
+
+        var mapGenResult = new MapGenerator(seed, mapType).decideAndGenerateMapServer(logicMap,MAP_SIZE_XZ,MAP_SIZE_Y,MAP_SIZE_XZ);
 
         map = mapGenResult.getMap();
         registerLevelExit(mapType);
@@ -175,7 +180,7 @@ public class ServerLevelManager extends LevelManager {
     }
 
     private void initializeCollisionGrid() {
-        grid = new WorldGrid(MAP_SIZE, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
+        grid = new WorldGrid(MAP_SIZE_XZ, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
     }
 
     private boolean levelIndexOutOfBounds(int levelIndex) {
@@ -199,12 +204,19 @@ public class ServerLevelManager extends LevelManager {
         var newLevelType = levelTypes[levelIndex];
         System.out.println("SERVER: level seed " + newLevelSeed);
         Main.getInstance().enqueue(() -> {
+            try {
+                var levelGenerator = new LevelGenerator(newLevelSeed,newLevelType,levelIndex);
+                var levelGenerationResult = levelGenerator.generateLevel();
 
-            createMap(newLevelSeed, newLevelType);
-            AStar.setPathfindingMap(map);
-            MobGenerator mg = new MobGenerator(newLevelSeed, levelIndex);
-            mg.spawnMobs(map);
-            notifyPlayersAboutNewLevelEntities();
+                createMap(newLevelSeed, newLevelType);
+                AStar.setPathfindingMap(map,MAP_SIZE_XZ,MAP_SIZE_Y,MAP_SIZE_XZ);
+                MobGenerator mg = new MobGenerator(newLevelSeed, levelIndex);
+//                mg.spawnMobs(levelGenerationResult.getEntitySpawnData());
+                notifyPlayersAboutNewLevelEntities();
+            }catch (IOException exception){
+                System.err.println("Server could not load level of type "+newLevelType +" with seed "+newLevelSeed+". Reason: "+exception.getMessage());
+            }
+
         });
     }
 
@@ -222,6 +234,13 @@ public class ServerLevelManager extends LevelManager {
         DestructibleDecoration d = DecorationFactory.createDestructibleDecoration(currentMaxId++, rootNode, pos, template, assetManager);
         registerEntityLocal(d);
         insertIntoCollisionGrid(d);
+    }
+    
+    public DestructibleDecoration registerDestructibleDecoration(DecorationTemplates.DecorationTemplate template,Vector3f pos) {
+        DestructibleDecoration d = DecorationFactory.createDestructibleDecoration(currentMaxId++, rootNode,pos, template, assetManager);
+        registerEntityLocal(d);
+        insertIntoCollisionGrid(d);
+        return d;
     }
 
     public Mob registerMob(MobSpawnType spawnType) {
@@ -532,11 +551,11 @@ public class ServerLevelManager extends LevelManager {
         exitPositionOnMapIntArray[1] = 1;
         do {
             if (mapType == MapType.ARMORY) { // hardcoded - armory will be read from file
-                exitPositionOnMapIntArray[0] = 6;
-                exitPositionOnMapIntArray[2] = 8;
+                exitPositionOnMapIntArray[0] = 20;
+                exitPositionOnMapIntArray[2] = 20;
             } else {
-                exitPositionOnMapIntArray[0] = 4 + RANDOM.nextInt(MAP_SIZE - 4);
-                exitPositionOnMapIntArray[2] = 4 + RANDOM.nextInt(MAP_SIZE - 4);
+                exitPositionOnMapIntArray[0] = 4 + RANDOM.nextInt(MAP_SIZE_XZ - 4);
+                exitPositionOnMapIntArray[2] = 4 + RANDOM.nextInt(MAP_SIZE_XZ - 4);
             }
         } while (canNotPlaceCar(exitPositionOnMapIntArray));
 
@@ -555,7 +574,7 @@ public class ServerLevelManager extends LevelManager {
     }
 
     private boolean canNotPlaceCar(int[] exitPositionOnMapIntArray) {
-        return map[exitPositionOnMapIntArray[0]][exitPositionOnMapIntArray[1]][exitPositionOnMapIntArray[2]] != 0;
+        return map.isPositionNotEmpty(exitPositionOnMapIntArray[0], exitPositionOnMapIntArray[1], exitPositionOnMapIntArray[2]);
     }
 
     public int getAndIncreaseNextEntityId() {

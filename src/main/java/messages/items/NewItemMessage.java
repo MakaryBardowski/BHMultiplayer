@@ -4,7 +4,7 @@
  */
 package messages.items;
 
-import com.jme3.network.AbstractMessage;
+import client.ClientGameAppState;
 import com.jme3.network.serializing.Serializable;
 import game.items.Item;
 import game.items.ItemTemplates;
@@ -36,8 +36,6 @@ public abstract class NewItemMessage extends TwoWayMessage {
     }
     
     public ItemTemplate getTemplate(){
-    return ItemTemplates.templates.get(templateIndex);
+        return ItemTemplates.getTemplateByIndex(templateIndex);
     }
-    
-
 }

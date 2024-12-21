@@ -63,7 +63,7 @@ set CMD_LINE_ARGS=%*
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\BulletHeavenMultiplayer-0.0.86.jar
+set CLASSPATH=%APP_HOME%\lib\BulletHeavenMultiplayer-0.0.87.jar
 
 @rem Execute BulletHeavenMultiplayer
 "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %BULLET_HEAVEN_MULTIPLAYER_OPTS%  -jar "%CLASSPATH%" %CMD_LINE_ARGS%
