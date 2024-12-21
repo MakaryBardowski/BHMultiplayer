@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class VoxelAdding {
 
-    public static Block AddOptimizedBox(Chunk chunk, Block[][][] map, byte[][][] logicMap, int vmX, int vmY, int vmZ, float voxelSize, AssetManager asm, BlockType bt, float x, float y, float z) {
+    public static Block AddOptimizedBox(Chunk chunk, Block[][][] map, Map logicMap, int vmX, int vmY, int vmZ, float voxelSize, AssetManager asm, BlockType bt, float x, float y, float z) {
         Block b = new Block(bt);
         map[vmX][vmY][vmZ] = b;
 
@@ -33,23 +33,24 @@ public class VoxelAdding {
         boolean front = false;
         boolean back = false;
 
-        if (mapContainsX(vmX - 1, map) && logicMap[vmX - 1][vmY][vmZ] == 0) {
+        if (logicMap.isWithinMapBounds(vmX -1, vmY, vmZ) && logicMap.isPositionEmpty(vmX-1,vmY,vmZ)) {
             left = true;
         }
-        if (mapContainsX(vmX + 1, map) && logicMap[vmX + 1][vmY][vmZ] == 0) {
+        if (logicMap.isWithinMapBounds(vmX +1, vmY, vmZ) && logicMap.isPositionEmpty(vmX+1,vmY,vmZ)) {
             right = true;
         }
-        if (mapContainsZ(vmZ - 1, map) && logicMap[vmX][vmY][vmZ - 1] == 0) {
+        if (logicMap.isWithinMapBounds(vmX, vmY, vmZ-1) && logicMap.isPositionEmpty(vmX,vmY,vmZ-1)) {
             front = true;
         }
-        if (mapContainsZ(vmZ + 1, map) && logicMap[vmX][vmY][vmZ + 1] == 0) {
+        if (logicMap.isWithinMapBounds(vmX, vmY, vmZ+1) && logicMap.isPositionEmpty(vmX,vmY,vmZ+1)) {
             back = true;
         }
-        if (mapContainsY(vmY + 1, map) && logicMap[vmX][vmY + 1][vmZ] == 0) {
-            top = true;
-        }
-        if (mapContainsY(vmY - 1, map) && logicMap[vmX][vmY - 1][vmZ] == 0) {
+
+        if (logicMap.isWithinMapBounds(vmX, vmY-1, vmZ) && logicMap.isPositionEmpty(vmX,vmY-1,vmZ)) {
             floor = true;
+        }
+        if (logicMap.isWithinMapBounds(vmX, vmY+1, vmZ) && logicMap.isPositionEmpty(vmX,vmY+1,vmZ)) {
+            top = true;
         }
 
         int neighborCnt = (left ? 1 : 0) + (right ? 1 : 0) + (back ? 1 : 0) + (front ? 1 : 0) + (top ? 1 : 0) + (floor ? 1 : 0);
@@ -244,7 +245,7 @@ public class VoxelAdding {
 
         List<Vector4f> colors = new ArrayList<>();
         for (int i = 0; i < vertices.size(); i++) {
-            colors.add(new Vector4f(0.1f, 0.1f, 0.1f, 1));
+            colors.add(new Vector4f(1f, 1f, 1f, 1));
 
         }
 

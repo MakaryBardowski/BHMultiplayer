@@ -47,7 +47,7 @@ public class NewIndestructibleDecorationMessage extends TwoWayMessage {
     }
 
     public DecorationTemplates.DecorationTemplate getTemplate() {
-        return DecorationTemplates.templates.get(templateIndex);
+        return DecorationTemplates.getTemplateByIndex(templateIndex);
     }
 
     public Vector3f getPos() {

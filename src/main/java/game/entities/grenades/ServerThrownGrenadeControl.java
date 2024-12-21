@@ -84,7 +84,8 @@ public class ServerThrownGrenadeControl extends AbstractControl implements Savab
         var posInMapNow = calculateNewPosInLogicMap(spatial, new Vector3f(), ServerMain.getInstance().getBLOCK_SIZE());
         var posInMapAfterMove = calculateNewPosInLogicMap(spatial, moveVec, ServerMain.getInstance().getBLOCK_SIZE());
 
-        if (ServerMain.getInstance().getMap()[(int) posInMapNow.getX()][(int) posInMapAfterMove.getY()][(int) posInMapNow.getZ()] != 0 && bounces <= maxBounces) {
+
+        if (ServerMain.getInstance().getMap().isPositionNotEmpty((int) posInMapNow.getX(),(int) posInMapAfterMove.getY(),(int) posInMapNow.getZ()) && bounces <= maxBounces) {
             moveVec.setY(-moveVec.getY() * BOUNCE_ELASTICITY);
             bounces++;
         }

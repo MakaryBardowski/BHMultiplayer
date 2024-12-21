@@ -4,12 +4,11 @@
  */
 package messages;
 
-import LemurGUI.LemurPlayerEquipment;
+import LemurGUI.LemurPlayerInventoryGui;
 import LemurGUI.LemurPlayerHealthbar;
 import client.ClientGameAppState;
 import client.PlayerHUD;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.scene.Node;
@@ -92,13 +91,11 @@ public class SetPlayerMessage extends TwoWayMessage {
 
     private void addPlayerHUD(Player player) {
         var LemurPlayerHud = new LemurPlayerHealthbar(player);
-        var LemurPlayerEquipment = new LemurPlayerEquipment(player);
+        var LemurPlayerEquipment = new LemurPlayerInventoryGui(player);
 
-        player.setPlayerHud(LemurPlayerHud);
-        player.setPlayerEquipmentGui(LemurPlayerEquipment);
-        ClientGameAppState.getInstance().getPlayer().setPlayerHud(LemurPlayerHud);
+        player.setPlayerHealthbar(LemurPlayerHud);
+        player.setPlayerinventoryGui(LemurPlayerEquipment);;
         ClientGameAppState.getInstance().getStateManager().attach(new PlayerHUD(ClientGameAppState.getInstance()));
-
     }
 
     private Player registerMyPlayer(SetPlayerMessage nmsg) {

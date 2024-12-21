@@ -3,6 +3,7 @@ package server;
 import client.Main;
 import com.jme3.app.Application;
 import game.entities.mobs.Mob;
+import game.map.blocks.Map;
 import messages.messageListeners.ServerMessageListener;
 import messages.MobPosRotUpdateMessage;
 
@@ -188,7 +189,7 @@ public class ServerMain extends AbstractAppState implements ConnectionListener {
         return currentGamemode.getLevelManager().getGrid();
     }
 
-    public byte[][][] getMap() {
+    public Map getMap() {
         return currentGamemode.getLevelManager().getMap();
     }
 

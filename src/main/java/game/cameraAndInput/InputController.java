@@ -21,29 +21,18 @@ import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
-import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.simsilica.lemur.GuiGlobals;
-import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.render.NiftyImage;
-import static debugging.DebugUtils.DEBUG_GEO;
-import game.entities.Chest;
 import game.entities.InteractiveEntity;
 import game.items.Item;
 import game.items.weapons.Grenade;
 import game.items.weapons.MeleeWeapon;
 import game.items.weapons.RangedWeapon;
-import java.util.Arrays;
-import java.util.Random;
 import messages.MobRotUpdateMessage;
-import messages.gameSetupMessages.NextLevelMessage;
-import server.ServerMain;
-import settings.GlobalSettings;
 
 /**
  *
@@ -145,7 +134,7 @@ public class InputController {
 
                 if (name.equals("I") && !gs.getPlayer().isDead() && !keyPressed) {
                     Player p = gs.getPlayer();
-                    p.getPlayerEquipmentGui().toggle();
+                    p.getPlayerinventoryGui().toggle();
                 }
 
                 if (name.equals(

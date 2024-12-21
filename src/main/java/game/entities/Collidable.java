@@ -71,7 +71,7 @@ public abstract class Collidable extends Movable {
             int y = (int) (Math.floor(corner[1] / cellSize));
             int z = (int) (Math.floor(corner[2] / cellSize));
 
-            if (ClientGameAppState.getInstance().getMap().getBlockWorld().getLogicMap()[x][y][z] != 0) {
+            if (ClientGameAppState.getInstance().getMap().getBlockWorld().getLogicMap().isPositionNotEmpty(x,y,z)) {
                 return false;
             }
         }
@@ -109,7 +109,7 @@ public abstract class Collidable extends Movable {
             int y = (int) (Math.floor(corner[1] / cellSize));
             int z = (int) (Math.floor(corner[2] / cellSize));
 
-            if (ServerMain.getInstance().getMap()[x][y][z] != 0) {
+            if (ServerMain.getInstance().getMap().isPositionNotEmpty(x,y,z)) {
                 return false;
             }
         }

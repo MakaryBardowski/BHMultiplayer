@@ -2,6 +2,7 @@ package game.map.blocks;
 
 import client.Main;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Vector4f;
@@ -10,10 +11,12 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.texture.Texture;
+import com.jme3.texture.image.ColorSpace;
 import com.jme3.util.BufferUtils;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -58,19 +61,30 @@ public class ChunkLayer {
 
         geometry.move(chunkPos.getX() * bw.getBLOCK_SIZE(), 0, chunkPos.getY() * bw.getBLOCK_SIZE());
 
-        Material mat = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
+        Material mat = new Material(bw.getAsm(), "Common/MatDefs/Light/Lighting.j3md");
 
-        if (isAnimated) {
-            mat = new Material(bw.getAsm(), "Shaders/AnimatedUnshaded/AnimatedUnshaded.j3md");
-            mat.setVector4("imageNumsAndCurrent",     new Vector4f(4, BlockType.WATER.minTexCoord.x, 4, 16));
-//mat = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
-        }
-        
-        mat.setTexture("ColorMap", bw.getTextureAtlas().getAtlasTexture("DiffuseMap"));
-        mat.getTextureParam("ColorMap").getTextureValue().setMagFilter(Texture.MagFilter.Nearest);
-        mat.getTextureParam("ColorMap").getTextureValue().setMinFilter(Texture.MinFilter.NearestNearestMipMap);
+//        if (isAnimated) {
+//            mat = new Material(bw.getAsm(), "Shaders/AnimatedUnshaded/AnimatedUnshaded.j3md");
+//            mat.setVector4("imageNumsAndCurrent",     new Vector4f(4, BlockType.WATER.minTexCoord.x, 4, 16));
+////mat = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
+//        }
 
-        mat.setBoolean("VertexColor", true);
+
+//        mat.setTexture("DiffuseMap", Main.getInstance().getAssetManager().loadTexture("Textures/Blocks/debugColor.png"));
+
+        mat.setTexture("DiffuseMap", bw.getTextureAtlas().getAtlasTexture("DiffuseMap"));
+        mat.getTextureParam("DiffuseMap").getTextureValue().setMagFilter(Texture.MagFilter.Nearest);
+        mat.getTextureParam("DiffuseMap").getTextureValue().setMinFilter(Texture.MinFilter.NearestNearestMipMap);
+
+        Texture texture = mat.getTextureParam("DiffuseMap").getTextureValue();
+        texture.getImage().setColorSpace(ColorSpace.sRGB);
+
+        System.out.println("tile color space "+bw.getTextureAtlas().getAtlasTexture("DiffuseMap").getImage().getColorSpace());
+        System.out.println("tile format "+bw.getTextureAtlas().getAtlasTexture("DiffuseMap").getImage().getFormat());
+
+
+
+//        mat.setBoolean("UseVertexColor", true);
         mat.getAdditionalRenderState().setWireframe(Main.WIREFRAME);
 //        mat.getAdditionalRenderState().setLineWidth(7);
 

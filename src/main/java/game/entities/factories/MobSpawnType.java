@@ -4,6 +4,8 @@
  */
 package game.entities.factories;
 
+import com.jme3.math.Vector3f;
+
 /**
  *
  * @author 48793

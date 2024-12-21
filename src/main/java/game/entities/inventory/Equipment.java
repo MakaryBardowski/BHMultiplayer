@@ -1,6 +1,9 @@
 package game.entities.inventory;
 
+import LemurGUI.LemurPlayerInventoryGui;
+import com.simsilica.lemur.component.IconComponent;
 import game.items.Item;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,11 +11,30 @@ import java.util.List;
 public class Equipment {
     private final Item[] items;
 
+    @Getter
+    private LemurPlayerInventoryGui inventoryGui;
+
     public Equipment(Item[] items){
         this.items = items;
     }
 
     public synchronized void swapItems(int index, int otherIndex){
+        if(inventoryGui != null){
+            var eqButton = inventoryGui.getEquipmentButtonByIndex(index);
+            var otherEqButton = inventoryGui.getEquipmentButtonByIndex(otherIndex);
+
+            var targetIcon = (IconComponent) otherEqButton.getIcon();
+            var targetIconSize = targetIcon.getIconSize();
+
+            var captureIcon = (IconComponent) eqButton.getIcon();
+            var captureIconSize = captureIcon.getIconSize();
+
+            captureIcon.setIconSize(targetIconSize);
+            targetIcon.setIconSize(captureIconSize);
+
+            otherEqButton.setIcon(captureIcon);
+            eqButton.setIcon(targetIcon);
+        }
         var temp = items[index];
         items[index] = items[otherIndex];
         items[otherIndex] = temp;
@@ -30,7 +52,10 @@ public class Equipment {
     public synchronized Item removeItem(int index){
         var item = items[index];
         items[index] = null;
-        return null;
+        if(inventoryGui != null && item != null){
+            inventoryGui.updateEquipmentButton(index);
+        }
+        return item;
     }
 
     /***
@@ -45,6 +70,9 @@ public class Equipment {
         for(int i = 0; i < items.length; i++){
             if(items[i] != null && items[i].getId() == item.getId()){
                 items[i] = null;
+                if(inventoryGui != null){
+                    inventoryGui.updateEquipmentButton(i);
+                }
                 return item;
             }
         }
@@ -64,6 +92,9 @@ public class Equipment {
                     itemsRemoved.add(removedItem);
                 }
             }
+        }
+        if(inventoryGui != null){
+            inventoryGui.updateEquipmentGui();
         }
         return itemsRemoved;
     }
@@ -111,11 +142,18 @@ public class Equipment {
         // if there was a free slot, fill it
         if(firstFreeIndex != -1) {
             items[firstFreeIndex] = item;
+            if(inventoryGui != null){
+                inventoryGui.updateEquipmentButton(firstFreeIndex);
+            }
             return true;
         }
 
         // fail to add item, because all spots were populated
         return false;
+    }
+
+    public synchronized void setInventoryGui(LemurPlayerInventoryGui gui){
+        this.inventoryGui = gui;
     }
 
 }

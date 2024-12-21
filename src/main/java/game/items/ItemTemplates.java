@@ -21,12 +21,16 @@ import lombok.Getter;
  */
 public class ItemTemplates {
 
-    public static final ArrayList<ItemTemplate> templates = new ArrayList<>();
+    private static final ArrayList<ItemTemplate> templates = new ArrayList<>();
 
     private static final String ITEMS_PATH = "Models/Items/";
     private static final String ICON_PATH = "Textures/GUI/EquipmentIcons/";
     private static final String WEAPONS_PATH = ITEMS_PATH + "Weapons/";
     private static final String CONSUMABLE_PATH = ITEMS_PATH + "Consumable/";
+
+    public static ItemTemplate getTemplateByIndex(int index){
+        return templates.get(index);
+    }
 
     public static final ItemTemplate RIFLE_MANNLICHER_95 = new RangedWeaponTemplate("Mannlicher 95 [Rifle]", WEAPONS_PATH + "Mannlicher95/mannlicher95.j3o", ICON_PATH + "equipmentMannlicher95.png", WEAPONS_PATH + "Mannlicher95/Mannlicher95Drop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f),
@@ -172,6 +176,11 @@ public class ItemTemplates {
             MobRangedWeaponUsageData.RIFLE_BORYSOV_MOB_USAGE_DATA
     );
 
+    public static final ItemTemplate REPORT = new ItemTemplate("Report", ITEMS_PATH + "Misc/report.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "Misc/report.j3o",
+            new DropOffsetData(new Vector3f(0, 0.0f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1f),
+            new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
+            ItemType.REPORT, 22);
+
     static {
         templates.add(RIFLE_MANNLICHER_95.getTemplateIndex(), RIFLE_MANNLICHER_95);
         templates.add(VEST_TRENCH.getTemplateIndex(), VEST_TRENCH);
@@ -196,6 +205,7 @@ public class ItemTemplates {
         templates.add(GAS_MASK.getTemplateIndex(), GAS_MASK);
         templates.add(AXE.getTemplateIndex(), AXE);
         templates.add(RIFLE_BORYSOV.getTemplateIndex(), RIFLE_BORYSOV);
+        templates.add(REPORT.getTemplateIndex(), REPORT);
 
     }
 
@@ -309,7 +319,8 @@ public class ItemTemplates {
         HELMET, VEST, GLOVES, BOOTS,
         RIFLE, PISTOL, LMG, KNIFE, AXE, GRENADE,
         PISTOL_AMMO, RIFLE_AMMO, SMG_AMMO, LMG_AMMO, SHOTGUN_AMMO,
-        MEDPACK
+        MEDPACK,
+        REPORT
     }
 
 }

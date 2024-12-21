@@ -40,6 +40,6 @@ public class NewMeleeWeaponMessage extends NewItemMessage {
     @Override
     public void handleClient(ClientGameAppState client) {
             Item i = (Item) ifa.createItem(id, getTemplate(), droppable);
-            client.registerEntity(i);    }
-
+            client.registerEntity(i);
+    }
 }

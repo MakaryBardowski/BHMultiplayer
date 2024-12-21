@@ -30,7 +30,8 @@ public class AssaultClass extends PlayerClass {
                 RIFLE_MANNLICHER_95,
                 RIFLE_AMMO_PACK,
                 SMOKE_GRENADE,
-                BOOTS_TRENCH
+                BOOTS_TRENCH,
+                REPORT
         );
 
     }

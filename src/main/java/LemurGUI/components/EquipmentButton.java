@@ -4,7 +4,7 @@
  */
 package LemurGUI.components;
 
-import LemurGUI.LemurPlayerEquipment;
+import LemurGUI.LemurPlayerInventoryGui;
 import LemurGUI.dragDrop.DragAndDropControl;
 import client.ClientGameAppState;
 import com.jme3.collision.CollisionResult;
@@ -14,7 +14,6 @@ import com.jme3.scene.Spatial;
 import com.simsilica.lemur.component.IconComponent;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorMotionEvent;
-import java.util.Arrays;
 import messages.items.MobItemInteractionMessage;
 
 /**
@@ -23,9 +22,9 @@ import messages.items.MobItemInteractionMessage;
  */
 public class EquipmentButton extends DraggableButton {
 
-    private final LemurPlayerEquipment lemurPlayerEquipment;
+    private final LemurPlayerInventoryGui lemurPlayerEquipment;
 
-    public EquipmentButton(String s, LemurPlayerEquipment lemurPlayerEquipment, DragAndDropControl dragAndDropControl, TooltipMouseListener tooltipListener) {
+    public EquipmentButton(String s, LemurPlayerInventoryGui lemurPlayerEquipment, DragAndDropControl dragAndDropControl, TooltipMouseListener tooltipListener) {
         super(s, dragAndDropControl, tooltipListener);
         this.lemurPlayerEquipment = lemurPlayerEquipment;
     }
@@ -72,43 +71,21 @@ public class EquipmentButton extends DraggableButton {
         }
 
         if (dragTarget == null) {
-            var currentIconSize = ((IconComponent) this.getIcon()).getIconSize();
-            var emptyIcon = new IconComponent("Textures/GUI/equipmentSlotEmpty.png");
-            emptyIcon.setIconSize(currentIconSize);
-            this.setIcon(emptyIcon);
-
+            lemurPlayerEquipment.getPlayer().getEquipment().removeItem(draggedItemIndexInEquipment);
             var miim = new MobItemInteractionMessage(item.getId(), lemurPlayerEquipment.getPlayer().getId(), MobItemInteractionMessage.ItemInteractionType.DROP);
             ClientGameAppState.getInstance().getClient().send(miim);
-            lemurPlayerEquipment.getPlayer().getHotbar().removeItemAt(Integer.parseInt(draggedSpatial.getName()));
-
             return;
         }
 
         if (dragTarget instanceof EquipmentButton dragTargetEquipmentButton) {
-
-            var targetIcon = (IconComponent) dragTargetEquipmentButton.getIcon();
-            var targetIconSize = targetIcon.getIconSize();
-
-            var captureIcon = (IconComponent) this.getIcon();
-            var captureIconSize = captureIcon.getIconSize();
-
-            captureIcon.setIconSize(targetIconSize);
-            targetIcon.setIconSize(captureIconSize);
-
-            dragTargetEquipmentButton.setIcon(captureIcon);
-            this.setIcon(targetIcon);
-
             lemurPlayerEquipment.getPlayer().getEquipment().swapItems(Integer.parseInt(dragTargetEquipmentButton.getName()), draggedItemIndexInEquipment);
-            System.out.println("event "+event.getX() + " "+event.getY());
             tooltipListener.mouseEntered(new MouseMotionEvent((int) event.getX(), (int) event.getY(), 0, 0, 0, 0), dragTarget, dragTarget);
         }
 
         if (dragTarget instanceof HotbarButton dragTargetHotbarButton) {
-            var captureIcon = (IconComponent) this.getIcon().clone();
-            dragTargetHotbarButton.setIcon(captureIcon);
 
             var hotbarIndex = Integer.parseInt(dragTarget.getName());
-            lemurPlayerEquipment.getPlayer().getHotbar().addItemAt(lemurPlayerEquipment.getPlayer().getEquipment().getItemAt(draggedItemIndexInEquipment),hotbarIndex);
+            lemurPlayerEquipment.getPlayer().getHotbar().setItemAt(lemurPlayerEquipment.getPlayer().getEquipment().getItemAt(draggedItemIndexInEquipment),hotbarIndex);
             dragTargetHotbarButton.getTooltipListener().mouseEntered(new MouseMotionEvent((int) event.getX(), (int) event.getY(), 0, 0, 0, 0), dragTarget, dragTarget);
 
         }

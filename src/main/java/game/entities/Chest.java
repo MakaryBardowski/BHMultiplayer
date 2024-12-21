@@ -43,7 +43,7 @@ public class Chest extends Destructible {
     private final Item[] equipment = new Item[9];
     private boolean locked;
 
-    private static final DecorationTemplate TEMPLATE = DecorationTemplates.CRATE;
+    private static final DecorationTemplate TEMPLATE = DecorationTemplates.SMALL_FLAT_CRATE;
 
     public Chest(int id, String name, Node node) {
         super(id, name, node);
@@ -75,7 +75,6 @@ public class Chest extends Destructible {
     public static Chest createRandomChestClient(int id, Node parentNode, Vector3f offset, AssetManager a) {
         Node node = (Node) a.loadModel(TEMPLATE.getModelPath());
         Chest chest = new Chest(id, "Crate " + id, node);
-        node.scale(0.8f);
         chest.hitboxNode.scale(1.25f);
         attachDestructibleToNode(chest, parentNode, offset);
         setupModelShootability(node, id);
@@ -126,7 +125,7 @@ public class Chest extends Destructible {
         for (int i = 0; i < equipment.length; i++) {
             Item item = equipment[i];
             if (item != null) {
-                item.drop(node.getWorldTranslation().add(0, 1, 0));
+                item.drop(node.getWorldTranslation().add(0, 0.3f, 0));
             }
             equipment[i] = null;
         }
@@ -156,11 +155,9 @@ public class Chest extends Destructible {
 
     @Override
     protected final void createHitbox() {
-        float hitboxWidth = 0.8f;
-        float hitboxHeight = 0.8f;
-        float hitboxLength = 0.8f;
-        hitboxNode.move(0, hitboxHeight, 0);
-        collisionShape = new RectangleAABB(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
+
+        hitboxNode.move(0, TEMPLATE.getCollisionShapeHeight(), 0);
+        collisionShape = new RectangleAABB(hitboxNode.getWorldTranslation(), TEMPLATE.getCollisionShapeWidth(), TEMPLATE.getCollisionShapeHeight(), TEMPLATE.getCollisionShapeLength());
         showHitboxIndicator();
 
     }

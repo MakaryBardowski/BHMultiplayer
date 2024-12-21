@@ -502,7 +502,7 @@ public class MudBeetleActions {
                 int mobPosX = (int) (Math.floor(mobPos.x / BLOCK_SIZE));
                 int mobPosY = (int) (Math.floor(mobPos.y / BLOCK_SIZE));
                 int mobPosZ = (int) (Math.floor(mobPos.z / BLOCK_SIZE));
-                if (ServerMain.getInstance().getMap()[mobPosX][mobPosY][mobPosZ] != 0) {
+                if (ServerMain.getInstance().getMap().isPositionNotEmpty(mobPosX,mobPosY,mobPosZ)) {
                     return false;
                 }
 

@@ -5,18 +5,13 @@
  */
 package game.map.blocks;
 
-import client.ClientGameAppState;
-import client.Main;
 import com.jme3.asset.AssetManager;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import game.entities.DecorationTemplates;
-import game.entities.LevelExit;
+
 import java.util.HashMap;
 import java.util.Random;
 import jme3tools.optimize.TextureAtlas;
 import lombok.Getter;
-import static game.entities.DestructibleUtils.setupModelShootability;
 
 /**
  *
@@ -25,15 +20,17 @@ import static game.entities.DestructibleUtils.setupModelShootability;
 public class BlockWorld {
 
     @Getter
-    private final int MAP_HEIGHT = 20;
+    private final int mapSizeX;
     @Getter
-    private final int MAP_SIZE;
+    private final int mapSizeY;
+    @Getter
+    private final int mapSizeZ;
 
     private final int BLOCK_SIZE;
     private final int CHUNK_SIZE;
 
     private Block[][][] map;  // contains block data - generated based on logic map
-    private final byte[][][] logicMap; // contains info if a block is present (!=0) needed for culling
+    private final Map logicMap; // contains info if a block is present (!=0) needed for culling
 
     private TextureAtlas textureAtlas;
     private final AssetManager asm;
@@ -41,16 +38,17 @@ public class BlockWorld {
     private HashMap<String, Chunk> chunks;
     private Node worldNode;
 
-    private int temp1;
-    private int temp2;
-    private int temp3;
 
-    public BlockWorld(int BLOCK_SIZE, int CHUNK_SIZE, int MAP_SIZE, byte[][][] logicMap, AssetManager asm, Node rootNode) {
+
+    public BlockWorld(int BLOCK_SIZE, int CHUNK_SIZE, int mapSizeX,int mapSizeY,int mapSizeZ, Map logicMap, AssetManager asm, Node rootNode) {
         this.BLOCK_SIZE = BLOCK_SIZE;
         this.CHUNK_SIZE = CHUNK_SIZE;
-        this.MAP_SIZE = MAP_SIZE;
+        this.mapSizeX = mapSizeX;
+        this.mapSizeY = mapSizeY;
+        this.mapSizeZ =  mapSizeZ;
+
         this.asm = asm;
-        map = new Block[MAP_SIZE][MAP_HEIGHT][MAP_SIZE];
+        map = new Block[this.mapSizeX][this.mapSizeY][this.mapSizeZ];
         this.logicMap = logicMap;
 
         chunks = createChunks();
@@ -61,6 +59,9 @@ public class BlockWorld {
         textureAtlas.addTexture(asm.loadTexture(BlockType.DIRT_STONES.textureName), "DiffuseMap");
         textureAtlas.addTexture(asm.loadTexture(BlockType.DIRT.textureName), "DiffuseMap");
         textureAtlas.addTexture(asm.loadTexture(BlockType.WATER.textureName), "DiffuseMap");
+        textureAtlas.addTexture(asm.loadTexture(BlockType.OFFICE_BOTTOM.textureName), "DiffuseMap");
+        textureAtlas.addTexture(asm.loadTexture(BlockType.OFFICE_TOP.textureName), "DiffuseMap");
+        textureAtlas.addTexture(asm.loadTexture(BlockType.OFFICE_FLOOR.textureName), "DiffuseMap");
 
         initializeBlocks();
         rootNode.attachChild(worldNode);
@@ -88,11 +89,11 @@ public class BlockWorld {
 
     public Block placeBlock(int x, int y, int z, BlockType bt) {
 
-        if (logicMap[x][y][z] != 0) {
+        if (logicMap.isPositionNotEmpty(x,y,z)) {
             throw new IllegalArgumentException("Block [" + x + "][" + y + "][" + z + "] already exists!");
         }
 
-        logicMap[x][y][z] = 1;
+        logicMap.setBlockIdAtPosition(x,y,z,(byte)1);
         Chunk c = chunks.get("" + (x / CHUNK_SIZE) * CHUNK_SIZE + (z / CHUNK_SIZE) * CHUNK_SIZE);
 //       Block   b = VoxelAdding.addBox((x * BLOCK_SIZE)-c.getChunkPos().getX()*BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE)-c.getChunkPos().getY()*BLOCK_SIZE, BLOCK_SIZE,  c.getBlocksCount(),  asm,  bt);
         Block b = VoxelAdding.AddOptimizedBox(c, map, logicMap, x, y, z, BLOCK_SIZE, asm, bt, (x * BLOCK_SIZE) - c.getChunkPos().getX() * BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE) - c.getChunkPos().getY() * BLOCK_SIZE);
@@ -102,7 +103,7 @@ public class BlockWorld {
     }
 
     public Block removeBlock(int x, int y, int z) {
-        logicMap[x][y][z] = 0;
+        logicMap.setBlockIdAtPosition(x,y,z,(byte)0);
         Block b = map[x][y][z];
         Chunk c = chunks.get("" + (x / CHUNK_SIZE) * CHUNK_SIZE + (z / CHUNK_SIZE) * CHUNK_SIZE);
         c.detachBlock(b);
@@ -112,7 +113,21 @@ public class BlockWorld {
     public Block addBlockDataToChunk(int x, int y, int z, BlockType bt) { // o
         Chunk c = chunks.get("" + (x / CHUNK_SIZE) * CHUNK_SIZE + (z / CHUNK_SIZE) * CHUNK_SIZE);
 //       Block   b = VoxelAdding.addBox((x * BLOCK_SIZE)-c.getChunkPos().getX()*BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE)-c.getChunkPos().getY()*BLOCK_SIZE, BLOCK_SIZE,  c.getBlocksCount(),  asm,  bt);
-        Block b = VoxelAdding.AddOptimizedBox(c, map, logicMap, x, y, z, BLOCK_SIZE, asm, bt, (x * BLOCK_SIZE) - c.getChunkPos().getX() * BLOCK_SIZE, y * BLOCK_SIZE, (z * BLOCK_SIZE) - c.getChunkPos().getY() * BLOCK_SIZE);
+        Block b = VoxelAdding.AddOptimizedBox(
+                c,
+                map,
+                logicMap,
+                x,
+                y,
+                z,
+                BLOCK_SIZE,
+                asm,
+                bt,
+                (x * BLOCK_SIZE) - c.getChunkPos().getX() * BLOCK_SIZE,
+                y * BLOCK_SIZE,
+                (z * BLOCK_SIZE) - c.getChunkPos().getY() * BLOCK_SIZE
+        );
+
         map[x][y][z] = b;
         c.addBlockData(b, asm.loadTexture(bt.textureName));
 
@@ -156,7 +171,7 @@ public class BlockWorld {
         return chunks;
     }
 
-    public byte[][][] getLogicMap() {
+    public Map getLogicMap() {
         return logicMap;
     }
 
@@ -165,47 +180,34 @@ public class BlockWorld {
         // because it writes to chunk and batches it only once
         Random r = new Random();
 
-        for (int x = 0; x < logicMap.length; x++) {
-//            for (int y = 0; y < logicMap[x].length; y++) {
-            for (int y = 0; y < MAP_HEIGHT; y++) {
-
-                for (int z = 0; z < logicMap[x][y].length; z++) {
-
-                    if (logicMap[x][y][z] == 1 || logicMap[x][y][z] == 9) {
-
+        for (int index = 0; index < logicMap.getLength(); index++) {
+                    int x = logicMap.getXFromIndex(index);
+                    int y = logicMap.getYFromIndex(index);
+                    int z = logicMap.getZFromIndex(index);
+            System.out.println("X Y Z "+x + " "+ y + " "+z);
+                    if (logicMap.getBlockIdAtIndex(index) == 1 || logicMap.getBlockIdAtIndex(index) == 9) {
                         addBlockDataToChunk(x, y, z, BlockType.STONE);
-
-                    } else if (logicMap[x][y][z] == 2) {
+                    } else if (logicMap.getBlockIdAtIndex(index) == 2) {
                         var bt = BlockType.DIRT;
                         if (r.nextInt(5) == 1) {
                             bt = BlockType.DIRT_STONES;
                         }
-//else if (r.nextInt(10) == 2) {
-//                            bt = BlockType.WATER;
-//                        }
 
                         addBlockDataToChunk(x, y, z, bt);
 
+                    } else if (logicMap.getBlockIdAtIndex(index) == 3){
+                        addBlockDataToChunk(x, y, z, BlockType.OFFICE_BOTTOM);
+                    }else if (logicMap.getBlockIdAtIndex(index) == 4){
+                        addBlockDataToChunk(x, y, z, BlockType.OFFICE_TOP);
+                    }else if (logicMap.getBlockIdAtIndex(index) == 5){
+                        addBlockDataToChunk(x, y, z, BlockType.OFFICE_FLOOR);
                     }
-                }
-            }
+
         }
 
         for (Chunk c : chunks.values()) {
             c.attach();
         }
-    }
-
-    // from now on only use below functions instead of explicit array access
-    public byte getBlockIndexByCellCoords(int x, int y, int z) {
-        return logicMap[x][y][z];
-    }
-
-    public byte getBlockTypeByPosition(Vector3f position) {
-        temp1 = (int) (Math.floor(position.x / BLOCK_SIZE));
-        temp2 = (int) (Math.floor(position.y / BLOCK_SIZE));
-        temp3 = (int) (Math.floor(position.z / BLOCK_SIZE));
-        return logicMap[temp1][temp2][temp3];
     }
 
     private void clear() {
@@ -230,19 +232,4 @@ public class BlockWorld {
         double totalTime = (time1 - time) / 1000d;
         System.out.println("time for regeneration = " + totalTime + "s");
     }
-
-//    public void spawnCarAtLocation() {
-//        var template = DecorationTemplates.EXIT_CAR;
-//        var car = (Node) Main.getInstance().getAssetManager().loadModel(template.getModelPath());
-//        car.getChild(0).scale(template.getScale());
-//        setupModelLight(car);
-//        setupModelShootability(car, -1);
-//        LevelExit exit = new LevelExit(-1, "Exit Car", car, template);
-//        ClientGameAppState.getInstance().getPickableNode().attachChild(car);
-//        ClientGameAppState.getInstance().registerEntity(exit);
-//        car.move(BLOCK_SIZE * x + 0.5f * BLOCK_SIZE, BLOCK_SIZE * y, BLOCK_SIZE * z + 0.5f * BLOCK_SIZE);
-//
-//        ClientGameAppState.getInstance().getGrid().insert(exit);
-//
-//    }
 }

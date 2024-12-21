@@ -78,7 +78,7 @@ public class LobbyTeamViewAppState extends BaseAppState {
 
     private void setupTeamViewScene() {
         AmbientLight al = new AmbientLight();
-        al.setColor(ColorRGBA.White.mult(0.7f));
+        al.setColor(ColorRGBA.White.mult(0.5f));
         backgroundNode.addLight(al);
 
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.Cyan);

@@ -4,6 +4,7 @@
  */
 package networkingUtils;
 
+import messages.items.*;
 import messages.messageListeners.ServerMessageListener;
 import messages.SystemHealthUpdateMessage;
 import messages.EntityUpdateMessage;
@@ -33,18 +34,6 @@ import messages.ThrownGrenadeExplodedMessage;
 import messages.bulkMessages.BulkMessage;
 import messages.gameSetupMessages.GameInfoOnStartMessage;
 import messages.gameSetupMessages.NextLevelMessage;
-import messages.items.ChestItemInteractionMessage;
-import messages.items.MobItemInteractionMessage;
-import messages.items.NewAmmoPackMessage;
-import messages.items.NewBootsMessage;
-import messages.items.NewGlovesMessage;
-import messages.items.NewGrenadeMessage;
-import messages.items.NewHelmetMessage;
-import messages.items.NewItemMessage;
-import messages.items.NewMeleeWeaponMessage;
-import messages.items.NewRangedWeaponMessage;
-import messages.items.NewVestMessage;
-import messages.items.SetDefaultItemMessage;
 import messages.lobby.GameStartedMessage;
 import messages.lobby.HostChangedNicknameMessage;
 import messages.lobby.HostChangedPlayerClassMessage;
@@ -85,6 +74,7 @@ public class NetworkingInitialization {
         Serializer.registerClass(BulkMessage.class);
         Serializer.registerClass(AnimationPlayedMessage.class);
 
+        Serializer.registerClass(NewMiscItemMessage.class);
         Serializer.registerClass(NewItemMessage.class);
         Serializer.registerClass(NewHelmetMessage.class);
         Serializer.registerClass(NewVestMessage.class);

@@ -9,7 +9,7 @@ public class AStar {
 
     private static Node currentNode;
     private static Node neighbor;
-    private static byte[][][] grid;
+    private static game.map.blocks.Map grid;
     private static boolean[][][] visited;  // 3D visited array
     private static final PriorityQueue<Node> openSet = new PriorityQueue<>(new NodeComparator());
     private static final Queue<Node> nodePool = new LinkedList<>();  // Node pool to reuse nodes
@@ -28,12 +28,12 @@ public class AStar {
         {{-1, 0, 0}, {1, 0, 0}},
         {{0, 0, -1}, {0, 0, 1}},};
 
-    public static void setPathfindingMap(byte[][][] map) {
+    public static void setPathfindingMap(game.map.blocks.Map map,int mapSizeX, int mapSizeY, int mapSizeZ) {
         grid = map;
-        visited = new boolean[map.length][map[0].length][map[0][0].length];  // 3D visited array
+        visited = new boolean[mapSizeX][mapSizeY][mapSizeZ];  // 3D visited array
 
         // Prepopulate the node pool for better performance
-        for (int i = 0; i < map.length * map[0].length * map[0][0].length; i++) {
+        for (int i = 0; i < mapSizeX * mapSizeY * mapSizeZ; i++) {
             nodePool.add(new Node(0, 0, 0));
         }
 
@@ -49,16 +49,16 @@ public class AStar {
         int endY = GridUtils.worldToGridCoordinate(to.y);
         int endZ = GridUtils.worldToGridCoordinate(to.z);
 
-        if (!GridUtils.isSpotEmpty(startX, startY, startZ, grid) || !GridUtils.isSpotEmpty(endX, endY, endZ, grid)) {
-            return null;
-        }
+//        if (!GridUtils.isSpotEmpty(startX, startY, startZ, grid) || !GridUtils.isSpotEmpty(endX, endY, endZ, grid)) {
+//            return null;
+//        }
 
         List<Node> path = findPath(startX, startY, startZ, endX, endY, endZ);
         return path == null ? null : path.stream().map(Node::getVector3f).toList();
     }
 
     public static List<Node> findPath(int startX, int startY, int startZ, int goalX, int goalY, int goalZ) {
-        if (grid[startX][startY][startZ] != 0 || grid[goalX][goalY][goalZ] != 0) {
+        if (grid.isPositionNotEmpty(startX,startY,startZ) || grid.isPositionNotEmpty(goalX,goalY,goalZ)) {
             return null;
         }
 
@@ -95,7 +95,7 @@ public class AStar {
                     int newY = currentNode.y + d[1];
                     int newZ = currentNode.z + d[2];
 
-                    if (isValid(newX, newY, newZ) && grid[newX][newY][newZ] == 0 && !visited[newX][newY][newZ]) {
+                    if (isValid(newX, newY, newZ) && grid.isPositionEmpty(newX,newY,newZ) && !visited[newX][newY][newZ]) {
                         neighbor = getNewNode(newX, newY, newZ, currentNode.g + 1, heuristic(newX, newY, newZ, goalX, goalY, goalZ));
                         neighbor.parent = currentNode;
                         openSet.add(neighbor);
@@ -122,7 +122,7 @@ public class AStar {
     }
 
     private static boolean isValid(int x, int y, int z) {
-        return x >= 0 && x < grid.length && y >= 0 && y < grid[0].length && z >= 0 && z < grid[0][0].length;
+        return grid.isWithinMapBounds(x,y,z);
     }
 
     private static int heuristic(int x1, int y1, int z1, int x2, int y2, int z2) {

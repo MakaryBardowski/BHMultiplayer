@@ -8,6 +8,8 @@ import game.map.MapGenerationResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import game.map.blocks.Map;
 import jme3utilities.math.Vector3i;
 
 /**
@@ -17,15 +19,20 @@ import jme3utilities.math.Vector3i;
 public class RandomMapGenerator {
 
     private final Random random;
-    private final int mapSize;
+    private final int mapSizeX;
+    private final int mapSizeZ;
+    private final int mapSizeY;
 
-    public RandomMapGenerator(long seed, int mapSize) {
+    public RandomMapGenerator(long seed, int mapSizeX,int mapSizeY, int mapSizeZ) {
         this.random = new Random(seed);
-        this.mapSize = mapSize;
+        this.mapSizeX = mapSizeX;
+        this.mapSizeY = mapSizeY;
+        this.mapSizeZ = mapSizeZ;
     }
 
-    public MapGenerationResult createRandomMap(byte[][][] logicMap) {
+    public MapGenerationResult createRandomMap(Map logicMap) {
         int numRooms = random.nextInt(3, 4);
+
 //        int numRooms = 2;
         List<Room> rooms = new ArrayList<>();
         for (int roomCounter = 0; roomCounter < numRooms; roomCounter++) {
@@ -43,21 +50,20 @@ public class RandomMapGenerator {
         return mapGenResult;
     }
 
-    private Room addRandomRoom(byte[][][] logicMap, int roomSizeX, int roomSizeY, int roomSizeZ, List<Room> allRooms) {
+    private Room addRandomRoom(Map logicMap, int roomSizeX, int roomSizeY, int roomSizeZ, List<Room> allRooms) {
         while (true) {
-            var roomPosX = random.nextInt(0, mapSize);
+            var roomPosX = random.nextInt(0, mapSizeX);
             var roomPosY = random.nextInt(0, 1);
-            var roomPosZ = random.nextInt(0, mapSize);
-            if (isRoomPlaceable(logicMap, roomSizeX, roomSizeY, roomSizeZ, roomPosX, roomPosY, roomPosZ, allRooms)) {
+            var roomPosZ = random.nextInt(0, mapSizeZ);
+            if (isRoomPlaceable(roomSizeX, roomSizeY, roomSizeZ, roomPosX, roomPosY, roomPosZ, allRooms)) {
 
                 for (int x = roomPosX; x < roomPosX + roomSizeX; x++) {
                     for (int y = roomPosY; y < roomPosY + roomSizeY; y++) {
                         for (int z = roomPosZ; z < roomPosZ + roomSizeZ; z++) {
-                            logicMap[x][y][z] = 1;
+                            logicMap.setBlockIdAtPosition(x,y,z,(byte)1);
                             // hardcode dla podlogi
                             if (y == 0) {
-                                logicMap[x][y][z] = 2;
-
+                                logicMap.setBlockIdAtPosition(x,y,z,(byte)2);
                             }
                             // hardcode dla podlogi
 
@@ -69,8 +75,7 @@ public class RandomMapGenerator {
                 for (int x = roomPosX + 1; x < roomPosX + roomSizeX - 1; x++) {
                     for (int y = roomPosY + 1; y < roomPosY + roomSizeY - 1; y++) {
                         for (int z = roomPosZ + 1; z < roomPosZ + roomSizeZ - 1; z++) {
-                            logicMap[x][y][z] = 0;
-
+                            logicMap.setBlockIdAtPosition(x,y,z,(byte)0);
                         }
                     }
                 }
@@ -81,15 +86,15 @@ public class RandomMapGenerator {
         }
     }
 
-    private boolean isRoomPlaceable(byte[][][] logicMap, int roomSizeX, int roomSizeY, int roomSizeZ, int roomPosX, int roomPosY, int roomPosZ, List<Room> allRooms) {
+    private boolean isRoomPlaceable(int roomSizeX, int roomSizeY, int roomSizeZ, int roomPosX, int roomPosY, int roomPosZ, List<Room> allRooms) {
         // is within bounds
-        if (roomPosX + roomSizeX >= logicMap.length) {
+        if (roomPosX + roomSizeX >= mapSizeX) {
             return false;
         }
-        if (roomPosY + roomSizeY >= logicMap[0].length) {
+        if (roomPosY + roomSizeY >= mapSizeY) {
             return false;
         }
-        if (roomPosZ + roomSizeZ >= logicMap[0][0].length) {
+        if (roomPosZ + roomSizeZ >= mapSizeZ) {
             return false;
         }
         // is within bounds
@@ -102,7 +107,7 @@ public class RandomMapGenerator {
         return true;
     }
 
-    public void connectRooms(byte[][][] logicMap, List<Room> roomConnectionPositions) {
+    public void connectRooms(Map logicMap, List<Room> roomConnectionPositions) {
         for (int i = 0; i < roomConnectionPositions.size() - 1; i++) {
             var currentRoom = roomConnectionPositions.get(i);
             var nextRoom = roomConnectionPositions.get(i + 1);
@@ -119,29 +124,25 @@ public class RandomMapGenerator {
 
             if (startX <= endX) {
                 for (int x = startX; x <= endX; x++) {
-                    logicMap[x][0][startZ] = 2;
-                    logicMap[x][1][startZ] = 0;
-
+                    logicMap.setBlockIdAtPosition(x,0,startZ,(byte) 2);
+                    logicMap.setBlockIdAtPosition(x,1,startZ,(byte) 0);
                 }
             } else if (startX > endX) {
                 for (int x = endX; x <= startX; x++) {
-                    logicMap[x][0][startZ] = 2;
-                    logicMap[x][1][startZ] = 0;
-
+                    logicMap.setBlockIdAtPosition(x,0,startZ,(byte) 2);
+                    logicMap.setBlockIdAtPosition(x,1,startZ,(byte) 0);
                 }
             }
 
             if (startZ <= endZ) {
                 for (int z = startZ; z <= endZ; z++) {
-                    logicMap[endX][0][z] = 2;
-                    logicMap[endX][1][z] = 0;
-
+                    logicMap.setBlockIdAtPosition(endX,0,z,(byte)2);
+                    logicMap.setBlockIdAtPosition(endX,1,z,(byte)0);
                 }
             } else if (endZ <= startZ) {
                 for (int z = endZ; z <= startZ; z++) {
-                    logicMap[endX][0][z] = 2;
-                    logicMap[endX][1][z] = 0;
-
+                    logicMap.setBlockIdAtPosition(endX,0,z,(byte)2);
+                    logicMap.setBlockIdAtPosition(endX,1,z,(byte)0);
                 }
             }
         }
