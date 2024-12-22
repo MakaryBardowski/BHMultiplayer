@@ -4,5 +4,7 @@
 **/*.jar
 **/*.lock
 **/*.log
-build/assets/
+/.gradle/nb-cache/
 /.idea/
+*.class
+/build
