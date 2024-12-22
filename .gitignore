@@ -1,6 +1,8 @@
-
+**/*.MF
 **/*.bin
 **/*.class
 **/*.jar
 **/*.lock
 **/*.log
+build/assets/
+/.idea/

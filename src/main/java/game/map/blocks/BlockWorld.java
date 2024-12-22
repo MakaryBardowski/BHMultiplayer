@@ -184,7 +184,7 @@ public class BlockWorld {
                     int x = logicMap.getXFromIndex(index);
                     int y = logicMap.getYFromIndex(index);
                     int z = logicMap.getZFromIndex(index);
-            System.out.println("X Y Z "+x + " "+ y + " "+z);
+
                     if (logicMap.getBlockIdAtIndex(index) == 1 || logicMap.getBlockIdAtIndex(index) == 9) {
                         addBlockDataToChunk(x, y, z, BlockType.STONE);
                     } else if (logicMap.getBlockIdAtIndex(index) == 2) {

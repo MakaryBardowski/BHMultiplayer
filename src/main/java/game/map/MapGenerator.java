@@ -11,6 +11,7 @@ import game.map.blocks.Map;
 import game.map.proceduralGeneration.RandomMapGenerator;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 /**
  *
@@ -119,7 +120,7 @@ public class MapGenerator {
 
     private Level decideAndGenerateMapClient(Map logicMap, int blockSize, int chunkSize, int mapSizeX,int mapSizeY,int mapSizeZ, AssetManager a, Node mapNode) throws IOException {
         switch (mapType) {
-            case ARMORY:
+            case STATIC:
                 // expect server to provide map info
 //                logicMap = new LevelLoader().readLevelFile("assets/Maps/office.json").getLogicMap();
                 break;
@@ -143,8 +144,8 @@ public class MapGenerator {
     public MapGenerationResult decideAndGenerateMapServer(Map logicMap,int mapSizeX,int mapSizeY, int mapSizeZ) throws IOException {
         MapGenerationResult mapGenResult;
         switch (mapType) {
-            case ARMORY:
-                logicMap = new LevelLoader().readLevelFile("assets/Maps/office.json").getMap();
+            case STATIC:
+                logicMap = new LevelLoader().readLevelFile(LevelGenerator.STARTING_LEVEL_FILEPATH).getMap();
                 mapGenResult = new MapGenerationResult(logicMap, null);
                 break;
             case CASUAL:
@@ -177,5 +178,9 @@ public class MapGenerator {
 
     public MapGenerationResult createCasualLogicMapServer(Map logicMap,int mapSizeX, int mapSizeY, int mapSizeZ) {
         return new RandomMapGenerator(seed, mapSizeX,mapSizeY,mapSizeZ).createRandomMap(logicMap);
+    }
+
+    public Level createFromMap(int blockSize,int chunkSize,int mapSizeX,int mapSizeY, int mapSizeZ, Map logicMap,AssetManager a, Node mapNode){
+        return new Level(blockSize, chunkSize, mapSizeX,mapSizeY,mapSizeZ, logicMap, a, mapNode);
     }
 }

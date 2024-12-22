@@ -4,6 +4,7 @@
  */
 package networkingUtils;
 
+import messages.gameSetupMessages.MapMessage;
 import messages.items.*;
 import messages.messageListeners.ServerMessageListener;
 import messages.SystemHealthUpdateMessage;
@@ -53,6 +54,7 @@ public class NetworkingInitialization {
         Serializer.registerClass(GameStartedMessage.class);
         Serializer.registerClass(HostChangedPlayerClassMessage.class);
         Serializer.registerClass(GameInfoOnStartMessage.class);
+        Serializer.registerClass(MapMessage.class);
 
         Serializer.registerClass(EntityUpdateMessage.class);
         Serializer.registerClass(MobPosRotUpdateMessage.class);
