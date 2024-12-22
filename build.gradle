@@ -1,11 +1,11 @@
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'  // Add the Shadow plugin
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 group 'com.mygame'
-version '0.0.87'
+version '0.0.88'
 
 mainClassName = "client.Main"
 
@@ -34,7 +34,7 @@ project(":assets") {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(17)
+            languageVersion = JavaLanguageVersion.of(21)
         }
     }
 }
@@ -45,6 +45,7 @@ dependencies {
             branch = "master"
         }
     }
+    implementation 'org.lz4:lz4-java:1.8.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
     implementation "org.jmonkeyengine:jme3-core:$jmeVer"
     implementation "org.jmonkeyengine:jme3-desktop:$jmeVer"
@@ -59,11 +60,48 @@ dependencies {
     implementation "com.simsilica:lemur:1.16.0"
     implementation 'org.codehaus.groovy:groovy-all:3.0.21'
     compileOnly 'org.projectlombok:lombok:1.18.28'
-    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
     runtimeOnly project(':assets')
 }
 
+tasks.named('distZip') {
+    dependsOn shadowJar, copyResourceFile
+    from(shadowJar.archiveFile)
+    from("$buildDir/libs/Maps") {
+        into('Maps')
+    }
+}
+
+tasks.named('distTar') {
+    dependsOn shadowJar, copyResourceFile
+    from(shadowJar.archiveFile)
+    from("$buildDir/libs/Maps") {
+        into('Maps')
+    }
+}
+
+tasks.named('startScripts') {
+    dependsOn shadowJar
+}
+
+tasks.named('startShadowScripts') {
+    dependsOn jar
+}
+
+task copyResourceFile(type: Copy) {
+    mustRunAfter ':assets:build'
+    from('assets/Maps') {
+        include '**/*'
+    }
+    into("$buildDir/libs/Maps")
+    doLast {
+        println "Maps folder copied to: ${buildDir}/libs/Maps"
+    }
+}
+
 jar {
+    mustRunAfter ':copyResourceFile'
+
     manifest {
         attributes 'Main-Class': "$mainClassName"
     }
@@ -71,7 +109,7 @@ jar {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -79,8 +117,8 @@ wrapper {
     gradleVersion = '8.11'
 }
 
-// ShadowJar configuration
 shadowJar {
+    mustRunAfter ':copyResourceFile'
     archiveClassifier.set('')
     manifest {
         attributes 'Main-Class': "$mainClassName"
@@ -89,13 +127,4 @@ shadowJar {
 
 application {
     mainClass.set(mainClassName)
-}
-
-// Task to create a distributable ZIP containing just the JAR
-task distZipJar(type: Zip) {
-    dependsOn shadowJar
-    from("$buildDir/libs") {
-        into("/")
-    }
-    archiveFileName = "mygame-${version}.zip"
 }

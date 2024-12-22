@@ -47,6 +47,7 @@ import lombok.Getter;
 import game.map.collision.WorldGrid;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -56,6 +57,7 @@ import jme3utilities.math.Vector3i;
 import messages.InstantEntityPosCorrectionMessage;
 import messages.PlayerJoinedMessage;
 import messages.SetPlayerMessage;
+import messages.gameSetupMessages.MapMessage;
 import messages.items.ChestItemInteractionMessage;
 import static messages.items.ChestItemInteractionMessage.ChestItemInteractionType.INSERT;
 import messages.items.MobItemInteractionMessage;
@@ -119,7 +121,7 @@ public class ServerLevelManager extends LevelManager {
             levelSeeds[i] = RANDOM.nextLong();
         }
 
-        levelTypes[0] = MapType.ARMORY;
+        levelTypes[0] = MapType.STATIC;
         for (int i = 1; i < levelTypes.length; i++) {
             if (i % 5 == 0) {
                 levelTypes[i] = MapType.BOSS;
@@ -134,13 +136,25 @@ public class ServerLevelManager extends LevelManager {
     public void createMap(long seed, MapType mapType) throws IOException {
         System.out.println("SERVER: generating map of type " + mapType + " seed " + seed);
         Map logicMap = null;
-        if(!mapType.equals(MapType.ARMORY)){
+        if(!mapType.equals(MapType.STATIC)){
             logicMap = new Map( new byte[MAP_SIZE_XZ*MAP_SIZE_Y*MAP_SIZE_XZ], MAP_SIZE_XZ,MAP_SIZE_Y,MAP_SIZE_XZ,BLOCK_SIZE);
         }
 
         var mapGenResult = new MapGenerator(seed, mapType).decideAndGenerateMapServer(logicMap,MAP_SIZE_XZ,MAP_SIZE_Y,MAP_SIZE_XZ);
 
         map = mapGenResult.getMap();
+
+        if(mapType.equals(MapType.STATIC)){
+                Thread.ofVirtual().start(() -> {
+                    try {
+                        var mmsg = new MapMessage(map);
+                        server.broadcast(mmsg);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                });
+        }
+
         registerLevelExit(mapType);
 
         var rooms = mapGenResult.getRooms();
@@ -550,7 +564,7 @@ public class ServerLevelManager extends LevelManager {
         var exitPositionOnMapIntArray = new int[3];
         exitPositionOnMapIntArray[1] = 1;
         do {
-            if (mapType == MapType.ARMORY) { // hardcoded - armory will be read from file
+            if (mapType == MapType.STATIC) { // hardcoded - armory will be read from file
                 exitPositionOnMapIntArray[0] = 20;
                 exitPositionOnMapIntArray[2] = 20;
             } else {

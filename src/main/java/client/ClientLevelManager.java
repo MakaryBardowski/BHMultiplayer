@@ -23,6 +23,8 @@ import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
 import game.map.MapGenerator;
+import game.map.MapType;
+import game.map.blocks.Map;
 import game.map.collision.WorldGrid;
 
 import java.io.IOException;
@@ -101,6 +103,10 @@ public class ClientLevelManager extends LevelManager {
     @Getter
     private final Node pickableNode = new Node("PICKABLE NODE");
 
+    @Getter
+    @Setter
+    private volatile Map nextStaticMap; // cached from server
+
     public ClientLevelManager() {
         this.assetManager = MAIN_INSTANCE.getAssetManager();
         this.renderManager = MAIN_INSTANCE.getRenderManager();
@@ -140,20 +146,64 @@ public class ClientLevelManager extends LevelManager {
 
         var levelSeed = levelSeeds[levelIndex];
         var levelType = levelTypes[levelIndex];
-//        System.out.println("CLIENT: level seed "+levelSeed);
-//        System.out.println("CLIENT: generating map of type "+levelType);
+
+
         MapGenerator mg = new MapGenerator(levelSeed, levelType);
+
+        if(levelType.equals(MapType.STATIC)){
+            if(nextStaticMap != null){
+                MAIN_INSTANCE.enqueue(() -> {
+                        map = mg.createFromMap(
+                                BLOCK_SIZE,
+                                CHUNK_SIZE,
+                                MAP_SIZE_XZ,
+                                MAP_SIZE_Y,
+                                MAP_SIZE_XZ,
+                                nextStaticMap,
+                                assetManager,
+                                mapNode);
+                });
+            } else {
+                Runnable awaitUntilCacheFilledAndCreateMap = () -> {
+                    while(nextStaticMap == null){
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    System.out.println("IM OUT THE LOOP!");
+
+                    MAIN_INSTANCE.enqueue(() -> {
+                        System.out.println("IM CREATING FROM THE MAP I RECEIVED!");
+                        map = mg.createFromMap(
+                                BLOCK_SIZE,
+                                CHUNK_SIZE,
+                                MAP_SIZE_XZ,
+                                MAP_SIZE_Y,
+                                MAP_SIZE_XZ,
+                                nextStaticMap,
+                                assetManager,
+                                mapNode);
+                        nextStaticMap = null;
+                    });
+                };
+                Thread.ofVirtual().start(awaitUntilCacheFilledAndCreateMap);
+            }
+
+            return;
+        }
 
         MAIN_INSTANCE.enqueue(() -> {
             try {
-                map = mg.generateMap(
-                        BLOCK_SIZE,
-                        CHUNK_SIZE,
-                        MAP_SIZE_XZ,
-                        MAP_SIZE_Y,
-                        MAP_SIZE_XZ,
-                        assetManager,
-                        mapNode);
+                    map = mg.generateMap(
+                            BLOCK_SIZE,
+                            CHUNK_SIZE,
+                            MAP_SIZE_XZ,
+                            MAP_SIZE_Y,
+                            MAP_SIZE_XZ,
+                            assetManager,
+                            mapNode);
             } catch (IOException exception){
                 System.err.println("Client could not load level of type "+levelType +" with seed "+levelSeed+". Reason: "+exception.getMessage());
             }

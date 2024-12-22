@@ -3,10 +3,12 @@ package game.map;
 import LevelLoadSystem.LevelLoader;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 public class LevelGenerator {
+    private static final String PWD = Paths.get("").toAbsolutePath().toString();
     private static final String LEVEL_FILE_EXTENSION = ".json";
-    private static final String STARTING_LEVEL_FILEPATH = "assets/Maps/office"+LEVEL_FILE_EXTENSION;
+    public static final String STARTING_LEVEL_FILEPATH = PWD + "/Maps/office" + LEVEL_FILE_EXTENSION;
     private static final String BOSS_LEVEL_FILEPATH_PREFIX = "assets/Maps/bossRoom";
     private static final String INVALID_MAP_TYPE_FOR_FILE_LOADING_PROVIDED_MESSAGE = "cannot load map of given type '%s'. Maps can be loaded with types ARMORY,BOSS";
 
@@ -42,7 +44,7 @@ public class LevelGenerator {
     }
 
     public String getSavedLevelFilepath(MapType mapType, int levelIndex){
-        if(mapType == MapType.ARMORY){
+        if(mapType == MapType.STATIC){
             return STARTING_LEVEL_FILEPATH;
         }
         if(mapType == MapType.BOSS) {

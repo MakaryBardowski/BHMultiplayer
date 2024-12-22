@@ -1,13 +1,22 @@
 package game.map.blocks;
 
 import com.jme3.math.Vector3f;
+import lombok.Getter;
 
 public class Map {
+    @Getter
     private final int blockSize;
+
+    @Getter
     private int mapSizeX;
+
+    @Getter
     private int mapSizeY;
+
+    @Getter
     private int mapSizeZ;
 
+    @Getter
     private byte[] logicMap;
 
     public Map(byte[] logicMap,int mapSizeX, int mapSizeY, int mapSizeZ, int blockSize){
@@ -26,7 +35,6 @@ public class Map {
     }
 
     public byte getBlockIdAtPosition(int x, int y,int z){
-        System.out.println("pos xyz "+x+" "+y+" "+z);
         return logicMap[positionToIndex(x,y,z)];
     }
 

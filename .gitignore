@@ -1,6 +1,10 @@
-
+**/*.MF
 **/*.bin
 **/*.class
 **/*.jar
 **/*.lock
 **/*.log
+/.gradle/nb-cache/
+/.idea/
+*.class
+/build
